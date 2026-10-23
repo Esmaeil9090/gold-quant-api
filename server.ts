@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, and Live APIs are never served stale
-const APP_VERSION = '2026.10.23-v68.0';
+const APP_VERSION = '2026.10.23-v69.0';
 const BUILD_TIME = Date.now();
 
 app.use((req, res, next) => {
@@ -1643,7 +1643,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       garchVolForecast,
       300,
       24,
-      900
+      intervalStepSeconds
     );
 
     // Atmospheric State Classification
@@ -1746,8 +1746,11 @@ app.post('/api/gold-predictions', async (req: Request, res: Response) => {
   res.redirect(307, '/api/gold-forecast');
 });
 
-// SPA fallback
+// SPA fallback (do not serve index.html for missing static scripts/assets)
 app.get('*', (req: Request, res: Response) => {
+  if (/\.(js|css|map|png|jpg|jpeg|svg|ico|webp|woff2?)$/i.test(req.path)) {
+    return res.status(404).end();
+  }
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
