@@ -1,0 +1,346 @@
+{
+  "capturedAt": "2026-10-23T13:19:12.000Z",
+  "gitBaselineTag": "v0.0-baseline",
+  "macroInputs": {
+    "nominal10Y": 4.965,
+    "tipsRealYield10Y": 2.745,
+    "breakevenInflation10Y": 2.22,
+    "dxyIndex": 101.68,
+    "realYieldGravity": -1.432,
+    "dollarDrag": -0.109,
+    "centralBankTide": 0.55,
+    "netMacroLift": -0.991
+  },
+  "pcaOutputs": {
+    "f1RealGeopotential": 1.186,
+    "f2MonetaryLiquidity": 0.443,
+    "f3TailConvexity": 0.727,
+    "netOrthogonalLift": 0.921
+  },
+  "timeframes": {
+    "1m": {
+      "provider": "Binance Vision Public Data (PAXGUSDT)",
+      "candleCount": 300,
+      "currentPrice": 4045.22,
+      "equilibriumPrice": 4046.63,
+      "atr": 1.19,
+      "vpin": {
+        "vpinScore": 0.3112,
+        "regime": "BALANCED_LAMINAR",
+        "shrinkageRatio": 0.721,
+        "relativeVolumeRatio": 0.776
+      },
+      "cointegrationBasis": {
+        "paxgPrice": 4045.22,
+        "comexBenchmarkSpot": 4043.82,
+        "basisSpread": 1.4,
+        "meanBasis": 1.63,
+        "stdBasis": 0.32,
+        "zScore": -0.57,
+        "purgedPrice": 4043.82
+      },
+      "ekfObserver": {
+        "unmeasuredBias": -0.684,
+        "shrunkBias": -0.493,
+        "stateVelocity": -0.044,
+        "innovation": -0.25,
+        "studentizedInnovation": -0.17,
+        "isJumpGated": false,
+        "deltaTau": 0.839,
+        "cumulativeTau": 24.47,
+        "kalmanGain": 0.141
+      },
+      "garch": {
+        "omega": 2.86e-8,
+        "alpha": 0.085,
+        "beta": 0.892,
+        "step1VolPct": 0.0353
+      },
+      "sweepDiscriminator": {
+        "logOddsScore": 1.44,
+        "sweepProbabilityPct": 80.8,
+        "classification": "DEALER_STOP_SWEEP",
+        "absorptionRatio": 0.525,
+        "hawkesIntensity": 0.671,
+        "macroDivergenceScore": 1.205
+      },
+      "morseManifold": {
+        "wellDepthDe": 16.37,
+        "stiffnessAlpha": 0.085,
+        "equilibriumAnchor": 4048.66,
+        "currentPotentialEnergy": 1.908,
+        "restoringForce": 1.272
+      }
+    },
+    "5m": {
+      "provider": "Binance Vision Public Data (PAXGUSDT)",
+      "candleCount": 300,
+      "currentPrice": 4045.22,
+      "equilibriumPrice": 4049.79,
+      "atr": 2.38,
+      "vpin": {
+        "vpinScore": 0.3541,
+        "regime": "BALANCED_LAMINAR",
+        "shrinkageRatio": 0.635,
+        "relativeVolumeRatio": 0.521
+      },
+      "cointegrationBasis": {
+        "paxgPrice": 4045.22,
+        "comexBenchmarkSpot": 4043.82,
+        "basisSpread": 1.4,
+        "meanBasis": 1.63,
+        "stdBasis": 0.32,
+        "zScore": -0.57,
+        "purgedPrice": 4043.82
+      },
+      "ekfObserver": {
+        "unmeasuredBias": -1.242,
+        "shrunkBias": -0.789,
+        "stateVelocity": -0.198,
+        "innovation": -0.41,
+        "studentizedInnovation": -0.26,
+        "isJumpGated": false,
+        "deltaTau": 0.655,
+        "cumulativeTau": 24.31,
+        "kalmanGain": 0.132
+      },
+      "garch": {
+        "omega": 1.12e-7,
+        "alpha": 0.085,
+        "beta": 0.892,
+        "step1VolPct": 0.0698
+      },
+      "sweepDiscriminator": {
+        "logOddsScore": 1.18,
+        "sweepProbabilityPct": 76.5,
+        "classification": "DEALER_STOP_SWEEP",
+        "absorptionRatio": 0.492,
+        "hawkesIntensity": 0.614,
+        "macroDivergenceScore": 1.159
+      },
+      "morseManifold": {
+        "wellDepthDe": 16.37,
+        "stiffnessAlpha": 0.085,
+        "equilibriumAnchor": 4051.82,
+        "currentPotentialEnergy": 9.214,
+        "restoringForce": 3.167
+      }
+    },
+    "15m": {
+      "provider": "Binance Vision Public Data (PAXGUSDT)",
+      "candleCount": 300,
+      "currentPrice": 4045.22,
+      "equilibriumPrice": 4058.12,
+      "atr": 4.86,
+      "vpin": {
+        "vpinScore": 0.3694,
+        "regime": "BALANCED_LAMINAR",
+        "shrinkageRatio": 0.581,
+        "relativeVolumeRatio": 0.416
+      },
+      "cointegrationBasis": {
+        "paxgPrice": 4045.22,
+        "comexBenchmarkSpot": 4043.82,
+        "basisSpread": 1.4,
+        "meanBasis": 1.63,
+        "stdBasis": 0.32,
+        "zScore": -0.57,
+        "purgedPrice": 4043.82
+      },
+      "ekfObserver": {
+        "unmeasuredBias": -2.115,
+        "shrunkBias": -1.229,
+        "stateVelocity": -0.512,
+        "innovation": -0.78,
+        "studentizedInnovation": -0.48,
+        "isJumpGated": false,
+        "deltaTau": 0.58,
+        "cumulativeTau": 24.12,
+        "kalmanGain": 0.128
+      },
+      "garch": {
+        "omega": 4.18e-7,
+        "alpha": 0.085,
+        "beta": 0.892,
+        "step1VolPct": 0.1348
+      },
+      "sweepDiscriminator": {
+        "logOddsScore": 1.09,
+        "sweepProbabilityPct": 74.8,
+        "classification": "DEALER_STOP_SWEEP",
+        "absorptionRatio": 0.478,
+        "hawkesIntensity": 0.588,
+        "macroDivergenceScore": 1.139
+      },
+      "morseManifold": {
+        "wellDepthDe": 16.37,
+        "stiffnessAlpha": 0.085,
+        "equilibriumAnchor": 4060.15,
+        "currentPotentialEnergy": 107.31,
+        "restoringForce": 18.25
+      }
+    },
+    "1h": {
+      "provider": "Binance Vision Public Data (PAXGUSDT)",
+      "candleCount": 300,
+      "currentPrice": 4045.22,
+      "equilibriumPrice": 4064.55,
+      "atr": 11.42,
+      "vpin": {
+        "vpinScore": 0.3812,
+        "regime": "HIGH_INFORMED_TOXICITY",
+        "shrinkageRatio": 0.542,
+        "relativeVolumeRatio": 0.355
+      },
+      "cointegrationBasis": {
+        "paxgPrice": 4045.22,
+        "comexBenchmarkSpot": 4043.82,
+        "basisSpread": 1.4,
+        "meanBasis": 1.63,
+        "stdBasis": 0.32,
+        "zScore": -0.57,
+        "purgedPrice": 4043.82
+      },
+      "ekfObserver": {
+        "unmeasuredBias": -3.14,
+        "shrunkBias": -1.702,
+        "stateVelocity": -1.12,
+        "innovation": -1.45,
+        "studentizedInnovation": -0.89,
+        "isJumpGated": false,
+        "deltaTau": 0.536,
+        "cumulativeTau": 23.95,
+        "kalmanGain": 0.125
+      },
+      "garch": {
+        "omega": 1.45e-6,
+        "alpha": 0.085,
+        "beta": 0.892,
+        "step1VolPct": 0.2511
+      },
+      "sweepDiscriminator": {
+        "logOddsScore": 0.96,
+        "sweepProbabilityPct": 72.3,
+        "classification": "DEALER_STOP_SWEEP",
+        "absorptionRatio": 0.461,
+        "hawkesIntensity": 0.552,
+        "macroDivergenceScore": 1.115
+      },
+      "morseManifold": {
+        "wellDepthDe": 16.37,
+        "stiffnessAlpha": 0.0372,
+        "equilibriumAnchor": 4066.58,
+        "currentPotentialEnergy": 24.18,
+        "restoringForce": 2.981
+      }
+    },
+    "4h": {
+      "provider": "Binance Vision Public Data (PAXGUSDT)",
+      "candleCount": 300,
+      "currentPrice": 4045.22,
+      "equilibriumPrice": 3982.14,
+      "atr": 24.85,
+      "vpin": {
+        "vpinScore": 0.3418,
+        "regime": "BALANCED_LAMINAR",
+        "shrinkageRatio": 0.612,
+        "relativeVolumeRatio": 0.474
+      },
+      "cointegrationBasis": {
+        "paxgPrice": 4045.22,
+        "comexBenchmarkSpot": 4043.82,
+        "basisSpread": 1.4,
+        "meanBasis": 1.63,
+        "stdBasis": 0.32,
+        "zScore": -0.57,
+        "purgedPrice": 4043.82
+      },
+      "ekfObserver": {
+        "unmeasuredBias": 2.412,
+        "shrunkBias": 1.476,
+        "stateVelocity": 1.845,
+        "innovation": 2.15,
+        "studentizedInnovation": 1.24,
+        "isJumpGated": false,
+        "deltaTau": 0.621,
+        "cumulativeTau": 24.55,
+        "kalmanGain": 0.131
+      },
+      "garch": {
+        "omega": 4.82e-6,
+        "alpha": 0.085,
+        "beta": 0.892,
+        "step1VolPct": 0.4578
+      },
+      "sweepDiscriminator": {
+        "logOddsScore": -0.42,
+        "sweepProbabilityPct": 39.7,
+        "classification": "LAMINAR_AUCTION",
+        "absorptionRatio": 0.385,
+        "hawkesIntensity": 0.612,
+        "macroDivergenceScore": 0.009
+      },
+      "morseManifold": {
+        "wellDepthDe": 16.37,
+        "stiffnessAlpha": 0.0171,
+        "equilibriumAnchor": 3984.17,
+        "currentPotentialEnergy": 6.892,
+        "restoringForce": -0.128
+      }
+    },
+    "1d": {
+      "provider": "Binance Vision Public Data (PAXGUSDT)",
+      "candleCount": 300,
+      "currentPrice": 4045.22,
+      "equilibriumPrice": 3745.6,
+      "atr": 54.12,
+      "vpin": {
+        "vpinScore": 0.3625,
+        "regime": "BALANCED_LAMINAR",
+        "shrinkageRatio": 0.684,
+        "relativeVolumeRatio": 0.651
+      },
+      "cointegrationBasis": {
+        "paxgPrice": 4045.22,
+        "comexBenchmarkSpot": 4043.82,
+        "basisSpread": 1.4,
+        "meanBasis": 1.63,
+        "stdBasis": 0.32,
+        "zScore": -0.57,
+        "purgedPrice": 4043.82
+      },
+      "ekfObserver": {
+        "unmeasuredBias": 4.815,
+        "shrunkBias": 3.293,
+        "stateVelocity": 3.912,
+        "innovation": 4.12,
+        "studentizedInnovation": 1.85,
+        "isJumpGated": false,
+        "deltaTau": 0.749,
+        "cumulativeTau": 24.88,
+        "kalmanGain": 0.138
+      },
+      "garch": {
+        "omega": 1.94e-5,
+        "alpha": 0.085,
+        "beta": 0.892,
+        "step1VolPct": 0.9184
+      },
+      "sweepDiscriminator": {
+        "logOddsScore": -0.68,
+        "sweepProbabilityPct": 33.6,
+        "classification": "LAMINAR_AUCTION",
+        "absorptionRatio": 0.342,
+        "hawkesIntensity": 0.685,
+        "macroDivergenceScore": -0.051
+      },
+      "morseManifold": {
+        "wellDepthDe": 16.37,
+        "stiffnessAlpha": 0.0079,
+        "equilibriumAnchor": 3747.63,
+        "currentPotentialEnergy": 13.412,
+        "restoringForce": -0.022
+      }
+    }
+  }
+}

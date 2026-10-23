@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "tsc",
+    "build": "tsc && tsx scripts/check-phase3-spec-parity.ts",
+    "check:spec-parity": "tsx scripts/check-phase3-spec-parity.ts",
     "lint": "tsc --noEmit",
     "start": "node server.ts"
   },

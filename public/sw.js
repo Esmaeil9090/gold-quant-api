@@ -1,5 +1,5 @@
 // GDF Progressive Web App Service Worker — Self-Updating Engine
-const CACHE_NAME = 'gdf-quant-v69.0';
+const CACHE_NAME = 'gdf-quant-v70.0-phase1';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -47,14 +47,15 @@ self.addEventListener('message', (event) => {
 });
 
 // Fetch Strategy:
-// 1. Navigation requests (App Shell / index.html): Network-First (with quick fallback to cache if offline)
-// 2. /api/ requests: Network-First
+// 1. /api/ requests: Bypass ServiceWorker interception completely
+// 2. Navigation requests (App Shell / index.html): Network-First (with quick fallback to cache if offline)
 // 3. Static assets: Stale-While-Revalidate (with MIME-type guard against HTML fallback poisoning)
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
   if (req.method !== 'GET') return;
+  if (url.pathname.startsWith('/api/')) return;
 
   if (req.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
     event.respondWith(
@@ -69,13 +70,6 @@ self.addEventListener('fetch', (event) => {
         .catch(() => {
           return caches.match(req).then((cached) => cached || caches.match('/index.html'));
         })
-    );
-    return;
-  }
-
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(req, { cache: 'no-store' })
     );
     return;
   }
