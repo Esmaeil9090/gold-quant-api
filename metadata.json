@@ -1,0 +1,8 @@
+{
+  "name": "GDF",
+  "description": "Gold Dynamic Flow (GDF) — Institutional quantitative decision engine with hydrodynamic flow modeling, Jump-Diffusion ensemble, VPIN flow-toxicity, and DP state-space observer.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

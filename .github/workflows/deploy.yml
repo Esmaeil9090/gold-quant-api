@@ -1,0 +1,36 @@
+name: Masterpiece Pipeline v60
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" || true
+  apk:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-java@v4
+        with: { distribution: 'temurin', java-version: '21' }
+      - name: Build APK
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          echo '{"appId":"com.gdf.quant","appName":"GDF Quant","webDir":"www"}' > capacitor.config.json
+          mkdir -p www && cp index.html www/ && cp -r public/* www/ 2>/dev/null || true
+          npx cap add android && npx cap sync android
+          echo "allprojects { configurations.all { resolutionStrategy { force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22' }; exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'; exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8' } }" >> android/build.gradle
+          echo "org.gradle.jvmargs=-Xmx2048m" >> android/gradle.properties
+      - name: Compile APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: XAUUSD-Masterpiece-v60-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
