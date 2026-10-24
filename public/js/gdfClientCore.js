@@ -336,6 +336,33 @@
   }
 
   /**
+   * Sanitizes any technical or upstream error string so internal JSON parse errors
+   * (such as "Unexpected token '<'" or "<!DOCTYPE") are never leaked to the end user UI.
+   */
+  function sanitizeClientHaltMessage(rawMsg, lang) {
+    const isFa = lang === 'fa';
+    const defaultEn =
+      'All live external market feeds (Tier-1, Tier-2, Tier-3) are temporarily unreachable. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data generated.';
+    const defaultFa =
+      'تمامی منابع داده زنده بازار (سطح ۱، ۲ و ۳) موقتاً در دسترس نیستند. به‌روزرسانی فیلتر کالمن (EKF)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
+    if (!rawMsg || typeof rawMsg !== 'string') {
+      return isFa ? defaultFa : defaultEn;
+    }
+    const lower = rawMsg.toLowerCase();
+    if (
+      lower.includes('unexpected token') ||
+      lower.includes('<!doctype') ||
+      lower.includes('<html') ||
+      lower.includes('not valid json') ||
+      lower.includes('json.parse') ||
+      lower.includes('syntaxerror')
+    ) {
+      return isFa ? defaultFa : defaultEn;
+    }
+    return rawMsg;
+  }
+
+  /**
    * Renders the bilingual (EN/FA) Circuit Breaker / Fallback banner in the HUD.
    */
   function renderCircuitBreakerBanner(data, currentLang) {
@@ -363,10 +390,8 @@
       subEl.style.color = '#ffcdd2';
       subEl.textContent =
         currentLang === 'fa'
-          ? data?.haltReasonFa ||
-            'به‌روزرسانی فیلتر کالمن (EKF)، ساعت حجمی (τ) و نوسانات GARCH متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.'
-          : data?.haltReasonEn ||
-            'Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data generated.';
+          ? sanitizeClientHaltMessage(data?.haltReasonFa, 'fa')
+          : sanitizeClientHaltMessage(data?.haltReasonEn, 'en');
       badgeEl.style.color = '#ff8a80';
       badgeEl.style.borderColor = 'rgba(255, 82, 82, 0.65)';
       badgeEl.style.background = 'rgba(255, 23, 68, 0.22)';
@@ -568,6 +593,7 @@
     MODEL_SPEC_REGISTRY,
     validateForecastContract,
     renderCircuitBreakerBanner,
+    sanitizeClientHaltMessage,
     openModelSpecDrawer,
     syncModelSpecRegistry,
   };

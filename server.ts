@@ -16,7 +16,9 @@ import {
   fetchVerifiedMacroNews,
   fetchVerifiedMacroWaterfall,
   fetchVerifiedMarketWaterfall,
+  getProviderHttpDiagnostics,
   ProviderTier,
+  sanitizeUserFacingHaltReason,
 } from './src/services/realDataWaterfall.js';
 import {
   AdaptiveDPObserver,
@@ -29,6 +31,10 @@ import {
   buildHaltedDegradedForecastPayload,
   computeDataReliability,
 } from './src/services/telemetryService.js';
+import {
+  evaluateCausalWalkForwardValidation,
+  getLatestValidationScorecard,
+} from './src/services/walkForwardValidationService.js';
 
 export * from './src/contracts/quantContracts.js';
 
@@ -42,7 +48,7 @@ app.use(cors());
 app.use(express.json());
 
 // Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, and Live APIs are never served stale
-const APP_VERSION = '2026.10.23-v72.0-Phase4-ConfidenceMetrics';
+const APP_VERSION = '2026.10.24-v73.0-Phase5-ValidationLayer';
 const BUILD_TIME = Date.now();
 
 app.use((req, res, next) => {
@@ -88,6 +94,60 @@ app.get('/api/model-specs', (req: Request, res: Response) => {
     version: APP_VERSION,
     totalSpecs: getModelSpecList().length,
     registry: MODEL_SPEC_REGISTRY,
+  });
+});
+
+// Phase 1/2 Bug-Fix Diagnostic Endpoint: Inspect exact HTTP status, Content-Type, and HTML rejection events per provider
+app.get('/api/provider-diagnostics', async (req: Request, res: Response) => {
+  const probe = req.query.probe === '1' || req.query.probe === 'true';
+  let latestWaterfall = null;
+  if (probe) {
+    const wf = await fetchVerifiedMarketWaterfall('15m');
+    latestWaterfall = {
+      systemState: wf.systemState,
+      activeTier: wf.activeTier,
+      activeProvider: wf.activeProvider,
+      tierDiagnostics: wf.diagnostics,
+    };
+  }
+  const httpEvents = getProviderHttpDiagnostics();
+  const htmlRejectedEvents = httpEvents.filter(e => e.isHtmlOrNonJson || e.outcome === 'NON_JSON_HTML_REJECTED');
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    timestampIso: new Date().toISOString(),
+    totalHttpEventsLogged: httpEvents.length,
+    htmlOrNonJsonRejectionsCount: htmlRejectedEvents.length,
+    htmlRejectedProviders: Array.from(new Set(htmlRejectedEvents.map(e => e.providerName))),
+    latestWaterfall,
+    recentProviderEvents: httpEvents.slice(0, 30),
+  });
+});
+
+// Phase 5 Validation Layer Endpoint: Retrieve Causal Walk-Forward Evaluation Scorecard
+app.get('/api/validation-scorecard', async (req: Request, res: Response) => {
+  const intervalQuery = (req.query.interval as string) || '15m';
+  const interval = VALID_INTERVALS[intervalQuery] ? intervalQuery : '15m';
+  let scorecard = getLatestValidationScorecard(interval);
+  if (!scorecard) {
+    const [wf, macro] = await Promise.all([
+      fetchVerifiedMarketWaterfall(interval),
+      fetchVerifiedMacroWaterfall(),
+    ]);
+    if (wf.candles.length >= 26) {
+      scorecard = evaluateCausalWalkForwardValidation({
+        candles: wf.candles,
+        liveMacro: macro,
+        timeframe: interval,
+        intervalStepSeconds: VALID_INTERVALS[interval],
+      });
+    }
+  }
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    timeframe: interval,
+    scorecard,
   });
 });
 
@@ -213,6 +273,13 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
 
     lastVerifiedCalibration = quantOut.calibration;
 
+    const validationScorecard = evaluateCausalWalkForwardValidation({
+      candles,
+      liveMacro,
+      timeframe: interval,
+      intervalStepSeconds,
+    });
+
     const dataReliability = computeDataReliability(
       waterfall,
       observer,
@@ -233,8 +300,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       activeTier: waterfall.activeTier,
       activeProvider: waterfall.activeProvider,
       activeSymbol: waterfall.activeSymbol,
-      haltReasonEn: waterfall.haltReasonEn,
-      haltReasonFa: waterfall.haltReasonFa,
+      haltReasonEn: waterfall.haltReasonEn ? sanitizeUserFacingHaltReason(waterfall.haltReasonEn, 'en') : null,
+      haltReasonFa: waterfall.haltReasonFa ? sanitizeUserFacingHaltReason(waterfall.haltReasonFa, 'fa') : null,
       providerDiagnostics: waterfall.diagnostics,
       version: APP_VERSION,
       timestamp: Math.floor(Date.now() / 1000),
@@ -268,6 +335,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       macroNewsStatus: realNewsFeed,
       candles,
       dataReliability,
+      validationScorecard,
     };
 
     if (!simulateFailure && !fixtureReplay) {
@@ -275,15 +343,14 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
     }
     res.json(payload);
   } catch (err: any) {
-    console.error('Forecast waterfall critical error:', err.message);
+    console.warn('Forecast waterfall critical error (logged server-side):', err?.message);
     res.status(503).json({
       status: 'HALTED_DEGRADED',
       systemState: 'HALTED_DEGRADED',
       isHalted: true,
       isSynthetic: false,
-      haltReasonEn: `CRITICAL DATA PIPELINE HALT: ${err.message}. Zero synthetic fallback permitted.`,
-      haltReasonFa: `توقف اضطراری خط لوله داده: ${err.message}. تولید داده مصنوعی ممنوع است.`,
-      error: err.message,
+      haltReasonEn: sanitizeUserFacingHaltReason(err?.message, 'en'),
+      haltReasonFa: sanitizeUserFacingHaltReason(err?.message, 'fa'),
     });
   }
 });

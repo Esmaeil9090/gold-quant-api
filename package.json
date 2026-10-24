@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "tsc && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts",
+    "build": "tsc && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts",
     "check:spec-parity": "tsx scripts/check-phase3-spec-parity.ts",
     "check:confidence-metrics": "tsx scripts/check-phase4-confidence-metrics.ts",
+    "check:validation-layer": "tsx scripts/check-phase5-validation-and-html-guard.ts",
     "lint": "tsc --noEmit",
     "start": "node server.ts"
   },

@@ -20,9 +20,23 @@ export interface ProviderAttemptDiagnostic {
   symbol: string;
   endpoint: string;
   status: 'SUCCESS' | 'FAILED' | 'SKIPPED_BY_TEST';
+  httpStatus?: number;
+  contentType?: string;
+  isHtmlResponse?: boolean;
   latencyMs: number;
   candleCount: number;
   errorMessage?: string;
+  timestampIso: string;
+}
+
+export interface ProviderHttpDiagnosticEvent {
+  providerName: string;
+  endpoint: string;
+  httpStatus: number;
+  contentType: string;
+  isHtmlOrNonJson: boolean;
+  outcome: 'JSON_OK' | 'CSV_OK' | 'XML_OK' | 'NON_JSON_HTML_REJECTED' | 'HTTP_ERROR' | 'NETWORK_TIMEOUT';
+  detail: string;
   timestampIso: string;
 }
 
@@ -130,7 +144,40 @@ export function assertVerifiedProvenance(
   }
 }
 
-async function fetchWithTimeout(url: string, timeoutMs = 2600): Promise<globalThis.Response> {
+const providerHttpDiagnosticsLog: ProviderHttpDiagnosticEvent[] = [];
+
+function recordProviderHttpDiagnostic(evt: ProviderHttpDiagnosticEvent): void {
+  providerHttpDiagnosticsLog.unshift(evt);
+  if (providerHttpDiagnosticsLog.length > 80) {
+    providerHttpDiagnosticsLog.length = 80;
+  }
+}
+
+export function getProviderHttpDiagnostics(): ProviderHttpDiagnosticEvent[] {
+  return [...providerHttpDiagnosticsLog];
+}
+
+/**
+ * Sanitizes any upstream error string so internal JSON parser messages
+ * ("Unexpected token '<'", "<!DOCTYPE", "<html", "is not valid JSON")
+ * are never leaked into user-facing HALTED_DEGRADED banners.
+ */
+export function sanitizeUserFacingHaltReason(rawReason: string | undefined | null, lang: 'en' | 'fa' = 'en'): string {
+  const defaultEn =
+    'All live external gold feeds (Tier-1 Binance, Tier-2 Yahoo COMEX, Tier-3 Kraken/Coinbase) are temporarily unreachable or rate-limited. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data is generated.';
+  const defaultFa =
+    'تمامی منابع زنده بازار طلا (سطح ۱ بایننس، سطح ۲ کامکس یاهو، سطح ۳ کراکن/کوین‌بیس) موقتاً در دسترس نیستند. به‌روزرسانی فیلتر کالمن (P)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
+
+  if (!rawReason || typeof rawReason !== 'string') {
+    return lang === 'fa' ? defaultFa : defaultEn;
+  }
+  if (/unexpected token|<!doctype|<html|is not valid json|syntaxerror|non_json_upstream/i.test(rawReason)) {
+    return lang === 'fa' ? defaultFa : defaultEn;
+  }
+  return rawReason;
+}
+
+async function fetchWithTimeout(url: string, timeoutMs = 2600, acceptHeader = 'application/json'): Promise<globalThis.Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
   try {
@@ -138,7 +185,7 @@ async function fetchWithTimeout(url: string, timeoutMs = 2600): Promise<globalTh
       signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) GDF-Quant-Terminal/1.0',
-        Accept: 'application/json, text/xml, application/xml, text/csv, */*',
+        Accept: acceptHeader,
       },
     });
     clearTimeout(timer);
@@ -146,6 +193,114 @@ async function fetchWithTimeout(url: string, timeoutMs = 2600): Promise<globalTh
   } catch (err) {
     clearTimeout(timer);
     throw err;
+  }
+}
+
+/**
+ * Strict JSON Fetch Guard:
+ * 1. Always checks response.ok AND Content-Type (must contain "application/json" or "text/json") BEFORE parsing JSON.
+ * 2. Detects HTML / <!DOCTYPE / gateway error pages and logs exact provider + HTTP status + Content-Type.
+ * 3. Never throws raw SyntaxError ("Unexpected token '<', \"<!DOCTYPE \"...") into user-facing state.
+ */
+export async function fetchSafeJson<T = any>(
+  url: string,
+  providerName: string,
+  timeoutMs = 2600
+): Promise<{ data: T; httpStatus: number; contentType: string }> {
+  let res: globalThis.Response;
+  try {
+    res = await fetchWithTimeout(url, timeoutMs, 'application/json, text/json;q=0.9');
+  } catch (netErr: any) {
+    const detail = netErr?.message || 'Network or timeout error';
+    recordProviderHttpDiagnostic({
+      providerName,
+      endpoint: url,
+      httpStatus: 0,
+      contentType: 'none',
+      isHtmlOrNonJson: false,
+      outcome: 'NETWORK_TIMEOUT',
+      detail,
+      timestampIso: new Date().toISOString(),
+    });
+    throw new Error(`${providerName} unreachable (${detail})`);
+  }
+
+  const httpStatus = res.status;
+  const contentType = (res.headers.get('content-type') || '').toLowerCase();
+  const isJsonContentType = contentType.includes('application/json') || contentType.includes('text/json');
+
+  if (!res.ok) {
+    console.warn(
+      `[GDF Waterfall HTTP Guard] Provider="${providerName}" failed | HTTP ${httpStatus} | Content-Type="${contentType || 'unknown'}" | URL=${url}`
+    );
+    recordProviderHttpDiagnostic({
+      providerName,
+      endpoint: url,
+      httpStatus,
+      contentType: contentType || 'unknown',
+      isHtmlOrNonJson: !isJsonContentType,
+      outcome: 'HTTP_ERROR',
+      detail: `HTTP ${httpStatus}`,
+      timestampIso: new Date().toISOString(),
+    });
+    throw new Error(`${providerName} returned HTTP ${httpStatus}`);
+  }
+
+  const rawText = await res.text();
+  const trimmed = rawText.trim();
+  const looksLikeHtml =
+    trimmed.startsWith('<') ||
+    /^<!doctype/i.test(trimmed) ||
+    /^<html/i.test(trimmed) ||
+    contentType.includes('text/html');
+
+  if (!isJsonContentType || looksLikeHtml) {
+    console.warn(
+      `[GDF Waterfall Non-JSON Guard] Provider="${providerName}" returned non-JSON/HTML | HTTP ${httpStatus} | Content-Type="${contentType || 'none'}" | StartsWith="${trimmed.slice(0, 24).replace(/\s+/g, ' ')}"`
+    );
+    recordProviderHttpDiagnostic({
+      providerName,
+      endpoint: url,
+      httpStatus,
+      contentType: contentType || 'none',
+      isHtmlOrNonJson: true,
+      outcome: 'NON_JSON_HTML_REJECTED',
+      detail: `Rejected non-JSON payload (Content-Type: ${contentType || 'none'}, HTML=${looksLikeHtml})`,
+      timestampIso: new Date().toISOString(),
+    });
+    throw new Error(
+      `NON_JSON_UPSTREAM_RESPONSE from ${providerName} (HTTP ${httpStatus}, Content-Type: ${contentType || 'none'})`
+    );
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as T;
+    recordProviderHttpDiagnostic({
+      providerName,
+      endpoint: url,
+      httpStatus,
+      contentType,
+      isHtmlOrNonJson: false,
+      outcome: 'JSON_OK',
+      detail: 'Verified JSON response parsed',
+      timestampIso: new Date().toISOString(),
+    });
+    return { data: parsed, httpStatus, contentType };
+  } catch (_) {
+    console.warn(
+      `[GDF Waterfall Malformed JSON Guard] Provider="${providerName}" body failed JSON.parse | HTTP ${httpStatus} | Content-Type="${contentType}"`
+    );
+    recordProviderHttpDiagnostic({
+      providerName,
+      endpoint: url,
+      httpStatus,
+      contentType,
+      isHtmlOrNonJson: true,
+      outcome: 'NON_JSON_HTML_REJECTED',
+      detail: 'Malformed JSON body rejected',
+      timestampIso: new Date().toISOString(),
+    });
+    throw new Error(`NON_JSON_UPSTREAM_RESPONSE from ${providerName} (Malformed JSON body)`);
   }
 }
 
@@ -175,9 +330,7 @@ async function fetchTier1BinancePaxg(interval: string): Promise<{
   for (const h of hosts) {
     const endpoint = `${h.base}/api/v3/klines?symbol=PAXGUSDT&interval=${binanceInt}&limit=300`;
     try {
-      const res = await fetchWithTimeout(endpoint, 2400);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const raw = await res.json();
+      const { data: raw } = await fetchSafeJson<any[]>(endpoint, h.name, 2400);
       if (!Array.isArray(raw) || raw.length < 30) throw new Error('Insufficient klines array');
 
       const candles: VerifiedCandle[] = [];
@@ -249,9 +402,7 @@ async function fetchTier2YahooGold(interval: string): Promise<{
   for (const s of symbols) {
     const endpoint = `https://query1.finance.yahoo.com/v8/finance/chart/${s.sym}?interval=${cfg.yfInt}&range=${cfg.range}`;
     try {
-      const res = await fetchWithTimeout(endpoint, 2600);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const { data } = await fetchSafeJson<any>(endpoint, s.name, 2600);
       const result = data?.chart?.result?.[0];
       const timestamps: number[] = result?.timestamp || [];
       const quote = result?.indicators?.quote?.[0] || {};
@@ -315,9 +466,11 @@ async function fetchTier3KrakenOrCoinbase(interval: string): Promise<{
   const krakenEndpoint = `https://api.kraken.com/0/public/OHLC?pair=PAXGUSD&interval=${kInt}`;
 
   try {
-    const res = await fetchWithTimeout(krakenEndpoint, 2600);
-    if (!res.ok) throw new Error(`Kraken HTTP ${res.status}`);
-    const data = await res.json();
+    const { data } = await fetchSafeJson<any>(
+      krakenEndpoint,
+      'Kraken Institutional Spot (PAXG/USD)',
+      2600
+    );
     const pairKey = Object.keys(data?.result || {}).find(k => k !== 'last');
     const rows = pairKey ? data.result[pairKey] : [];
     if (!Array.isArray(rows) || rows.length < 25) throw new Error('Kraken insufficient OHLC rows');
@@ -355,35 +508,43 @@ async function fetchTier3KrakenOrCoinbase(interval: string): Promise<{
     };
     const gran = cbGranularityMap[interval] || 900;
     const cbEndpoint = `https://api.exchange.coinbase.com/products/PAXG-USD/candles?granularity=${gran}`;
-    const res2 = await fetchWithTimeout(cbEndpoint, 2600);
-    if (!res2.ok) throw new Error(`Tier 3 failed: Kraken (${krakenErr.message}) & Coinbase (HTTP ${res2.status})`);
-    const rows2 = await res2.json();
-    if (!Array.isArray(rows2) || rows2.length < 25) throw new Error('Coinbase insufficient candles');
+    try {
+      const { data: rows2 } = await fetchSafeJson<any[]>(
+        cbEndpoint,
+        'Coinbase Exchange Spot (PAXG-USD)',
+        2600
+      );
+      if (!Array.isArray(rows2) || rows2.length < 25) throw new Error('Coinbase insufficient candles');
 
-    const candles: VerifiedCandle[] = rows2
-      .slice(0, 300)
-      .reverse()
-      .map((item: any) => ({
-        time: Number(item[0]),
-        low: parseFloat(item[1]),
-        high: parseFloat(item[2]),
-        open: parseFloat(item[3]),
-        close: parseFloat(item[4]),
-        volume: Math.max(0.01, parseFloat(item[5])),
-      }));
+      const candles: VerifiedCandle[] = rows2
+        .slice(0, 300)
+        .reverse()
+        .map((item: any) => ({
+          time: Number(item[0]),
+          low: parseFloat(item[1]),
+          high: parseFloat(item[2]),
+          open: parseFloat(item[3]),
+          close: parseFloat(item[4]),
+          volume: Math.max(0.01, parseFloat(item[5])),
+        }));
 
-    assertVerifiedProvenance(candles, {
-      providerName: 'Coinbase Exchange Spot (PAXG-USD)',
-      symbol: 'PAXG-USD',
-      endpoint: cbEndpoint,
-      tier: 'TIER_3_TERTIARY',
-    });
-    return {
-      providerName: 'Coinbase Exchange Spot (PAXG-USD)',
-      symbol: 'PAXG-USD',
-      endpoint: cbEndpoint,
-      candles,
-    };
+      assertVerifiedProvenance(candles, {
+        providerName: 'Coinbase Exchange Spot (PAXG-USD)',
+        symbol: 'PAXG-USD',
+        endpoint: cbEndpoint,
+        tier: 'TIER_3_TERTIARY',
+      });
+      return {
+        providerName: 'Coinbase Exchange Spot (PAXG-USD)',
+        symbol: 'PAXG-USD',
+        endpoint: cbEndpoint,
+        candles,
+      };
+    } catch (cbErr: any) {
+      throw new Error(
+        `Tier 3 failed: Kraken (${krakenErr?.message || 'failed'}) & Coinbase (${cbErr?.message || 'failed'})`
+      );
+    }
   }
 }
 
@@ -713,18 +874,73 @@ export async function fetchVerifiedMarketWaterfall(
 
 async function fetchFredSeriesLatest(seriesId: string): Promise<number | null> {
   const url = `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${seriesId}`;
-  const res = await fetchWithTimeout(url, 3200);
-  if (!res.ok) return null;
-  const csv = await res.text();
-  const lines = csv.trim().split('\n');
-  for (let i = lines.length - 1; i >= 1; i--) {
-    const parts = lines[i].split(',');
-    const val = parseFloat(parts[1]);
-    if (Number.isFinite(val)) {
-      return val;
+  const providerName = `St. Louis Fed FRED (${seriesId})`;
+  try {
+    const res = await fetchWithTimeout(url, 3200, 'text/csv, text/plain;q=0.9');
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    if (!res.ok) {
+      recordProviderHttpDiagnostic({
+        providerName,
+        endpoint: url,
+        httpStatus: res.status,
+        contentType: contentType || 'unknown',
+        isHtmlOrNonJson: contentType.includes('text/html'),
+        outcome: 'HTTP_ERROR',
+        detail: `HTTP ${res.status}`,
+        timestampIso: new Date().toISOString(),
+      });
+      return null;
     }
+    const csv = await res.text();
+    const trimmed = csv.trim();
+    if (trimmed.startsWith('<') || /^<!doctype/i.test(trimmed) || contentType.includes('text/html')) {
+      console.warn(
+        `[GDF Waterfall Non-CSV Guard] Provider="${providerName}" returned HTML instead of CSV | HTTP ${res.status} | Content-Type="${contentType}"`
+      );
+      recordProviderHttpDiagnostic({
+        providerName,
+        endpoint: url,
+        httpStatus: res.status,
+        contentType: contentType || 'text/html',
+        isHtmlOrNonJson: true,
+        outcome: 'NON_JSON_HTML_REJECTED',
+        detail: 'FRED endpoint returned HTML instead of CSV',
+        timestampIso: new Date().toISOString(),
+      });
+      return null;
+    }
+    const lines = trimmed.split('\n');
+    for (let i = lines.length - 1; i >= 1; i--) {
+      const parts = lines[i].split(',');
+      const val = parseFloat(parts[1]);
+      if (Number.isFinite(val)) {
+        recordProviderHttpDiagnostic({
+          providerName,
+          endpoint: url,
+          httpStatus: res.status,
+          contentType: contentType || 'text/csv',
+          isHtmlOrNonJson: false,
+          outcome: 'CSV_OK',
+          detail: `Latest value=${val}`,
+          timestampIso: new Date().toISOString(),
+        });
+        return val;
+      }
+    }
+    return null;
+  } catch (err: any) {
+    recordProviderHttpDiagnostic({
+      providerName,
+      endpoint: url,
+      httpStatus: 0,
+      contentType: 'none',
+      isHtmlOrNonJson: false,
+      outcome: 'NETWORK_TIMEOUT',
+      detail: err?.message || 'Timeout',
+      timestampIso: new Date().toISOString(),
+    });
+    return null;
   }
-  return null;
 }
 
 function medianOf(values: number[]): number {
@@ -772,12 +988,12 @@ export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: 
   const outliersRejected: string[] = [];
 
   const tasks = await Promise.allSettled([
-    fetchWithTimeout('https://query1.finance.yahoo.com/v8/finance/chart/%5ETNX?interval=1d&range=5d', 3000).then(r => r.json()),
-    fetchWithTimeout('https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB?interval=1d&range=5d', 3000).then(r => r.json()),
+    fetchSafeJson('https://query1.finance.yahoo.com/v8/finance/chart/%5ETNX?interval=1d&range=5d', 'Yahoo Finance (^TNX)', 3000).then(r => r.data),
+    fetchSafeJson('https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB?interval=1d&range=5d', 'ICE US Dollar Index (DX-Y.NYB)', 3000).then(r => r.data),
     fetchFredSeriesLatest('DGS10'),
     fetchFredSeriesLatest('DFII10'),
     fetchFredSeriesLatest('T10YIE'),
-    fetchWithTimeout('https://query1.finance.yahoo.com/v8/finance/chart/%5ETYX?interval=1d&range=5d', 3000).then(r => r.json()),
+    fetchSafeJson('https://query1.finance.yahoo.com/v8/finance/chart/%5ETYX?interval=1d&range=5d', 'Yahoo Finance (^TYX 30Y)', 3000).then(r => r.data),
   ]);
 
   if (tasks[0].status === 'fulfilled') {
@@ -1050,11 +1266,52 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
     feeds.map(async feed => {
       try {
         const res = await fetchWithTimeout(feed.url, 3600);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (!res.ok) {
+          recordProviderHttpDiagnostic({
+            providerName: feed.name,
+            endpoint: feed.url,
+            httpStatus: res.status,
+            contentType: ct || 'none',
+            isHtmlOrNonJson: ct.includes('text/html'),
+            outcome: 'HTTP_ERROR',
+            detail: `HTTP ${res.status}`,
+            timestampIso: new Date().toISOString(),
+          });
+          throw new Error(`HTTP ${res.status}`);
+        }
         const xml = await res.text();
+        const trimmedXml = xml.trim();
+        const isHtmlErrorPage =
+          ct.includes('text/html') ||
+          trimmedXml.toLowerCase().startsWith('<!doctype html') ||
+          trimmedXml.toLowerCase().startsWith('<html');
+        if (isHtmlErrorPage && !trimmedXml.includes('<item>')) {
+          recordProviderHttpDiagnostic({
+            providerName: feed.name,
+            endpoint: feed.url,
+            httpStatus: res.status,
+            contentType: ct || 'text/html',
+            isHtmlOrNonJson: true,
+            outcome: 'NON_JSON_HTML_REJECTED',
+            detail: 'RSS provider returned HTML page instead of XML feed',
+            timestampIso: new Date().toISOString(),
+          });
+          throw new Error('RSS provider returned HTML instead of XML');
+        }
         const itemMatches = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8);
         if (itemMatches.length === 0) throw new Error('Zero RSS <item> nodes');
 
+        recordProviderHttpDiagnostic({
+          providerName: feed.name,
+          endpoint: feed.url,
+          httpStatus: res.status,
+          contentType: ct || 'application/xml',
+          isHtmlOrNonJson: false,
+          outcome: 'XML_OK',
+          detail: `Verified XML RSS (${itemMatches.length} items)`,
+          timestampIso: new Date().toISOString(),
+        });
         activeSources.push(feed.name);
         for (let idx = 0; idx < itemMatches.length; idx++) {
           const block = itemMatches[idx][1];
@@ -1110,7 +1367,7 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
             isVerifiedExternal: true,
           });
         }
-      } catch (_) {
+      } catch (err: any) {
         failedSources.push(feed.name);
       }
     })

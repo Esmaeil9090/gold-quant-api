@@ -297,3 +297,69 @@ export interface ObserverTelemetryPayload {
   history: ConvergencePoint[];
 }
 
+export type ValidationHorizonBars = 1 | 5 | 15 | 60;
+
+export interface WalkForwardHorizonMetrics {
+  horizonBars: ValidationHorizonBars;
+  horizonLabelEn: string;
+  horizonLabelFa: string;
+  sampleSizeN: number;
+  status: 'CALIBRATED_ACTIVE' | 'PROVISIONAL_LOW_SAMPLE' | 'INSUFFICIENT_WARMUP';
+  spearmanRankIc: number | null;
+  rankIcRollingStd: number | null;
+  icIr: number | null;
+  rankIcTStat: number | null;
+  directionalHitRate: number | null;
+  payoffAsymmetryRatio: number | null;
+  meanWinReturnBps: number | null;
+  meanLossReturnBps: number | null;
+  sweepPrecision: number | null;
+  sweepRecall: number | null;
+  sweepF1Score: number | null;
+  sweepBrierScore: number | null;
+}
+
+export type VolatilityRegimeKey = 'HIGH_VOL_GARCH' | 'LOW_VOL_GARCH';
+export type MacroRegimeKey = 'EXPANDING_MACRO_PRESSURE' | 'CONTRACTING_MACRO_PRESSURE';
+
+export interface RegimeConditionalValidationMetrics {
+  regimeKey: VolatilityRegimeKey | MacroRegimeKey;
+  regimeLabelEn: string;
+  regimeLabelFa: string;
+  sampleSizeN: number;
+  spearmanRankIcH5: number | null;
+  icIrH5: number | null;
+  directionalHitRateH5: number | null;
+  payoffAsymmetryH5: number | null;
+  sweepF1ScoreH5: number | null;
+  sweepBrierScoreH5: number | null;
+}
+
+export interface WalkForwardValidationScorecard {
+  schemaVersion: string;
+  timeframe: string;
+  causalityEnforced: true;
+  zeroLookaheadVerified: true;
+  effectiveSampleSizeN: number;
+  persistedSnapshotsCount: number;
+  lastUpdatedIso: string;
+  currentVolatilityRegime: VolatilityRegimeKey;
+  currentVolatilityRegimeLabelEn: string;
+  currentVolatilityRegimeLabelFa: string;
+  currentMacroRegime: MacroRegimeKey;
+  currentMacroRegimeLabelEn: string;
+  currentMacroRegimeLabelFa: string;
+  horizons: WalkForwardHorizonMetrics[];
+  volatilityRegimePartitions: {
+    HIGH_VOL_GARCH: RegimeConditionalValidationMetrics;
+    LOW_VOL_GARCH: RegimeConditionalValidationMetrics;
+  };
+  macroRegimePartitions: {
+    EXPANDING_MACRO_PRESSURE: RegimeConditionalValidationMetrics;
+    CONTRACTING_MACRO_PRESSURE: RegimeConditionalValidationMetrics;
+  };
+  summaryBadgeEn: string;
+  summaryBadgeFa: string;
+}
+
+

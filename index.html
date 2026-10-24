@@ -3036,6 +3036,87 @@ input:checked + .toggle-slider:before {
         </div>
       </div>
     </div>
+
+    <!-- Panel 10: Phase 5 Causal Walk-Forward Validation & Attribution Scorecard (Collapsed by Default) -->
+    <div class="collapsible-panel" id="panelValidation">
+      <div class="panel-accordion-header" data-panel="panelValidation">
+        <div class="accordion-title-left">
+          <span class="accordion-icon">🎯</span>
+          <span class="accordion-title" data-i18n="panelValidationTitle">Causal Walk-Forward Validation &amp; Attribution Scorecard (OOS)</span>
+          <button type="button" class="spec-badge-btn" data-model-spec="EKF_STATE_OBSERVER" title="Inspect Causal State-Space Observer & Out-of-Sample Evaluation Spec">✓ Exact · Spec ⓘ</button>
+        </div>
+        <div class="accordion-header-right">
+          <span class="accordion-status-pill" id="valScorecardHeaderPill" style="color: var(--cyan); border-color: rgba(0, 229, 255, 0.4);">CAUSAL ZERO-LOOKAHEAD · h=1,5,15,60</span>
+          <span class="accordion-arrow">▼</span>
+        </div>
+      </div>
+      <div class="panel-accordion-body">
+        <div class="recharts-card" style="margin-bottom: 0;">
+          <div class="recharts-header" style="margin-bottom: 10px;">
+            <div class="recharts-title-box">
+              <span class="recharts-badge" data-i18n="valScorecardBadge">Phase 5 · Strictly Causal Walk-Forward Out-of-Sample Evaluation Engine</span>
+              <h3 class="recharts-title" data-i18n="valScorecardTitle">Validation &amp; Attribution Scorecard (Horizons h = 1, 5, 15, 60 Bars)</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span class="legend-pill pill-cyan" id="valSampleBadge">OOS Sample N = --</span>
+              <span class="legend-pill pill-gold" id="valCausalityBadge">✓ Zero-Lookahead Causal Prefix (≤ t)</span>
+            </div>
+          </div>
+          <div class="recharts-desc" data-i18n="valScorecardDesc">
+            At every historical origin bar t, all state estimates (Scalar-Gain Kalman filter, GARCH(1,1) conditional variance, 40-bar OU anchor, and Wick-Volume Sweep log-odds) are computed strictly on prefix bars 0..t before scoring against realized forward returns r_{t→t+h}.
+          </div>
+
+          <!-- Active Regime Attribution Banner -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-bottom: 14px;">
+            <div style="background: rgba(10, 16, 28, 0.85); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 10px; padding: 10px 14px;">
+              <div style="font-size: 9px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.8px;" data-i18n="valActiveVolRegimeLbl">Current GARCH Volatility Regime</div>
+              <div style="font-size: 12px; font-weight: 800; color: #fff; margin-top: 3px; font-family: monospace;" id="valCurrentVolRegime">HIGH_VOL_GARCH</div>
+            </div>
+            <div style="background: rgba(10, 16, 28, 0.85); border: 1px solid rgba(245, 215, 110, 0.3); border-radius: 10px; padding: 10px 14px;">
+              <div style="font-size: 9px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.8px;" data-i18n="valActiveMacroRegimeLbl">Current Real-Yield / Dollar Macro Regime</div>
+              <div style="font-size: 12px; font-weight: 800; color: #fff; margin-top: 3px; font-family: monospace;" id="valCurrentMacroRegime">EXPANDING_MACRO_PRESSURE</div>
+            </div>
+          </div>
+
+          <!-- Multi-Horizon Walk-Forward Metrics Table (h = 1, 5, 15, 60) -->
+          <div class="mtf-table-wrap" style="margin-bottom: 14px;">
+            <table class="mtf-table">
+              <thead>
+                <tr>
+                  <th data-i18n="valColHorizon">Horizon (h)</th>
+                  <th data-i18n="valColSampleN">Effective N</th>
+                  <th data-i18n="valColRankIc">Spearman Rank-IC (t-stat)</th>
+                  <th data-i18n="valColIcIr">Rank-ICIR</th>
+                  <th data-i18n="valColHitRate">Directional Hit Rate</th>
+                  <th data-i18n="valColPayoff">Payoff Asymmetry (Win/Loss)</th>
+                  <th data-i18n="valColSweepPrRcF1">Sweep Classifier (Prec / Rec / F1)</th>
+                  <th data-i18n="valColBrier">Sweep Brier Score</th>
+                </tr>
+              </thead>
+              <tbody id="valHorizonsTableBody">
+                <!-- Populated dynamically by renderValidationScorecard -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Regime-Conditional Performance Partitions (Volatility & Macro Regimes) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+            <div style="background: rgba(8, 13, 24, 0.88); border: 1px solid rgba(40, 60, 95, 0.55); border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 10px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;" data-i18n="valVolRegimeTitle">
+                Regime Partition A · GARCH(1,1) Conditional Volatility (h=5)
+              </div>
+              <div id="valVolRegimePartitionBody" style="display: flex; flex-direction: column; gap: 8px; font-size: 11px;"></div>
+            </div>
+            <div style="background: rgba(8, 13, 24, 0.88); border: 1px solid rgba(40, 60, 95, 0.55); border-radius: 10px; padding: 12px 14px;">
+              <div style="font-size: 10px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;" data-i18n="valMacroRegimeTitle">
+                Regime Partition B · Real-Yield &amp; Dollar Macro Pressure (h=5)
+              </div>
+              <div id="valMacroRegimePartitionBody" style="display: flex; flex-direction: column; gap: 8px; font-size: 11px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3490,6 +3571,22 @@ const i18n = {
     dpKalmanGain: 'Scalar Kalman Gain (K_k) ⓘ',
     dpSweepScore: 'Wick-Volume Sweep Log-Odds (L_t) ⓘ',
     dpSweepAction: 'Sweep Proxy Regime Guidance ⓘ',
+    panelValidationTitle: 'Causal Walk-Forward Validation & Attribution Scorecard (OOS)',
+    valScorecardBadge: 'Phase 5 · Strictly Causal Walk-Forward Out-of-Sample Evaluation Engine',
+    valScorecardTitle: 'Validation & Attribution Scorecard (Horizons h = 1, 5, 15, 60 Bars)',
+    valScorecardDesc: 'At every historical origin bar t, all state estimates (Scalar-Gain Kalman filter, GARCH(1,1) conditional variance, 40-bar OU anchor, and Wick-Volume Sweep log-odds) are computed strictly on prefix bars 0..t before scoring against realized forward returns r_{t→t+h}.',
+    valActiveVolRegimeLbl: 'Current GARCH Volatility Regime',
+    valActiveMacroRegimeLbl: 'Current Real-Yield / Dollar Macro Regime',
+    valColHorizon: 'Horizon (h)',
+    valColSampleN: 'Effective N',
+    valColRankIc: 'Spearman Rank-IC (t-stat)',
+    valColIcIr: 'Rank-ICIR',
+    valColHitRate: 'Directional Hit Rate',
+    valColPayoff: 'Payoff Asymmetry (Win/Loss)',
+    valColSweepPrRcF1: 'Sweep Classifier (Prec / Rec / F1)',
+    valColBrier: 'Sweep Brier Score',
+    valVolRegimeTitle: 'Regime Partition A · GARCH(1,1) Conditional Volatility (h=5)',
+    valMacroRegimeTitle: 'Regime Partition B · Real-Yield & Dollar Macro Pressure (h=5)',
   },
   fa: {
     title: 'سامانه پویای جریان طلا (GDF)',
@@ -3655,6 +3752,22 @@ const i18n = {
     dpKalmanGain: 'بهره کالمن اسکالر (K_k) ⓘ',
     dpSweepScore: 'لگاریتم شانس شدو-حجم (L_t) ⓘ',
     dpSweepAction: 'راهنمای رژیم پروکسی جاروب ⓘ',
+    panelValidationTitle: 'کارت امتیازی اعتبارسنجی علّی گام‌به‌گام (خارج از نمونه OOS)',
+    valScorecardBadge: 'فاز ۵ · موتور ارزیابی علّی بدون آینده‌نگری (Zero-Lookahead Walk-Forward)',
+    valScorecardTitle: 'کارت امتیازی اعتبارسنجی و تفکیک رژیم (افق‌های h = 1, 5, 15, 60 کندل)',
+    valScorecardDesc: 'در هر کندل مبدأ تاریخی t، تمامی تخمین‌های حالت (فیلتر کالمن اسکالر، واریانس شرطی GARCH(1,1)، تعادل ۴۰ کندلی OU و لگاریتم شانس جاروب نقدینگی) صرفاً با داده‌های تا زمان t محاسبه شده و سپس با بازده تحقق‌یافته آینده مقایسه می‌شوند.',
+    valActiveVolRegimeLbl: 'رژیم جاری نوسان شرطی GARCH',
+    valActiveMacroRegimeLbl: 'رژیم جاری فشار کلان (بازده واقعی و دلار)',
+    valColHorizon: 'افق پیش‌بینی (h)',
+    valColSampleN: 'حجم نمونه (N)',
+    valColRankIc: 'ضریب اطلاعات رتبه‌ای اسپیرمن (آماره t)',
+    valColIcIr: 'نسبت اطلاعاتی (ICIR)',
+    valColHitRate: 'نرخ اصابت جهتی',
+    valColPayoff: 'عدم تقارن بازده (برد/باخت)',
+    valColSweepPrRcF1: 'عملکرد طبقه‌بند جاروب (دقت / بازیابی / F1)',
+    valColBrier: 'امتیاز برایر (Brier)',
+    valVolRegimeTitle: 'تفکیک رژیم الف · نوسان‌پذیری شرطی GARCH(1,1) (در افق h=5)',
+    valMacroRegimeTitle: 'تفکیک رژیم ب · فشار کلان بازده واقعی و دلار (در افق h=5)',
   }
 };
 
@@ -3709,7 +3822,7 @@ document.getElementById('langBtn').addEventListener('click', () => {
 // ==========================================================
 // Progressive Web App (PWA) Self-Updating Engine & ServiceWorker
 // ==========================================================
-const CLIENT_APP_VERSION = '2026.10.23-v72.0-Phase4-ConfidenceMetrics';
+const CLIENT_APP_VERSION = '2026.10.24-v73.0-Phase5-ValidationLayer';
 let swRegistration = null;
 let isUpdating = false;
 
@@ -3832,6 +3945,8 @@ async function checkServerBuildVersion(interactive = false) {
   try {
     const res = await fetch(`/api/app-version?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return;
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (!ct.includes('application/json') && !ct.includes('text/json')) return;
     const data = await res.json();
     if (data && data.version) {
       if (data.version !== CLIENT_APP_VERSION) {
@@ -5355,7 +5470,18 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     clearTimeout(timeoutId);
 
     if (!res.ok && res.status !== 503) throw new Error('API HTTP ' + res.status);
-    const data = await res.json();
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    if (!contentType.includes('application/json') && !contentType.includes('text/json')) {
+      console.warn(`[GDF Circuit Breaker] Non-JSON Content-Type received from /api/gold-forecast: status=${res.status}, content-type=${contentType || 'none'}`);
+      throw new Error(`Upstream non-JSON response (HTTP ${res.status})`);
+    }
+    const rawText = await res.text();
+    const trimmedBody = rawText.trim();
+    if (trimmedBody.startsWith('<') || trimmedBody.toLowerCase().startsWith('<!doctype')) {
+      console.warn(`[GDF Circuit Breaker] HTML error page received instead of JSON from /api/gold-forecast: status=${res.status}`);
+      throw new Error(`Upstream gateway returned HTML page (HTTP ${res.status})`);
+    }
+    const data = JSON.parse(trimmedBody);
 
     if (reqId !== latestQuantReqId || targetInterval !== currentTimeframe) return;
 
@@ -5366,6 +5492,12 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
       const atmLabel = document.getElementById('atmStateLabel');
       const atmSub = document.getElementById('atmSubLabel');
       const pulse = document.getElementById('statusPulse');
+      const cleanSubEn = window.GDFClientCore?.sanitizeClientHaltMessage
+        ? window.GDFClientCore.sanitizeClientHaltMessage(data.haltReasonEn, 'en')
+        : 'All live market providers unreachable · Filter mutations frozen · Zero synthetic data generated';
+      const cleanSubFa = window.GDFClientCore?.sanitizeClientHaltMessage
+        ? window.GDFClientCore.sanitizeClientHaltMessage(data.haltReasonFa, 'fa')
+        : 'منابع داده زنده در دسترس نیستند · ماتریس کوواریانس و ساعت حجمی متوقف شدند · بدون داده مصنوعی';
       if (atmLabel) {
         atmLabel.textContent = currentLang === 'fa'
           ? 'توقف اضطراری (HALTED_DEGRADED) — قطعی منابع داده زنده'
@@ -5373,15 +5505,14 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
         atmLabel.style.color = '#ff1744';
       }
       if (atmSub) {
-        atmSub.textContent = currentLang === 'fa'
-          ? (data.haltReasonFa || 'ماتریس کوواریانس و ساعت حجمی متوقف شدند · بدون داده مصنوعی')
-          : (data.haltReasonEn || 'Filter mutations frozen · Zero synthetic fallback permitted');
+        atmSub.textContent = currentLang === 'fa' ? cleanSubFa : cleanSubEn;
       }
       if (pulse) {
         pulse.style.background = '#ff1744';
         pulse.style.boxShadow = '0 0 12px #ff1744';
       }
       if (data.dataReliability) updateDataReliabilityUI(data.dataReliability);
+      if (data.validationScorecard) renderValidationScorecard(data.validationScorecard);
       renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
       return;
     }
@@ -5403,13 +5534,18 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     const errDesc = (err && err.message) ? err.message : (abortReason || 'Timeout');
     console.warn('[GDF Circuit Breaker] Live API unreachable. Halting mutations without synthetic fallback:', errDesc);
 
+    const cleanHaltEn =
+      'All live external market feeds are temporarily unreachable. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data generated.';
+    const cleanHaltFa =
+      'ارتباط با منابع داده زنده بازار موقتاً برقرار نشد. به‌روزرسانی فیلتر کالمن (EKF)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
+
     const haltedState = {
       status: 'HALTED_DEGRADED',
       systemState: 'HALTED_DEGRADED',
       isHalted: true,
       isSynthetic: false,
-      haltReasonEn: `NETWORK / UPSTREAM CIRCUIT BREAKER TRIPPED (${errDesc}). Filter mutations frozen. Zero synthetic data generated.`,
-      haltReasonFa: `مدار محافظتی شبکه فعال شد (${errDesc}). به‌روزرسانی فیلترها متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.`,
+      haltReasonEn: cleanHaltEn,
+      haltReasonFa: cleanHaltFa,
     };
     updateCircuitBreakerBanner(haltedState);
 
@@ -5947,6 +6083,162 @@ function renderHUD(d) {
 
   if (d.dataReliability) {
     updateDataReliabilityUI(d.dataReliability);
+  }
+
+  if (d.validationScorecard) {
+    renderValidationScorecard(d.validationScorecard);
+  }
+}
+
+// Phase 5: Causal Walk-Forward Validation & Attribution Scorecard Renderer
+function renderValidationScorecard(sc) {
+  if (!sc) return;
+  const isFa = currentLang === 'fa';
+
+  const headerPill = document.getElementById('valScorecardHeaderPill');
+  if (headerPill) {
+    headerPill.textContent = isFa
+      ? (sc.summaryBadgeFa || `نمونه N=${sc.effectiveSampleSizeN}`)
+      : (sc.summaryBadgeEn || `OOS N=${sc.effectiveSampleSizeN}`);
+  }
+
+  const sampleBadge = document.getElementById('valSampleBadge');
+  if (sampleBadge) {
+    sampleBadge.textContent = isFa
+      ? `نمونه خارج از نمونه N = ${sc.effectiveSampleSizeN} (ذخیره‌شده: ${sc.persistedSnapshotsCount || sc.effectiveSampleSizeN})`
+      : `OOS Sample N = ${sc.effectiveSampleSizeN} (Persisted: ${sc.persistedSnapshotsCount || sc.effectiveSampleSizeN})`;
+  }
+
+  const causalityBadge = document.getElementById('valCausalityBadge');
+  if (causalityBadge) {
+    causalityBadge.textContent = isFa
+      ? '✓ علّی و بدون آینده‌نگری (صرفاً کندل‌های ≤ t)'
+      : '✓ Zero-Lookahead Causal Prefix (≤ t)';
+  }
+
+  const volRegEl = document.getElementById('valCurrentVolRegime');
+  if (volRegEl) {
+    volRegEl.textContent = isFa
+      ? (sc.currentVolatilityRegimeLabelFa || sc.currentVolatilityRegime)
+      : (sc.currentVolatilityRegimeLabelEn || sc.currentVolatilityRegime);
+    volRegEl.style.color = sc.currentVolatilityRegime === 'HIGH_VOL_GARCH' ? 'var(--amber)' : 'var(--green)';
+  }
+
+  const macroRegEl = document.getElementById('valCurrentMacroRegime');
+  if (macroRegEl) {
+    macroRegEl.textContent = isFa
+      ? (sc.currentMacroRegimeLabelFa || sc.currentMacroRegime)
+      : (sc.currentMacroRegimeLabelEn || sc.currentMacroRegime);
+    macroRegEl.style.color = sc.currentMacroRegime === 'EXPANDING_MACRO_PRESSURE' ? 'var(--cyan)' : 'var(--red)';
+  }
+
+  const tbody = document.getElementById('valHorizonsTableBody');
+  if (tbody && Array.isArray(sc.horizons)) {
+    tbody.innerHTML = '';
+    sc.horizons.forEach(hm => {
+      const tr = document.createElement('tr');
+      const hLabel = isFa ? hm.horizonLabelFa : hm.horizonLabelEn;
+      const isWarmup = hm.status === 'INSUFFICIENT_WARMUP' || hm.spearmanRankIc === null;
+
+      if (isWarmup) {
+        tr.innerHTML = `
+          <td style="font-weight: 800; color: #fff;">${hLabel}</td>
+          <td style="font-family: monospace; color: var(--muted);">N=${hm.sampleSizeN}</td>
+          <td colspan="6" style="font-family: monospace; color: var(--amber);">
+            ${isFa ? 'در حال تکمیل پنجره نمونه خارج از نمونه (نیازمند حداقل ۵ کندل تحقق‌یافته)' : 'Accumulating realized forward bars (requires N ≥ 5 realized horizons)'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      const icSign = hm.spearmanRankIc >= 0 ? '+' : '';
+      const icColor = hm.spearmanRankIc >= 0.05 ? 'var(--green)' : hm.spearmanRankIc <= -0.05 ? 'var(--red)' : 'var(--cyan)';
+      const tStatStr = hm.rankIcTStat !== null ? `${hm.rankIcTStat >= 0 ? '+' : ''}${hm.rankIcTStat.toFixed(2)}` : '0.00';
+      const icIrStr = hm.icIr !== null ? `${hm.icIr >= 0 ? '+' : ''}${hm.icIr.toFixed(2)}` : '0.00';
+      const hitStr = hm.directionalHitRate !== null ? `${(hm.directionalHitRate * 100).toFixed(1)}%` : 'N/A';
+      const hitColor = (hm.directionalHitRate || 0) >= 0.52 ? 'var(--green)' : (hm.directionalHitRate || 0) < 0.48 ? 'var(--amber)' : '#fff';
+      const payoffStr = hm.payoffAsymmetryRatio !== null
+        ? `${hm.payoffAsymmetryRatio.toFixed(2)}x (+${(hm.meanWinReturnBps || 0).toFixed(1)}/-${(hm.meanLossReturnBps || 0).toFixed(1)} bps)`
+        : 'N/A';
+      const prStr = hm.sweepPrecision !== null ? (hm.sweepPrecision * 100).toFixed(0) + '%' : '--';
+      const rcStr = hm.sweepRecall !== null ? (hm.sweepRecall * 100).toFixed(0) + '%' : '--';
+      const f1Str = hm.sweepF1Score !== null ? hm.sweepF1Score.toFixed(2) : '--';
+      const brierStr = hm.sweepBrierScore !== null ? hm.sweepBrierScore.toFixed(3) : '--';
+      const nStatusTag = hm.status === 'CALIBRATED_ACTIVE'
+        ? `<span style="color:var(--green);font-size:9px;">● ACTIVE</span>`
+        : `<span style="color:var(--amber);font-size:9px;">● PROVISIONAL</span>`;
+
+      tr.innerHTML = `
+        <td style="font-weight: 800; color: #fff;">${hLabel}</td>
+        <td style="font-family: monospace; color: #d1dced;">N=${hm.sampleSizeN} ${nStatusTag}</td>
+        <td style="font-family: monospace; font-weight: 700; color: ${icColor};">${icSign}${hm.spearmanRankIc.toFixed(3)} <span style="color: var(--muted); font-size: 10px;">(t=${tStatStr})</span></td>
+        <td style="font-family: monospace; color: var(--cyan); font-weight: 700;">${icIrStr}</td>
+        <td style="font-family: monospace; font-weight: 700; color: ${hitColor};">${hitStr}</td>
+        <td style="font-family: monospace; color: var(--gold);">${payoffStr}</td>
+        <td style="font-family: monospace; color: #e3ecfa;">P:${prStr} / R:${rcStr} / <b>F1:${f1Str}</b></td>
+        <td style="font-family: monospace; color: var(--cyan);">${brierStr}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderRegimeCardRow(rm, isActiveRegime) {
+    if (!rm) return '';
+    const title = isFa ? rm.regimeLabelFa : rm.regimeLabelEn;
+    const icStr = rm.spearmanRankIcH5 !== null ? `${rm.spearmanRankIcH5 >= 0 ? '+' : ''}${rm.spearmanRankIcH5.toFixed(3)}` : 'N/A';
+    const icIrStr = rm.icIrH5 !== null ? `${rm.icIrH5 >= 0 ? '+' : ''}${rm.icIrH5.toFixed(2)}` : 'N/A';
+    const hitStr = rm.directionalHitRateH5 !== null ? `${(rm.directionalHitRateH5 * 100).toFixed(1)}%` : 'N/A';
+    const asymStr = rm.payoffAsymmetryH5 !== null ? `${rm.payoffAsymmetryH5.toFixed(2)}x` : 'N/A';
+    const f1Str = rm.sweepF1ScoreH5 !== null ? rm.sweepF1ScoreH5.toFixed(2) : 'N/A';
+    const brierStr = rm.sweepBrierScoreH5 !== null ? rm.sweepBrierScoreH5.toFixed(3) : 'N/A';
+    const borderCol = isActiveRegime ? 'rgba(0, 230, 118, 0.5)' : 'rgba(40, 60, 95, 0.45)';
+    const activeBadge = isActiveRegime
+      ? `<span style="font-size:9px;font-weight:800;color:#00e676;background:rgba(0,230,118,0.12);padding:2px 6px;border-radius:4px;border:1px solid rgba(0,230,118,0.35);">${isFa ? 'رژیم فعال' : 'ACTIVE REGIME'}</span>`
+      : '';
+
+    return `
+      <div style="background: rgba(13, 21, 36, 0.9); border: 1px solid ${borderCol}; border-radius: 8px; padding: 9px 11px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 5px;">
+          <span style="font-weight: 700; color: #fff; font-size: 11px;">${title}</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            ${activeBadge}
+            <span style="font-family: monospace; font-size: 10px; color: var(--muted);">N=${rm.sampleSizeN}</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-family: monospace; font-size: 10.5px; color: #9cb0cc;">
+          <div>Rank-IC: <b style="color:var(--cyan);">${icStr}</b> (IR ${icIrStr})</div>
+          <div>Hit: <b style="color:var(--green);">${hitStr}</b> · Asym: <b style="color:var(--gold);">${asymStr}</b></div>
+          <div>Sweep F1: <b style="color:#fff;">${f1Str}</b> · Brier: <b>${brierStr}</b></div>
+        </div>
+      </div>
+    `;
+  }
+
+  const volBody = document.getElementById('valVolRegimePartitionBody');
+  if (volBody && sc.volatilityRegimePartitions) {
+    volBody.innerHTML =
+      renderRegimeCardRow(
+        sc.volatilityRegimePartitions.HIGH_VOL_GARCH,
+        sc.currentVolatilityRegime === 'HIGH_VOL_GARCH'
+      ) +
+      renderRegimeCardRow(
+        sc.volatilityRegimePartitions.LOW_VOL_GARCH,
+        sc.currentVolatilityRegime === 'LOW_VOL_GARCH'
+      );
+  }
+
+  const macroBody = document.getElementById('valMacroRegimePartitionBody');
+  if (macroBody && sc.macroRegimePartitions) {
+    macroBody.innerHTML =
+      renderRegimeCardRow(
+        sc.macroRegimePartitions.EXPANDING_MACRO_PRESSURE,
+        sc.currentMacroRegime === 'EXPANDING_MACRO_PRESSURE'
+      ) +
+      renderRegimeCardRow(
+        sc.macroRegimePartitions.CONTRACTING_MACRO_PRESSURE,
+        sc.currentMacroRegime === 'CONTRACTING_MACRO_PRESSURE'
+      );
   }
 }
 
@@ -7780,6 +8072,10 @@ document.getElementById('diagBtn').addEventListener('click', async () => {
   body.textContent = currentLang === 'fa' ? 'در حال استخراج تله‌متری زنده ناظر DP...' : 'Generating real-time DP Observer telemetry...';
   try {
     const res = await fetch('/api/diagnosis');
+    const ct = (res.headers.get('content-type') || '').toLowerCase();
+    if (!res.ok || (!ct.includes('application/json') && !ct.includes('text/json'))) {
+      throw new Error(`Non-JSON response (${res.status})`);
+    }
     const data = await res.json();
     body.textContent = data.report || 'Telemetry synchronized.';
   } catch (e) {

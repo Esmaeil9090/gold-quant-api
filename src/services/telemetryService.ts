@@ -13,6 +13,8 @@ import type {
   VpinTelemetry,
 } from '../contracts/quantContracts.js';
 import { AdaptiveDPObserver, computeOrthogonalMacroFactors } from '../engine/quantEngine.js';
+import { sanitizeUserFacingHaltReason } from './realDataWaterfall.js';
+import { getLatestValidationScorecard } from './walkForwardValidationService.js';
 
 /**
  * Validation & Telemetry Service (Layer 3)
@@ -367,8 +369,8 @@ export function buildHaltedDegradedForecastPayload(params: {
     isSynthetic: false,
     activeTier: 'NONE_HALTED',
     activeProvider: waterfall.activeProvider,
-    haltReasonEn: waterfall.haltReasonEn,
-    haltReasonFa: waterfall.haltReasonFa,
+    haltReasonEn: sanitizeUserFacingHaltReason(waterfall.haltReasonEn, 'en'),
+    haltReasonFa: sanitizeUserFacingHaltReason(waterfall.haltReasonFa, 'fa'),
     providerDiagnostics: waterfall.diagnostics,
     version: appVersion,
     timestamp: Math.floor(Date.now() / 1000),
@@ -470,6 +472,7 @@ export function buildHaltedDegradedForecastPayload(params: {
     macroNewsStatus: realNewsFeed,
     candles: cachedData?.candles || [],
     dataReliability: haltedReliability,
+    validationScorecard: cachedData?.validationScorecard || getLatestValidationScorecard(interval),
   };
 }
 
