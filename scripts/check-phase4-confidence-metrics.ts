@@ -158,14 +158,14 @@ function runPhase4ConfidenceCheck() {
   if (!sw || sw.percentileRank < 5 || sw.percentileRank > 95 || !(sw.standardError > 0)) {
     throw new Error('INVALID_SWEEP_PRESSURE_GAUGE');
   }
-  for (const row of quantOut.multiTimeframeMatrix) {
+  for (const row of quantOut.multiTimeframe.matrix) {
     const rdp = row.directionalPressure;
     if (!rdp || rdp.percentileRank < 5 || rdp.percentileRank > 95 || !(rdp.standardError > 0)) {
       throw new Error(`INVALID_MTF_DIRECTIONAL_PRESSURE on ${row.timeframe}`);
     }
   }
   console.log(
-    `[PASS] Sweep & MTF Empirical Gauges | Sweep L_t Z=${sw.logOddsZScore.toFixed(2)}σ (${sw.percentileLabel}, ±${sw.standardError.toFixed(2)}σ SE) | MTF Horizons=${quantOut.multiTimeframeMatrix.length} verified`
+    `[PASS] Sweep & MTF Empirical Gauges | Sweep L_t Z=${sw.logOddsZScore.toFixed(2)}σ (${sw.percentileLabel}, ±${sw.standardError.toFixed(2)}σ SE) | MTF Horizons=${quantOut.multiTimeframe.matrix.length} verified`
   );
 
   // Verify Feed Integrity Score on Real Waterfall Telemetry
@@ -218,7 +218,7 @@ function runPhase4ConfidenceCheck() {
     mockWaterfall,
     observer,
     quantOut.vpinTelemetry,
-    quantOut.pcaMacroFactors,
+    quantOut.pcaFactors,
     liveMacro,
     quantOut.cointegrationBasis,
     mockNews,
