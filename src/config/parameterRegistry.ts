@@ -154,7 +154,14 @@ export function computeEmpiricalQuantilePlumes(
   realReturns: number[],
   nSteps = 24,
   stepSeconds = 900,
-  anchorTimestampSec?: number
+  anchorTimestampSec?: number,
+  liquidityFusion?: {
+    fusedEquilibriumPrice: number;
+    fusedNetDriftUsdPerStep: number;
+    liquidityVolatilityMultiplier: number;
+    nearestUpperHvn?: number;
+    nearestLowerHvn?: number;
+  }
 ): {
   medianTrack: { time: number; value: number }[];
   upper95: { time: number; value: number }[];
@@ -187,17 +194,29 @@ export function computeEmpiricalQuantilePlumes(
   const lower25: { time: number; value: number }[] = [];
   const lower05: { time: number; value: number }[] = [];
 
+  const effectiveEq = liquidityFusion ? liquidityFusion.fusedEquilibriumPrice : equilibriumPrice;
+  const fusedDriftStep = liquidityFusion ? liquidityFusion.fusedNetDriftUsdPerStep : 0;
+  const volMult = liquidityFusion ? Math.max(0.65, Math.min(1.45, liquidityFusion.liquidityVolatilityMultiplier)) : 1.0;
+
   let pMed = currentPrice;
   let cumVar = 0;
 
   for (let step = 0; step < nSteps; step++) {
     const t = nowSec + (step + 1) * stepSeconds;
-    const stepVol = garchForecast[Math.min(step, garchForecast.length - 1)] || stdRet;
+    const stepVol = (garchForecast[Math.min(step, garchForecast.length - 1)] || stdRet) * volMult;
     cumVar += Math.pow(currentPrice * stepVol, 2);
     const horizonSigmaUsd = Math.sqrt(cumVar);
 
-    const mrStep = thetaMeanReversion * (equilibriumPrice - pMed);
-    pMed = pMed + mrStep;
+    const decayFactor = Math.exp(-0.08 * step);
+    const mrStep = thetaMeanReversion * (effectiveEq - pMed);
+    let nextP = pMed + mrStep + fusedDriftStep * decayFactor;
+
+    if (liquidityFusion?.nearestUpperHvn && nextP > pMed && nextP >= liquidityFusion.nearestUpperHvn) {
+      nextP = liquidityFusion.nearestUpperHvn + (nextP - liquidityFusion.nearestUpperHvn) * 0.55;
+    } else if (liquidityFusion?.nearestLowerHvn && nextP < pMed && nextP <= liquidityFusion.nearestLowerHvn) {
+      nextP = liquidityFusion.nearestLowerHvn + (nextP - liquidityFusion.nearestLowerHvn) * 0.55;
+    }
+    pMed = nextP;
 
     medianTrack.push({ time: t, value: parseFloat((pMed + q50Z * horizonSigmaUsd * 0.25).toFixed(2)) });
     upper95.push({ time: t, value: parseFloat((pMed + Math.max(1.2, q95Z) * horizonSigmaUsd).toFixed(2)) });

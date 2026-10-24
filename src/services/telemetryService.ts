@@ -46,14 +46,14 @@ export function computeDataReliability(
   // 1. Active Independent Provider Quorum Ratio
   const spotQuorumTotal = Math.max(3, waterfall.diagnostics.length);
   const spotQuorumActive = waterfall.diagnostics.filter(d => d.status === 'SUCCESS').length;
-  const macroTotal = 3; // Yahoo Finance Treasury/DXY, FRED CSV, Frankfurter FX
   const macroActive = liveMacro.respondingSources ? liveMacro.respondingSources.length : 0;
-  const newsTotal = 3; // Yahoo Finance Gold RSS, CNBC Market RSS, Investing Commodities RSS
+  const macroTotal = Math.max(4, macroActive); // Yahoo Treasury ^TNX, Yahoo DXY, FRED CSV, Frankfurter FX
   const newsActive = newsFeed.activeSources ? newsFeed.activeSources.length : 0;
+  const newsTotal = Math.max(3, newsActive); // Yahoo Finance Gold RSS, CNBC Market RSS, Investing Commodities RSS
 
   const activeProvidersCount = spotQuorumActive + macroActive + newsActive;
   const totalProvidersCount = spotQuorumTotal + macroTotal + newsTotal;
-  const quorumRatio = parseFloat((activeProvidersCount / Math.max(1, totalProvidersCount)).toFixed(4));
+  const quorumRatio = parseFloat(Math.min(1, activeProvidersCount / Math.max(1, totalProvidersCount)).toFixed(4));
   const quorumBadge = `${activeProvidersCount}/${totalProvidersCount} QUORUM`;
 
   // 2. Cross-Venue Price Dispersion (basis points = |P_primary - P_secondary| / P_primary * 10000)
@@ -248,14 +248,14 @@ export function computeDataReliability(
     gradeColor = '#ff1744';
   } else if (
     waterfall.systemState === 'DEGRADED_FALLBACK' ||
-    spotQuorumActive <= 1 && crossVenueDispersionBps === null ||
+    (spotQuorumActive <= 1 && crossVenueDispersionBps === null) ||
     stalenessStatus === 'STALE'
   ) {
     integrityState = 'SINGLE_SOURCE_DEGRADED';
     gradeLabel = `SINGLE-SOURCE / FALLBACK (${waterfall.activeTier} · ${activeProvidersCount}/${totalProvidersCount} QUORUM)`;
     gradeLabelFa = `وضعیت تک‌منبعی / جایگزین (${waterfall.activeTier} · حد نصاب ${activeProvidersCount}/${totalProvidersCount})`;
     gradeColor = '#ffab00';
-  } else if (spotQuorumActive < spotQuorumTotal || macroActive < 2 || sequenceCompletenessRatio < 1.0) {
+  } else if (spotQuorumActive < 2 || macroActive < 1 || sequenceCompletenessRatio < 0.95) {
     integrityState = 'PARTIAL_QUORUM';
     gradeLabel = `PARTIAL QUORUM (${activeProvidersCount}/${totalProvidersCount} ACTIVE · SEQ ${(sequenceCompletenessRatio * 100).toFixed(0)}%)`;
     gradeLabelFa = `حد نصاب جزئی (${activeProvidersCount}/${totalProvidersCount} منبع · پیوستگی ${(sequenceCompletenessRatio * 100).toFixed(0)}٪)`;
@@ -420,8 +420,34 @@ export function buildHaltedDegradedForecastPayload(params: {
       absorptionRatio: 0,
       hawkesIntensity: 0,
       macroDivergenceScore: 0,
-      tacticalAction: 'SYSTEM HALTED — DO NOT EXECUTE ON UNVERIFIED FEEDS',
-      tacticalActionFa: 'سیستم متوقف شده — عدم اجرای معاملات در زمان قطعی داده زنده',
+      tacticalAction: 'HALTED_DEGRADED STATE — UPSTREAM FEEDS UNREACHABLE (ESTIMATORS FROZEN)',
+      tacticalActionFa: 'وضعیت توقف کامل — عدم دسترسی به منابع داده زنده (فیلترها متوقف شدند)',
+    },
+    liquidityEngine: cachedData?.liquidityEngine || {
+      hierarchyOrder: ['MONTHLY', 'WEEKLY', 'DAILY', '4H', '1H', 'INTRADAY_15M_5M'],
+      topDownPools: [],
+      compositeHtfPocAnchor: lastKnownEq,
+      nearestUpperHvn: lastKnownPrice,
+      nearestLowerHvn: lastKnownPrice,
+      interactionState: 'HALTED_FREEZE',
+      interactionLabelEn: 'HALTED_DEGRADED STATE — LIQUIDITY ENGINE FROZEN',
+      interactionLabelFa: 'توقف کامل — موتور نقدینگی چندتایم‌فریمی متوقف شد',
+      absorptionInitiationClass: 'HALTED_FREEZE',
+      absorptionInitiationLabelEn: 'HALTED_FREEZE (NO LIVE FLOW)',
+      absorptionInitiationLabelFa: 'توقف کامل (بدون جریان زنده)',
+      absorptionScoreZ: 0,
+      initiationMomentumZ: 0,
+      liquidityPullDriftUsd: 0,
+      fusionWeights: {
+        ouMeanReversionWeight: 0.24,
+        kalmanDriftWeight: 0.24,
+        macroFactorWeight: 0.18,
+        sweepMicrostructureWeight: 0.12,
+        mtfLiquidityWeight: 0.22,
+      },
+      fusedNetDriftUsd: 0,
+      fusedEquilibriumAnchor: lastKnownEq,
+      epistemicClass: 'QUALIFIED_PROXY',
     },
     morseManifold: cachedData?.morseManifold || {
       wellDepthDe: 0,

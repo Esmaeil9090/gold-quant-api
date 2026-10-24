@@ -5,6 +5,7 @@ import {
   fitEmpiricalGarch11,
 } from '../config/parameterRegistry.js';
 import type {
+  AbsorptionInitiationClass,
   Candle,
   CointegrationBasis,
   ConvergencePoint,
@@ -12,15 +13,20 @@ import type {
   EmpiricalCalibrationScore,
   FilterInnovationConsistency,
   InnovationConsistencyState,
+  IntegratedLiquidityEngineTelemetry,
   IsobarLevel,
+  LiquidityInteractionState,
+  LiquidityTimeframeTier,
   MorseManifoldTelemetry,
   MultiTimeframeRegime,
   ObserverTelemetryPayload,
   PcaMacroFactors,
+  ProportionalFusionWeights,
   SweepDiscriminatorTelemetry,
   VectorPoint,
   VerifiedMacroYieldResult,
   VolumeClockTelemetry,
+  VolumeProfilePoolNode,
   VpinBaseResult,
   VpinTelemetry,
 } from '../contracts/quantContracts.js';
@@ -766,17 +772,17 @@ export function computeLogOddsSweepDiscriminator(
   const distGauge = computeEmpiricalDistributionGauge(historicalLogOdds, logOddsScore);
 
   let classification: SweepDiscriminatorTelemetry['classification'] = 'LAMINAR_AUCTION';
-  let tacticalAction = 'HOLD MACRO TRAJECTORY · NORMAL AUCTION';
-  let tacticalActionFa = 'حفظ مسیر کلان · جریان عادی بازار';
+  let tacticalAction = 'BALANCED AUCTION REGIME · MEAN-REVERTING MICROSTRUCTURE';
+  let tacticalActionFa = 'رژیم حراج متوازن · ریزساختار بازگشت به میانگین';
 
   if (logOddsScore >= logOddsClassificationThreshold) {
     classification = 'DEALER_STOP_SWEEP';
-    tacticalAction = 'ABSORB STOP-SWEEP DIP · DO NOT EXIT MACRO BIAS';
-    tacticalActionFa = 'جذب استاپ‌هانت دیلرها · عدم خروج از روند کلان';
+    tacticalAction = 'ELEVATED WICK-VOLUME REJECTION · TRANSIENT LIQUIDITY SWEEP STATE';
+    tacticalActionFa = 'رد شدو-حجم بالا · وضعیت گذرای جاروب نقدینگی';
   } else if (logOddsScore <= -logOddsClassificationThreshold) {
     classification = 'TRUE_STRUCTURAL_BREAKOUT';
-    tacticalAction = 'TRUE STRUCTURAL BREAKOUT · ALIGN WITH MOMENTUM';
-    tacticalActionFa = 'شکست ساختاری حقیقی · هم‌جهت با مومنتوم نهادی';
+    tacticalAction = 'DIRECTIONAL MOMENTUM EXPANSION · STRUCTURAL BREAKOUT STATE';
+    tacticalActionFa = 'انبساط مومنتوم جهتی · وضعیت شکست ساختاری قیمت';
   }
 
   return {
@@ -859,8 +865,8 @@ export function computeMultiTimeframeMatrix(
   baseVolPct: number
 ): { matrix: MultiTimeframeRegime[]; confluenceSummary: string; confluenceScore: number } {
   const configs = [
-    { tf: '5m', label: 'M5 · Micro Scalp', horizon: '15m - 45m', windowBars: 8, scale: 0.75 },
-    { tf: '15m', label: 'M15 · Tactical Core', horizon: '1h - 3h', windowBars: 20, scale: 1.0 },
+    { tf: '5m', label: 'M5 · Short-Horizon', horizon: '15m - 45m', windowBars: 8, scale: 0.75 },
+    { tf: '15m', label: 'M15 · Intraday Core', horizon: '1h - 3h', windowBars: 20, scale: 1.0 },
     { tf: '1h', label: 'H1 · Hydrodynamic', horizon: '6h - 18h', windowBars: 60, scale: 1.35 },
     { tf: '4h', label: 'H4 · Synoptic Front', horizon: '24h - 48h', windowBars: 140, scale: 1.85 },
     { tf: '1d', label: 'D1 · Macro Gravity', horizon: '3d - 14d', windowBars: 280, scale: 2.5 },
@@ -906,28 +912,28 @@ export function computeMultiTimeframeMatrix(
 
     let state = 'LAMINAR UPWARD FLOW';
     let stateKey: 'laminar' | 'squall' | 'cyclonic' | 'calm' = 'laminar';
-    let actionBias = 'ACCUMULATE DIP';
+    let actionBias = 'POSITIVE DRIFT DOMINANCE';
     let actionColor = '#00e676';
 
     if (empVolPct > 0.58) {
       state = 'SQUALL / TURBULENCE FRONT';
       stateKey = 'squall';
-      actionBias = 'DEFENSIVE HEDGE';
+      actionBias = 'HIGH-VARIANCE DISPERSION STATE';
       actionColor = '#ff4081';
     } else if (netVelocity < -0.25) {
       state = 'CYCLONIC DOWNWARD DRAFT';
       stateKey = 'cyclonic';
-      actionBias = 'REDUCE EXPOSURE';
+      actionBias = 'NEGATIVE DRIFT DOMINANCE';
       actionColor = '#ff3d5a';
     } else if (Math.abs(netVelocity) < 0.12) {
       state = 'DEAD CALM (RANGE COMPRESSION)';
       stateKey = 'calm';
-      actionBias = 'RANGE HARVESTING';
+      actionBias = 'NEUTRAL EQUILIBRIUM COMPRESSION';
       actionColor = '#ffab00';
     } else {
       state = 'LAMINAR UPWARD FLOW';
       stateKey = 'laminar';
-      actionBias = 'AGGRESSIVE LONG';
+      actionBias = 'POSITIVE DRIFT DOMINANCE';
       actionColor = '#00e676';
       laminarCount++;
     }
@@ -1033,6 +1039,397 @@ export function computeIsobars(currentPrice: number, atr: number, equilibrium: n
   ];
 }
 
+function aggregateCandlesByFactor(candles: Candle[], factor: number): Candle[] {
+  if (factor <= 1 || candles.length === 0) return candles;
+  const result: Candle[] = [];
+  for (let i = 0; i < candles.length; i += factor) {
+    const chunk = candles.slice(i, i + factor);
+    if (chunk.length === 0) continue;
+    let high = chunk[0].high;
+    let low = chunk[0].low;
+    let vol = 0;
+    for (const c of chunk) {
+      if (c.high > high) high = c.high;
+      if (c.low < low) low = c.low;
+      vol += c.volume;
+    }
+    result.push({
+      time: chunk[chunk.length - 1].time,
+      open: chunk[0].open,
+      high,
+      low,
+      close: chunk[chunk.length - 1].close,
+      volume: vol,
+    });
+  }
+  return result;
+}
+
+/**
+ * Pure Kernel-Smoothed Multi-Timeframe Volume Profile Estimator (QUALIFIED_PROXY)
+ * Computes POC, 70% Value Area (VAH/VAL), High-Volume Nodes (HVNs), and Low-Volume Nodes (LVNs)
+ * strictly from verified real historical OHLCV bars.
+ */
+export function computeVolumeProfilePoolNode(
+  candles: Candle[],
+  timeframe: LiquidityTimeframeTier,
+  labelEn: string,
+  labelFa: string,
+  hierarchyWeight: number,
+  currentPrice: number,
+  atr: number
+): VolumeProfilePoolNode {
+  const safeCandles = candles.length > 0 ? candles : [{ time: 0, open: currentPrice, high: currentPrice + 1, low: currentPrice - 1, close: currentPrice, volume: 1 }];
+  let minLow = Infinity;
+  let maxHigh = -Infinity;
+  let totalVol = 0;
+  for (const c of safeCandles) {
+    if (c.low < minLow) minLow = c.low;
+    if (c.high > maxHigh) maxHigh = c.high;
+    totalVol += Math.max(1e-6, c.volume);
+  }
+  const range = Math.max(0.5, maxHigh - minLow);
+  const numBins = 24;
+  const binSize = range / numBins;
+  const rawBins = new Array<number>(numBins).fill(0);
+
+  for (const c of safeCandles) {
+    const cLow = c.low;
+    const cHigh = Math.max(c.low + 0.01, c.high);
+    const vol = Math.max(1e-6, c.volume);
+    const startBin = Math.max(0, Math.min(numBins - 1, Math.floor((cLow - minLow) / binSize)));
+    const endBin = Math.max(0, Math.min(numBins - 1, Math.floor((cHigh - minLow) / binSize)));
+    const spanBins = Math.max(1, endBin - startBin + 1);
+    const volPerBin = vol / spanBins;
+    for (let b = startBin; b <= endBin; b++) {
+      rawBins[b] += volPerBin;
+    }
+  }
+
+  // 3-point Gaussian-like kernel smoothing across adjacent bins
+  const bins = rawBins.map((v, idx) => {
+    const prev = idx > 0 ? rawBins[idx - 1] : v;
+    const next = idx < numBins - 1 ? rawBins[idx + 1] : v;
+    return 0.25 * prev + 0.50 * v + 0.25 * next;
+  });
+
+  const smoothTotal = bins.reduce((a, b) => a + b, 0) || 1;
+  let pocBin = 0;
+  let maxBinVol = -1;
+  for (let i = 0; i < numBins; i++) {
+    if (bins[i] > maxBinVol) {
+      maxBinVol = bins[i];
+      pocBin = i;
+    }
+  }
+
+  const pocPrice = parseFloat((minLow + (pocBin + 0.5) * binSize).toFixed(2));
+  const pocVolumeShare = parseFloat((bins[pocBin] / smoothTotal).toFixed(4));
+
+  // 70% Value Area expansion around POC
+  let vaVol = bins[pocBin];
+  let lowIdx = pocBin;
+  let highIdx = pocBin;
+  const targetVaVol = 0.70 * smoothTotal;
+
+  while (vaVol < targetVaVol && (lowIdx > 0 || highIdx < numBins - 1)) {
+    const nextLowVol = lowIdx > 0 ? bins[lowIdx - 1] : -1;
+    const nextHighVol = highIdx < numBins - 1 ? bins[highIdx + 1] : -1;
+    if (nextHighVol >= nextLowVol && highIdx < numBins - 1) {
+      highIdx++;
+      vaVol += bins[highIdx];
+    } else if (lowIdx > 0) {
+      lowIdx--;
+      vaVol += bins[lowIdx];
+    } else if (highIdx < numBins - 1) {
+      highIdx++;
+      vaVol += bins[highIdx];
+    }
+  }
+
+  const valPrice = parseFloat((minLow + lowIdx * binSize).toFixed(2));
+  const vahPrice = parseFloat((minLow + (highIdx + 1) * binSize).toFixed(2));
+
+  // Identify local HVNs (local maxima) and LVNs (local minima)
+  const hvnCandidates: { price: number; vol: number }[] = [];
+  const lvnCandidates: { price: number; vol: number }[] = [];
+  const meanBinVol = smoothTotal / numBins;
+
+  for (let i = 1; i < numBins - 1; i++) {
+    const price = parseFloat((minLow + (i + 0.5) * binSize).toFixed(2));
+    if (bins[i] >= bins[i - 1] && bins[i] >= bins[i + 1] && bins[i] >= meanBinVol * 1.05) {
+      hvnCandidates.push({ price, vol: bins[i] });
+    }
+    if (bins[i] <= bins[i - 1] && bins[i] <= bins[i + 1] && bins[i] <= meanBinVol * 0.85) {
+      lvnCandidates.push({ price, vol: bins[i] });
+    }
+  }
+
+  if (hvnCandidates.length === 0) {
+    hvnCandidates.push({ price: pocPrice, vol: maxBinVol });
+  }
+  if (lvnCandidates.length === 0) {
+    let minBin = 0;
+    for (let i = 1; i < numBins; i++) {
+      if (bins[i] < bins[minBin]) minBin = i;
+    }
+    lvnCandidates.push({ price: parseFloat((minLow + (minBin + 0.5) * binSize).toFixed(2)), vol: bins[minBin] });
+  }
+
+  const hvnPrices = hvnCandidates
+    .sort((a, b) => b.vol - a.vol)
+    .slice(0, 3)
+    .map(x => x.price);
+  const lvnPrices = lvnCandidates
+    .sort((a, b) => a.vol - b.vol)
+    .slice(0, 3)
+    .map(x => x.price);
+
+  const safeAtr = Math.max(0.5, atr);
+  const distToPocAtr = parseFloat(((currentPrice - pocPrice) / safeAtr).toFixed(3));
+  let poolPullForceUsd = 0;
+  // If price is inside Value Area, POC exerts gentle stabilizing gravity; outside VA, LVN traversal or VAH/VAL pull dominates
+  if (currentPrice >= valPrice && currentPrice <= vahPrice) {
+    poolPullForceUsd = parseFloat(((pocPrice - currentPrice) * 0.16 * hierarchyWeight).toFixed(3));
+  } else {
+    const nearestEdge = currentPrice > vahPrice ? vahPrice : valPrice;
+    poolPullForceUsd = parseFloat(((nearestEdge - currentPrice) * 0.12 * hierarchyWeight).toFixed(3));
+  }
+
+  return {
+    timeframe,
+    labelEn,
+    labelFa,
+    hierarchyWeight,
+    barsSampled: safeCandles.length,
+    pocPrice,
+    vahPrice,
+    valPrice,
+    hvnPrices,
+    lvnPrices,
+    pocVolumeShare,
+    distToPocAtr,
+    poolPullForceUsd,
+  };
+}
+
+/**
+ * Integrated Top-Down Multi-Timeframe Liquidity Engine & Proportional State Fusion (QUALIFIED_PROXY)
+ * Strictly enforces Monthly -> Weekly -> Daily -> 4H -> 1H -> 15M/5M hierarchy.
+ */
+export function computeTopDownLiquidityEngine(params: {
+  intradayCandles: Candle[];
+  htfDailyCandles?: Candle[];
+  currentPrice: number;
+  equilibriumPrice: number;
+  atr: number;
+  intervalStepSeconds: number;
+  kalmanDriftVelocity: number;
+  shrunkBias: number;
+  orthogonalMacroLift: number;
+  sweepLogOdds: number;
+  vpinScore: number;
+}): IntegratedLiquidityEngineTelemetry {
+  const {
+    intradayCandles,
+    htfDailyCandles,
+    currentPrice,
+    equilibriumPrice,
+    atr,
+    intervalStepSeconds,
+    kalmanDriftVelocity,
+    shrunkBias,
+    orthogonalMacroLift,
+    sweepLogOdds,
+    vpinScore,
+  } = params;
+
+  const safeAtr = Math.max(0.5, atr);
+  const dailySource = htfDailyCandles && htfDailyCandles.length >= 20
+    ? htfDailyCandles
+    : aggregateCandlesByFactor(intradayCandles, Math.max(1, Math.round(86400 / Math.max(60, intervalStepSeconds))));
+
+  const monthlySlice = dailySource.slice(-Math.min(240, dailySource.length));
+  const weeklySlice = dailySource.slice(-Math.min(60, dailySource.length));
+  const dailySlice = dailySource.slice(-Math.min(20, dailySource.length));
+
+  const factor4h = Math.max(1, Math.round(14400 / Math.max(60, intervalStepSeconds)));
+  const factor1h = Math.max(1, Math.round(3600 / Math.max(60, intervalStepSeconds)));
+  const candles4h = intervalStepSeconds >= 14400
+    ? intradayCandles.slice(-60)
+    : aggregateCandlesByFactor(intradayCandles, factor4h).slice(-60);
+  const candles1h = intervalStepSeconds >= 3600
+    ? intradayCandles.slice(-80)
+    : aggregateCandlesByFactor(intradayCandles, factor1h).slice(-80);
+  const candlesIntraday = intradayCandles.slice(-Math.min(96, intradayCandles.length));
+
+  const topDownPools: VolumeProfilePoolNode[] = [
+    computeVolumeProfilePoolNode(monthlySlice, 'MONTHLY', 'Monthly Macro Structure Pool (HTF-M)', 'استخر نقدینگی ساختار ماهانه (HTF-M)', 0.28, currentPrice, safeAtr),
+    computeVolumeProfilePoolNode(weeklySlice, 'WEEKLY', 'Weekly Institutional Value Pool (HTF-W)', 'استخر ارزش نهادی هفتگی (HTF-W)', 0.22, currentPrice, safeAtr),
+    computeVolumeProfilePoolNode(dailySlice, 'DAILY', 'Daily Composite Auction Pool (HTF-D)', 'استخر حراج مرکب روزانه (HTF-D)', 0.18, currentPrice, safeAtr),
+    computeVolumeProfilePoolNode(candles4h, '4H', '4-Hour Intermediate Swing Pool (MTF-4H)', 'استخر نوسان میانی ۴ ساعته (MTF-4H)', 0.14, currentPrice, safeAtr),
+    computeVolumeProfilePoolNode(candles1h, '1H', '1-Hour Session Liquidity Pool (MTF-1H)', 'استخر نقدینگی نشست ۱ ساعته (MTF-1H)', 0.10, currentPrice, safeAtr),
+    computeVolumeProfilePoolNode(candlesIntraday, 'INTRADAY_15M_5M', 'Intraday Micro-Execution Pool (LTF-15M/5M)', 'استخر اجرای خرد درون‌روزی (LTF)', 0.08, currentPrice, safeAtr),
+  ];
+
+  // Top-Down Composite HTF Anchor (Monthly + Weekly + Daily carry 68% of hierarchy authority)
+  let compositeHtfPocAnchor = 0;
+  let weightSum = 0;
+  for (const pool of topDownPools) {
+    compositeHtfPocAnchor += pool.pocPrice * pool.hierarchyWeight;
+    weightSum += pool.hierarchyWeight;
+  }
+  compositeHtfPocAnchor = parseFloat((compositeHtfPocAnchor / Math.max(1e-6, weightSum)).toFixed(2));
+
+  // Collect all HTF HVNs (Monthly, Weekly, Daily, 4H) to find nearest upper and lower liquidity magnets
+  const htfHvns: number[] = [];
+  const htfLvns: number[] = [];
+  for (const pool of topDownPools.slice(0, 4)) {
+    for (const h of pool.hvnPrices) htfHvns.push(h);
+    for (const l of pool.lvnPrices) htfLvns.push(l);
+  }
+  const upperHvns = htfHvns.filter(p => p >= currentPrice).sort((a, b) => a - b);
+  const lowerHvns = htfHvns.filter(p => p < currentPrice).sort((a, b) => b - a);
+  const nearestUpperHvn = upperHvns.length > 0 ? upperHvns[0] : parseFloat((currentPrice + 1.8 * safeAtr).toFixed(2));
+  const nearestLowerHvn = lowerHvns.length > 0 ? lowerHvns[0] : parseFloat((currentPrice - 1.8 * safeAtr).toFixed(2));
+
+  // Absorption vs. Initiation Flow Discriminator over trailing 16 bars
+  const recent = intradayCandles.slice(-Math.min(16, intradayCandles.length));
+  const avgVol = recent.reduce((acc, c) => acc + Math.max(1e-6, c.volume), 0) / Math.max(1, recent.length);
+  let absorptionAccum = 0;
+  let initiationAccum = 0;
+
+  for (const c of recent.slice(-6)) {
+    const relVol = Math.max(1e-6, c.volume) / Math.max(1e-6, avgVol);
+    const range = Math.max(0.05, c.high - c.low);
+    const body = Math.abs(c.close - c.open);
+    const bodyRatio = body / range;
+    const upperWick = c.high - Math.max(c.open, c.close);
+    const lowerWick = Math.min(c.open, c.close) - c.low;
+    const wickDominance = (upperWick + lowerWick) / range;
+    const sign = c.close >= c.open ? 1 : -1;
+
+    // High volume with small body / heavy wick rejection at a pool edge = Absorption
+    absorptionAccum += relVol * wickDominance * (1 - 0.5 * bodyRatio) * (-sign);
+    // High volume with high body displacement = Directional Initiation
+    initiationAccum += relVol * bodyRatio * (range / safeAtr) * sign;
+  }
+
+  const absorptionScoreZ = parseFloat(Math.max(-3.5, Math.min(3.5, absorptionAccum / 2.2)).toFixed(3));
+  const initiationMomentumZ = parseFloat(Math.max(-3.5, Math.min(3.5, initiationAccum / 2.0)).toFixed(3));
+
+  let absorptionInitiationClass: AbsorptionInitiationClass = 'NEUTRAL_ROTATION';
+  let absorptionInitiationLabelEn = 'NEUTRAL VOLUME ROTATION (BALANCED TWO-SIDED FLOW)';
+  let absorptionInitiationLabelFa = 'چرخش حجمی خنثی (تعادل جریان دوسویه)';
+
+  if (Math.abs(absorptionScoreZ) > Math.abs(initiationMomentumZ) && Math.abs(absorptionScoreZ) >= 0.48) {
+    absorptionInitiationClass = 'RESTING_LIQUIDITY_ABSORPTION';
+    absorptionInitiationLabelEn = absorptionScoreZ > 0
+      ? `PASSIVE BID ABSORPTION (+${absorptionScoreZ.toFixed(2)}σ LIMIT DEFENSE)`
+      : `PASSIVE OFFER ABSORPTION (${absorptionScoreZ.toFixed(2)}σ OVERHEAD SUPPLY CAP)`;
+    absorptionInitiationLabelFa = absorptionScoreZ > 0
+      ? `جذب نقدینگی خرید (+${absorptionScoreZ.toFixed(2)}σ دفاع سفارشات محدود)`
+      : `جذب عرضه بالایی (${absorptionScoreZ.toFixed(2)}σ مقاومت سفارشات فروش)`;
+  } else if (Math.abs(initiationMomentumZ) >= 0.48) {
+    absorptionInitiationClass = 'DIRECTIONAL_INITIATION_EXPANSION';
+    absorptionInitiationLabelEn = initiationMomentumZ > 0
+      ? `UPWARD INITIATION EXPANSION (+${initiationMomentumZ.toFixed(2)}σ AGGRESSIVE DISPLACEMENT)`
+      : `DOWNWARD INITIATION EXPANSION (${initiationMomentumZ.toFixed(2)}σ AGGRESSIVE DISPLACEMENT)`;
+    absorptionInitiationLabelFa = initiationMomentumZ > 0
+      ? `آغازگر گسترش صعودی (+${initiationMomentumZ.toFixed(2)}σ جابجایی تهاجمی)`
+      : `آغازگر گسترش نزولی (${initiationMomentumZ.toFixed(2)}σ جابجایی تهاجمی)`;
+  }
+
+  // Classify Liquidity Interaction State relative to HTF HVNs / LVNs / Value Area
+  const dailyPool = topDownPools[2];
+  const weeklyPool = topDownPools[1];
+  const distToNearestHvnAtr = Math.min(
+    Math.abs(currentPrice - nearestUpperHvn),
+    Math.abs(currentPrice - nearestLowerHvn)
+  ) / safeAtr;
+  const distToNearestLvnAtr = htfLvns.length > 0
+    ? Math.min(...htfLvns.map(l => Math.abs(currentPrice - l))) / safeAtr
+    : 1.5;
+
+  let interactionState: LiquidityInteractionState = 'BALANCED_POC_ROTATION';
+  let interactionLabelEn = 'HTF VALUE AREA ROTATION — BALANCED AUCTION AROUND COMPOSITE POC';
+  let interactionLabelFa = 'چرخش متعادل در محدوده ارزش تایم‌فریم بالا حول نقطه کنترل (POC)';
+
+  if (distToNearestLvnAtr < 0.38 && Math.abs(initiationMomentumZ) > 0.45) {
+    interactionState = 'LVN_VACUUM_ACCELERATION';
+    interactionLabelEn = 'LVN LIQUIDITY VACUUM — LOW-RESISTANCE PRICE DISPLACEMENT ZONE';
+    interactionLabelFa = 'خلأ نقدینگی (LVN) — ناحیه حرکت سریع قیمت با مقاومت حجمی کم';
+  } else if (absorptionInitiationClass === 'RESTING_LIQUIDITY_ABSORPTION' && (currentPrice >= dailyPool.vahPrice || currentPrice <= dailyPool.valPrice)) {
+    interactionState = 'VALUE_AREA_ABSORPTION_REVERSAL';
+    interactionLabelEn = 'HTF VALUE AREA BOUNDARY ABSORPTION — MEAN-REVERSION TOWARD POC';
+    interactionLabelFa = 'جذب نقدینگی در مرز محدوده ارزش — بازگشت به سمت مرکز ثقل حجمی (POC)';
+  } else if (absorptionInitiationClass === 'DIRECTIONAL_INITIATION_EXPANSION' && (currentPrice > weeklyPool.vahPrice || currentPrice < weeklyPool.valPrice)) {
+    interactionState = 'INITIATION_BREAKOUT_ACCEPTANCE';
+    interactionLabelEn = 'HTF INITIATION ACCEPTANCE — MIGRATING TOWARD NEXT MACRO LIQUIDITY POOL';
+    interactionLabelFa = 'پذیرش شکست آغازگر — مهاجرت قیمت به سمت استخر نقدینگی کلان بعدی';
+  } else if (distToNearestHvnAtr < 0.65) {
+    interactionState = 'HTF_HVN_MAGNET_GRAVITY';
+    interactionLabelEn = 'HTF HIGH-VOLUME NODE GRAVITY — INSTITUTIONAL DEPTH ATTRACTION';
+    interactionLabelFa = 'جاذبه گره پرحجم تایم‌فریم بالا (HVN) — کشش عمق نقدینگی نهادی';
+  }
+
+  // Net liquidity pull drift ($/step) combining top-down pool gravity + absorption/initiation impulse
+  const rawPoolPullSum = topDownPools.reduce((acc, p) => acc + p.poolPullForceUsd, 0);
+  const flowImpulseUsd = (initiationMomentumZ * 0.45 + absorptionScoreZ * 0.35) * safeAtr * 0.18;
+  const liquidityPullDriftUsd = parseFloat((rawPoolPullSum + flowImpulseUsd).toFixed(3));
+
+  // Proportional State Vector Fusion (Transparent weights summing strictly to 1.00)
+  const fusionWeights: ProportionalFusionWeights = {
+    ouMeanReversionWeight: 0.24,
+    kalmanDriftWeight: 0.24,
+    macroFactorWeight: 0.18,
+    sweepMicrostructureWeight: 0.12,
+    mtfLiquidityWeight: 0.22,
+  };
+
+  // Convert component signals to comparable per-step USD drift contributions
+  const ouComponentStep = 0.12 * (equilibriumPrice - currentPrice);
+  const kalmanComponentStep = (kalmanDriftVelocity * 0.55 + shrunkBias * 0.45) * 0.35;
+  const macroComponentStep = orthogonalMacroLift * 0.35;
+  const sweepComponentStep = sweepLogOdds * safeAtr * 0.12 * (1 - 0.25 * vpinScore);
+  const liquidityComponentStep = liquidityPullDriftUsd;
+
+  const fusedNetDriftUsd = parseFloat((
+    fusionWeights.ouMeanReversionWeight * ouComponentStep +
+    fusionWeights.kalmanDriftWeight * kalmanComponentStep +
+    fusionWeights.macroFactorWeight * macroComponentStep +
+    fusionWeights.sweepMicrostructureWeight * sweepComponentStep +
+    fusionWeights.mtfLiquidityWeight * liquidityComponentStep
+  ).toFixed(3));
+
+  // Fused effective equilibrium blends trailing price equilibrium (78%) with Top-Down HTF POC anchor (22%)
+  const fusedEquilibriumAnchor = parseFloat((
+    (1 - fusionWeights.mtfLiquidityWeight) * equilibriumPrice +
+    fusionWeights.mtfLiquidityWeight * compositeHtfPocAnchor
+  ).toFixed(2));
+
+  return {
+    hierarchyOrder: ['MONTHLY', 'WEEKLY', 'DAILY', '4H', '1H', 'INTRADAY_15M_5M'],
+    topDownPools,
+    compositeHtfPocAnchor,
+    nearestUpperHvn,
+    nearestLowerHvn,
+    interactionState,
+    interactionLabelEn,
+    interactionLabelFa,
+    absorptionInitiationClass,
+    absorptionInitiationLabelEn,
+    absorptionInitiationLabelFa,
+    absorptionScoreZ,
+    initiationMomentumZ,
+    liquidityPullDriftUsd,
+    fusionWeights,
+    fusedNetDriftUsd,
+    fusedEquilibriumAnchor,
+    epistemicClass: 'QUALIFIED_PROXY',
+  };
+}
+
 /**
  * Pure Quantitative Pipeline Orchestrator (Zero I/O)
  * Executes the complete econometric/hydrodynamic pipeline on verified candle & macro inputs.
@@ -1051,7 +1448,8 @@ export function evaluatePureQuantPipeline(
   intervalStepSeconds: number,
   observerInst: AdaptiveDPObserver,
   systemState: 'LIVE_NOMINAL' | 'DEGRADED_FALLBACK' | 'HALTED_DEGRADED',
-  activeTier: string
+  activeTier: string,
+  htfDailyCandles?: Candle[]
 ) {
   const calibration = buildEmpiricalCalibrationBundle(candles);
   const currentPrice = candles[candles.length - 1].close;
@@ -1062,7 +1460,7 @@ export function evaluatePureQuantPipeline(
   }
 
   const eqWindow = Math.min(40, closes.length);
-  const equilibriumPrice = closes.slice(-eqWindow).reduce((a, b) => a + b, 0) / eqWindow;
+  const rawEquilibriumPrice = closes.slice(-eqWindow).reduce((a, b) => a + b, 0) / eqWindow;
   const atrWindow = Math.min(14, candles.length - 1);
   let trSum = 0;
   for (let i = candles.length - atrWindow; i < candles.length; i++) {
@@ -1114,12 +1512,34 @@ export function evaluatePureQuantPipeline(
     calibration
   );
 
+  // Integrated Top-Down Multi-Timeframe Liquidity Engine (Monthly -> Weekly -> Daily -> 4H -> 1H -> 15M/5M)
+  const liquidityEngine = computeTopDownLiquidityEngine({
+    intradayCandles: candles,
+    htfDailyCandles,
+    currentPrice,
+    equilibriumPrice: rawEquilibriumPrice,
+    atr,
+    intervalStepSeconds,
+    kalmanDriftVelocity: observerInst.estimatedDrift,
+    shrunkBias: effectiveBias,
+    orthogonalMacroLift: pcaFactors.netOrthogonalLift,
+    sweepLogOdds: sweepDiscriminator.logOddsScore,
+    vpinScore: vpinBase.vpinScore,
+  });
+
+  // Proportionally fused equilibrium anchor and net velocity shape the Morse manifold, flow field, and yellow trajectory
+  const equilibriumPrice = liquidityEngine.fusedEquilibriumAnchor;
+
   const morseManifold = computeMorsePotentialManifold(
     currentPrice,
     equilibriumPrice,
     atr,
-    pcaFactors.netOrthogonalLift,
+    pcaFactors.netOrthogonalLift + liquidityEngine.liquidityPullDriftUsd * 0.22,
     candles
+  );
+
+  const totalFusedVelocity = parseFloat(
+    (pcaFactors.netOrthogonalLift + effectiveBias + liquidityEngine.liquidityPullDriftUsd * liquidityEngine.fusionWeights.mtfLiquidityWeight).toFixed(3)
   );
 
   const macroWindVector = {
@@ -1130,7 +1550,7 @@ export function evaluatePureQuantPipeline(
     orthogonalMacroLift: pcaFactors.netOrthogonalLift,
     unmeasuredBiasCurrent: parseFloat(effectiveBias.toFixed(3)),
     rawBias: parseFloat(observerInst.biasEstimate.toFixed(3)),
-    totalNetVelocity: parseFloat((pcaFactors.netOrthogonalLift + effectiveBias).toFixed(3)),
+    totalNetVelocity: totalFusedVelocity,
   };
 
   const garchFit = fitEmpiricalGarch11(returns);
@@ -1141,19 +1561,26 @@ export function evaluatePureQuantPipeline(
   const multiTimeframe = computeMultiTimeframeMatrix(
     candles,
     pcaFactors.netOrthogonalLift,
-    effectiveBias,
+    effectiveBias + liquidityEngine.liquidityPullDriftUsd * 0.22,
     currentGarchVolPct
   );
 
   const flowField = computeVectorFlowField(
     currentPrice,
     pcaFactors.netOrthogonalLift,
-    effectiveBias,
+    effectiveBias + liquidityEngine.liquidityPullDriftUsd * liquidityEngine.fusionWeights.mtfLiquidityWeight,
     equilibriumPrice,
     garchVolForecast[0]
   );
 
   const isobars = computeIsobars(currentPrice, atr, equilibriumPrice);
+
+  const liquidityVolMult =
+    liquidityEngine.interactionState === 'LVN_VACUUM_ACCELERATION'
+      ? 1.16
+      : liquidityEngine.interactionState === 'HTF_HVN_MAGNET_GRAVITY'
+      ? 0.88
+      : 1.0;
 
   const ensemble = computeEmpiricalQuantilePlumes(
     currentPrice,
@@ -1163,7 +1590,14 @@ export function evaluatePureQuantPipeline(
     returns,
     24,
     intervalStepSeconds,
-    candles[candles.length - 1].time
+    candles[candles.length - 1].time,
+    {
+      fusedEquilibriumPrice: equilibriumPrice,
+      fusedNetDriftUsdPerStep: liquidityEngine.fusedNetDriftUsd * 0.35,
+      liquidityVolatilityMultiplier: liquidityVolMult,
+      nearestUpperHvn: liquidityEngine.nearestUpperHvn,
+      nearestLowerHvn: liquidityEngine.nearestLowerHvn,
+    }
   );
 
   let atmosphericState = 'LAMINAR UPWARD FLOW';
@@ -1177,10 +1611,10 @@ export function evaluatePureQuantPipeline(
   } else if (currentGarchVolPct > 0.6) {
     atmosphericState = 'SQUALL / HIGH TURBULENCE FRONT';
     barometerStatus = 'RAPID PRESSURE DROP';
-  } else if (Math.abs(pcaFactors.netOrthogonalLift + effectiveBias) < 0.25) {
+  } else if (Math.abs(totalFusedVelocity) < 0.25) {
     atmosphericState = 'DEAD CALM (RANGE OSCILLATION)';
     barometerStatus = 'STAGNANT HIGH PRESSURE';
-  } else if (pcaFactors.netOrthogonalLift + effectiveBias < -0.3) {
+  } else if (totalFusedVelocity < -0.3) {
     atmosphericState = 'CYCLONIC DOWNWARD DRAFT';
     barometerStatus = 'DESCENDING SYSTEM';
   }
@@ -1218,6 +1652,7 @@ export function evaluatePureQuantPipeline(
     vpinTelemetry,
     volumeClockTelemetry,
     sweepDiscriminator,
+    liquidityEngine,
     morseManifold,
     macroWindVector,
     directionalPressure,

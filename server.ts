@@ -17,6 +17,7 @@ import {
   fetchVerifiedMacroWaterfall,
   fetchVerifiedMarketWaterfall,
   getProviderHttpDiagnostics,
+  getSystemWarningErrorLog,
   ProviderTier,
   sanitizeUserFacingHaltReason,
 } from './src/services/realDataWaterfall.js';
@@ -48,7 +49,7 @@ app.use(cors());
 app.use(express.json());
 
 // Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, and Live APIs are never served stale
-const APP_VERSION = '2026.10.24-v73.0-Phase5-ValidationLayer';
+const APP_VERSION = '2026.10.24-v75.0-UnifiedLiquidityResilience';
 const BUILD_TIME = Date.now();
 
 app.use((req, res, next) => {
@@ -115,12 +116,14 @@ app.get('/api/provider-diagnostics', async (req: Request, res: Response) => {
   res.json({
     status: 'SUCCESS',
     version: APP_VERSION,
+    buildTime: BUILD_TIME,
     timestampIso: new Date().toISOString(),
     totalHttpEventsLogged: httpEvents.length,
     htmlOrNonJsonRejectionsCount: htmlRejectedEvents.length,
     htmlRejectedProviders: Array.from(new Set(htmlRejectedEvents.map(e => e.providerName))),
     latestWaterfall,
     recentProviderEvents: httpEvents.slice(0, 30),
+    systemWarningsErrors: getSystemWarningErrorLog().slice(0, 40),
   });
 });
 
@@ -240,16 +243,20 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
     ]);
 
     if (waterfall.systemState === 'HALTED_DEGRADED' || waterfall.candles.length === 0) {
-      const haltedPayload = buildHaltedDegradedForecastPayload({
-        waterfall,
-        liveMacro,
-        realNewsFeed,
-        observerInst: observer,
-        interval,
-        intervalStepSeconds,
-        appVersion: APP_VERSION,
-        cachedData: cached?.data,
-      });
+      const haltedPayload = {
+        ...buildHaltedDegradedForecastPayload({
+          waterfall,
+          liveMacro,
+          realNewsFeed,
+          observerInst: observer,
+          interval,
+          intervalStepSeconds,
+          appVersion: APP_VERSION,
+          cachedData: cached?.data,
+        }),
+        buildTime: BUILD_TIME,
+        systemWarningsErrors: getSystemWarningErrorLog().slice(0, 40),
+      };
       return res.json(haltedPayload);
     }
 
@@ -268,7 +275,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       intervalStepSeconds,
       observer,
       waterfall.systemState,
-      waterfall.activeTier
+      waterfall.activeTier,
+      waterfall.htfDailyCandles
     );
 
     lastVerifiedCalibration = quantOut.calibration;
@@ -303,7 +311,9 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       haltReasonEn: waterfall.haltReasonEn ? sanitizeUserFacingHaltReason(waterfall.haltReasonEn, 'en') : null,
       haltReasonFa: waterfall.haltReasonFa ? sanitizeUserFacingHaltReason(waterfall.haltReasonFa, 'fa') : null,
       providerDiagnostics: waterfall.diagnostics,
+      systemWarningsErrors: getSystemWarningErrorLog().slice(0, 40),
       version: APP_VERSION,
+      buildTime: BUILD_TIME,
       timestamp: Math.floor(Date.now() / 1000),
       timeframe: interval,
       timeframeStepSeconds: intervalStepSeconds,
@@ -321,6 +331,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       vpinTelemetry: quantOut.vpinTelemetry,
       volumeClockTelemetry: quantOut.volumeClockTelemetry,
       sweepDiscriminator: quantOut.sweepDiscriminator,
+      liquidityEngine: quantOut.liquidityEngine,
       morseManifold: quantOut.morseManifold,
       cointegrationBasis: quantOut.cointegrationBasis,
       pcaMacroFactors: quantOut.pcaFactors,
@@ -344,13 +355,55 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
     res.json(payload);
   } catch (err: any) {
     console.warn('Forecast waterfall critical error (logged server-side):', err?.message);
+    const fallbackHalted = buildHaltedDegradedForecastPayload({
+      waterfall: {
+        systemState: 'HALTED_DEGRADED',
+        activeTier: 'NONE_HALTED',
+        activeProvider: 'ALL_PROVIDERS_FAILED',
+        activeSymbol: 'NONE',
+        activeEndpoint: 'NONE',
+        candles: [],
+        secondaryBenchmark: null,
+        diagnostics: [],
+        haltReasonEn: sanitizeUserFacingHaltReason(err?.message, 'en'),
+        haltReasonFa: sanitizeUserFacingHaltReason(err?.message, 'fa'),
+        freshnessAgeSec: 999999,
+      },
+      liveMacro: {
+        status: 'MACRO_FEED_UNAVAILABLE',
+        source: 'UNAVAILABLE',
+        respondingSources: [],
+        nominal10Y: 0,
+        tipsRealYield10Y: 0,
+        breakevenInflation10Y: 0,
+        dxyIndex: 0,
+        realYieldGravity: 0,
+        dollarDrag: 0,
+        centralBankTide: 0,
+        netMacroLift: 0,
+        lastUpdated: new Date().toISOString(),
+        sanityCheckZScore: 0,
+        outliersRejected: [],
+      },
+      realNewsFeed: {
+        status: 'UNAVAILABLE',
+        activeSources: [],
+        failedSources: [],
+        events: [],
+        lastFetchedIso: new Date().toISOString(),
+        unavailableMessageEn: 'News feed unavailable during system halt.',
+        unavailableMessageFa: 'جریان اخبار در زمان توقف سیستم در دسترس نیست.',
+      },
+      observerInst: observer,
+      interval,
+      intervalStepSeconds,
+      appVersion: APP_VERSION,
+      cachedData: cached?.data,
+    });
     res.status(503).json({
-      status: 'HALTED_DEGRADED',
-      systemState: 'HALTED_DEGRADED',
-      isHalted: true,
-      isSynthetic: false,
-      haltReasonEn: sanitizeUserFacingHaltReason(err?.message, 'en'),
-      haltReasonFa: sanitizeUserFacingHaltReason(err?.message, 'fa'),
+      ...fallbackHalted,
+      buildTime: BUILD_TIME,
+      systemWarningsErrors: getSystemWarningErrorLog().slice(0, 40),
     });
   }
 });

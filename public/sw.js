@@ -1,5 +1,5 @@
 // GDF Progressive Web App Service Worker — Self-Updating Engine
-const CACHE_NAME = 'gdf-quant-v70.0-phase1';
+const CACHE_NAME = 'gdf-quant-v75.0-unified-resilience';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',

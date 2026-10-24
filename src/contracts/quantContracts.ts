@@ -362,4 +362,69 @@ export interface WalkForwardValidationScorecard {
   summaryBadgeFa: string;
 }
 
+export type LiquidityTimeframeTier =
+  | 'MONTHLY'
+  | 'WEEKLY'
+  | 'DAILY'
+  | '4H'
+  | '1H'
+  | 'INTRADAY_15M_5M';
 
+export interface VolumeProfilePoolNode {
+  timeframe: LiquidityTimeframeTier;
+  labelEn: string;
+  labelFa: string;
+  hierarchyWeight: number;
+  barsSampled: number;
+  pocPrice: number;
+  vahPrice: number;
+  valPrice: number;
+  hvnPrices: number[];
+  lvnPrices: number[];
+  pocVolumeShare: number;
+  distToPocAtr: number;
+  poolPullForceUsd: number;
+}
+
+export type LiquidityInteractionState =
+  | 'HTF_HVN_MAGNET_GRAVITY'
+  | 'LVN_VACUUM_ACCELERATION'
+  | 'VALUE_AREA_ABSORPTION_REVERSAL'
+  | 'INITIATION_BREAKOUT_ACCEPTANCE'
+  | 'BALANCED_POC_ROTATION'
+  | 'HALTED_FREEZE';
+
+export type AbsorptionInitiationClass =
+  | 'RESTING_LIQUIDITY_ABSORPTION'
+  | 'DIRECTIONAL_INITIATION_EXPANSION'
+  | 'NEUTRAL_ROTATION'
+  | 'HALTED_FREEZE';
+
+export interface ProportionalFusionWeights {
+  ouMeanReversionWeight: number;
+  kalmanDriftWeight: number;
+  macroFactorWeight: number;
+  sweepMicrostructureWeight: number;
+  mtfLiquidityWeight: number;
+}
+
+export interface IntegratedLiquidityEngineTelemetry {
+  hierarchyOrder: LiquidityTimeframeTier[];
+  topDownPools: VolumeProfilePoolNode[];
+  compositeHtfPocAnchor: number;
+  nearestUpperHvn: number;
+  nearestLowerHvn: number;
+  interactionState: LiquidityInteractionState;
+  interactionLabelEn: string;
+  interactionLabelFa: string;
+  absorptionInitiationClass: AbsorptionInitiationClass;
+  absorptionInitiationLabelEn: string;
+  absorptionInitiationLabelFa: string;
+  absorptionScoreZ: number;
+  initiationMomentumZ: number;
+  liquidityPullDriftUsd: number;
+  fusionWeights: ProportionalFusionWeights;
+  fusedNetDriftUsd: number;
+  fusedEquilibriumAnchor: number;
+  epistemicClass: EstimatorClassification;
+}
