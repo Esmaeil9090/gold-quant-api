@@ -1,6 +1,6 @@
 {
   "version": "v73.0-Phase5-WalkForward",
-  "updatedAtIso": "2026-10-25T08:31:44.601Z",
+  "updatedAtIso": "2026-10-25T10:09:33.738Z",
   "recordsByTimeframe": {
     "15m_causality_test_A": {
       "1792513800": {
@@ -1299,150 +1299,6 @@
       }
     },
     "15m": {
-      "1792701000": {
-        "timeframe": "15m",
-        "originBarTime": 1792701000,
-        "originClose": 4035.27,
-        "causalDriftSignal": 1.0050550000000311,
-        "causalSweepLogOdds": 1.66,
-        "causalSweepPredictedProb": 0.8051055268349466,
-        "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0912,
-        "volatilityRegime": "LOW_VOL_GARCH",
-        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
-        "realizedForwardReturnsByHorizon": {
-          "1": 0.00015363343093658156,
-          "5": 0.0012828579273189314,
-          "15": -0.0010463260532693642,
-          "60": 0.0012605829326084058
-        },
-        "realizedSweepOutcomeByHorizon": {
-          "1": 1,
-          "5": 1,
-          "15": 1,
-          "60": 1
-        }
-      },
-      "1792701900": {
-        "timeframe": "15m",
-        "originBarTime": 1792701900,
-        "originClose": 4035.89,
-        "causalDriftSignal": 1.224674999999979,
-        "causalSweepLogOdds": 0.26,
-        "causalSweepPredictedProb": 0.3859081817834967,
-        "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0866,
-        "volatilityRegime": "LOW_VOL_GARCH",
-        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
-        "realizedForwardReturnsByHorizon": {
-          "1": 0.0008198051502539003,
-          "5": 0.0008792210915686586,
-          "15": -0.0008254373985273066,
-          "60": 0.0009510106442391425
-        },
-        "realizedSweepOutcomeByHorizon": {
-          "1": 1,
-          "5": 0,
-          "15": 1,
-          "60": 1
-        }
-      },
-      "1792702800": {
-        "timeframe": "15m",
-        "originBarTime": 1792702800,
-        "originClose": 4039.2,
-        "causalDriftSignal": 1.8006400000000358,
-        "causalSweepLogOdds": -0.63,
-        "causalSweepPredictedProb": 0.11123250092276259,
-        "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0929,
-        "volatilityRegime": "LOW_VOL_GARCH",
-        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
-        "realizedForwardReturnsByHorizon": {
-          "1": 0.00039109008194056525,
-          "5": 0.00040346385399853195,
-          "15": 0.001103569888044579,
-          "60": -0.0005175631065806392
-        },
-        "realizedSweepOutcomeByHorizon": {
-          "1": 0,
-          "5": 0,
-          "15": 1,
-          "60": 1
-        }
-      },
-      "1792703700": {
-        "timeframe": "15m",
-        "originBarTime": 1792703700,
-        "originClose": 4040.78,
-        "causalDriftSignal": 1.993599999999942,
-        "causalSweepLogOdds": 0.09,
-        "causalSweepPredictedProb": 0.21185533366491718,
-        "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0899,
-        "volatilityRegime": "LOW_VOL_GARCH",
-        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
-        "realizedForwardReturnsByHorizon": {
-          "1": -0.00004454684720430262,
-          "5": 0.00027713580326529474,
-          "15": -0.0034384101682209353,
-          "60": -0.000022273175549451852
-        },
-        "realizedSweepOutcomeByHorizon": {
-          "1": 0,
-          "5": 0,
-          "15": 1,
-          "60": 1
-        }
-      },
-      "1792704600": {
-        "timeframe": "15m",
-        "originBarTime": 1792704600,
-        "originClose": 4040.6,
-        "causalDriftSignal": 1.943275000000025,
-        "causalSweepLogOdds": 1.18,
-        "causalSweepPredictedProb": 0.4920216454213719,
-        "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0838,
-        "volatilityRegime": "LOW_VOL_GARCH",
-        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
-        "realizedForwardReturnsByHorizon": {
-          "1": -0.000037123888607894376,
-          "5": -0.0003713009189036978,
-          "15": -0.003418696565779363,
-          "60": 0.000042072074419324056
-        },
-        "realizedSweepOutcomeByHorizon": {
-          "1": 1,
-          "5": 1,
-          "15": 1,
-          "60": 1
-        }
-      },
-      "1792705500": {
-        "timeframe": "15m",
-        "originBarTime": 1792705500,
-        "originClose": 4040.45,
-        "causalDriftSignal": 1.8796300000000354,
-        "causalSweepLogOdds": 1.34,
-        "causalSweepPredictedProb": 0.5199388740401929,
-        "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0712,
-        "volatilityRegime": "LOW_VOL_GARCH",
-        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
-        "realizedForwardReturnsByHorizon": {
-          "1": -0.00025000340481373467,
-          "5": -0.0007353369325626501,
-          "15": -0.004005089206275707,
-          "60": -0.00029704073389435955
-        },
-        "realizedSweepOutcomeByHorizon": {
-          "1": 1,
-          "5": 1,
-          "15": 1,
-          "60": 1
-        }
-      },
       "1792706400": {
         "timeframe": "15m",
         "originBarTime": 1792706400,
@@ -1451,7 +1307,7 @@
         "causalSweepLogOdds": 3.55,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0657,
+        "causalGarchVolPct": 0.0668,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1473,9 +1329,9 @@
         "originClose": 4040.83,
         "causalDriftSignal": 1.7369600000000047,
         "causalSweepLogOdds": -0.47,
-        "causalSweepPredictedProb": 0.07352930037411382,
+        "causalSweepPredictedProb": 0.07078091264246524,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0654,
+        "causalGarchVolPct": 0.0666,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1497,9 +1353,9 @@
         "originClose": 4041.9,
         "causalDriftSignal": 1.7733650000000054,
         "causalSweepLogOdds": 1.24,
-        "causalSweepPredictedProb": 0.48803347277228293,
+        "causalSweepPredictedProb": 0.47607774668349784,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0638,
+        "causalGarchVolPct": 0.0652,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1521,9 +1377,9 @@
         "originClose": 4039.1,
         "causalDriftSignal": 1.4095049999999865,
         "causalSweepLogOdds": 0.84,
-        "causalSweepPredictedProb": 0.363169409544863,
+        "causalSweepPredictedProb": 0.35569130071762683,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0628,
+        "causalGarchVolPct": 0.0635,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1545,9 +1401,9 @@
         "originClose": 4037.48,
         "causalDriftSignal": 1.1131850000000232,
         "causalSweepLogOdds": 2.85,
-        "causalSweepPredictedProb": 0.9031994506156338,
+        "causalSweepPredictedProb": 0.8961652533337329,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0589,
+        "causalGarchVolPct": 0.0594,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1569,9 +1425,9 @@
         "originClose": 4039.17,
         "causalDriftSignal": 1.3508049999999656,
         "causalSweepLogOdds": -0.33,
-        "causalSweepPredictedProb": 0.09175919813873962,
+        "causalSweepPredictedProb": 0.0885080516078984,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0612,
+        "causalGarchVolPct": 0.062,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1591,11 +1447,11 @@
         "timeframe": "15m",
         "originBarTime": 1792711800,
         "originClose": 4037.04,
-        "causalDriftSignal": 1.010365000000027,
+        "causalDriftSignal": 1.0113650000000272,
         "causalSweepLogOdds": 2.49,
-        "causalSweepPredictedProb": 0.8413447404368685,
+        "causalSweepPredictedProb": 0.8314724027996041,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0585,
+        "causalGarchVolPct": 0.059,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1615,11 +1471,11 @@
         "timeframe": "15m",
         "originBarTime": 1792712700,
         "originClose": 4036.1,
-        "causalDriftSignal": 0.9081699999999983,
+        "causalDriftSignal": 0.9091699999999983,
         "causalSweepLogOdds": 3.19,
-        "causalSweepPredictedProb": 0.9394292291770311,
+        "causalSweepPredictedProb": 0.9344782633070794,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0546,
+        "causalGarchVolPct": 0.055,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1639,11 +1495,11 @@
         "timeframe": "15m",
         "originBarTime": 1792713600,
         "originClose": 4038.52,
-        "causalDriftSignal": 1.3089699999999884,
+        "causalDriftSignal": 1.3099699999999883,
         "causalSweepLogOdds": 2.89,
-        "causalSweepPredictedProb": 0.8728567986674478,
+        "causalSweepPredictedProb": 0.8643338986560599,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0617,
+        "causalGarchVolPct": 0.0625,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1663,11 +1519,11 @@
         "timeframe": "15m",
         "originBarTime": 1792714500,
         "originClose": 4031.05,
-        "causalDriftSignal": 0.21074000000002702,
+        "causalDriftSignal": 0.2117400000000269,
         "causalSweepLogOdds": 0.78,
-        "causalSweepPredictedProb": 0.5398278962083312,
+        "causalSweepPredictedProb": 0.5279032407578157,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.09,
+        "causalGarchVolPct": 0.0896,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1687,9 +1543,9 @@
         "timeframe": "15m",
         "originBarTime": 1792715400,
         "originClose": 4032.56,
-        "causalDriftSignal": 0.706534999999998,
+        "causalDriftSignal": 0.707534999999998,
         "causalSweepLogOdds": 1.08,
-        "causalSweepPredictedProb": 0.5239222533165022,
+        "causalSweepPredictedProb": 0.5159534996015409,
         "causalSweepPredictedPositive": true,
         "causalGarchVolPct": 0.086,
         "volatilityRegime": "LOW_VOL_GARCH",
@@ -1713,9 +1569,9 @@
         "originClose": 4043.66,
         "causalDriftSignal": -0.00824999999995632,
         "causalSweepLogOdds": -3.49,
-        "causalSweepPredictedProb": 0.05261613013743627,
+        "causalSweepPredictedProb": 0.050502569236683836,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1477,
+        "causalGarchVolPct": 0.1485,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1735,11 +1591,11 @@
         "timeframe": "15m",
         "originBarTime": 1792717200,
         "originClose": 4026.91,
-        "causalDriftSignal": -2.061674999999963,
+        "causalDriftSignal": -2.062674999999963,
         "causalSweepLogOdds": -0.63,
-        "causalSweepPredictedProb": 0.6664021486751718,
+        "causalSweepPredictedProb": 0.6554216970681164,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.214,
+        "causalGarchVolPct": 0.2137,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1759,11 +1615,11 @@
         "timeframe": "15m",
         "originBarTime": 1792718100,
         "originClose": 4026.81,
-        "causalDriftSignal": -1.4210499999999686,
+        "causalDriftSignal": -1.4200499999999683,
         "causalSweepLogOdds": -0.43,
-        "causalSweepPredictedProb": 0.6843862991396081,
+        "causalSweepPredictedProb": 0.6772418745785047,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1924,
+        "causalGarchVolPct": 0.1922,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1785,9 +1641,9 @@
         "originClose": 4024.3,
         "causalDriftSignal": -1.2478500000000403,
         "causalSweepLogOdds": -0.66,
-        "causalSweepPredictedProb": 0.6772418745785047,
-        "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1737,
+        "causalSweepPredictedProb": 0.6664021486751718,
+        "causalSweepPredictedPositive": false,
+        "causalGarchVolPct": 0.1734,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1807,11 +1663,11 @@
         "timeframe": "15m",
         "originBarTime": 1792719900,
         "originClose": 4006.11,
-        "causalDriftSignal": 3.1121749999999633,
+        "causalDriftSignal": 3.113174999999963,
         "causalSweepLogOdds": 0.71,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.238,
+        "causalGarchVolPct": 0.237,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1831,11 +1687,11 @@
         "timeframe": "15m",
         "originBarTime": 1792720800,
         "originClose": 4027.45,
-        "causalDriftSignal": 5.960264999999976,
+        "causalDriftSignal": 5.962264999999976,
         "causalSweepLogOdds": 0.8,
-        "causalSweepPredictedProb": 0.3820886419843874,
+        "causalSweepPredictedProb": 0.37070004493263065,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.3202,
+        "causalGarchVolPct": 0.3205,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1855,11 +1711,11 @@
         "timeframe": "15m",
         "originBarTime": 1792721700,
         "originClose": 4028.09,
-        "causalDriftSignal": 5.328170000000009,
+        "causalDriftSignal": 5.329170000000008,
         "causalSweepLogOdds": 0.92,
-        "causalSweepPredictedProb": 0.4285762900598127,
+        "causalSweepPredictedProb": 0.42074031222558267,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.2875,
+        "causalGarchVolPct": 0.2878,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1879,11 +1735,11 @@
         "timeframe": "15m",
         "originBarTime": 1792722600,
         "originClose": 4033.24,
-        "causalDriftSignal": 5.306289999999962,
+        "causalDriftSignal": 5.307289999999963,
         "causalSweepLogOdds": -0.78,
-        "causalSweepPredictedProb": 0.15386424369832807,
+        "causalSweepPredictedProb": 0.14916997105813823,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.2653,
+        "causalGarchVolPct": 0.2658,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1903,11 +1759,11 @@
         "timeframe": "15m",
         "originBarTime": 1792723500,
         "originClose": 4032.93,
-        "causalDriftSignal": 4.726694999999958,
+        "causalDriftSignal": 4.727694999999957,
         "causalSweepLogOdds": 2.29,
-        "causalSweepPredictedProb": 0.8868604910482839,
+        "causalSweepPredictedProb": 0.8809998340161567,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.2382,
+        "causalGarchVolPct": 0.2387,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1927,11 +1783,11 @@
         "timeframe": "15m",
         "originBarTime": 1792724400,
         "originClose": 4030.24,
-        "causalDriftSignal": 4.011799999999957,
+        "causalDriftSignal": 4.012799999999958,
         "causalSweepLogOdds": 1.37,
-        "causalSweepPredictedProb": 0.6255157701293177,
+        "causalSweepPredictedProb": 0.6140918182165034,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.2149,
+        "causalGarchVolPct": 0.2153,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1951,11 +1807,11 @@
         "timeframe": "15m",
         "originBarTime": 1792725300,
         "originClose": 4033.24,
-        "causalDriftSignal": 3.9128599999999207,
+        "causalDriftSignal": 3.9138599999999206,
         "causalSweepLogOdds": 0.47,
-        "causalSweepPredictedProb": 0.4364405260536641,
+        "causalSweepPredictedProb": 0.4285762900598127,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1972,
+        "causalGarchVolPct": 0.1977,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1977,9 +1833,9 @@
         "originClose": 4031.06,
         "causalDriftSignal": 3.38379499999996,
         "causalSweepLogOdds": 1.2,
-        "causalSweepPredictedProb": 0.5831661346767394,
+        "causalSweepPredictedProb": 0.5714237099401873,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1781,
+        "causalGarchVolPct": 0.1785,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -1999,11 +1855,11 @@
         "timeframe": "15m",
         "originBarTime": 1792727100,
         "originClose": 4031.51,
-        "causalDriftSignal": 3.177649999999949,
+        "causalDriftSignal": 3.1786499999999487,
         "causalSweepLogOdds": 1.7,
-        "causalSweepPredictedProb": 0.7356527705340088,
+        "causalSweepPredictedProb": 0.725746935430251,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.161,
+        "causalGarchVolPct": 0.1614,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2025,7 +1881,7 @@
         "originClose": 4024.67,
         "causalDriftSignal": 2.3811699999999876,
         "causalSweepLogOdds": 0.04,
-        "causalSweepPredictedProb": 0.15150501985658846,
+        "causalSweepPredictedProb": 0.14685908066819878,
         "causalSweepPredictedPositive": false,
         "causalGarchVolPct": 0.1587,
         "volatilityRegime": "HIGH_VOL_GARCH",
@@ -2047,11 +1903,11 @@
         "timeframe": "15m",
         "originBarTime": 1792728900,
         "originClose": 4021.35,
-        "causalDriftSignal": 1.927919999999998,
+        "causalDriftSignal": 1.9289199999999982,
         "causalSweepLogOdds": 0.14,
-        "causalSweepPredictedProb": 0.24196357816592753,
+        "causalSweepPredictedProb": 0.2357624232731182,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1455,
+        "causalGarchVolPct": 0.1454,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2073,9 +1929,9 @@
         "originClose": 4018.92,
         "causalDriftSignal": 1.620045000000009,
         "causalSweepLogOdds": -0.12,
-        "causalSweepPredictedProb": 0.2296499234117839,
+        "causalSweepPredictedProb": 0.22362722058352452,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1325,
+        "causalGarchVolPct": 0.1324,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2095,9 +1951,9 @@
         "timeframe": "15m",
         "originBarTime": 1792730700,
         "originClose": 4019.18,
-        "causalDriftSignal": 1.609200000000048,
+        "causalDriftSignal": 1.610200000000048,
         "causalSweepLogOdds": 1.83,
-        "causalSweepPredictedProb": 0.7580364218340725,
+        "causalSweepPredictedProb": 0.751747841913914,
         "causalSweepPredictedPositive": true,
         "causalGarchVolPct": 0.1207,
         "volatilityRegime": "HIGH_VOL_GARCH",
@@ -2123,7 +1979,7 @@
         "causalSweepLogOdds": -1.47,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1622,
+        "causalGarchVolPct": 0.1628,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2143,11 +1999,11 @@
         "timeframe": "15m",
         "originBarTime": 1792732500,
         "originClose": 4025.69,
-        "causalDriftSignal": 1.567525000000096,
+        "causalDriftSignal": 1.568525000000096,
         "causalSweepLogOdds": 2.22,
-        "causalSweepPredictedProb": 0.7611480063447704,
+        "causalSweepPredictedProb": 0.751747841913914,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1504,
+        "causalGarchVolPct": 0.1508,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2167,11 +2023,11 @@
         "timeframe": "15m",
         "originBarTime": 1792733400,
         "originClose": 4039.85,
-        "causalDriftSignal": 0.8152000000000863,
+        "causalDriftSignal": 0.8162000000000864,
         "causalSweepLogOdds": -0.94,
-        "causalSweepPredictedProb": 0.5159534996015409,
+        "causalSweepPredictedProb": 0.507978354578628,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.207,
+        "causalGarchVolPct": 0.2077,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2191,11 +2047,11 @@
         "timeframe": "15m",
         "originBarTime": 1792734300,
         "originClose": 4036.94,
-        "causalDriftSignal": 0.4520050000000684,
+        "causalDriftSignal": 0.4530050000000684,
         "causalSweepLogOdds": 0.71,
-        "causalSweepPredictedProb": 0.5477584709632526,
+        "causalSweepPredictedProb": 0.5398278962083312,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1879,
+        "causalGarchVolPct": 0.1885,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2215,11 +2071,11 @@
         "timeframe": "15m",
         "originBarTime": 1792735200,
         "originClose": 4034.39,
-        "causalDriftSignal": 0.14266500000003907,
+        "causalDriftSignal": 0.14166500000003907,
         "causalSweepLogOdds": 2.34,
-        "causalSweepPredictedProb": 0.8707618393491714,
+        "causalSweepPredictedProb": 0.8665004435378838,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1705,
+        "causalGarchVolPct": 0.171,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2241,9 +2097,9 @@
         "originClose": 4029.56,
         "causalDriftSignal": -0.3078449999999392,
         "causalSweepLogOdds": 0.79,
-        "causalSweepPredictedProb": 0.32996857934505847,
+        "causalSweepPredictedProb": 0.3191775185611988,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1599,
+        "causalGarchVolPct": 0.1602,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2263,11 +2119,11 @@
         "timeframe": "15m",
         "originBarTime": 1792737000,
         "originClose": 4029.52,
-        "causalDriftSignal": -0.20806999999997972,
+        "causalDriftSignal": -0.20706999999997971,
         "causalSweepLogOdds": 3.4,
-        "causalSweepPredictedProb": 0.9417924375761003,
+        "causalSweepPredictedProb": 0.9382198074757251,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1446,
+        "causalGarchVolPct": 0.1449,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2287,11 +2143,11 @@
         "timeframe": "15m",
         "originBarTime": 1792737900,
         "originClose": 4027.63,
-        "causalDriftSignal": -0.3720600000000012,
+        "causalDriftSignal": -0.3710600000000012,
         "causalSweepLogOdds": 1.16,
-        "causalSweepPredictedProb": 0.4364405260536641,
+        "causalSweepPredictedProb": 0.4285762900598127,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1314,
+        "causalGarchVolPct": 0.1316,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2313,9 +2169,9 @@
         "originClose": 4030.13,
         "causalDriftSignal": 0.3073349999999828,
         "causalSweepLogOdds": 0.59,
-        "causalSweepPredictedProb": 0.2676288336853927,
+        "causalSweepPredictedProb": 0.2610862344782557,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1238,
+        "causalGarchVolPct": 0.1242,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2335,11 +2191,11 @@
         "timeframe": "15m",
         "originBarTime": 1792739700,
         "originClose": 4031.62,
-        "causalDriftSignal": 0.549195000000007,
+        "causalDriftSignal": 0.548195000000007,
         "causalSweepLogOdds": 1.58,
-        "causalSweepPredictedProb": 0.5948348250188158,
+        "causalSweepPredictedProb": 0.5870643872625158,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1147,
+        "causalGarchVolPct": 0.1152,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2361,9 +2217,9 @@
         "originClose": 4034.05,
         "causalDriftSignal": 0.8575699999999525,
         "causalSweepLogOdds": 0.02,
-        "causalSweepPredictedProb": 0.1894296135844597,
+        "causalSweepPredictedProb": 0.1840600914995341,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1092,
+        "causalGarchVolPct": 0.1098,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2385,9 +2241,9 @@
         "originClose": 4026,
         "causalDriftSignal": -0.35910500000000506,
         "causalSweepLogOdds": -0.12,
-        "causalSweepPredictedProb": 0.20326933449781806,
+        "causalSweepPredictedProb": 0.1976624917939911,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1264,
+        "causalGarchVolPct": 0.1265,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2409,9 +2265,9 @@
         "originClose": 4027.54,
         "causalDriftSignal": 0.1446449999999896,
         "causalSweepLogOdds": 1.62,
-        "causalSweepPredictedProb": 0.6664021486751718,
+        "causalSweepPredictedProb": 0.6590969860290097,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1172,
+        "causalGarchVolPct": 0.1174,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2431,11 +2287,11 @@
         "timeframe": "15m",
         "originBarTime": 1792743300,
         "originClose": 4030.7,
-        "causalDriftSignal": 0.6758500000000404,
+        "causalDriftSignal": 0.6768500000000404,
         "causalSweepLogOdds": -0.26,
-        "causalSweepPredictedProb": 0.1074877619430449,
+        "causalSweepPredictedProb": 0.10383474666626713,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1139,
+        "causalGarchVolPct": 0.1143,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2457,9 +2313,9 @@
         "originClose": 4037.18,
         "causalDriftSignal": 1.5559699999999885,
         "causalSweepLogOdds": -0.49,
-        "causalSweepPredictedProb": 0.11313950895171607,
+        "causalSweepPredictedProb": 0.10934861668743785,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1276,
+        "causalGarchVolPct": 0.1282,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2481,9 +2337,9 @@
         "originClose": 4037.37,
         "causalDriftSignal": 1.4279750000000297,
         "causalSweepLogOdds": 1.22,
-        "causalSweepPredictedProb": 0.5318814403673632,
+        "causalSweepPredictedProb": 0.5239222533165022,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.116,
+        "causalGarchVolPct": 0.1166,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2503,11 +2359,11 @@
         "timeframe": "15m",
         "originBarTime": 1792746000,
         "originClose": 4040.12,
-        "causalDriftSignal": 1.6109349999999905,
+        "causalDriftSignal": 1.6119349999999903,
         "causalSweepLogOdds": -0.02,
-        "causalSweepPredictedProb": 0.23269501802419457,
+        "causalSweepPredictedProb": 0.22662727943424926,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1109,
+        "causalGarchVolPct": 0.1116,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2527,11 +2383,11 @@
         "timeframe": "15m",
         "originBarTime": 1792746900,
         "originClose": 4038.74,
-        "causalDriftSignal": 1.1330900000000292,
+        "causalDriftSignal": 1.1340900000000291,
         "causalSweepLogOdds": 0.64,
-        "causalSweepPredictedProb": 0.5199388740401929,
+        "causalSweepPredictedProb": 0.5119665272277171,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1014,
+        "causalGarchVolPct": 0.102,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2553,9 +2409,9 @@
         "originClose": 4037.26,
         "causalDriftSignal": 0.8732199999999884,
         "causalSweepLogOdds": 1.94,
-        "causalSweepPredictedProb": 0.821213646553827,
+        "causalSweepPredictedProb": 0.8159399085004659,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0933,
+        "causalGarchVolPct": 0.0938,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2577,9 +2433,9 @@
         "originClose": 4038.13,
         "causalDriftSignal": 0.8890649999999878,
         "causalSweepLogOdds": 0.12,
-        "causalSweepPredictedProb": 0.3372427624290788,
+        "causalSweepPredictedProb": 0.32996857934505847,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0868,
+        "causalGarchVolPct": 0.0874,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2599,11 +2455,11 @@
         "timeframe": "15m",
         "originBarTime": 1792749600,
         "originClose": 4037.85,
-        "causalDriftSignal": 0.785859999999986,
+        "causalDriftSignal": 0.7868599999999859,
         "causalSweepLogOdds": 2.88,
-        "causalSweepPredictedProb": 0.95,
+        "causalSweepPredictedProb": 0.9484492628013267,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.08,
+        "causalGarchVolPct": 0.0805,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2625,9 +2481,9 @@
         "originClose": 4039.27,
         "causalDriftSignal": 0.8469899999999833,
         "causalSweepLogOdds": 1.16,
-        "causalSweepPredictedProb": 0.6554216970681164,
+        "causalSweepPredictedProb": 0.6480272401814652,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0767,
+        "causalGarchVolPct": 0.0773,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2651,7 +2507,7 @@
         "causalSweepLogOdds": 3.52,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0712,
+        "causalGarchVolPct": 0.0717,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2671,11 +2527,11 @@
         "timeframe": "15m",
         "originBarTime": 1792752300,
         "originClose": 4037.95,
-        "causalDriftSignal": 0.41083500000004286,
+        "causalDriftSignal": 0.40983500000004286,
         "causalSweepLogOdds": 2.86,
-        "causalSweepPredictedProb": 0.923641444928913,
+        "causalSweepPredictedProb": 0.9207301086378996,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0664,
+        "causalGarchVolPct": 0.0669,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2697,9 +2553,9 @@
         "originClose": 4042.13,
         "causalDriftSignal": 0.8928650000000108,
         "causalSweepLogOdds": -1.58,
-        "causalSweepPredictedProb": 0.058207562423899684,
+        "causalSweepPredictedProb": 0.055917403241666934,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0793,
+        "causalGarchVolPct": 0.0799,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2719,11 +2575,11 @@
         "timeframe": "15m",
         "originBarTime": 1792754100,
         "originClose": 4039.61,
-        "causalDriftSignal": 0.6282649999999921,
+        "causalDriftSignal": 0.627264999999992,
         "causalSweepLogOdds": 1.01,
-        "causalSweepPredictedProb": 0.5318814403673632,
+        "causalSweepPredictedProb": 0.5239222533165022,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0764,
+        "causalGarchVolPct": 0.0769,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2743,11 +2599,11 @@
         "timeframe": "15m",
         "originBarTime": 1792755000,
         "originClose": 4040.36,
-        "causalDriftSignal": 0.6693549999999614,
+        "causalDriftSignal": 0.6703549999999613,
         "causalSweepLogOdds": 1.68,
-        "causalSweepPredictedProb": 0.7323711663146073,
+        "causalSweepPredictedProb": 0.725746935430251,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.072,
+        "causalGarchVolPct": 0.0725,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2767,11 +2623,11 @@
         "timeframe": "15m",
         "originBarTime": 1792755900,
         "originClose": 4039.73,
-        "causalDriftSignal": 0.5315849999999827,
+        "causalDriftSignal": 0.5325849999999828,
         "causalSweepLogOdds": 2.58,
-        "causalSweepPredictedProb": 0.8829767439432687,
+        "causalSweepPredictedProb": 0.8809998340161567,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.067,
+        "causalGarchVolPct": 0.0675,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2793,9 +2649,9 @@
         "originClose": 4037.11,
         "causalDriftSignal": 0.20027499999998152,
         "causalSweepLogOdds": 1.4,
-        "causalSweepPredictedProb": 0.4960106203752248,
+        "causalSweepPredictedProb": 0.4920216454213719,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0666,
+        "causalGarchVolPct": 0.0668,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2815,11 +2671,11 @@
         "timeframe": "15m",
         "originBarTime": 1792757700,
         "originClose": 4040.69,
-        "causalDriftSignal": 0.8103749999999619,
+        "causalDriftSignal": 0.811374999999962,
         "causalSweepLogOdds": -0.17,
-        "causalSweepPredictedProb": 0.20610799352403214,
+        "causalSweepPredictedProb": 0.20045413884586183,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0756,
+        "causalGarchVolPct": 0.0761,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2841,9 +2697,9 @@
         "originClose": 4040.77,
         "causalDriftSignal": 0.8158699999999208,
         "causalSweepLogOdds": 2.62,
-        "causalSweepPredictedProb": 0.8997273665298378,
+        "causalSweepPredictedProb": 0.8979576193075929,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0703,
+        "causalGarchVolPct": 0.0708,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2865,9 +2721,9 @@
         "originClose": 4039.25,
         "causalDriftSignal": 0.5085499999998866,
         "causalSweepLogOdds": 1.23,
-        "causalSweepPredictedProb": 0.5239222533165022,
+        "causalSweepPredictedProb": 0.5199388740401929,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0664,
+        "causalGarchVolPct": 0.0668,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2887,11 +2743,11 @@
         "timeframe": "15m",
         "originBarTime": 1792760400,
         "originClose": 4044.64,
-        "causalDriftSignal": 1.2637499999999293,
+        "causalDriftSignal": 1.262749999999929,
         "causalSweepLogOdds": -0.61,
         "causalSweepPredictedProb": 0.1840600914995341,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0873,
+        "causalGarchVolPct": 0.0878,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2915,7 +2771,7 @@
         "causalSweepLogOdds": 0.48,
         "causalSweepPredictedProb": 0.23269501802419457,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1017,
+        "causalGarchVolPct": 0.1018,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2939,7 +2795,7 @@
         "causalSweepLogOdds": 1.83,
         "causalSweepPredictedProb": 0.6517316779654632,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.093,
+        "causalGarchVolPct": 0.0932,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2963,7 +2819,7 @@
         "causalSweepLogOdds": 3.69,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0854,
+        "causalGarchVolPct": 0.0855,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -2987,7 +2843,7 @@
         "causalSweepLogOdds": -2.03,
         "causalSweepPredictedProb": 0.48803347277228293,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1639,
+        "causalGarchVolPct": 0.1636,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3007,11 +2863,11 @@
         "timeframe": "15m",
         "originBarTime": 1792764900,
         "originClose": 3996.22,
-        "causalDriftSignal": 2.5570950000000154,
+        "causalDriftSignal": 2.5580950000000158,
         "causalSweepLogOdds": 0.67,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.3116,
+        "causalGarchVolPct": 0.3109,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3035,7 +2891,7 @@
         "causalSweepLogOdds": 0.66,
         "causalSweepPredictedProb": 0.4168338653232606,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.3715,
+        "causalGarchVolPct": 0.3714,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3055,11 +2911,11 @@
         "timeframe": "15m",
         "originBarTime": 1792766700,
         "originClose": 4016.54,
-        "causalDriftSignal": 4.603140000000074,
+        "causalDriftSignal": 4.604140000000074,
         "causalSweepLogOdds": 2.02,
         "causalSweepPredictedProb": 0.8159399085004659,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.3332,
+        "causalGarchVolPct": 0.3331,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3083,7 +2939,7 @@
         "causalSweepLogOdds": 1.56,
         "causalSweepPredictedProb": 0.7673049819758054,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.3004,
+        "causalGarchVolPct": 0.3003,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3103,7 +2959,7 @@
         "timeframe": "15m",
         "originBarTime": 1792768500,
         "originClose": 4012.42,
-        "causalDriftSignal": 3.35422000000007,
+        "causalDriftSignal": 3.3552200000000703,
         "causalSweepLogOdds": 0.3,
         "causalSweepPredictedProb": 0.3859081817834967,
         "causalSweepPredictedPositive": false,
@@ -3127,7 +2983,7 @@
         "timeframe": "15m",
         "originBarTime": 1792769400,
         "originClose": 4012.4,
-        "causalDriftSignal": 3.111245000000057,
+        "causalDriftSignal": 3.112245000000057,
         "causalSweepLogOdds": 1.33,
         "causalSweepPredictedProb": 0.6517316779654632,
         "causalSweepPredictedPositive": true,
@@ -3155,7 +3011,7 @@
         "causalSweepLogOdds": 0.7,
         "causalSweepPredictedProb": 0.2843388077800051,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.2367,
+        "causalGarchVolPct": 0.2369,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3179,7 +3035,7 @@
         "causalSweepLogOdds": 2.61,
         "causalSweepPredictedProb": 0.8051055268349466,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.2128,
+        "causalGarchVolPct": 0.213,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3199,11 +3055,11 @@
         "timeframe": "15m",
         "originBarTime": 1792772100,
         "originClose": 4015.01,
-        "causalDriftSignal": 2.729020000000066,
+        "causalDriftSignal": 2.730020000000066,
         "causalSweepLogOdds": -0.16,
         "causalSweepPredictedProb": 0.14230968545973283,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1959,
+        "causalGarchVolPct": 0.196,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3223,11 +3079,11 @@
         "timeframe": "15m",
         "originBarTime": 1792773000,
         "originClose": 4015.86,
-        "causalDriftSignal": 2.6925300000000165,
+        "causalDriftSignal": 2.693530000000017,
         "causalSweepLogOdds": 1.93,
         "causalSweepPredictedProb": 0.6700314206549416,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1772,
+        "causalGarchVolPct": 0.1773,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3247,11 +3103,11 @@
         "timeframe": "15m",
         "originBarTime": 1792773900,
         "originClose": 4013.89,
-        "causalDriftSignal": 2.189120000000008,
+        "causalDriftSignal": 2.190120000000008,
         "causalSweepLogOdds": 2,
         "causalSweepPredictedProb": 0.725746935430251,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1605,
+        "causalGarchVolPct": 0.1606,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3319,11 +3175,11 @@
         "timeframe": "15m",
         "originBarTime": 1792776600,
         "originClose": 4006.14,
-        "causalDriftSignal": 1.2539150000000063,
+        "causalDriftSignal": 1.255915000000006,
         "causalSweepLogOdds": 0.08,
         "causalSweepPredictedProb": 0.3409030139709904,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1236,
+        "causalGarchVolPct": 0.1235,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3343,11 +3199,11 @@
         "timeframe": "15m",
         "originBarTime": 1792777500,
         "originClose": 4011.25,
-        "causalDriftSignal": 1.9771900000000207,
+        "causalDriftSignal": 1.9791900000000204,
         "causalSweepLogOdds": -1.14,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1279,
+        "causalGarchVolPct": 0.1281,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3371,7 +3227,7 @@
         "causalSweepLogOdds": 3.08,
         "causalSweepPredictedProb": 0.9292190873575348,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1163,
+        "causalGarchVolPct": 0.1165,
         "volatilityRegime": "HIGH_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3395,7 +3251,7 @@
         "causalSweepLogOdds": 0.42,
         "causalSweepPredictedProb": 0.1867329054684121,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.1106,
+        "causalGarchVolPct": 0.1109,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3415,11 +3271,11 @@
         "timeframe": "15m",
         "originBarTime": 1792780200,
         "originClose": 4009.25,
-        "causalDriftSignal": 1.6321699999999928,
+        "causalDriftSignal": 1.633169999999993,
         "causalSweepLogOdds": 1.46,
         "causalSweepPredictedProb": 0.606419814648572,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.1062,
+        "causalGarchVolPct": 0.1064,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3443,7 +3299,7 @@
         "causalSweepLogOdds": 1.23,
         "causalSweepPredictedProb": 0.46017210379166884,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0994,
+        "causalGarchVolPct": 0.0997,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3467,7 +3323,7 @@
         "causalSweepLogOdds": 2.97,
         "causalSweepPredictedProb": 0.9162066219651499,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0916,
+        "causalGarchVolPct": 0.0918,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3491,7 +3347,7 @@
         "causalSweepLogOdds": 1.78,
         "causalSweepPredictedProb": 0.6217194571190601,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0862,
+        "causalGarchVolPct": 0.0865,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3515,7 +3371,7 @@
         "causalSweepLogOdds": 1.26,
         "causalSweepPredictedProb": 0.47607774668349784,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0797,
+        "causalGarchVolPct": 0.08,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3535,11 +3391,11 @@
         "timeframe": "15m",
         "originBarTime": 1792784700,
         "originClose": 4010.95,
-        "causalDriftSignal": 1.7229400000000532,
+        "causalDriftSignal": 1.7239400000000533,
         "causalSweepLogOdds": 0.02,
         "causalSweepPredictedProb": 0.11702325605673126,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0767,
+        "causalGarchVolPct": 0.0771,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3563,7 +3419,7 @@
         "causalSweepLogOdds": 1.43,
         "causalSweepPredictedProb": 0.5596177121427077,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0731,
+        "causalGarchVolPct": 0.0734,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3583,11 +3439,11 @@
         "timeframe": "15m",
         "originBarTime": 1792786500,
         "originClose": 4008.48,
-        "causalDriftSignal": 1.2286050000000814,
+        "causalDriftSignal": 1.2276050000000813,
         "causalSweepLogOdds": 4.5,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0684,
+        "causalGarchVolPct": 0.0687,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3611,7 +3467,7 @@
         "causalSweepLogOdds": 1.3,
         "causalSweepPredictedProb": 0.5870643872625158,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0656,
+        "causalGarchVolPct": 0.0658,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3631,11 +3487,11 @@
         "timeframe": "15m",
         "originBarTime": 1792788300,
         "originClose": 4007.22,
-        "causalDriftSignal": 1.156110000000106,
+        "causalDriftSignal": 1.1551100000001062,
         "causalSweepLogOdds": 1.2,
         "causalSweepPredictedProb": 0.5358564569451512,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.063,
+        "causalGarchVolPct": 0.0633,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3659,7 +3515,7 @@
         "causalSweepLogOdds": -1.13,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0626,
+        "causalGarchVolPct": 0.063,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3683,7 +3539,7 @@
         "causalSweepLogOdds": -0.52,
         "causalSweepPredictedProb": 0.0934175724118024,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0598,
+        "causalGarchVolPct": 0.0602,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3707,7 +3563,7 @@
         "causalSweepLogOdds": -0.01,
         "causalSweepPredictedProb": 0.21185533366491718,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0571,
+        "causalGarchVolPct": 0.0575,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3731,7 +3587,7 @@
         "causalSweepLogOdds": 3.7,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0548,
+        "causalGarchVolPct": 0.0551,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3755,7 +3611,7 @@
         "causalSweepLogOdds": 0.36,
         "causalSweepPredictedProb": 0.23885199365522952,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0529,
+        "causalGarchVolPct": 0.0533,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3779,7 +3635,7 @@
         "causalSweepLogOdds": -0.2,
         "causalSweepPredictedProb": 0.14685908066819878,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0512,
+        "causalGarchVolPct": 0.0516,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3799,7 +3655,7 @@
         "timeframe": "15m",
         "originBarTime": 1792794600,
         "originClose": 4001.91,
-        "causalDriftSignal": 0.4678249999999826,
+        "causalDriftSignal": 0.4688249999999826,
         "causalSweepLogOdds": -2.12,
         "causalSweepPredictedProb": 0.16354305706302472,
         "causalSweepPredictedPositive": true,
@@ -3823,11 +3679,11 @@
         "timeframe": "15m",
         "originBarTime": 1792795500,
         "originClose": 3998.58,
-        "causalDriftSignal": 0.12961999999996443,
+        "causalDriftSignal": 0.12861999999996443,
         "causalSweepLogOdds": 0.93,
         "causalSweepPredictedProb": 0.9440825967583331,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0656,
+        "causalGarchVolPct": 0.0655,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3847,7 +3703,7 @@
         "timeframe": "15m",
         "originBarTime": 1792796400,
         "originClose": 4000.45,
-        "causalDriftSignal": 0.5701350000000003,
+        "causalDriftSignal": 0.5711350000000003,
         "causalSweepLogOdds": -0.68,
         "causalSweepPredictedProb": 0.19215015740058863,
         "causalSweepPredictedPositive": false,
@@ -3875,7 +3731,7 @@
         "causalSweepLogOdds": -1.12,
         "causalSweepPredictedProb": 0.05937995040452287,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0698,
+        "causalGarchVolPct": 0.07,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3895,11 +3751,11 @@
         "timeframe": "15m",
         "originBarTime": 1792798200,
         "originClose": 4001.88,
-        "causalDriftSignal": 0.7990950000000321,
+        "causalDriftSignal": 0.800095000000032,
         "causalSweepLogOdds": 0.07,
         "causalSweepPredictedProb": 0.30502571902598025,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0653,
+        "causalGarchVolPct": 0.0656,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3923,7 +3779,7 @@
         "causalSweepLogOdds": -0.85,
         "causalSweepPredictedProb": 0.05369892282893913,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0668,
+        "causalGarchVolPct": 0.0672,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3947,7 +3803,7 @@
         "causalSweepLogOdds": 1.55,
         "causalSweepPredictedProb": 0.6443086992823732,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0628,
+        "causalGarchVolPct": 0.0631,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3971,7 +3827,7 @@
         "causalSweepLogOdds": -0.46,
         "causalSweepPredictedProb": 0.23885199365522952,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0634,
+        "causalGarchVolPct": 0.0636,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -3995,7 +3851,7 @@
         "causalSweepLogOdds": -0.07,
         "causalSweepPredictedProb": 0.32996857934505847,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0599,
+        "causalGarchVolPct": 0.0601,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4015,11 +3871,11 @@
         "timeframe": "15m",
         "originBarTime": 1792802700,
         "originClose": 4000.65,
-        "causalDriftSignal": 0.8633600000000241,
+        "causalDriftSignal": 0.8643600000000242,
         "causalSweepLogOdds": -1.77,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0583,
+        "causalGarchVolPct": 0.0586,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4043,7 +3899,7 @@
         "causalSweepLogOdds": -1.64,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0571,
+        "causalGarchVolPct": 0.0574,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4063,11 +3919,11 @@
         "timeframe": "15m",
         "originBarTime": 1792804500,
         "originClose": 4001,
-        "causalDriftSignal": 0.931934999999974,
+        "causalDriftSignal": 0.9329349999999741,
         "causalSweepLogOdds": 0.94,
         "causalSweepPredictedProb": 0.5159534996015409,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0545,
+        "causalGarchVolPct": 0.0548,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4087,11 +3943,11 @@
         "timeframe": "15m",
         "originBarTime": 1792805400,
         "originClose": 4001.56,
-        "causalDriftSignal": 0.9820750000000207,
+        "causalDriftSignal": 0.9810750000000208,
         "causalSweepLogOdds": -1.49,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0536,
+        "causalGarchVolPct": 0.054,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4115,7 +3971,7 @@
         "causalSweepLogOdds": -1.31,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0538,
+        "causalGarchVolPct": 0.0542,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4139,7 +3995,7 @@
         "causalSweepLogOdds": -1.12,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0525,
+        "causalGarchVolPct": 0.0529,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4159,11 +4015,11 @@
         "timeframe": "15m",
         "originBarTime": 1792808100,
         "originClose": 4002.99,
-        "causalDriftSignal": 1.043970000000032,
+        "causalDriftSignal": 1.0449700000000322,
         "causalSweepLogOdds": -0.96,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0511,
+        "causalGarchVolPct": 0.0515,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4183,11 +4039,11 @@
         "timeframe": "15m",
         "originBarTime": 1792809000,
         "originClose": 4003.18,
-        "causalDriftSignal": 1.045550000000001,
+        "causalDriftSignal": 1.0465500000000012,
         "causalSweepLogOdds": 1.46,
         "causalSweepPredictedProb": 0.5199388740401929,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.05,
+        "causalGarchVolPct": 0.0504,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4211,7 +4067,7 @@
         "causalSweepLogOdds": -1.4,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0514,
+        "causalGarchVolPct": 0.0519,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4235,7 +4091,7 @@
         "causalSweepLogOdds": -1.66,
         "causalSweepPredictedProb": 0.05,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0514,
+        "causalGarchVolPct": 0.0519,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4259,7 +4115,7 @@
         "causalSweepLogOdds": -0.2,
         "causalSweepPredictedProb": 0.2296499234117839,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0496,
+        "causalGarchVolPct": 0.05,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4283,7 +4139,7 @@
         "causalSweepLogOdds": -1.58,
         "causalSweepPredictedProb": 0.05479928939533408,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0486,
+        "causalGarchVolPct": 0.049,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4303,11 +4159,11 @@
         "timeframe": "15m",
         "originBarTime": 1792813500,
         "originClose": 4004.89,
-        "causalDriftSignal": 1.0204900000000108,
+        "causalDriftSignal": 1.0214900000000107,
         "causalSweepLogOdds": -0.6,
         "causalSweepPredictedProb": 0.19215015740058863,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0476,
+        "causalGarchVolPct": 0.048,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4331,7 +4187,7 @@
         "causalSweepLogOdds": -1.81,
         "causalSweepPredictedProb": 0.05937995040452287,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0473,
+        "causalGarchVolPct": 0.0477,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4355,7 +4211,7 @@
         "causalSweepLogOdds": -1.97,
         "causalSweepPredictedProb": 0.05479928939533408,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0468,
+        "causalGarchVolPct": 0.0472,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4379,7 +4235,7 @@
         "causalSweepLogOdds": -1.92,
         "causalSweepPredictedProb": 0.06300838324186386,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0463,
+        "causalGarchVolPct": 0.0466,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4403,7 +4259,7 @@
         "causalSweepLogOdds": -3.21,
         "causalSweepPredictedProb": 0.09680054938436619,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0523,
+        "causalGarchVolPct": 0.0527,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4423,11 +4279,11 @@
         "timeframe": "15m",
         "originBarTime": 1792818000,
         "originClose": 4007.73,
-        "causalDriftSignal": 1.0641750000000338,
+        "causalDriftSignal": 1.063175000000034,
         "causalSweepLogOdds": -2,
         "causalSweepPredictedProb": 0.27425306456974896,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0504,
+        "causalGarchVolPct": 0.0508,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4451,7 +4307,7 @@
         "causalSweepLogOdds": 0.59,
         "causalSweepPredictedProb": 0.48803347277228293,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0502,
+        "causalGarchVolPct": 0.0505,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4475,7 +4331,7 @@
         "causalSweepLogOdds": 3.3,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0485,
+        "causalGarchVolPct": 0.0488,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4499,7 +4355,7 @@
         "causalSweepLogOdds": -1.24,
         "causalSweepPredictedProb": 0.12302445804295127,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0497,
+        "causalGarchVolPct": 0.05,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4523,7 +4379,7 @@
         "causalSweepLogOdds": -1.86,
         "causalSweepPredictedProb": 0.09012273386879326,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0509,
+        "causalGarchVolPct": 0.0513,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4547,7 +4403,7 @@
         "causalSweepLogOdds": 0.01,
         "causalSweepPredictedProb": 0.35569130071762683,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0491,
+        "causalGarchVolPct": 0.0494,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4571,7 +4427,7 @@
         "causalSweepLogOdds": -0.45,
         "causalSweepPredictedProb": 0.2450970203052581,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0477,
+        "causalGarchVolPct": 0.048,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4595,7 +4451,7 @@
         "causalSweepLogOdds": 0.75,
         "causalSweepPredictedProb": 0.5159534996015409,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0472,
+        "causalGarchVolPct": 0.0475,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4619,7 +4475,7 @@
         "causalSweepLogOdds": 1.95,
         "causalSweepPredictedProb": 0.7290691528409883,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0459,
+        "causalGarchVolPct": 0.0462,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4643,7 +4499,7 @@
         "causalSweepLogOdds": 2.2,
         "causalSweepPredictedProb": 0.7290691528409883,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.045,
+        "causalGarchVolPct": 0.0452,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4667,7 +4523,7 @@
         "causalSweepLogOdds": -0.27,
         "causalSweepPredictedProb": 0.30502571902598025,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0449,
+        "causalGarchVolPct": 0.045,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4691,7 +4547,7 @@
         "causalSweepLogOdds": -0.92,
         "causalSweepPredictedProb": 0.5948348250188158,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0447,
+        "causalGarchVolPct": 0.0448,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4715,7 +4571,7 @@
         "causalSweepLogOdds": -1.26,
         "causalSweepPredictedProb": 0.15386424369832807,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0463,
+        "causalGarchVolPct": 0.0465,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4735,11 +4591,11 @@
         "timeframe": "15m",
         "originBarTime": 1792829700,
         "originClose": 4004.93,
-        "causalDriftSignal": 0.4577849999999818,
+        "causalDriftSignal": 0.4567849999999817,
         "causalSweepLogOdds": 0.5,
         "causalSweepPredictedProb": 0.5831661346767394,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.045,
+        "causalGarchVolPct": 0.0452,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4763,7 +4619,7 @@
         "causalSweepLogOdds": -2.37,
         "causalSweepPredictedProb": 0.254626845252656,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0441,
+        "causalGarchVolPct": 0.0442,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4787,7 +4643,7 @@
         "causalSweepLogOdds": -2.62,
         "causalSweepPredictedProb": 0.1840600914995341,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0435,
+        "causalGarchVolPct": 0.0437,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4811,7 +4667,7 @@
         "causalSweepLogOdds": -0.2,
         "causalSweepPredictedProb": 0.4364405260536641,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0428,
+        "causalGarchVolPct": 0.043,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4835,7 +4691,7 @@
         "causalSweepLogOdds": 0.55,
         "causalSweepPredictedProb": 0.5948348250188158,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0424,
+        "causalGarchVolPct": 0.0425,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4883,7 +4739,7 @@
         "causalSweepLogOdds": -1.24,
         "causalSweepPredictedProb": 0.1840600914995341,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0456,
+        "causalGarchVolPct": 0.0457,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4907,7 +4763,7 @@
         "causalSweepLogOdds": -1.47,
         "causalSweepPredictedProb": 0.44432996675237435,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.045,
+        "causalGarchVolPct": 0.0451,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4931,7 +4787,7 @@
         "causalSweepLogOdds": 0.7,
         "causalSweepPredictedProb": 0.551716823549828,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0466,
+        "causalGarchVolPct": 0.0468,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4951,11 +4807,11 @@
         "timeframe": "15m",
         "originBarTime": 1792837800,
         "originClose": 4001.84,
-        "causalDriftSignal": 0.6356749999999357,
+        "causalDriftSignal": 0.6366749999999357,
         "causalSweepLogOdds": 3.07,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0452,
+        "causalGarchVolPct": 0.0453,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -4979,7 +4835,7 @@
         "causalSweepLogOdds": 2.06,
         "causalSweepPredictedProb": 0.8508300289418618,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0439,
+        "causalGarchVolPct": 0.0441,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5003,7 +4859,7 @@
         "causalSweepLogOdds": -0.22,
         "causalSweepPredictedProb": 0.178786353446173,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0481,
+        "causalGarchVolPct": 0.0483,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5027,7 +4883,7 @@
         "causalSweepLogOdds": 1.82,
         "causalSweepPredictedProb": 0.7156611922199949,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0463,
+        "causalGarchVolPct": 0.0465,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5051,7 +4907,7 @@
         "causalSweepLogOdds": 0.96,
         "causalSweepPredictedProb": 0.48803347277228293,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0451,
+        "causalGarchVolPct": 0.0453,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5075,7 +4931,7 @@
         "causalSweepLogOdds": 3.63,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0438,
+        "causalGarchVolPct": 0.044,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5099,7 +4955,7 @@
         "causalSweepLogOdds": -1.86,
         "causalSweepPredictedProb": 0.1020423806924071,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0531,
+        "causalGarchVolPct": 0.0534,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5123,7 +4979,7 @@
         "causalSweepLogOdds": -2.17,
         "causalSweepPredictedProb": 0.08379337803485007,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0512,
+        "causalGarchVolPct": 0.0515,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5147,7 +5003,7 @@
         "causalSweepLogOdds": -2.19,
         "causalSweepPredictedProb": 0.08691502073880684,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0495,
+        "causalGarchVolPct": 0.0497,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5171,7 +5027,7 @@
         "causalSweepLogOdds": -0.16,
         "causalSweepPredictedProb": 0.7356527705340088,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0479,
+        "causalGarchVolPct": 0.0482,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5195,7 +5051,7 @@
         "causalSweepLogOdds": -1.68,
         "causalSweepPredictedProb": 0.38973881355618434,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0463,
+        "causalGarchVolPct": 0.0465,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5219,7 +5075,7 @@
         "causalSweepLogOdds": 1.16,
         "causalSweepPredictedProb": 0.6736447592265258,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0455,
+        "causalGarchVolPct": 0.0457,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5243,7 +5099,7 @@
         "causalSweepLogOdds": 3.07,
         "causalSweepPredictedProb": 0.9331927712797292,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0441,
+        "causalGarchVolPct": 0.0442,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5267,7 +5123,7 @@
         "causalSweepLogOdds": -1.86,
         "causalSweepPredictedProb": 0.09012273386879326,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.045,
+        "causalGarchVolPct": 0.0452,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5291,7 +5147,7 @@
         "causalSweepLogOdds": -0.55,
         "causalSweepPredictedProb": 0.254626845252656,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0437,
+        "causalGarchVolPct": 0.0438,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5315,7 +5171,7 @@
         "causalSweepLogOdds": 3.98,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0612,
+        "causalGarchVolPct": 0.0611,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5363,7 +5219,7 @@
         "causalSweepLogOdds": 1.18,
         "causalSweepPredictedProb": 0.919243288834375,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0546,
+        "causalGarchVolPct": 0.0545,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5387,7 +5243,7 @@
         "causalSweepLogOdds": -2.24,
         "causalSweepPredictedProb": 0.507978354578628,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0774,
+        "causalGarchVolPct": 0.0772,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5411,7 +5267,7 @@
         "causalSweepLogOdds": 4.5,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0743,
+        "causalGarchVolPct": 0.0741,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5435,7 +5291,7 @@
         "causalSweepLogOdds": -0.77,
         "causalSweepPredictedProb": 0.6179113580156126,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0686,
+        "causalGarchVolPct": 0.0685,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5483,7 +5339,7 @@
         "causalSweepLogOdds": 1.15,
         "causalSweepPredictedProb": 0.5556700332476256,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.083,
+        "causalGarchVolPct": 0.0832,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5531,7 +5387,7 @@
         "causalSweepLogOdds": 2.04,
         "causalSweepPredictedProb": 0.7580364218340725,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0744,
+        "causalGarchVolPct": 0.0745,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5555,7 +5411,7 @@
         "causalSweepLogOdds": -1.12,
         "causalSweepPredictedProb": 0.10934861668743785,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0737,
+        "causalGarchVolPct": 0.0738,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5579,7 +5435,7 @@
         "causalSweepLogOdds": -0.03,
         "causalSweepPredictedProb": 0.2676288336853927,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0681,
+        "causalGarchVolPct": 0.0682,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5603,7 +5459,7 @@
         "causalSweepLogOdds": -0.12,
         "causalSweepPredictedProb": 0.29115965462985144,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0645,
+        "causalGarchVolPct": 0.0646,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5623,18 +5479,18 @@
         "timeframe": "15m",
         "originBarTime": 1792863000,
         "originClose": 3998.32,
-        "causalDriftSignal": 1.2569700000000865,
+        "causalDriftSignal": 1.2579700000000866,
         "causalSweepLogOdds": -0.58,
         "causalSweepPredictedProb": 0.27425306456974896,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0631,
+        "causalGarchVolPct": 0.0633,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0.0002500737730659747,
           "5": 0.0003725870965429276,
           "15": 0.0008924766317290473,
-          "60": 0.0004300881747039841
+          "60": 0.0004725868466270458
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0,
@@ -5651,18 +5507,20 @@
         "causalSweepLogOdds": -1.25,
         "causalSweepPredictedProb": 0.20045413884586183,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0606,
+        "causalGarchVolPct": 0.0608,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.00007251495624148558,
           "5": 0.0003624959258901531,
-          "15": 0.0010046660330774453
+          "15": 0.0010046660330774453,
+          "60": 0.00017001445163783945
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
           "5": 0,
-          "15": 1
+          "15": 1,
+          "60": 1
         }
       },
       "1792864800": {
@@ -5673,18 +5531,20 @@
         "causalSweepLogOdds": 1.95,
         "causalSweepPredictedProb": 0.8531409193318013,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0567,
+        "causalGarchVolPct": 0.0568,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0,
           "5": 0.000584970768143229,
-          "15": 0.0011571110505577344
+          "15": 0.0011571110505577344,
+          "60": 0.00005001087737620415
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0,
           "5": 1,
-          "15": 1
+          "15": 1,
+          "60": 1
         }
       },
       "1792865700": {
@@ -5695,18 +5555,20 @@
         "causalSweepLogOdds": -0.79,
         "causalSweepPredictedProb": 0.2775952752896584,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0534,
+        "causalGarchVolPct": 0.0536,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.00019256523206721986,
           "5": 0.001264507010824706,
-          "15": 0.0012395322353465515
+          "15": 0.0012395322353465515,
+          "60": -0.00024008703270214518
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0,
           "5": 1,
-          "15": 1
+          "15": 1,
+          "60": 1
         }
       },
       "1792866600": {
@@ -5717,18 +5579,20 @@
         "causalSweepLogOdds": -0.35,
         "causalSweepPredictedProb": 0.32996857934505847,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0507,
+        "causalGarchVolPct": 0.0508,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0.0003875935117858541,
           "5": 0.001302218579294228,
-          "15": 0.0013946341346463603
+          "15": 0.0013946341346463603,
+          "60": 0.00033258938646247937
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
           "5": 1,
-          "15": 1
+          "15": 1,
+          "60": 1
         }
       },
       "1792867500": {
@@ -5739,18 +5603,20 @@
         "causalSweepLogOdds": -1.23,
         "causalSweepPredictedProb": 0.2147638171459416,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0524,
+        "causalGarchVolPct": 0.0526,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0.00023998260241327212,
           "5": 0.0009146250675084669,
-          "15": 0.0010095382220434114
+          "15": 0.0010095382220434114,
+          "60": 0.00020748832952594714
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
           "5": 1,
-          "15": 1
+          "15": 1,
+          "60": 1
         }
       },
       "1792868400": {
@@ -5761,18 +5627,20 @@
         "causalSweepLogOdds": -0.9,
         "causalSweepPredictedProb": 0.2945984889045171,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0517,
+        "causalGarchVolPct": 0.0519,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0.000149959886011482,
           "5": 0.000677140295105562,
-          "15": 0.0006596553540105655
+          "15": 0.0006596553540105655,
+          "60": -0.000032494272887343186
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0,
           "5": 1,
-          "15": 1
+          "15": 1,
+          "60": 1
         }
       },
       "1792869300": {
@@ -5783,7 +5651,7 @@
         "causalSweepLogOdds": -2.2,
         "causalSweepPredictedProb": 0.10383474666626713,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0501,
+        "causalGarchVolPct": 0.0503,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5805,7 +5673,7 @@
         "causalSweepLogOdds": -3.46,
         "causalSweepPredictedProb": 0.14457232741808373,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0579,
+        "causalGarchVolPct": 0.0581,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5827,7 +5695,7 @@
         "causalSweepLogOdds": -2.09,
         "causalSweepPredictedProb": 0.3335978513248282,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0543,
+        "causalGarchVolPct": 0.0545,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5849,7 +5717,7 @@
         "causalSweepLogOdds": -0.53,
         "causalSweepPredictedProb": 0.39743194208650373,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0513,
+        "causalGarchVolPct": 0.0515,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5871,7 +5739,7 @@
         "causalSweepLogOdds": -0.89,
         "causalSweepPredictedProb": 0.2945984889045171,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0488,
+        "causalGarchVolPct": 0.049,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5893,7 +5761,7 @@
         "causalSweepLogOdds": -0.46,
         "causalSweepPredictedProb": 0.37448422987068236,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0467,
+        "causalGarchVolPct": 0.0469,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5915,7 +5783,7 @@
         "causalSweepLogOdds": -0.39,
         "causalSweepPredictedProb": 0.37828054288094,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0449,
+        "causalGarchVolPct": 0.0451,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5937,7 +5805,7 @@
         "causalSweepLogOdds": 0.49,
         "causalSweepPredictedProb": 0.5199388740401929,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0452,
+        "causalGarchVolPct": 0.0453,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5959,7 +5827,7 @@
         "causalSweepLogOdds": 1.86,
         "causalSweepPredictedProb": 0.8105703864155402,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0437,
+        "causalGarchVolPct": 0.0438,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -5981,7 +5849,7 @@
         "causalSweepLogOdds": -1.5,
         "causalSweepPredictedProb": 0.13349955646211623,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0465,
+        "causalGarchVolPct": 0.0466,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6003,7 +5871,7 @@
         "causalSweepLogOdds": -1.62,
         "causalSweepPredictedProb": 0.11900016598384339,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0451,
+        "causalGarchVolPct": 0.0452,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6025,7 +5893,7 @@
         "causalSweepLogOdds": -1.33,
         "causalSweepPredictedProb": 0.16108706121373179,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.044,
+        "causalGarchVolPct": 0.0441,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6047,7 +5915,7 @@
         "causalSweepLogOdds": -0.46,
         "causalSweepPredictedProb": 0.31561370086039187,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0425,
+        "causalGarchVolPct": 0.0426,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6069,7 +5937,7 @@
         "causalSweepLogOdds": -0.41,
         "causalSweepPredictedProb": 0.3227581254214953,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0414,
+        "causalGarchVolPct": 0.0415,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6113,7 +5981,7 @@
         "causalSweepLogOdds": 0.77,
         "causalSweepPredictedProb": 0.5792596877744174,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0395,
+        "causalGarchVolPct": 0.0396,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6135,7 +6003,7 @@
         "causalSweepLogOdds": -1.48,
         "causalSweepPredictedProb": 0.12302445804295127,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0395,
+        "causalGarchVolPct": 0.0396,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6157,7 +6025,7 @@
         "causalSweepLogOdds": -1.46,
         "causalSweepPredictedProb": 0.13349955646211623,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0392,
+        "causalGarchVolPct": 0.0393,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6179,7 +6047,7 @@
         "causalSweepLogOdds": 0.82,
         "causalSweepPredictedProb": 0.6179113580156126,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0386,
+        "causalGarchVolPct": 0.0387,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6223,7 +6091,7 @@
         "causalSweepLogOdds": 0.27,
         "causalSweepPredictedProb": 0.4285762900598127,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0375,
+        "causalGarchVolPct": 0.0376,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6355,7 +6223,7 @@
         "causalSweepLogOdds": -1.39,
         "causalSweepPredictedProb": 0.16602323980483796,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0303,
+        "causalGarchVolPct": 0.0304,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6377,7 +6245,7 @@
         "causalSweepLogOdds": -1.43,
         "causalSweepPredictedProb": 0.13566610134394005,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0305,
+        "causalGarchVolPct": 0.0306,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6399,7 +6267,7 @@
         "causalSweepLogOdds": -1.25,
         "causalSweepPredictedProb": 0.12507198860181407,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0305,
+        "causalGarchVolPct": 0.0306,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6421,7 +6289,7 @@
         "causalSweepLogOdds": 0.13,
         "causalSweepPredictedProb": 0.4681185596326368,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.031,
+        "causalGarchVolPct": 0.0311,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6443,7 +6311,7 @@
         "causalSweepLogOdds": 0.95,
         "causalSweepPredictedProb": 0.7389137655217444,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0312,
+        "causalGarchVolPct": 0.0313,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6465,7 +6333,7 @@
         "causalSweepLogOdds": 0.68,
         "causalSweepPredictedProb": 0.6443086992823732,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0308,
+        "causalGarchVolPct": 0.0309,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6487,7 +6355,7 @@
         "causalSweepLogOdds": 0.77,
         "causalSweepPredictedProb": 0.6480272401814652,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0304,
+        "causalGarchVolPct": 0.0305,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6505,11 +6373,11 @@
         "timeframe": "15m",
         "originBarTime": 1792899000,
         "originClose": 4004.18,
-        "causalDriftSignal": 0.7303200000000398,
+        "causalDriftSignal": 0.7293200000000398,
         "causalSweepLogOdds": -1.07,
         "causalSweepPredictedProb": 0.22662727943424926,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0303,
+        "causalGarchVolPct": 0.0304,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6531,7 +6399,7 @@
         "causalSweepLogOdds": -0.75,
         "causalSweepPredictedProb": 0.363169409544863,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0308,
+        "causalGarchVolPct": 0.0309,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6553,7 +6421,7 @@
         "causalSweepLogOdds": -3.48,
         "causalSweepPredictedProb": 0.14916997105813823,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0318,
+        "causalGarchVolPct": 0.0319,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6575,7 +6443,7 @@
         "causalSweepLogOdds": -3.51,
         "causalSweepPredictedProb": 0.16354305706302472,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0318,
+        "causalGarchVolPct": 0.0319,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6597,7 +6465,7 @@
         "causalSweepLogOdds": -3.81,
         "causalSweepPredictedProb": 0.16602323980483796,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0323,
+        "causalGarchVolPct": 0.0325,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6615,17 +6483,17 @@
         "timeframe": "15m",
         "originBarTime": 1792903500,
         "originClose": 4007.26,
-        "causalDriftSignal": 0.8673550000000323,
+        "causalDriftSignal": 0.8653550000000323,
         "causalSweepLogOdds": -3.83,
         "causalSweepPredictedProb": 0.20045413884586183,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0337,
+        "causalGarchVolPct": 0.0338,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.00008484960412772128,
           "5": -0.001623372925511106,
-          "15": -0.0018033549277967768
+          "15": -0.0017608562558739124
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
@@ -6641,16 +6509,18 @@
         "causalSweepLogOdds": 0.84,
         "causalSweepPredictedProb": 0.95,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0326,
+        "causalGarchVolPct": 0.0328,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0.000032443345810293494,
-          "5": -0.0015385233213833958
+          "5": -0.0015385233213833958,
+          "15": -0.0017285052736694096
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
-          "5": 1
+          "5": 1,
+          "15": 1
         }
       },
       "1792905300": {
@@ -6661,23 +6531,25 @@
         "causalSweepLogOdds": -1.59,
         "causalSweepPredictedProb": 0.5596177121427077,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0321,
+        "causalGarchVolPct": 0.0322,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.0004742767368800581,
-          "5": -0.0017584486226046314
+          "5": -0.0017584486226046314,
+          "15": -0.001953467149982747
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
-          "5": 1
+          "5": 1,
+          "15": 1
         }
       },
       "1792906200": {
         "timeframe": "15m",
         "originBarTime": 1792906200,
         "originClose": 4005.15,
-        "causalDriftSignal": 0.5392900000000501,
+        "causalDriftSignal": 0.5402900000000501,
         "causalSweepLogOdds": 0.07,
         "causalSweepPredictedProb": 0.4403822878572922,
         "causalSweepPredictedPositive": false,
@@ -6686,18 +6558,20 @@
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.0006618671137574756,
-          "5": -0.0012841718857245128
+          "5": -0.0012841718857245128,
+          "15": -0.0017692883231810973
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
-          "5": 1
+          "5": 1,
+          "15": 1
         }
       },
       "1792907100": {
         "timeframe": "15m",
         "originBarTime": 1792907100,
         "originClose": 4002.5,
-        "causalDriftSignal": 0.16583500000005924,
+        "causalDriftSignal": 0.16683500000005924,
         "causalSweepLogOdds": 0.57,
         "causalSweepPredictedProb": 0.7122603179680538,
         "causalSweepPredictedPositive": true,
@@ -6706,31 +6580,35 @@
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.0004348228165560554,
-          "5": 0.00008494330039821092
+          "5": 0.00008494330039821092,
+          "15": -0.0007273100223260481
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
-          "5": 1
+          "5": 1,
+          "15": 1
         }
       },
       "1792908000": {
         "timeframe": "15m",
         "originBarTime": 1792908000,
         "originClose": 4000.76,
-        "causalDriftSignal": 0.08517000000006386,
+        "causalDriftSignal": 0.08717000000006386,
         "causalSweepLogOdds": -2.05,
         "causalSweepPredictedProb": 0.5039893796247752,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0408,
+        "causalGarchVolPct": 0.0407,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": 0,
-          "5": 0.000807020875181211
+          "5": 0.000807020875181211,
+          "15": -0.000029994750920902297
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0,
-          "5": 1
+          "5": 1,
+          "15": 1
         }
       },
       "1792908900": {
@@ -6746,22 +6624,24 @@
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.00018748195541095971,
-          "5": 0.0007445812074896783
+          "5": 0.0007445812074896783,
+          "15": -0.000029994750920902297
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 1,
-          "5": 1
+          "5": 1,
+          "15": 1
         }
       },
       "1792909800": {
         "timeframe": "15m",
         "originBarTime": 1792909800,
         "originClose": 4000.01,
-        "causalDriftSignal": 0.1579000000000852,
+        "causalDriftSignal": 0.1589000000000852,
         "causalSweepLogOdds": -2.05,
         "causalSweepPredictedProb": 0.47607774668349784,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.0375,
+        "causalGarchVolPct": 0.0374,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6797,11 +6677,11 @@
         "timeframe": "15m",
         "originBarTime": 1792911600,
         "originClose": 4002.84,
-        "causalDriftSignal": 0.8303800000000138,
+        "causalDriftSignal": 0.8323800000000138,
         "causalSweepLogOdds": 0.39,
         "causalSweepPredictedProb": 0.5000000005248086,
         "causalSweepPredictedPositive": false,
-        "causalGarchVolPct": 0.0463,
+        "causalGarchVolPct": 0.0464,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
@@ -6817,16 +6697,16 @@
         "timeframe": "15m",
         "originBarTime": 1792912500,
         "originClose": 4003.99,
-        "causalDriftSignal": 0.9715300000001044,
+        "causalDriftSignal": 0.9705300000001044,
         "causalSweepLogOdds": -0.89,
         "causalSweepPredictedProb": 0.1867329054684121,
         "causalSweepPredictedPositive": true,
-        "causalGarchVolPct": 0.046,
+        "causalGarchVolPct": 0.0461,
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
           "1": -0.00006243966769136403,
-          "5": -0.0009870028774668913
+          "5": -0.0009445042055439759
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0,
@@ -6837,7 +6717,7 @@
         "timeframe": "15m",
         "originBarTime": 1792913400,
         "originClose": 4003.74,
-        "causalDriftSignal": 0.8981300000000355,
+        "causalDriftSignal": 0.8991300000000356,
         "causalSweepLogOdds": 0.49,
         "causalSweepPredictedProb": 0.4720967592421843,
         "causalSweepPredictedPositive": false,
@@ -6845,17 +6725,19 @@
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
-          "1": -0.00020732765962619155
+          "1": -0.00020732765962619155,
+          "5": -0.0009345631597757666
         },
         "realizedSweepOutcomeByHorizon": {
-          "1": 1
+          "1": 1,
+          "5": 1
         }
       },
       "1792914300": {
         "timeframe": "15m",
         "originBarTime": 1792914300,
         "originClose": 4002.91,
-        "causalDriftSignal": 0.8188050000000476,
+        "causalDriftSignal": 0.8198050000000476,
         "causalSweepLogOdds": 1.11,
         "causalSweepPredictedProb": 0.6984682295953909,
         "causalSweepPredictedPositive": true,
@@ -6863,10 +6745,12 @@
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
-          "1": -0.00019737590054365038
+          "1": -0.00019737590054365038,
+          "5": -0.0009197540306527301
         },
         "realizedSweepOutcomeByHorizon": {
-          "1": 1
+          "1": 1,
+          "5": 1
         }
       },
       "1792915200": {
@@ -6881,17 +6765,19 @@
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
-          "1": -0.0005223596277306802
+          "1": -0.0005223596277306802,
+          "5": -0.0010124760401874012
         },
         "realizedSweepOutcomeByHorizon": {
-          "1": 1
+          "1": 1,
+          "5": 1
         }
       },
       "1792916100": {
         "timeframe": "15m",
         "originBarTime": 1792916100,
         "originClose": 4000.03,
-        "causalDriftSignal": 0.5830849999999281,
+        "causalDriftSignal": 0.5840849999999282,
         "causalSweepLogOdds": -0.9,
         "causalSweepPredictedProb": 0.39358018535142797,
         "causalSweepPredictedPositive": true,
@@ -6899,7 +6785,121 @@
         "volatilityRegime": "LOW_VOL_GARCH",
         "macroRegime": "CONTRACTING_MACRO_PRESSURE",
         "realizedForwardReturnsByHorizon": {
-          "1": 0.0000024999781250669096
+          "1": 0.00004499865004804795,
+          "5": -0.0001100052253591478
+        },
+        "realizedSweepOutcomeByHorizon": {
+          "1": 0,
+          "5": 1
+        }
+      },
+      "1792917000": {
+        "timeframe": "15m",
+        "originBarTime": 1792917000,
+        "originClose": 4000.21,
+        "causalDriftSignal": 0.6418249999999172,
+        "causalSweepLogOdds": -1.3,
+        "causalSweepPredictedProb": 0.2610862344782557,
+        "causalSweepPredictedPositive": true,
+        "causalGarchVolPct": 0.0398,
+        "volatilityRegime": "LOW_VOL_GARCH",
+        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
+        "realizedForwardReturnsByHorizon": {
+          "1": -0.000052498621923203866,
+          "5": 0.00010748857944187847
+        },
+        "realizedSweepOutcomeByHorizon": {
+          "1": 0,
+          "5": 1
+        }
+      },
+      "1792917900": {
+        "timeframe": "15m",
+        "originBarTime": 1792917900,
+        "originClose": 4000,
+        "causalDriftSignal": 0.662309999999914,
+        "causalSweepLogOdds": -0.76,
+        "causalSweepPredictedProb": 0.3820886419843874,
+        "causalSweepPredictedPositive": false,
+        "causalGarchVolPct": 0.0379,
+        "volatilityRegime": "LOW_VOL_GARCH",
+        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
+        "realizedForwardReturnsByHorizon": {
+          "1": -0.00019251853050315925,
+          "5": 0.0001599872013651075
+        },
+        "realizedSweepOutcomeByHorizon": {
+          "1": 1,
+          "5": 1
+        }
+      },
+      "1792918800": {
+        "timeframe": "15m",
+        "originBarTime": 1792918800,
+        "originClose": 3999.23,
+        "causalDriftSignal": 0.5562399999999452,
+        "causalSweepLogOdds": 0.01,
+        "causalSweepPredictedProb": 0.6025680579134962,
+        "causalSweepPredictedPositive": false,
+        "causalGarchVolPct": 0.0365,
+        "volatilityRegime": "LOW_VOL_GARCH",
+        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
+        "realizedForwardReturnsByHorizon": {
+          "1": -0.00029009791007842984
+        },
+        "realizedSweepOutcomeByHorizon": {
+          "1": 1
+        }
+      },
+      "1792919700": {
+        "timeframe": "15m",
+        "originBarTime": 1792919700,
+        "originClose": 3998.07,
+        "causalDriftSignal": 0.4962299999999287,
+        "causalSweepLogOdds": 3.03,
+        "causalSweepPredictedProb": 0.95,
+        "causalSweepPredictedPositive": true,
+        "causalGarchVolPct": 0.0359,
+        "volatilityRegime": "LOW_VOL_GARCH",
+        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
+        "realizedForwardReturnsByHorizon": {
+          "1": 0.00038011118709758464
+        },
+        "realizedSweepOutcomeByHorizon": {
+          "1": 1
+        }
+      },
+      "1792920600": {
+        "timeframe": "15m",
+        "originBarTime": 1792920600,
+        "originClose": 3999.59,
+        "causalDriftSignal": 0.7413849999999402,
+        "causalSweepLogOdds": -1.44,
+        "causalSweepPredictedProb": 0.16602323980483796,
+        "causalSweepPredictedPositive": true,
+        "causalGarchVolPct": 0.039,
+        "volatilityRegime": "LOW_VOL_GARCH",
+        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
+        "realizedForwardReturnsByHorizon": {
+          "1": 0.0002624924548491745
+        },
+        "realizedSweepOutcomeByHorizon": {
+          "1": 1
+        }
+      },
+      "1792921500": {
+        "timeframe": "15m",
+        "originBarTime": 1792921500,
+        "originClose": 4000.64,
+        "causalDriftSignal": 0.9043300000000182,
+        "causalSweepLogOdds": -0.65,
+        "causalSweepPredictedProb": 0.25142882404452765,
+        "causalSweepPredictedPositive": false,
+        "causalGarchVolPct": 0.0395,
+        "volatilityRegime": "LOW_VOL_GARCH",
+        "macroRegime": "CONTRACTING_MACRO_PRESSURE",
+        "realizedForwardReturnsByHorizon": {
+          "1": 0
         },
         "realizedSweepOutcomeByHorizon": {
           "1": 0
@@ -7209,7 +7209,7 @@
       "zeroLookaheadVerified": true,
       "effectiveSampleSizeN": 240,
       "persistedSnapshotsCount": 302,
-      "lastUpdatedIso": "2026-10-25T08:31:44.597Z",
+      "lastUpdatedIso": "2026-10-25T10:09:33.736Z",
       "currentVolatilityRegime": "LOW_VOL_GARCH",
       "currentVolatilityRegimeLabelEn": "LOW_VOL_GARCH (Below Median Conditional Vol)",
       "currentVolatilityRegimeLabelFa": "رژیم نوسان پایین (LOW_VOL_GARCH)",
@@ -7223,18 +7223,18 @@
           "horizonLabelFa": "افق h=1 کندل (+15 دقیقه)",
           "sampleSizeN": 240,
           "status": "CALIBRATED_ACTIVE",
-          "spearmanRankIc": -0.0329,
-          "rankIcRollingStd": 0.2913,
-          "icIr": -0.113,
-          "rankIcTStat": -0.51,
-          "directionalHitRate": 0.4958,
-          "payoffAsymmetryRatio": 1.024,
-          "meanWinReturnBps": 4.94,
-          "meanLossReturnBps": 4.82,
-          "sweepPrecision": 0.6623,
-          "sweepRecall": 0.68,
-          "sweepF1Score": 0.6711,
-          "sweepBrierScore": 0.2534
+          "spearmanRankIc": -0.0367,
+          "rankIcRollingStd": 0.2946,
+          "icIr": -0.125,
+          "rankIcTStat": -0.57,
+          "directionalHitRate": 0.4917,
+          "payoffAsymmetryRatio": 1.009,
+          "meanWinReturnBps": 4.89,
+          "meanLossReturnBps": 4.84,
+          "sweepPrecision": 0.6536,
+          "sweepRecall": 0.6667,
+          "sweepF1Score": 0.6601,
+          "sweepBrierScore": 0.2557
         },
         {
           "horizonBars": 5,
@@ -7242,18 +7242,18 @@
           "horizonLabelFa": "افق h=5 کندل (+1.3 ساعت)",
           "sampleSizeN": 236,
           "status": "CALIBRATED_ACTIVE",
-          "spearmanRankIc": -0.0267,
-          "rankIcRollingStd": 0.3781,
-          "icIr": -0.071,
-          "rankIcTStat": -0.41,
-          "directionalHitRate": 0.5,
-          "payoffAsymmetryRatio": 0.611,
-          "meanWinReturnBps": 7.46,
-          "meanLossReturnBps": 12.21,
-          "sweepPrecision": 0.7434,
-          "sweepRecall": 0.6726,
-          "sweepF1Score": 0.7063,
-          "sweepBrierScore": 0.314
+          "spearmanRankIc": -0.0282,
+          "rankIcRollingStd": 0.3942,
+          "icIr": -0.072,
+          "rankIcTStat": -0.43,
+          "directionalHitRate": 0.4915,
+          "payoffAsymmetryRatio": 0.606,
+          "meanWinReturnBps": 7.36,
+          "meanLossReturnBps": 12.16,
+          "sweepPrecision": 0.7417,
+          "sweepRecall": 0.655,
+          "sweepF1Score": 0.6957,
+          "sweepBrierScore": 0.3204
         },
         {
           "horizonBars": 15,
@@ -7261,18 +7261,18 @@
           "horizonLabelFa": "افق h=15 کندل (+3.8 ساعت)",
           "sampleSizeN": 226,
           "status": "CALIBRATED_ACTIVE",
-          "spearmanRankIc": -0.1011,
-          "rankIcRollingStd": 0.4748,
-          "icIr": -0.213,
-          "rankIcTStat": -1.52,
-          "directionalHitRate": 0.3982,
-          "payoffAsymmetryRatio": 0.641,
-          "meanWinReturnBps": 12.39,
-          "meanLossReturnBps": 19.34,
-          "sweepPrecision": 0.9306,
-          "sweepRecall": 0.6381,
-          "sweepF1Score": 0.7571,
-          "sweepBrierScore": 0.3888
+          "spearmanRankIc": -0.0786,
+          "rankIcRollingStd": 0.4614,
+          "icIr": -0.17,
+          "rankIcTStat": -1.18,
+          "directionalHitRate": 0.3938,
+          "payoffAsymmetryRatio": 0.663,
+          "meanWinReturnBps": 12.41,
+          "meanLossReturnBps": 18.72,
+          "sweepPrecision": 0.931,
+          "sweepRecall": 0.6429,
+          "sweepF1Score": 0.7606,
+          "sweepBrierScore": 0.3852
         },
         {
           "horizonBars": 60,
@@ -7280,18 +7280,18 @@
           "horizonLabelFa": "افق h=60 کندل (+15 ساعت)",
           "sampleSizeN": 181,
           "status": "CALIBRATED_ACTIVE",
-          "spearmanRankIc": -0.0692,
-          "rankIcRollingStd": 0.4746,
-          "icIr": -0.146,
-          "rankIcTStat": -0.93,
-          "directionalHitRate": 0.221,
-          "payoffAsymmetryRatio": 0.508,
-          "meanWinReturnBps": 16.78,
-          "meanLossReturnBps": 33.03,
+          "spearmanRankIc": -0.0782,
+          "rankIcRollingStd": 0.4604,
+          "icIr": -0.17,
+          "rankIcTStat": -1.05,
+          "directionalHitRate": 0.2265,
+          "payoffAsymmetryRatio": 0.483,
+          "meanWinReturnBps": 16.04,
+          "meanLossReturnBps": 33.23,
           "sweepPrecision": 1,
           "sweepRecall": 0.663,
           "sweepF1Score": 0.7973,
-          "sweepBrierScore": 0.3792
+          "sweepBrierScore": 0.3835
         }
       ],
       "volatilityRegimePartitions": {
@@ -7304,20 +7304,20 @@
           "icIrH5": -1.172,
           "directionalHitRateH5": 0.5294,
           "payoffAsymmetryH5": 0.997,
-          "sweepF1ScoreH5": 0.6441,
-          "sweepBrierScoreH5": 0.2961
+          "sweepF1ScoreH5": 0.6207,
+          "sweepBrierScoreH5": 0.2979
         },
         "LOW_VOL_GARCH": {
           "regimeKey": "LOW_VOL_GARCH",
           "regimeLabelEn": "Low GARCH Volatility Regime (σ_t < Median)",
           "regimeLabelFa": "رژیم نوسان شرطی پایین GARCH (σ_t < میانه)",
           "sampleSizeN": 185,
-          "spearmanRankIcH5": -0.0174,
-          "icIrH5": -0.047,
-          "directionalHitRateH5": 0.4919,
-          "payoffAsymmetryH5": 0.44,
-          "sweepF1ScoreH5": 0.7203,
-          "sweepBrierScoreH5": 0.319
+          "spearmanRankIcH5": -0.028,
+          "icIrH5": -0.073,
+          "directionalHitRateH5": 0.4811,
+          "payoffAsymmetryH5": 0.426,
+          "sweepF1ScoreH5": 0.7121,
+          "sweepBrierScoreH5": 0.3266
         }
       },
       "macroRegimePartitions": {
@@ -7326,28 +7326,28 @@
           "regimeLabelEn": "Expanding Macro Pressure (Net Lift ≥ 0)",
           "regimeLabelFa": "رژیم فشار کلان انبساطی (برآیند کلان ≥ ۰)",
           "sampleSizeN": 236,
-          "spearmanRankIcH5": -0.0267,
-          "icIrH5": -0.071,
-          "directionalHitRateH5": 0.5,
-          "payoffAsymmetryH5": 0.611,
-          "sweepF1ScoreH5": 0.7063,
-          "sweepBrierScoreH5": 0.314
+          "spearmanRankIcH5": -0.0282,
+          "icIrH5": -0.072,
+          "directionalHitRateH5": 0.4915,
+          "payoffAsymmetryH5": 0.606,
+          "sweepF1ScoreH5": 0.6957,
+          "sweepBrierScoreH5": 0.3204
         },
         "CONTRACTING_MACRO_PRESSURE": {
           "regimeKey": "CONTRACTING_MACRO_PRESSURE",
           "regimeLabelEn": "Contracting Macro Pressure (Net Lift < 0)",
           "regimeLabelFa": "رژیم فشار کلان انقباضی (برآیند کلان < ۰)",
           "sampleSizeN": 236,
-          "spearmanRankIcH5": -0.0267,
-          "icIrH5": -0.071,
-          "directionalHitRateH5": 0.5,
-          "payoffAsymmetryH5": 0.611,
-          "sweepF1ScoreH5": 0.7063,
-          "sweepBrierScoreH5": 0.314
+          "spearmanRankIcH5": -0.0282,
+          "icIrH5": -0.072,
+          "directionalHitRateH5": 0.4915,
+          "payoffAsymmetryH5": 0.606,
+          "sweepF1ScoreH5": 0.6957,
+          "sweepBrierScoreH5": 0.3204
         }
       },
-      "summaryBadgeEn": "OOS N=240 · IC(h=1)=-0.033 · IC(h=5)=-0.027 · Hit(h=1)=49.6%",
-      "summaryBadgeFa": "نمونه N=240 · ضریب IC(h=1)=-0.033 · IC(h=5)=-0.027 · نرخ اصابت=49.6%"
+      "summaryBadgeEn": "OOS N=240 · IC(h=1)=-0.037 · IC(h=5)=-0.028 · Hit(h=1)=49.2%",
+      "summaryBadgeFa": "نمونه N=240 · ضریب IC(h=1)=-0.037 · IC(h=5)=-0.028 · نرخ اصابت=49.2%"
     }
   }
 }

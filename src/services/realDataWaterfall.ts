@@ -20,12 +20,17 @@ export interface ProviderAttemptDiagnostic {
   providerName: string;
   symbol: string;
   endpoint: string;
+  venueGroupId?: string;
+  instrumentIdentity?: InstrumentIdentity;
   status: 'SUCCESS' | 'FAILED' | 'SKIPPED_BY_TEST';
   httpStatus?: number;
   contentType?: string;
   isHtmlResponse?: boolean;
   latencyMs: number;
   candleCount: number;
+  lastBarTimeSec?: number;
+  barStalenessSec?: number;
+  isStaleBar?: boolean;
   errorMessage?: string;
   timestampIso: string;
 }
@@ -54,6 +59,8 @@ export interface SystemWarningErrorEntry {
 }
 
 export interface VerifiedMarketWaterfallResult {
+  snapshotId?: string;
+  snapshotTimestampIso?: string;
   systemState: TerminalSystemState;
   activeTier: ProviderTier | 'NONE_HALTED';
   activeProvider: string;
@@ -385,12 +392,75 @@ type ProviderFetchOutcome = {
     providerName: string;
     symbol: string;
     endpoint: string;
+    venueGroupId: string;
     candles: VerifiedCandle[];
     tier: ProviderTier;
     instrumentIdentity: InstrumentIdentity;
+    lastBarTimeSec: number;
+    barStalenessSec: number;
+    isStaleBar: boolean;
   } | null;
   diag: ProviderAttemptDiagnostic;
 };
+
+const INTERVAL_STEP_SECONDS_MAP: Record<string, number> = {
+  '1m': 60,
+  '5m': 300,
+  '15m': 900,
+  '30m': 1800,
+  '1h': 3600,
+  '4h': 14400,
+  '1d': 86400,
+};
+
+export function inferVenueGroupId(providerName: string, endpoint: string = ''): string {
+  const lower = `${providerName} ${endpoint}`.toLowerCase();
+  if (lower.includes('binance')) return 'binance_paxg';
+  if (lower.includes('bybit')) return 'bybit_paxg';
+  if (lower.includes('kucoin')) return 'kucoin_paxg';
+  if (lower.includes('yahoo') || lower.includes('gc=f') || lower.includes('gc%3df')) return 'yahoo_comex_gcf';
+  if (lower.includes('htx') || lower.includes('huobi')) return 'htx_paxg';
+  if (lower.includes('okx')) return 'okx_paxg';
+  if (lower.includes('kraken')) return 'kraken_paxg';
+  if (lower.includes('coinbase')) return 'coinbase_paxg';
+  if (lower.includes('gate.io') || lower.includes('gateio')) return 'gateio_paxg';
+  if (lower.includes('fixture')) return 'fixture_replay';
+  return providerName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+}
+
+export function evaluateProviderQuorum(diagnostics: ProviderAttemptDiagnostic[]) {
+  const totalEndpoints = diagnostics.length;
+  const activeEndpoints = diagnostics.filter(d => d.status === 'SUCCESS').length;
+
+  const allVenueGroups = new Set<string>();
+  const activeVenueGroups = new Set<string>();
+  const paxgVenueGroups = new Set<string>();
+  const activePaxgVenueGroups = new Set<string>();
+
+  for (const d of diagnostics) {
+    const group = d.venueGroupId || inferVenueGroupId(d.providerName, d.endpoint);
+    const inst = d.instrumentIdentity || (d.symbol === 'GC=F' ? 'COMEX_GOLD_FUTURES' : 'PAXG_SPOT_TOKEN');
+    allVenueGroups.add(group);
+    if (inst === 'PAXG_SPOT_TOKEN') {
+      paxgVenueGroups.add(group);
+    }
+    if (d.status === 'SUCCESS' && !d.isStaleBar) {
+      activeVenueGroups.add(group);
+      if (inst === 'PAXG_SPOT_TOKEN') {
+        activePaxgVenueGroups.add(group);
+      }
+    }
+  }
+
+  return {
+    totalEndpoints,
+    activeEndpoints,
+    independentVenuesTotal: allVenueGroups.size,
+    independentVenuesActive: activeVenueGroups.size,
+    sameInstrumentPaxgVenuesTotal: paxgVenueGroups.size,
+    sameInstrumentPaxgVenuesActive: activePaxgVenueGroups.size,
+  };
+}
 
 async function runIsolatedProvider(
   tier: ProviderTier,
@@ -399,9 +469,12 @@ async function runIsolatedProvider(
   endpoint: string,
   instrumentIdentity: InstrumentIdentity,
   skipByTest: boolean,
-  fetcher: () => Promise<{ candles: VerifiedCandle[]; httpStatus: number; contentType: string }>
+  fetcher: () => Promise<{ candles: VerifiedCandle[]; httpStatus: number; contentType: string }>,
+  interval: string = '15m'
 ): Promise<ProviderFetchOutcome> {
   const tStart = Date.now();
+  const venueGroupId = inferVenueGroupId(providerName, endpoint);
+  const stepSec = INTERVAL_STEP_SECONDS_MAP[interval] || 900;
   if (skipByTest) {
     return {
       res: null,
@@ -410,6 +483,8 @@ async function runIsolatedProvider(
         providerName,
         symbol,
         endpoint,
+        venueGroupId,
+        instrumentIdentity,
         status: 'SKIPPED_BY_TEST',
         latencyMs: 0,
         candleCount: 0,
@@ -427,19 +502,42 @@ async function runIsolatedProvider(
       endpoint,
       tier,
     });
+    const lastBarTimeSec = cleanCandles[cleanCandles.length - 1].time;
+    const barStalenessSec = Math.max(0, Math.floor(Date.now() / 1000) - lastBarTimeSec);
+    // 24/7 PAXG spot venues are stale if > 2.0x timeframe step; COMEX futures allow weekend closure window
+    const isStaleBar =
+      instrumentIdentity === 'PAXG_SPOT_TOKEN'
+        ? barStalenessSec > stepSec * 2.0
+        : barStalenessSec > Math.max(stepSec * 4.0, 216000);
     return {
-      res: { providerName, symbol, endpoint, candles: cleanCandles, tier, instrumentIdentity },
+      res: {
+        providerName,
+        symbol,
+        endpoint,
+        venueGroupId,
+        candles: cleanCandles,
+        tier,
+        instrumentIdentity,
+        lastBarTimeSec,
+        barStalenessSec,
+        isStaleBar,
+      },
       diag: {
         tier,
         providerName,
         symbol,
         endpoint,
+        venueGroupId,
+        instrumentIdentity,
         status: 'SUCCESS',
         httpStatus: out.httpStatus,
         contentType: out.contentType,
         isHtmlResponse: false,
         latencyMs: Date.now() - tStart,
         candleCount: cleanCandles.length,
+        lastBarTimeSec,
+        barStalenessSec,
+        isStaleBar,
         timestampIso: new Date().toISOString(),
       },
     };
@@ -453,6 +551,8 @@ async function runIsolatedProvider(
         providerName,
         symbol,
         endpoint,
+        venueGroupId,
+        instrumentIdentity,
         status: 'FAILED',
         isHtmlResponse: isHtml,
         latencyMs: Date.now() - tStart,
@@ -825,7 +925,16 @@ async function fetchGateIoSpotPaxgCandles(interval: string) {
 
 const marketWaterfallCache = new Map<string, { timestamp: number; data: VerifiedMarketWaterfallResult }>();
 const lastVerifiedRealSnapshotCache = new Map<string, { timestamp: number; data: VerifiedMarketWaterfallResult }>();
+let latestGlobalWaterfallSnapshot: VerifiedMarketWaterfallResult | null = null;
 let cachedHtfDailyCandles: { timestamp: number; candles: VerifiedCandle[] } | null = null;
+
+export function getLatestWaterfallSnapshot(interval: string = '15m'): VerifiedMarketWaterfallResult | null {
+  return (
+    marketWaterfallCache.get(interval)?.data ||
+    lastVerifiedRealSnapshotCache.get(interval)?.data ||
+    latestGlobalWaterfallSnapshot
+  );
+}
 
 async function getOrFetchHtfDailyCandles(): Promise<VerifiedCandle[]> {
   if (cachedHtfDailyCandles && Date.now() - cachedHtfDailyCandles.timestamp < 300000) {
@@ -867,6 +976,7 @@ export async function fetchVerifiedMarketWaterfall(
 ): Promise<VerifiedMarketWaterfallResult> {
   const flags = getFeatureFlags();
   const simFail = (options?.simulateFailure || '').toLowerCase();
+  const stepSec = INTERVAL_STEP_SECONDS_MAP[interval] || 900;
 
   if (!simFail && !options?.fixtureReplay) {
     const cached = marketWaterfallCache.get(interval);
@@ -875,9 +985,14 @@ export async function fetchVerifiedMarketWaterfall(
     }
   }
 
+  const snapshotTimestampIso = new Date().toISOString();
+  const snapshotId = `gdf-snap-${interval}-${Date.now()}`;
+
   if (options?.fixtureReplay) {
     if (!flags.ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST) {
       return {
+        snapshotId,
+        snapshotTimestampIso,
         systemState: 'HALTED_DEGRADED',
         activeTier: 'NONE_HALTED',
         activeProvider: 'NONE (Fixture Replay Disabled in Production)',
@@ -906,7 +1021,10 @@ export async function fetchVerifiedMarketWaterfall(
         tier: 'FIXTURE_TEST_REPLAY',
       });
       const lastBarTime = cleanFixtureCandles[cleanFixtureCandles.length - 1].time;
+      const barAgeSec = Math.max(0, Math.floor(Date.now() / 1000) - lastBarTime);
       return {
+        snapshotId,
+        snapshotTimestampIso,
         systemState: 'FIXTURE_REPLAY',
         activeTier: 'FIXTURE_TEST_REPLAY',
         activeProvider: `${raw.provider} [Verified Fixture Replay]`,
@@ -923,13 +1041,18 @@ export async function fetchVerifiedMarketWaterfall(
             providerName: `${raw.provider} [Verified Fixture Replay]`,
             symbol: raw.symbol,
             endpoint: `fixtures/real-market/paxg_${interval}.json`,
+            venueGroupId: 'fixture_replay',
+            instrumentIdentity: 'PAXG_SPOT_TOKEN',
             status: 'SUCCESS',
             latencyMs: 1,
             candleCount: cleanFixtureCandles.length,
-            timestampIso: new Date().toISOString(),
+            lastBarTimeSec: lastBarTime,
+            barStalenessSec: barAgeSec,
+            isStaleBar: true,
+            timestampIso: snapshotTimestampIso,
           },
         ],
-        freshnessAgeSec: Math.max(0, Math.floor(Date.now() / 1000) - lastBarTime),
+        freshnessAgeSec: barAgeSec,
         haltReasonEn: 'FIXTURE REPLAY MODE: Operating on read-only historical verified fixture data (not live market feed).',
         haltReasonFa: 'حالت بازپخش داده تاریخی آزمایشی (غیرزنده).',
       };
@@ -940,9 +1063,9 @@ export async function fetchVerifiedMarketWaterfall(
   const skipT2 = simFail.includes('all') || simFail.includes('tier2');
   const skipT3 = simFail.includes('all') || simFail.includes('tier3');
 
-  // Execute all 10 independent providers in parallel with complete fault isolation
+  // Execute all 10 provider endpoints in parallel with complete fault isolation
   const providerOutcomes = await Promise.all([
-    // Tier 1 Primary Venues (4 independent PAXG spot sources)
+    // Tier 1 Primary Venues (4 endpoints across 3 independent PAXG spot venues: Binance [2 hosts], Bybit, KuCoin)
     runIsolatedProvider(
       'TIER_1_PRIMARY',
       'Binance Vision Public Node (PAXG/USDT)',
@@ -950,7 +1073,8 @@ export async function fetchVerifiedMarketWaterfall(
       `https://data-api.binance.vision/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
       'PAXG_SPOT_TOKEN',
       skipT1,
-      () => fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision Public Node (PAXG/USDT)', interval)
+      () => fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision Public Node (PAXG/USDT)', interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_1_PRIMARY',
@@ -959,7 +1083,8 @@ export async function fetchVerifiedMarketWaterfall(
       `https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
       'PAXG_SPOT_TOKEN',
       skipT1,
-      () => fetchBinanceHostCandles('https://api.binance.com', 'Binance Spot Primary Core (PAXG/USDT)', interval)
+      () => fetchBinanceHostCandles('https://api.binance.com', 'Binance Spot Primary Core (PAXG/USDT)', interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_1_PRIMARY',
@@ -968,7 +1093,8 @@ export async function fetchVerifiedMarketWaterfall(
       `https://api.bybit.com/v5/market/kline?category=spot&symbol=PAXGUSDT`,
       'PAXG_SPOT_TOKEN',
       skipT1,
-      () => fetchBybitSpotPaxgCandles(interval)
+      () => fetchBybitSpotPaxgCandles(interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_1_PRIMARY',
@@ -977,7 +1103,8 @@ export async function fetchVerifiedMarketWaterfall(
       `https://api.kucoin.com/api/v1/market/candles?symbol=PAXG-USDT`,
       'PAXG_SPOT_TOKEN',
       skipT1,
-      () => fetchKucoinSpotPaxgCandles(interval)
+      () => fetchKucoinSpotPaxgCandles(interval),
+      interval
     ),
 
     // Tier 2 Secondary Venues (3 independent sources: Yahoo COMEX GC=F, HTX PAXG/USDT, OKX PAXG-USDT)
@@ -988,7 +1115,8 @@ export async function fetchVerifiedMarketWaterfall(
       'https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF',
       'COMEX_GOLD_FUTURES',
       skipT2,
-      () => fetchYahooGoldSingle('query1.finance.yahoo.com', 'GC%3DF', 'GC=F', 'Yahoo Finance COMEX Gold Futures (GC=F)', interval)
+      () => fetchYahooGoldSingle('query1.finance.yahoo.com', 'GC%3DF', 'GC=F', 'Yahoo Finance COMEX Gold Futures (GC=F)', interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_2_SECONDARY',
@@ -997,7 +1125,8 @@ export async function fetchVerifiedMarketWaterfall(
       'https://api.huobi.pro/market/history/kline?symbol=paxgusdt',
       'PAXG_SPOT_TOKEN',
       skipT2,
-      () => fetchHtxSpotPaxgCandles(interval)
+      () => fetchHtxSpotPaxgCandles(interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_2_SECONDARY',
@@ -1006,7 +1135,8 @@ export async function fetchVerifiedMarketWaterfall(
       'https://www.okx.com/api/v5/market/candles?instId=PAXG-USDT',
       'PAXG_SPOT_TOKEN',
       skipT2,
-      () => fetchOkxSpotPaxgCandles(interval)
+      () => fetchOkxSpotPaxgCandles(interval),
+      interval
     ),
 
     // Tier 3 Tertiary Venues (3 independent PAXG spot sources)
@@ -1017,7 +1147,8 @@ export async function fetchVerifiedMarketWaterfall(
       'https://api.kraken.com/0/public/OHLC?pair=PAXGUSD',
       'PAXG_SPOT_TOKEN',
       skipT3,
-      () => fetchKrakenSpotPaxgCandles(interval)
+      () => fetchKrakenSpotPaxgCandles(interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_3_TERTIARY',
@@ -1026,7 +1157,8 @@ export async function fetchVerifiedMarketWaterfall(
       'https://api.exchange.coinbase.com/products/PAXG-USD/candles',
       'PAXG_SPOT_TOKEN',
       skipT3,
-      () => fetchCoinbaseSpotPaxgCandles(interval)
+      () => fetchCoinbaseSpotPaxgCandles(interval),
+      interval
     ),
     runIsolatedProvider(
       'TIER_3_TERTIARY',
@@ -1035,7 +1167,8 @@ export async function fetchVerifiedMarketWaterfall(
       'https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=PAXG_USDT',
       'PAXG_SPOT_TOKEN',
       skipT3,
-      () => fetchGateIoSpotPaxgCandles(interval)
+      () => fetchGateIoSpotPaxgCandles(interval),
+      interval
     ),
   ]);
 
@@ -1044,12 +1177,15 @@ export async function fetchVerifiedMarketWaterfall(
     .map(o => o.res)
     .filter((r): r is NonNullable<ProviderFetchOutcome['res']> => r !== null && r.candles.length >= 20);
 
-  // Prioritize same-instrument PAXG_SPOT_TOKEN within each tier before falling back to COMEX_GOLD_FUTURES
-  const tier1Success = successfulResults.find(r => r.tier === 'TIER_1_PRIMARY');
+  // Prioritize fresh (non-stale) same-instrument PAXG_SPOT_TOKEN within each tier before falling back
+  const freshResults = successfulResults.filter(r => !r.isStaleBar);
+  const pool = freshResults.length > 0 ? freshResults : successfulResults;
+
+  const tier1Success = pool.find(r => r.tier === 'TIER_1_PRIMARY');
   const tier2Success =
-    successfulResults.find(r => r.tier === 'TIER_2_SECONDARY' && r.instrumentIdentity === 'PAXG_SPOT_TOKEN') ||
-    successfulResults.find(r => r.tier === 'TIER_2_SECONDARY');
-  const tier3Success = successfulResults.find(r => r.tier === 'TIER_3_TERTIARY');
+    pool.find(r => r.tier === 'TIER_2_SECONDARY' && r.instrumentIdentity === 'PAXG_SPOT_TOKEN') ||
+    pool.find(r => r.tier === 'TIER_2_SECONDARY');
+  const tier3Success = pool.find(r => r.tier === 'TIER_3_TERTIARY');
   const primaryWinner = tier1Success || tier2Success || tier3Success || null;
 
   if (!primaryWinner) {
@@ -1062,8 +1198,10 @@ export async function fetchVerifiedMarketWaterfall(
           providerOrComponent: 'Verified Real Snapshot Cache',
           message: `All 10 live venues timed out transiently; serving verified real snapshot (${recentVerified.data.activeProvider}) in DEGRADED_FALLBACK.`,
         });
-        return {
+        const fallbackResult: VerifiedMarketWaterfallResult = {
           ...recentVerified.data,
+          snapshotId,
+          snapshotTimestampIso,
           systemState: 'DEGRADED_FALLBACK',
           isFixtureReplay: false,
           diagnostics,
@@ -1074,6 +1212,8 @@ export async function fetchVerifiedMarketWaterfall(
           haltReasonEn: `DEGRADED FALLBACK MODE: Transient upstream rate-limit; preserving verified real bars from ${recentVerified.data.activeProvider}.`,
           haltReasonFa: `وضعیت جایگزین (Degraded Fallback): محدودیت موقت شبکه؛ حفظ کندل‌های واقعی تاییدشده از ${recentVerified.data.activeProvider}.`,
         };
+        latestGlobalWaterfallSnapshot = fallbackResult;
+        return fallbackResult;
       }
     }
 
@@ -1084,7 +1224,9 @@ export async function fetchVerifiedMarketWaterfall(
       message: 'CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1, Tier-2, and Tier-3 live external gold providers failed.',
     });
 
-    return {
+    const haltedResult: VerifiedMarketWaterfallResult = {
+      snapshotId,
+      snapshotTimestampIso,
       systemState: 'HALTED_DEGRADED',
       activeTier: 'NONE_HALTED',
       activeProvider: 'NONE (All External Market Providers Unreachable)',
@@ -1102,6 +1244,8 @@ export async function fetchVerifiedMarketWaterfall(
       haltReasonFa:
         'مدار محافظتی فعال شد (توقف در وضعیت اضطراری): تمامی منابع زنده سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (کامکس یاهو/HTX/OKX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) قطع شده‌اند. به‌روزرسانی فیلتر کالمن و نوسانات متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.',
     };
+    latestGlobalWaterfallSnapshot = haltedResult;
+    return haltedResult;
   }
 
   const primaryCandles = primaryWinner.candles;
@@ -1111,10 +1255,15 @@ export async function fetchVerifiedMarketWaterfall(
   const activeEndpoint = primaryWinner.endpoint;
   const instrumentIdentity = primaryWinner.instrumentIdentity;
 
-  // Select an independent secondary benchmark and align bars by UTC timestamp
+  // Select an truly independent secondary benchmark (different venueGroupId!) and align bars by UTC timestamp
   const refBench =
-    successfulResults.find(r => r.providerName !== activeProvider && r.tier !== activeTier) ||
-    successfulResults.find(r => r.providerName !== activeProvider) ||
+    successfulResults.find(
+      r => r.venueGroupId !== primaryWinner.venueGroupId && r.instrumentIdentity === instrumentIdentity && !r.isStaleBar
+    ) ||
+    successfulResults.find(
+      r => r.venueGroupId !== primaryWinner.venueGroupId && !r.isStaleBar
+    ) ||
+    successfulResults.find(r => r.venueGroupId !== primaryWinner.venueGroupId) ||
     null;
 
   const intervalToleranceMap: Record<string, number> = {
@@ -1157,9 +1306,24 @@ export async function fetchVerifiedMarketWaterfall(
   const htfDailyCandles = interval === '1d' ? primaryCandles : await getOrFetchHtfDailyCandles();
   const lastBarTime = primaryCandles[primaryCandles.length - 1].time;
   const freshnessAgeSec = Math.max(0, Math.floor(Date.now() / 1000) - lastBarTime);
-  const systemState: TerminalSystemState = activeTier === 'TIER_1_PRIMARY' ? 'LIVE_NOMINAL' : 'DEGRADED_FALLBACK';
+  const isWinnerStale = freshnessAgeSec > stepSec * 2.0;
+
+  const systemState: TerminalSystemState =
+    activeTier === 'TIER_1_PRIMARY' && !isWinnerStale ? 'LIVE_NOMINAL' : 'DEGRADED_FALLBACK';
+
+  let haltReasonEn: string | undefined;
+  let haltReasonFa: string | undefined;
+  if (isWinnerStale) {
+    haltReasonEn = `DEGRADED FALLBACK MODE (STALE BAR): Latest bar from ${activeProvider} is ${freshnessAgeSec}s old (${(freshnessAgeSec / stepSec).toFixed(1)}x ${interval} timeframe).`;
+    haltReasonFa = `وضعیت جایگزین (کندل قدیمی): آخرین کندل دریافتی از ${activeProvider} دارای تاخیر ${freshnessAgeSec} ثانیه است.`;
+  } else if (systemState === 'DEGRADED_FALLBACK') {
+    haltReasonEn = `DEGRADED FALLBACK MODE: Primary Tier-1 feed unavailable. Operating on verified ${activeTier} (${activeProvider}).`;
+    haltReasonFa = `وضعیت جایگزین (Degraded Fallback): منبع اصلی سطح ۱ در دسترس نیست. سیستم بر روی منبع واقعی تاییدشده ${activeProvider} قرار دارد.`;
+  }
 
   const result: VerifiedMarketWaterfallResult = {
+    snapshotId,
+    snapshotTimestampIso,
     systemState,
     activeTier,
     activeProvider,
@@ -1172,16 +1336,11 @@ export async function fetchVerifiedMarketWaterfall(
     secondaryBenchmark,
     diagnostics,
     freshnessAgeSec,
-    haltReasonEn:
-      systemState === 'DEGRADED_FALLBACK'
-        ? `DEGRADED FALLBACK MODE: Primary Tier-1 feed unavailable. Operating on verified ${activeTier} (${activeProvider}).`
-        : undefined,
-    haltReasonFa:
-      systemState === 'DEGRADED_FALLBACK'
-        ? `وضعیت جایگزین (Degraded Fallback): منبع اصلی سطح ۱ در دسترس نیست. سیستم بر روی منبع واقعی تاییدشده ${activeProvider} قرار دارد.`
-        : undefined,
+    haltReasonEn,
+    haltReasonFa,
   };
 
+  latestGlobalWaterfallSnapshot = result;
   if (!simFail && !options?.fixtureReplay) {
     marketWaterfallCache.set(interval, { timestamp: Date.now(), data: result });
     lastVerifiedRealSnapshotCache.set(interval, { timestamp: Date.now(), data: result });

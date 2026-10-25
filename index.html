@@ -4346,7 +4346,42 @@ function logClientWarningOrError(level, subsystem, message) {
   if (clientWarningErrorLog.length > 50) clientWarningErrorLog.length = 50;
 }
 
-const API_BASE = '';
+function resolveApiBaseUrl() {
+  try {
+    if (typeof window !== 'undefined') {
+      if (window.GDF_API_BASE_URL && typeof window.GDF_API_BASE_URL === 'string') {
+        return window.GDF_API_BASE_URL.replace(/\/+$/, '');
+      }
+      const urlParams = new URLSearchParams(window.location.search || '');
+      const paramApiBase = urlParams.get('apiBase');
+      if (paramApiBase && /^https?:\/\//i.test(paramApiBase)) {
+        return paramApiBase.replace(/\/+$/, '');
+      }
+      const storedBase = window.localStorage ? window.localStorage.getItem('gdf_api_base_url') : null;
+      if (storedBase && /^https?:\/\//i.test(storedBase)) {
+        return storedBase.replace(/\/+$/, '');
+      }
+      const proto = window.location.protocol || '';
+      const origin = window.location.origin || '';
+      const isNativeShell =
+        proto === 'file:' ||
+        proto === 'capacitor:' ||
+        origin.includes('capacitor://') ||
+        (window.location.hostname === 'localhost' && Boolean(window.Capacitor || window.cordova));
+      if (isNativeShell) {
+        return 'https://gold-quant-api.onrender.com';
+      }
+    }
+  } catch (_) {}
+  return '';
+}
+
+const API_BASE = resolveApiBaseUrl();
+
+function buildApiUrl(pathWithLeadingSlash) {
+  const cleanPath = pathWithLeadingSlash.startsWith('/') ? pathWithLeadingSlash : `/${pathWithLeadingSlash}`;
+  return `${API_BASE}${cleanPath}`;
+}
 
 function showUpdateToast(msg = 'New quantitative build detected. Applying update...') {
   const toast = document.getElementById('pwaUpdateToast');
@@ -4477,11 +4512,8 @@ async function checkServerBuildVersion(interactive = false) {
   if (pwaVerLbl) {
     pwaVerLbl.textContent = `Build: ${CLIENT_APP_VERSION} · Auto-sync active`;
   }
-  if (window.location.protocol === 'file:' || window.location.origin.includes('capacitor://')) {
-    return;
-  }
   try {
-    const res = await fetch(`/api/app-version?t=${Date.now()}`, { cache: 'no-store' });
+    const res = await fetch(buildApiUrl(`/api/app-version?t=${Date.now()}`), { cache: 'no-store' });
     if (!res.ok) return;
     const ct = (res.headers.get('content-type') || '').toLowerCase();
     if (!ct.includes('application/json') && !ct.includes('text/json')) return;
@@ -6050,30 +6082,51 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     const urlParams = new URLSearchParams(window.location.search);
     const simFail = urlParams.get('simulateFailure') || '';
     const fixReplay = urlParams.get('fixtureReplay') || '';
-    let apiUrl = `/api/gold-forecast?interval=${encodeURIComponent(targetInterval)}&_t=${Date.now()}`;
-    if (simFail) apiUrl += `&simulateFailure=${encodeURIComponent(simFail)}`;
-    if (fixReplay) apiUrl += `&fixtureReplay=${encodeURIComponent(fixReplay)}`;
+    let apiPath = `/api/gold-forecast?interval=${encodeURIComponent(targetInterval)}&_t=${Date.now()}`;
+    if (simFail) apiPath += `&simulateFailure=${encodeURIComponent(simFail)}`;
+    if (fixReplay) apiPath += `&fixtureReplay=${encodeURIComponent(fixReplay)}`;
+    const apiUrl = buildApiUrl(apiPath);
 
     timeoutId = setTimeout(() => {
       try { controller.abort('Upstream timeout after 15s'); } catch (_) {}
     }, 15000);
 
-    const res = await fetch(apiUrl, {
+    let res = await fetch(apiUrl, {
       signal: controller.signal,
-      headers: { 'Cache-Control': 'no-store' }
+      cache: 'no-store',
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-store'
+      }
     });
+
+    // If Render cold-start or gateway interstitial returns HTTP 200 with HTML or 502/504, retry once after 1.2s
+    let contentType = (res.headers.get('content-type') || '').toLowerCase();
+    const isNonJson200 = res.ok && !contentType.includes('application/json') && !contentType.includes('text/json');
+    if (isNonJson200 || res.status === 502 || res.status === 504) {
+      await new Promise(r => setTimeout(r, 1200));
+      const retryUrl = buildApiUrl(`${apiPath}&_retry=1`);
+      res = await fetch(retryUrl, {
+        signal: controller.signal,
+        cache: 'no-store',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-store'
+        }
+      });
+      contentType = (res.headers.get('content-type') || '').toLowerCase();
+    }
     clearTimeout(timeoutId);
 
     if (!res.ok && res.status !== 503) throw new Error('API HTTP ' + res.status);
-    const contentType = (res.headers.get('content-type') || '').toLowerCase();
     if (!contentType.includes('application/json') && !contentType.includes('text/json')) {
-      console.warn(`[GDF Circuit Breaker] Non-JSON Content-Type received from /api/gold-forecast: status=${res.status}, content-type=${contentType || 'none'}`);
-      throw new Error(`Upstream non-JSON response (HTTP ${res.status})`);
+      console.warn(`[GDF Client Transport Guard] Non-JSON Content-Type received from /api/gold-forecast: status=${res.status}, content-type=${contentType || 'none'}`);
+      throw new Error(`Upstream non-JSON response (HTTP ${res.status}, Content-Type=${contentType || 'none'})`);
     }
     const rawText = await res.text();
     const trimmedBody = rawText.trim();
     if (trimmedBody.startsWith('<') || trimmedBody.toLowerCase().startsWith('<!doctype')) {
-      console.warn(`[GDF Circuit Breaker] HTML error page received instead of JSON from /api/gold-forecast: status=${res.status}`);
+      console.warn(`[GDF Client Transport Guard] HTML error page received instead of JSON from /api/gold-forecast: status=${res.status}`);
       throw new Error(`Upstream gateway returned HTML page (HTTP ${res.status})`);
     }
     const data = JSON.parse(trimmedBody);
@@ -6130,65 +6183,83 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     if (abortReason.includes('Superseded')) return;
 
     const errDesc = (err && err.message) ? err.message : (abortReason || 'Timeout');
-    console.warn('[GDF Circuit Breaker] Live API unreachable. Halting mutations without synthetic fallback:', errDesc);
-    logClientWarningOrError('ERROR', 'MARKET_WATERFALL', `Live API fetch failed (${targetInterval}): ${errDesc}`);
+    console.warn('[GDF Client Transport Guard] Could not fetch JSON from /api/gold-forecast. Preserving last verified snapshot without synthetic data:', errDesc);
+    logClientWarningOrError('ERROR', 'CLIENT_API_TRANSPORT', `Client fetch to /api/gold-forecast (${targetInterval}) failed: ${errDesc}`);
+
+    const prevData = (forecastData && Array.isArray(forecastData.candles) && forecastData.candles.length > 0) ? forecastData : null;
+    const prevRel = prevData?.dataReliability || null;
+    const stepSec = TIMEFRAME_STEPS[targetInterval] || 900;
+    const lastBarSec = prevData?.candles?.length
+      ? prevData.candles[prevData.candles.length - 1].time
+      : null;
+    const actualStalenessSec = lastBarSec ? Math.max(0, Math.floor(Date.now() / 1000) - lastBarSec) : null;
+    const actualStalenessRatio = actualStalenessSec !== null ? parseFloat((actualStalenessSec / stepSec).toFixed(3)) : null;
 
     const cleanHaltEn =
-      'All live external market feeds are temporarily unreachable. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data generated.';
+      `Client API transport error while requesting /api/gold-forecast (${errDesc}). Filter mutations are FROZEN. Zero synthetic data generated.`;
     const cleanHaltFa =
-      'ارتباط با منابع داده زنده بازار موقتاً برقرار نشد. به‌روزرسانی فیلتر کالمن (EKF)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
+      `خطای ارتباط کلاینت با سرور در دریافت /api/gold-forecast (${errDesc}). به‌روزرسانی فیلترها متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.`;
 
-    const haltedReliability = {
+    const transportReliability = {
       integrityState: 'HALTED_DEGRADED',
-      gradeLabel: 'HALTED / DEGRADED — ALL LIVE MARKET SOURCES UNREACHABLE',
-      gradeLabelFa: 'توقف کامل (HALTED) — عدم دسترسی به منابع زنده بازار',
+      gradeLabel: prevRel
+        ? `CLIENT API TRANSPORT FAULT — PRESERVING LAST SNAPSHOT (${prevRel.quorumBadge || ''})`
+        : 'CLIENT API TRANSPORT FAULT — GATEWAY / NETWORK UNREACHABLE',
+      gradeLabelFa: prevRel
+        ? `خطای شبکه کلاینت — حفظ آخرین اسنپ‌شات تاییدشده (${prevRel.quorumBadge || ''})`
+        : 'خطای ارتباط کلاینت با سرور — عدم دریافت پاسخ JSON',
       gradeColor: '#ff1744',
-      activeProvidersCount: 0,
-      totalProvidersCount: 16,
-      quorumRatio: 0,
-      quorumBadge: '0/16 QUORUM',
-      spotQuorumActive: 0,
-      spotQuorumTotal: 10,
-      crossVenueDispersionBps: null,
-      stalenessSec: 9000,
-      timeframeStepSec: TIMEFRAME_STEPS[targetInterval] || 900,
-      stalenessRatio: 10,
+      activeProvidersCount: prevRel ? prevRel.activeProvidersCount : null,
+      totalProvidersCount: prevRel ? prevRel.totalProvidersCount : null,
+      quorumRatio: prevRel ? prevRel.quorumRatio : 0,
+      quorumBadge: prevRel ? `${prevRel.quorumBadge} (CACHED)` : 'CLIENT_TRANSPORT_ERROR',
+      spotQuorumActive: prevRel ? prevRel.spotQuorumActive : null,
+      spotQuorumTotal: prevRel ? prevRel.spotQuorumTotal : null,
+      crossVenueDispersionBps: prevRel ? prevRel.crossVenueDispersionBps : null,
+      stalenessSec: actualStalenessSec,
+      timeframeStepSec: stepSec,
+      stalenessRatio: actualStalenessRatio,
       stalenessStatus: 'HALTED',
-      sequenceCompletenessRatio: 0,
-      contiguousBarsCount: 0,
-      expectedBarsCount: 0,
-      missingBarsCount: 0,
-      totalFeeds: 5,
+      sequenceCompletenessRatio: prevRel ? prevRel.sequenceCompletenessRatio : 0,
+      contiguousBarsCount: prevRel ? prevRel.contiguousBarsCount : 0,
+      expectedBarsCount: prevRel ? prevRel.expectedBarsCount : 0,
+      missingBarsCount: prevRel ? prevRel.missingBarsCount : 0,
+      totalFeeds: prevRel ? prevRel.totalFeeds : 5,
       healthyFeeds: 0,
       lastCheckTimestamp: Date.now(),
       systemState: 'HALTED_DEGRADED',
-      activeTier: 'NONE_HALTED',
-      activeProvider: 'ALL_PROVIDERS_FAILED',
-      feeds: forecastData?.dataReliability?.feeds || [],
+      activeTier: prevData?.activeTier || 'CLIENT_TRANSPORT_FAULT',
+      activeProvider: prevData?.activeProvider
+        ? `${prevData.activeProvider} [Last Verified Snapshot · Client Transport Fault]`
+        : 'CLIENT_API_UNREACHABLE (Gateway/Network Non-JSON or Timeout)',
+      feeds: prevRel?.feeds || [],
     };
 
     const haltedState = {
-      ...(forecastData || {}),
-      status: 'HALTED_DEGRADED',
+      ...(prevData || {}),
+      status: 'CLIENT_API_TRANSPORT_ERROR',
       systemState: 'HALTED_DEGRADED',
       isHalted: true,
+      isClientTransportError: true,
+      clientTransportErrorDetail: errDesc,
       isSynthetic: false,
-      activeTier: 'NONE_HALTED',
-      activeProvider: 'ALL_PROVIDERS_FAILED',
+      activeTier: transportReliability.activeTier,
+      activeProvider: transportReliability.activeProvider,
+      providerDiagnostics: prevData?.providerDiagnostics || [],
       haltReasonEn: cleanHaltEn,
       haltReasonFa: cleanHaltFa,
-      dataReliability: haltedReliability,
+      dataReliability: transportReliability,
     };
     forecastData = haltedState;
     updateCircuitBreakerBanner(haltedState);
-    updateDataReliabilityUI(haltedReliability);
+    updateDataReliabilityUI(transportReliability);
 
     const atmLabel = document.getElementById('atmStateLabel');
     const atmSub = document.getElementById('atmSubLabel');
     if (atmLabel) {
       atmLabel.textContent = currentLang === 'fa'
-        ? 'توقف اضطراری (HALTED_DEGRADED)'
-        : 'HALTED / DEGRADED — UPSTREAM UNREACHABLE';
+        ? 'خطای شبکه کلاینت (CLIENT TRANSPORT FAULT)'
+        : 'CLIENT API TRANSPORT FAULT — RETRYING...';
       atmLabel.style.color = '#ff1744';
     }
     if (atmSub) {
@@ -6196,8 +6267,8 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     }
 
     retryQuantTimeout = setTimeout(() => {
-      fetchQuantData(currentTimeframe, false);
-    }, 15000);
+      fetchQuantData(currentTimeframe, true);
+    }, 8000);
   } finally {
     if (activeQuantController === controller) {
       activeQuantController = null;
@@ -6435,6 +6506,15 @@ function renderHUD(d) {
     window.GDFClientCore.syncModelSpecRegistry(d.modelSpecRegistry);
   }
   document.getElementById('headPrice').textContent = '$' + d.currentPrice.toFixed(2);
+  const spotLabelEl = document.querySelector('[data-i18n="spotGold"]');
+  if (spotLabelEl) {
+    if (d.instrumentIdentity === 'COMEX_GOLD_FUTURES') {
+      spotLabelEl.textContent = currentLang === 'fa' ? 'آتی طلای کامکس (GC=F)' : 'COMEX Gold Futures (GC=F)';
+    } else {
+      const sym = d.activeSymbol || 'PAXG';
+      spotLabelEl.textContent = currentLang === 'fa' ? `طلای توکنیزه‌شده (${sym})` : `Spot Gold Token (${sym})`;
+    }
+  }
   const netLift = d.macroWindVector.totalNetVelocity;
   document.getElementById('headDrift').textContent = (netLift >= 0 ? '+' : '') + netLift.toFixed(2) + ' $/hr';
   document.getElementById('headVol').textContent = d.garchVolatility.currentVolPct.toFixed(2) + '%';
@@ -6451,7 +6531,12 @@ function renderHUD(d) {
     }
     const macroTag = document.getElementById('macroFeedStatusTag');
     if (macroTag) {
-      macroTag.textContent = d.macroYieldFeed.status === 'ONLINE_STREAMING' ? '● LIVE' : '● SYNCED';
+      macroTag.textContent =
+        d.macroYieldFeed.status === 'ONLINE_MULTI_SOURCE_VERIFIED'
+          ? '● LIVE VERIFIED'
+          : d.macroYieldFeed.status === 'MACRO_FEED_UNAVAILABLE'
+          ? '● UNAVAILABLE'
+          : '● DEGRADED';
     }
   }
 
@@ -8973,7 +9058,7 @@ document.getElementById('diagBtn').addEventListener('click', async () => {
   overlay.classList.remove('hidden');
   body.textContent = currentLang === 'fa' ? 'در حال استخراج تله‌متری زنده ناظر DP...' : 'Generating real-time DP Observer telemetry...';
   try {
-    const res = await fetch('/api/diagnosis');
+    const res = await fetch(buildApiUrl('/api/diagnosis'), { cache: 'no-store' });
     const ct = (res.headers.get('content-type') || '').toLowerCase();
     if (!res.ok || (!ct.includes('application/json') && !ct.includes('text/json'))) {
       throw new Error(`Non-JSON response (${res.status})`);
@@ -9037,7 +9122,7 @@ if (btnReverifyFeeds) {
     const txt = document.getElementById('txtReverifyFeeds');
     if (txt) txt.textContent = currentLang === 'fa' ? 'در حال پایش و راستی‌آزمایی...' : 'Verifying and pinging streams...';
     btnReverifyFeeds.disabled = true;
-    await fetchQuantData(currentTimeframe);
+    await fetchQuantData(currentTimeframe, true);
     setTimeout(() => {
       btnReverifyFeeds.disabled = false;
       if (txt) txt.textContent = currentLang === 'fa' ? 'راستی‌آزمایی مجدد جریان‌های داده' : 'Re-Verify All Input Streams';
@@ -9045,7 +9130,7 @@ if (btnReverifyFeeds) {
   });
 }
 
-document.getElementById('refreshBtn').addEventListener('click', () => fetchQuantData(currentTimeframe));
+document.getElementById('refreshBtn').addEventListener('click', () => fetchQuantData(currentTimeframe, true));
 
 // Client-Side Anti-Inspection & IP Tamper Deterrent Protection
 document.addEventListener('contextmenu', (e) => {
@@ -9119,11 +9204,30 @@ const btnCopyBugReport = document.getElementById('btnCopyBugReport');
 function buildCleanBugReportText(diagPayload) {
   const d = forecastData || {};
   const rel = d.dataReliability || {};
-  const sysState = d.systemState || (d.isHalted ? 'HALTED_DEGRADED' : 'LIVE_NOMINAL');
-  const quorumStr = `${rel.activeProvidersCount ?? 0}/${rel.totalProvidersCount ?? 16}`;
-  const providerDiags = Array.isArray(d.providerDiagnostics)
-    ? d.providerDiagnostics
-    : (diagPayload?.latestWaterfall?.tierDiagnostics || []);
+  const wfSnap = diagPayload?.latestWaterfall || null;
+  const sysState = d.systemState || wfSnap?.systemState || (d.isHalted ? 'HALTED_DEGRADED' : 'LIVE_NOMINAL');
+  const snapshotId = d.snapshotId || rel.snapshotId || wfSnap?.snapshotId || 'N/A';
+  const instIdentity = d.instrumentIdentity || wfSnap?.instrumentIdentity || 'PAXG_SPOT_TOKEN';
+  const activeProv = d.activeProvider || wfSnap?.activeProvider || 'NONE';
+  const activeTier = d.activeTier || wfSnap?.activeTier || 'NONE';
+  const quorumStr =
+    rel.activeProvidersCount !== null && rel.activeProvidersCount !== undefined
+      ? `${rel.activeProvidersCount}/${rel.totalProvidersCount ?? 16}`
+      : 'N/A (Client Transport Fault)';
+  const spotQuorumStr =
+    rel.spotQuorumActive !== null && rel.spotQuorumActive !== undefined
+      ? `${rel.spotQuorumActive}/${rel.spotQuorumTotal ?? 9} independent venues`
+      : 'N/A (Client Transport Fault)';
+  const stalenessStr =
+    rel.stalenessSec !== null && rel.stalenessSec !== undefined
+      ? `${rel.stalenessSec}s (${rel.stalenessRatio ?? 'N/A'}x TF · ${rel.stalenessStatus || 'N/A'})`
+      : wfSnap?.freshnessAgeSec !== undefined
+      ? `${wfSnap.freshnessAgeSec}s`
+      : 'N/A (No Server Snapshot)';
+  const providerDiags =
+    Array.isArray(d.providerDiagnostics) && d.providerDiagnostics.length > 0
+      ? d.providerDiagnostics
+      : (wfSnap?.tierDiagnostics || []);
   const serverWarns = Array.isArray(d.systemWarningsErrors)
     ? d.systemWarningsErrors
     : (Array.isArray(diagPayload?.systemWarningsErrors) ? diagPayload.systemWarningsErrors : []);
@@ -9134,23 +9238,25 @@ function buildCleanBugReportText(diagPayload) {
     '======================================================================',
     `Generated At (ISO):     ${new Date().toISOString()}`,
     `Client App Version:     ${CLIENT_APP_VERSION}`,
-    `Server App Version:     ${d.version || latestServerVersionInfo?.version || 'UNKNOWN'}`,
-    `Server Build Time:      ${d.buildTime ? new Date(d.buildTime).toISOString() : 'N/A'}`,
+    `Server App Version:     ${d.version || diagPayload?.version || latestServerVersionInfo?.version || 'UNKNOWN'}`,
+    `Server Build Time:      ${(d.buildTime || diagPayload?.buildTime) ? new Date(d.buildTime || diagPayload.buildTime).toISOString() : 'N/A'}`,
+    `Snapshot Correlation:   ${snapshotId}`,
+    `Instrument Identity:    ${instIdentity} (${d.activeSymbol || wfSnap?.activeSymbol || 'PAXGUSDT'})`,
     `Active Timeframe:       ${currentTimeframe} (${TIMEFRAME_STEPS[currentTimeframe] || 900}s)`,
     '',
     '1. CIRCUIT-BREAKER & FEED INTEGRITY STATE (SINGLE SOURCE OF TRUTH)',
     '----------------------------------------------------------------------',
-    `  • Circuit-Breaker State:    ${sysState}`,
+    `  • Circuit-Breaker State:    ${sysState}${d.isClientTransportError ? ' [CLIENT_API_TRANSPORT_ERROR]' : ''}`,
     `  • Feed Integrity State:     ${rel.integrityState || sysState} (${rel.gradeLabel || 'N/A'})`,
     `  • Provider Quorum Ratio:    ${quorumStr} (${((rel.quorumRatio || 0) * 100).toFixed(1)}%)`,
-    `  • Active Spot Venue:        ${d.activeProvider || 'NONE'} [${d.activeTier || 'NONE'}]`,
-    `  • Spot Venues Responding:   ${rel.spotQuorumActive ?? 0}/${rel.spotQuorumTotal ?? 10}`,
+    `  • Active Spot Venue:        ${activeProv} [${activeTier}]`,
+    `  • Spot Venues Responding:   ${spotQuorumStr}`,
     `  • Cross-Venue Dispersion:   ${rel.crossVenueDispersionBps !== null && rel.crossVenueDispersionBps !== undefined ? rel.crossVenueDispersionBps + ' bps' : 'Single-Venue / Unanchored'}`,
-    `  • Bar Staleness:            ${rel.stalenessSec ?? 'N/A'}s (${rel.stalenessRatio ?? 'N/A'}x TF · ${rel.stalenessStatus || 'N/A'})`,
+    `  • Bar Staleness:            ${stalenessStr}`,
     `  • Sequence Completeness:    ${rel.contiguousBarsCount ?? 0}/${rel.expectedBarsCount ?? 0} bars (${rel.missingBarsCount ?? 0} missing)`,
     `  • Halt Reason (if any):     ${d.haltReasonEn || 'None (Nominal)'}`,
     '',
-    '2. PER-PROVIDER WATERFALL STATUS (10 INDEPENDENT REAL GOLD SOURCES)',
+    '2. PER-PROVIDER WATERFALL STATUS (10 REAL GOLD ENDPOINTS / 9 VENUES)',
     '----------------------------------------------------------------------',
   ];
 
@@ -9158,12 +9264,16 @@ function buildCleanBugReportText(diagPayload) {
     lines.push('  • No provider diagnostics recorded yet.');
   } else {
     providerDiags.forEach((p, idx) => {
-      const htmlTag = p.isHtmlRejected ? ' [HTML_REJECTED]' : '';
+      const provName = p.providerName || p.provider || 'Unknown Provider';
+      const barsCount = p.candleCount ?? p.candlesCount ?? 0;
+      const htmlTag = (p.isHtmlResponse || p.isHtmlRejected) ? ' [HTML_REJECTED]' : '';
+      const staleTag = p.isStaleBar ? ` [STALE:${p.barStalenessSec ?? '?'}s]` : '';
       const httpTag = p.httpStatus ? ` HTTP=${p.httpStatus}` : '';
       const ctTag = p.contentType ? ` CT=${p.contentType}` : '';
-      const errTag = p.errorSummary ? ` · Reason: ${p.errorSummary}` : '';
+      const errReason = p.errorMessage || p.errorSummary || '';
+      const errTag = errReason ? ` · Reason: ${errReason}` : '';
       lines.push(
-        `  [${idx + 1}] ${p.provider} (${p.tier}) -> ${p.status} | Latency=${p.latencyMs}ms | Bars=${p.candlesCount}${httpTag}${ctTag}${htmlTag}${errTag}`
+        `  [${idx + 1}] ${provName} (${p.tier}) -> ${p.status} | Latency=${p.latencyMs}ms | Bars=${barsCount}${httpTag}${ctTag}${htmlTag}${staleTag}${errTag}`
       );
     });
   }
@@ -9189,7 +9299,8 @@ function buildCleanBugReportText(diagPayload) {
     lines.push('  • Zero warnings or errors recorded in current session.');
   } else {
     combinedWarnings.forEach((w, i) => {
-      lines.push(`  [${i + 1}] [${w.timestampIso}] [${w.level}] [${w.subsystem}] ${w.providerName ? '(' + w.providerName + ') ' : ''}${w.message}`);
+      const compName = w.providerOrComponent || w.providerName || '';
+      lines.push(`  [${i + 1}] [${w.timestampIso}] [${w.level}] [${w.subsystem}] ${compName ? '(' + compName + ') ' : ''}${w.message}`);
     });
   }
   lines.push('======================================================================');
@@ -9226,10 +9337,15 @@ async function openBugReportModal() {
   }
 
   try {
-    const res = await fetch(`/api/provider-diagnostics?_t=${Date.now()}`, { cache: 'no-store' });
+    const res = await fetch(buildApiUrl(`/api/provider-diagnostics?interval=${encodeURIComponent(currentTimeframe)}&_t=${Date.now()}`), { cache: 'no-store' });
     if (res.ok) {
       const diagData = await res.json();
       if (preEl) preEl.textContent = buildCleanBugReportText(diagData);
+      if (diagData?.latestWaterfall && (!d.activeProvider || d.isClientTransportError)) {
+        if (venueEl) {
+          venueEl.textContent = `Server Active Venue: ${diagData.latestWaterfall.activeProvider} (${diagData.latestWaterfall.activeTier})`;
+        }
+      }
     }
   } catch (_) {}
 }

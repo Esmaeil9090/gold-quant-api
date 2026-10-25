@@ -16,6 +16,7 @@ import {
   fetchVerifiedMacroNews,
   fetchVerifiedMacroWaterfall,
   fetchVerifiedMarketWaterfall,
+  getLatestWaterfallSnapshot,
   getProviderHttpDiagnostics,
   getSystemWarningErrorLog,
   ProviderTier,
@@ -101,16 +102,24 @@ app.get('/api/model-specs', (req: Request, res: Response) => {
 // Phase 1/2 Bug-Fix Diagnostic Endpoint: Inspect exact HTTP status, Content-Type, and HTML rejection events per provider
 app.get('/api/provider-diagnostics', async (req: Request, res: Response) => {
   const probe = req.query.probe === '1' || req.query.probe === 'true';
-  let latestWaterfall = null;
-  if (probe) {
-    const wf = await fetchVerifiedMarketWaterfall('15m');
-    latestWaterfall = {
-      systemState: wf.systemState,
-      activeTier: wf.activeTier,
-      activeProvider: wf.activeProvider,
-      tierDiagnostics: wf.diagnostics,
-    };
-  }
+  const intervalQuery = (req.query.interval as string) || '15m';
+  const interval = VALID_INTERVALS[intervalQuery] ? intervalQuery : '15m';
+  const wf = probe
+    ? await fetchVerifiedMarketWaterfall(interval)
+    : getLatestWaterfallSnapshot(interval) || (await fetchVerifiedMarketWaterfall(interval));
+  const latestWaterfall = wf
+    ? {
+        snapshotId: wf.snapshotId,
+        snapshotTimestampIso: wf.snapshotTimestampIso,
+        systemState: wf.systemState,
+        activeTier: wf.activeTier,
+        activeProvider: wf.activeProvider,
+        activeSymbol: wf.activeSymbol,
+        instrumentIdentity: wf.instrumentIdentity || 'PAXG_SPOT_TOKEN',
+        freshnessAgeSec: wf.freshnessAgeSec,
+        tierDiagnostics: wf.diagnostics,
+      }
+    : null;
   const httpEvents = getProviderHttpDiagnostics();
   const htmlRejectedEvents = httpEvents.filter(e => e.isHtmlOrNonJson || e.outcome === 'NON_JSON_HTML_REJECTED');
   res.json({
@@ -118,6 +127,7 @@ app.get('/api/provider-diagnostics', async (req: Request, res: Response) => {
     version: APP_VERSION,
     buildTime: BUILD_TIME,
     timestampIso: new Date().toISOString(),
+    snapshotId: wf?.snapshotId || null,
     totalHttpEventsLogged: httpEvents.length,
     htmlOrNonJsonRejectionsCount: htmlRejectedEvents.length,
     htmlRejectedProviders: Array.from(new Set(htmlRejectedEvents.map(e => e.providerName))),
@@ -330,6 +340,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
 
     const payload = {
       status: 'SUCCESS',
+      snapshotId: waterfall.snapshotId,
+      snapshotTimestampIso: waterfall.snapshotTimestampIso,
       systemState: waterfall.systemState,
       isHalted: false,
       isSynthetic: false,
@@ -440,6 +452,15 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
 
 app.post('/api/gold-predictions', async (req: Request, res: Response) => {
   res.redirect(307, '/api/gold-forecast');
+});
+
+// Strict API 404 JSON Guard: Never allow unknown /api/* routes to fall through to the HTML SPA catch-all
+app.all('/api/*', (req: Request, res: Response) => {
+  res.status(404).json({
+    status: 'NOT_FOUND',
+    error: `API endpoint not found: ${req.method} ${req.path}`,
+    timestampIso: new Date().toISOString(),
+  });
 });
 
 app.get('*', (req: Request, res: Response) => {

@@ -30,6 +30,9 @@ function parseBoolEnv(val: string | undefined, defaultValue: boolean): boolean {
 
 export function getFeatureFlags(): FeatureFlags {
   const isProduction = (process.env.NODE_ENV || '').trim().toLowerCase() === 'production';
+  const rawFixtureEnv =
+    process.env.GDF_ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST ??
+    process.env.ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST;
   return {
     STRICT_REAL_DATA_ONLY: parseBoolEnv(process.env.GDF_STRICT_REAL_DATA_ONLY, true),
     ENABLE_MULTI_TIER_WATERFALL: parseBoolEnv(process.env.GDF_ENABLE_MULTI_TIER_WATERFALL, true),
@@ -37,9 +40,6 @@ export function getFeatureFlags(): FeatureFlags {
     ENABLE_REAL_NEWS_ADAPTER: parseBoolEnv(process.env.GDF_ENABLE_REAL_NEWS_ADAPTER, true),
     ENABLE_CIRCUIT_BREAKER_HALT: parseBoolEnv(process.env.GDF_ENABLE_CIRCUIT_BREAKER_HALT, true),
     ENABLE_EMPIRICAL_CALIBRATION: parseBoolEnv(process.env.GDF_ENABLE_EMPIRICAL_CALIBRATION, true),
-    ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST: parseBoolEnv(
-      process.env.GDF_ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST,
-      !isProduction
-    ),
+    ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST: parseBoolEnv(rawFixtureEnv, !isProduction),
   };
 }

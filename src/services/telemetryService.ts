@@ -13,7 +13,7 @@ import type {
   VpinTelemetry,
 } from '../contracts/quantContracts.js';
 import { AdaptiveDPObserver, computeOrthogonalMacroFactors } from '../engine/quantEngine.js';
-import { sanitizeUserFacingHaltReason } from './realDataWaterfall.js';
+import { evaluateProviderQuorum, sanitizeUserFacingHaltReason } from './realDataWaterfall.js';
 import { getLatestValidationScorecard } from './walkForwardValidationService.js';
 
 /**
@@ -24,6 +24,8 @@ import { getLatestValidationScorecard } from './walkForwardValidationService.js'
 
 export function computeDataReliability(
   waterfall: {
+    snapshotId?: string;
+    snapshotTimestampIso?: string;
     systemState: TerminalSystemState;
     activeTier: ProviderTier | 'NONE_HALTED';
     activeProvider: string;
@@ -43,11 +45,12 @@ export function computeDataReliability(
   const activeDiag = waterfall.diagnostics.find(d => d.status === 'SUCCESS');
   const spotLatency = activeDiag?.latencyMs ?? 0;
 
-  // 1. Active Independent Provider Quorum Ratio
-  const spotQuorumTotal = Math.max(3, waterfall.diagnostics.length);
-  const spotQuorumActive = waterfall.diagnostics.filter(d => d.status === 'SUCCESS').length;
+  // 1. Active Independent Provider Quorum Ratio (deduplicating correlated exchange hosts such as Binance Vision + Binance Core)
+  const quorumBreakdown = evaluateProviderQuorum(waterfall.diagnostics);
+  const spotQuorumTotal = Math.max(3, quorumBreakdown.independentVenuesTotal || waterfall.diagnostics.length);
+  const spotQuorumActive = quorumBreakdown.independentVenuesActive;
   const macroActive = liveMacro.respondingSources ? liveMacro.respondingSources.length : 0;
-  const macroTotal = Math.max(4, macroActive); // Yahoo Treasury ^TNX, Yahoo DXY, FRED CSV, Frankfurter FX
+  const macroTotal = Math.max(4, macroActive); // Yahoo Treasury ^TNX, Yahoo DXY, FRED CSVs (DGS10/DFII10/DTWEXBGS)
   const newsActive = newsFeed.activeSources ? newsFeed.activeSources.length : 0;
   const newsTotal = Math.max(3, newsActive); // Yahoo Finance Gold RSS, CNBC Market RSS, Investing Commodities RSS
 
@@ -268,6 +271,8 @@ export function computeDataReliability(
   }
 
   return {
+    snapshotId: waterfall.snapshotId,
+    snapshotTimestampIso: waterfall.snapshotTimestampIso,
     integrityState,
     gradeLabel,
     gradeLabelFa,
@@ -278,6 +283,10 @@ export function computeDataReliability(
     quorumBadge,
     spotQuorumActive,
     spotQuorumTotal,
+    independentSpotVenuesActive: quorumBreakdown.independentVenuesActive,
+    independentSpotVenuesTotal: quorumBreakdown.independentVenuesTotal,
+    sameInstrumentPaxgVenuesActive: quorumBreakdown.sameInstrumentPaxgVenuesActive,
+    sameInstrumentPaxgVenuesTotal: quorumBreakdown.sameInstrumentPaxgVenuesTotal,
     crossVenueDispersionBps,
     stalenessSec,
     timeframeStepSec: safeStepSec,
@@ -369,11 +378,16 @@ export function buildHaltedDegradedForecastPayload(params: {
 
   return {
     status: 'HALTED_DEGRADED',
+    snapshotId: waterfall.snapshotId || `gdf-halted-${interval}-${Date.now()}`,
+    snapshotTimestampIso: waterfall.snapshotTimestampIso || new Date().toISOString(),
     systemState: 'HALTED_DEGRADED' as TerminalSystemState,
     isHalted: true,
     isSynthetic: false,
+    isFixtureReplay: false,
+    instrumentIdentity: waterfall.instrumentIdentity || 'NONE',
     activeTier: 'NONE_HALTED',
     activeProvider: waterfall.activeProvider,
+    activeSymbol: waterfall.activeSymbol || 'N/A',
     haltReasonEn: sanitizeUserFacingHaltReason(waterfall.haltReasonEn, 'en'),
     haltReasonFa: sanitizeUserFacingHaltReason(waterfall.haltReasonFa, 'fa'),
     providerDiagnostics: waterfall.diagnostics,

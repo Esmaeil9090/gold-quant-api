@@ -246,6 +246,8 @@ export interface FeedIntegrityMetric {
 }
 
 export interface DataReliabilityTelemetry {
+  snapshotId?: string;
+  snapshotTimestampIso?: string;
   integrityState: 'QUORUM_VERIFIED' | 'PARTIAL_QUORUM' | 'SINGLE_SOURCE_DEGRADED' | 'HALTED_DEGRADED' | 'FIXTURE_REPLAY';
   gradeLabel: string;
   gradeLabelFa: string;
@@ -256,6 +258,10 @@ export interface DataReliabilityTelemetry {
   quorumBadge: string;
   spotQuorumActive: number;
   spotQuorumTotal: number;
+  independentSpotVenuesActive?: number;
+  independentSpotVenuesTotal?: number;
+  sameInstrumentPaxgVenuesActive?: number;
+  sameInstrumentPaxgVenuesTotal?: number;
   crossVenueDispersionBps: number | null;
   stalenessSec: number;
   timeframeStepSec: number;

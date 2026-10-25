@@ -10,6 +10,7 @@
     "check:confidence-metrics": "tsx scripts/check-phase4-confidence-metrics.ts",
     "check:validation-layer": "tsx scripts/check-phase5-validation-and-html-guard.ts",
     "check:cognitive-hierarchy": "tsx scripts/check-phase6-cognitive-hierarchy.ts",
+    "check:full-system-audit": "tsx scripts/check-full-system-audit.ts",
     "lint": "tsc --noEmit",
     "start": "node server.ts"
   },

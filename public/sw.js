@@ -1,5 +1,5 @@
 // GDF Progressive Web App Service Worker — Self-Updating Engine
-const CACHE_NAME = 'gdf-quant-v75.0-unified-resilience';
+const CACHE_NAME = 'gdf-quant-v75.1-unified-resilience';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -47,7 +47,7 @@ self.addEventListener('message', (event) => {
 });
 
 // Fetch Strategy:
-// 1. /api/ requests: Bypass ServiceWorker interception completely
+// 1. /api/ requests: Bypass ServiceWorker interception completely (never return cached HTML for /api/*)
 // 2. Navigation requests (App Shell / index.html): Network-First (with quick fallback to cache if offline)
 // 3. Static assets: Stale-While-Revalidate (with MIME-type guard against HTML fallback poisoning)
 self.addEventListener('fetch', (event) => {
