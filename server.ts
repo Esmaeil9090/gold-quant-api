@@ -154,8 +154,36 @@ app.get('/api/validation-scorecard', async (req: Request, res: Response) => {
   });
 });
 
-app.use(express.static(__dirname));
+// Block direct HTTP access to server source code, scripts, fixtures, and configuration files
+app.use((req, res, next) => {
+  const lowerPath = req.path.toLowerCase();
+  if (
+    lowerPath === '/server.ts' ||
+    lowerPath === '/package.json' ||
+    lowerPath === '/tsconfig.json' ||
+    lowerPath === '/render.yaml' ||
+    lowerPath === '/procfile' ||
+    lowerPath.startsWith('/src/') ||
+    lowerPath.startsWith('/scripts/') ||
+    lowerPath.startsWith('/data/') ||
+    lowerPath.startsWith('/fixtures/') ||
+    lowerPath.startsWith('/.env') ||
+    lowerPath.startsWith('/.git') ||
+    lowerPath.endsWith('.ts')
+  ) {
+    return res.status(403).json({
+      status: 'FORBIDDEN',
+      error: 'Direct HTTP access to internal source, scripts, or configuration files is forbidden.',
+    });
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/index.html', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 const observer = new AdaptiveDPObserver();
 
@@ -305,6 +333,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       systemState: waterfall.systemState,
       isHalted: false,
       isSynthetic: false,
+      isFixtureReplay: Boolean(waterfall.isFixtureReplay || waterfall.systemState === 'FIXTURE_REPLAY'),
+      instrumentIdentity: waterfall.instrumentIdentity || 'PAXG_SPOT_TOKEN',
       activeTier: waterfall.activeTier,
       activeProvider: waterfall.activeProvider,
       activeSymbol: waterfall.activeSymbol,

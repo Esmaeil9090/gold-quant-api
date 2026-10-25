@@ -1447,7 +1447,7 @@ export function evaluatePureQuantPipeline(
   } | null,
   intervalStepSeconds: number,
   observerInst: AdaptiveDPObserver,
-  systemState: 'LIVE_NOMINAL' | 'DEGRADED_FALLBACK' | 'HALTED_DEGRADED',
+  systemState: 'LIVE_NOMINAL' | 'DEGRADED_FALLBACK' | 'HALTED_DEGRADED' | 'FIXTURE_REPLAY',
   activeTier: string,
   htfDailyCandles?: Candle[]
 ) {

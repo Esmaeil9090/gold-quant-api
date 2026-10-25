@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "tsc && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts && tsx scripts/check-phase6-cognitive-hierarchy.ts",
+    "build": "tsc && tsx scripts/check-phase0-baseline-integrity.ts && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts && tsx scripts/check-phase6-cognitive-hierarchy.ts",
+    "check:baseline-integrity": "tsx scripts/check-phase0-baseline-integrity.ts",
     "check:spec-parity": "tsx scripts/check-phase3-spec-parity.ts",
     "check:confidence-metrics": "tsx scripts/check-phase4-confidence-metrics.ts",
     "check:validation-layer": "tsx scripts/check-phase5-validation-and-html-guard.ts",

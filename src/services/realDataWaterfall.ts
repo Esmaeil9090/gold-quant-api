@@ -12,7 +12,8 @@ export interface VerifiedCandle {
 }
 
 export type ProviderTier = 'TIER_1_PRIMARY' | 'TIER_2_SECONDARY' | 'TIER_3_TERTIARY' | 'FIXTURE_TEST_REPLAY';
-export type TerminalSystemState = 'LIVE_NOMINAL' | 'DEGRADED_FALLBACK' | 'HALTED_DEGRADED';
+export type TerminalSystemState = 'LIVE_NOMINAL' | 'DEGRADED_FALLBACK' | 'HALTED_DEGRADED' | 'FIXTURE_REPLAY';
+export type InstrumentIdentity = 'PAXG_SPOT_TOKEN' | 'COMEX_GOLD_FUTURES' | 'NONE';
 
 export interface ProviderAttemptDiagnostic {
   tier: ProviderTier;
@@ -58,11 +59,15 @@ export interface VerifiedMarketWaterfallResult {
   activeProvider: string;
   activeSymbol: string;
   activeEndpoint: string;
+  instrumentIdentity?: InstrumentIdentity;
+  isFixtureReplay?: boolean;
   candles: VerifiedCandle[];
   htfDailyCandles?: VerifiedCandle[];
   secondaryBenchmark: {
     provider: string;
     symbol: string;
+    instrumentIdentity?: InstrumentIdentity;
+    alignedBarCount?: number;
     candles: VerifiedCandle[];
     crossVenueSpreadUsd: number;
     crossVenueZScore: number;
@@ -87,6 +92,7 @@ export interface VerifiedMacroYieldResult {
   status: 'ONLINE_MULTI_SOURCE_VERIFIED' | 'DEGRADED_SINGLE_SOURCE' | 'DEGRADED_CACHED_REAL' | 'MACRO_FEED_UNAVAILABLE';
   lastUpdated: string;
   respondingSources: string[];
+  missingSeries?: string[];
   sanityCheckZScore: number;
   outliersRejected: string[];
 }
@@ -120,8 +126,43 @@ export interface VerifiedMacroNewsFeedResult {
 }
 
 /**
+ * Normalizes, sorts, and deduplicates raw candle arrays by UTC timestamp,
+ * enforcing valid OHLC envelopes (`high >= max(open, close)` and `low <= min(open, close)`).
+ */
+export function normalizeAndDeduplicateCandles(rawCandles: VerifiedCandle[]): VerifiedCandle[] {
+  const byTimestamp = new Map<number, VerifiedCandle>();
+  for (const c of rawCandles) {
+    if (
+      !Number.isFinite(c.time) ||
+      c.time <= 1500000000 ||
+      !Number.isFinite(c.open) ||
+      !Number.isFinite(c.high) ||
+      !Number.isFinite(c.low) ||
+      !Number.isFinite(c.close) ||
+      c.open <= 100 ||
+      c.close <= 100
+    ) {
+      continue;
+    }
+    const time = Math.floor(c.time);
+    const high = Math.max(c.open, c.high, c.low, c.close);
+    const low = Math.min(c.open, c.high, c.low, c.close);
+    const volume = Number.isFinite(c.volume) && c.volume > 0 ? c.volume : 0.01;
+    byTimestamp.set(time, {
+      time,
+      open: c.open,
+      high,
+      low,
+      close: c.close,
+      volume,
+    });
+  }
+  return Array.from(byTimestamp.values()).sort((a, b) => a.time - b.time);
+}
+
+/**
  * Runtime Provenance Guard: Rejects any candle array that lacks verified external provider metadata,
- * valid monotonic UTC timestamps, or positive finite OHLC prices.
+ * strict monotonic UTC timestamps, or positive finite OHLC prices.
  */
 export function assertVerifiedProvenance(
   candles: VerifiedCandle[],
@@ -146,13 +187,16 @@ export function assertVerifiedProvenance(
       !Number.isFinite(c.high) ||
       !Number.isFinite(c.low) ||
       !Number.isFinite(c.close) ||
+      c.open <= 100 ||
       c.close <= 100 ||
-      c.high < c.low
+      c.high < c.low ||
+      c.high < Math.max(c.open, c.close) - 1e-6 ||
+      c.low > Math.min(c.open, c.close) + 1e-6
     ) {
       throw new Error(`PROVENANCE_VIOLATION: Malformed OHLCV bar at index ${i} from ${meta.providerName}.`);
     }
-    if (i > 0 && c.time < candles[i - 1].time) {
-      throw new Error(`PROVENANCE_VIOLATION: Non-monotonic bar timestamps at index ${i} from ${meta.providerName}.`);
+    if (i > 0 && c.time <= candles[i - 1].time) {
+      throw new Error(`PROVENANCE_VIOLATION: Non-monotonic or duplicate bar timestamps at index ${i} from ${meta.providerName}.`);
     }
   }
 }
@@ -205,9 +249,9 @@ export function getProviderHttpDiagnostics(): ProviderHttpDiagnosticEvent[] {
  */
 export function sanitizeUserFacingHaltReason(rawReason: string | undefined | null, lang: 'en' | 'fa' = 'en'): string {
   const defaultEn =
-    'All live external gold feeds across Tier-1 (Binance/Bybit/KuCoin), Tier-2 (Yahoo COMEX/OKX), and Tier-3 (Kraken/Coinbase/Gate.io) are temporarily unreachable or rate-limited. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data is generated.';
+    'All live external gold feeds across Tier-1 (Binance/Bybit/KuCoin), Tier-2 (Yahoo COMEX/OKX/HTX), and Tier-3 (Kraken/Coinbase/Gate.io) are temporarily unreachable or rate-limited. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data is generated.';
   const defaultFa =
-    'تمامی منابع زنده بازار طلا در سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (کامکس یاهو/OKX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) موقتاً در دسترس نیستند. به‌روزرسانی فیلتر کالمن (P)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
+    'تمامی منابع زنده بازار طلا در سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (کامکس یاهو/OKX/HTX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) موقتاً در دسترس نیستند. به‌روزرسانی فیلتر کالمن (P)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
 
   if (!rawReason || typeof rawReason !== 'string') {
     return lang === 'fa' ? defaultFa : defaultEn;
@@ -240,7 +284,7 @@ async function fetchWithTimeout(url: string, timeoutMs = 3200, acceptHeader = 'a
 /**
  * Strict JSON Fetch Guard:
  * 1. Always checks response.ok AND Content-Type (must contain "application/json" or "text/json") BEFORE parsing JSON.
- * 2. Detects HTML / <!DOCTYPE / gateway error pages and logs exact provider + HTTP status + Content-Type.
+ * 2. Detects HTML / <!DOCTYPE / gateway error pages and logs exact provider + HTTP status + Content-Type in internal diagnostics.
  * 3. Never throws raw SyntaxError ("Unexpected token '<', \"<!DOCTYPE \"...") into user-facing state.
  */
 export async function fetchSafeJson<T = any>(
@@ -271,9 +315,6 @@ export async function fetchSafeJson<T = any>(
   const isJsonContentType = contentType.includes('application/json') || contentType.includes('text/json');
 
   if (!res.ok) {
-    console.warn(
-      `[GDF Waterfall HTTP Guard] Provider="${providerName}" failed | HTTP ${httpStatus} | Content-Type="${contentType || 'unknown'}" | URL=${url}`
-    );
     recordProviderHttpDiagnostic({
       providerName,
       endpoint: url,
@@ -296,9 +337,6 @@ export async function fetchSafeJson<T = any>(
     contentType.includes('text/html');
 
   if (!isJsonContentType || looksLikeHtml) {
-    console.warn(
-      `[GDF Waterfall Non-JSON Guard] Provider="${providerName}" returned non-JSON/HTML | HTTP ${httpStatus} | Content-Type="${contentType || 'none'}" | StartsWith="${trimmed.slice(0, 24).replace(/\s+/g, ' ')}"`
-    );
     recordProviderHttpDiagnostic({
       providerName,
       endpoint: url,
@@ -328,9 +366,6 @@ export async function fetchSafeJson<T = any>(
     });
     return { data: parsed, httpStatus, contentType };
   } catch (_) {
-    console.warn(
-      `[GDF Waterfall Malformed JSON Guard] Provider="${providerName}" body failed JSON.parse | HTTP ${httpStatus} | Content-Type="${contentType}"`
-    );
     recordProviderHttpDiagnostic({
       providerName,
       endpoint: url,
@@ -346,7 +381,14 @@ export async function fetchSafeJson<T = any>(
 }
 
 type ProviderFetchOutcome = {
-  res: { providerName: string; symbol: string; endpoint: string; candles: VerifiedCandle[]; tier: ProviderTier } | null;
+  res: {
+    providerName: string;
+    symbol: string;
+    endpoint: string;
+    candles: VerifiedCandle[];
+    tier: ProviderTier;
+    instrumentIdentity: InstrumentIdentity;
+  } | null;
   diag: ProviderAttemptDiagnostic;
 };
 
@@ -355,6 +397,7 @@ async function runIsolatedProvider(
   providerName: string,
   symbol: string,
   endpoint: string,
+  instrumentIdentity: InstrumentIdentity,
   skipByTest: boolean,
   fetcher: () => Promise<{ candles: VerifiedCandle[]; httpStatus: number; contentType: string }>
 ): Promise<ProviderFetchOutcome> {
@@ -377,14 +420,15 @@ async function runIsolatedProvider(
   }
   try {
     const out = await fetcher();
-    assertVerifiedProvenance(out.candles, {
+    const cleanCandles = normalizeAndDeduplicateCandles(out.candles);
+    assertVerifiedProvenance(cleanCandles, {
       providerName,
       symbol,
       endpoint,
       tier,
     });
     return {
-      res: { providerName, symbol, endpoint, candles: out.candles, tier },
+      res: { providerName, symbol, endpoint, candles: cleanCandles, tier, instrumentIdentity },
       diag: {
         tier,
         providerName,
@@ -395,7 +439,7 @@ async function runIsolatedProvider(
         contentType: out.contentType,
         isHtmlResponse: false,
         latencyMs: Date.now() - tStart,
-        candleCount: out.candles.length,
+        candleCount: cleanCandles.length,
         timestampIso: new Date().toISOString(),
       },
     };
@@ -420,10 +464,12 @@ async function runIsolatedProvider(
   }
 }
 
-function aggregateCandlesTo4h(hourlyCandles: VerifiedCandle[]): VerifiedCandle[] {
+export function aggregateCandlesToStep(sourceCandles: VerifiedCandle[], stepSeconds: number): VerifiedCandle[] {
+  const safeStep = Math.max(60, Math.floor(stepSeconds));
+  const sorted = normalizeAndDeduplicateCandles(sourceCandles);
   const buckets = new Map<number, VerifiedCandle>();
-  for (const c of hourlyCandles) {
-    const bucketTime = Math.floor(c.time / 14400) * 14400;
+  for (const c of sorted) {
+    const bucketTime = Math.floor(c.time / safeStep) * safeStep;
     const existing = buckets.get(bucketTime);
     if (!existing) {
       buckets.set(bucketTime, { ...c, time: bucketTime });
@@ -435,6 +481,37 @@ function aggregateCandlesTo4h(hourlyCandles: VerifiedCandle[]): VerifiedCandle[]
     }
   }
   return Array.from(buckets.values()).sort((a, b) => a.time - b.time);
+}
+
+/**
+ * Aligns two verified candle series by matching UTC timestamps within toleranceSec
+ * so cross-venue basis spreads never compare mismatched bars across market breaks.
+ */
+export function alignBenchmarkCandlesByTimestamp(
+  primaryCandles: VerifiedCandle[],
+  benchmarkCandles: VerifiedCandle[],
+  toleranceSec: number = 450
+): { primary: VerifiedCandle; benchmark: VerifiedCandle }[] {
+  if (primaryCandles.length === 0 || benchmarkCandles.length === 0) return [];
+  const aligned: { primary: VerifiedCandle; benchmark: VerifiedCandle }[] = [];
+  const usedBenchTimes = new Set<number>();
+  let bIdx = 0;
+  for (const p of primaryCandles) {
+    while (bIdx + 1 < benchmarkCandles.length && benchmarkCandles[bIdx + 1].time <= p.time) {
+      bIdx++;
+    }
+    const candidateA = benchmarkCandles[bIdx];
+    const candidateB = bIdx + 1 < benchmarkCandles.length ? benchmarkCandles[bIdx + 1] : null;
+    let best = candidateA;
+    if (candidateB && Math.abs(candidateB.time - p.time) < Math.abs(candidateA.time - p.time)) {
+      best = candidateB;
+    }
+    if (best && Math.abs(best.time - p.time) <= toleranceSec && !usedBenchTimes.has(best.time)) {
+      usedBenchTimes.add(best.time);
+      aligned.push({ primary: p, benchmark: best });
+    }
+  }
+  return aligned;
 }
 
 // ============================================================================
@@ -466,7 +543,7 @@ async function fetchBinanceHostCandles(baseHost: string, providerName: string, i
       candles.push({ time, open, high, low, close, volume });
     }
   }
-  return { endpoint, candles, httpStatus, contentType };
+  return { endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 async function fetchBybitSpotPaxgCandles(interval: string) {
@@ -485,7 +562,6 @@ async function fetchBybitSpotPaxgCandles(interval: string) {
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const list = data?.result?.list;
   if (!Array.isArray(list) || list.length < 25) throw new Error('Insufficient Bybit kline list');
-  // Bybit returns newest-first: [startTimeMs, open, high, low, close, volume, turnover]
   const candles: VerifiedCandle[] = list
     .slice(0, 300)
     .reverse()
@@ -498,7 +574,7 @@ async function fetchBybitSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row[5])),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXGUSDT', endpoint, candles, httpStatus, contentType };
+  return { providerName, symbol: 'PAXGUSDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 async function fetchKucoinSpotPaxgCandles(interval: string) {
@@ -517,7 +593,6 @@ async function fetchKucoinSpotPaxgCandles(interval: string) {
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const rows = data?.data;
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Insufficient KuCoin candle rows');
-  // KuCoin returns newest-first: [timeSec, open, close, high, low, volume, turnover]
   const candles: VerifiedCandle[] = rows
     .slice(0, 300)
     .reverse()
@@ -530,11 +605,11 @@ async function fetchKucoinSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row[5])),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXG-USDT', endpoint, candles, httpStatus, contentType };
+  return { providerName, symbol: 'PAXG-USDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 // ============================================================================
-// TIER 2 INDEPENDENT PROVIDERS (Yahoo COMEX GC=F, Yahoo XAUUSD=X, OKX PAXG-USDT)
+// TIER 2 INDEPENDENT PROVIDERS (Yahoo COMEX GC=F, HTX PAXG/USDT, OKX PAXG-USDT)
 // ============================================================================
 async function fetchYahooGoldSingle(
   host: string,
@@ -579,11 +654,43 @@ async function fetchYahooGoldSingle(
     }
   }
 
+  candles = normalizeAndDeduplicateCandles(candles);
   if (cfg.aggregate4h) {
-    candles = aggregateCandlesTo4h(candles);
+    candles = aggregateCandlesToStep(candles, 14400);
   }
   candles = candles.slice(-300);
   return { providerName, symbol: displaySym, endpoint, candles, httpStatus, contentType };
+}
+
+async function fetchHtxSpotPaxgCandles(interval: string) {
+  const htxMap: Record<string, string> = {
+    '1m': '1min',
+    '5m': '5min',
+    '15m': '15min',
+    '30m': '30min',
+    '1h': '60min',
+    '4h': '4hour',
+    '1d': '1day',
+  };
+  const period = htxMap[interval] || '15min';
+  const providerName = 'HTX Global Institutional Spot (PAXG/USDT)';
+  const endpoint = `https://api.huobi.pro/market/history/kline?symbol=paxgusdt&period=${period}&size=300`;
+  const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
+  const rows = data?.data;
+  if (!Array.isArray(rows) || rows.length < 25) throw new Error('Insufficient HTX kline rows');
+  const candles: VerifiedCandle[] = rows
+    .slice(0, 300)
+    .reverse()
+    .map((row: any) => ({
+      time: Number(row.id),
+      open: parseFloat(row.open),
+      high: parseFloat(row.high),
+      low: parseFloat(row.low),
+      close: parseFloat(row.close),
+      volume: Math.max(0.01, parseFloat(row.amount || row.vol || '1')),
+    }))
+    .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
+  return { providerName, symbol: 'PAXGUSDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 async function fetchOkxSpotPaxgCandles(interval: string) {
@@ -602,7 +709,6 @@ async function fetchOkxSpotPaxgCandles(interval: string) {
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const rows = data?.data;
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Insufficient OKX candle rows');
-  // OKX returns newest-first: [tsMs, o, h, l, c, vol, volCcy, ...]
   const candles: VerifiedCandle[] = rows
     .slice(0, 300)
     .reverse()
@@ -615,7 +721,7 @@ async function fetchOkxSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row[5])),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXG-USDT', endpoint, candles, httpStatus, contentType };
+  return { providerName, symbol: 'PAXG-USDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 // ============================================================================
@@ -647,26 +753,29 @@ async function fetchKrakenSpotPaxgCandles(interval: string) {
     close: parseFloat(item[4]),
     volume: Math.max(0.01, parseFloat(item[6])),
   }));
-  return { providerName, symbol: 'PAXGUSD', endpoint, candles, httpStatus, contentType };
+  return { providerName, symbol: 'PAXGUSD', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
-async function fetchCoinbaseSpotPaxgCandles(interval: string) {
-  const cbGranularityMap: Record<string, number> = {
-    '1m': 60,
-    '5m': 300,
-    '15m': 900,
-    '30m': 900,
-    '1h': 3600,
-    '4h': 21600,
-    '1d': 86400,
+export async function fetchCoinbaseSpotPaxgCandles(interval: string) {
+  // Coinbase Exchange only supports native granularities: 60, 300, 900, 3600, 21600, 86400.
+  // For 30m (1800s) we fetch 900s (15m) and aggregate to 1800s.
+  // For 4h (14400s) we fetch 3600s (1h) and aggregate to 14400s.
+  const cbConfigMap: Record<string, { fetchGranularity: number; aggregateToSec?: number }> = {
+    '1m': { fetchGranularity: 60 },
+    '5m': { fetchGranularity: 300 },
+    '15m': { fetchGranularity: 900 },
+    '30m': { fetchGranularity: 900, aggregateToSec: 1800 },
+    '1h': { fetchGranularity: 3600 },
+    '4h': { fetchGranularity: 3600, aggregateToSec: 14400 },
+    '1d': { fetchGranularity: 86400 },
   };
-  const gran = cbGranularityMap[interval] || 900;
+  const cfg = cbConfigMap[interval] || cbConfigMap['15m'];
   const providerName = 'Coinbase Exchange Spot (PAXG-USD)';
-  const endpoint = `https://api.exchange.coinbase.com/products/PAXG-USD/candles?granularity=${gran}`;
+  const endpoint = `https://api.exchange.coinbase.com/products/PAXG-USD/candles?granularity=${cfg.fetchGranularity}`;
   const { data: rows2, httpStatus, contentType } = await fetchSafeJson<any[]>(endpoint, providerName, 3200);
   if (!Array.isArray(rows2) || rows2.length < 25) throw new Error('Coinbase insufficient candles');
 
-  const candles: VerifiedCandle[] = rows2
+  let candles: VerifiedCandle[] = rows2
     .slice(0, 300)
     .reverse()
     .map((item: any) => ({
@@ -677,6 +786,11 @@ async function fetchCoinbaseSpotPaxgCandles(interval: string) {
       close: parseFloat(item[4]),
       volume: Math.max(0.01, parseFloat(item[5])),
     }));
+
+  candles = normalizeAndDeduplicateCandles(candles);
+  if (cfg.aggregateToSec) {
+    candles = aggregateCandlesToStep(candles, cfg.aggregateToSec);
+  }
   return { providerName, symbol: 'PAXG-USD', endpoint, candles, httpStatus, contentType };
 }
 
@@ -695,7 +809,6 @@ async function fetchGateIoSpotPaxgCandles(interval: string) {
   const endpoint = `https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=PAXG_USDT&interval=${gInt}&limit=300`;
   const { data: rows, httpStatus, contentType } = await fetchSafeJson<any[]>(endpoint, providerName, 3200);
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Gate.io insufficient candlesticks');
-  // Gate.io returns oldest-first: [timestampSecStr, quoteVol, close, high, low, baseVol, open, ...]
   const candles: VerifiedCandle[] = rows
     .slice(-300)
     .map((item: any) => ({
@@ -707,7 +820,7 @@ async function fetchGateIoSpotPaxgCandles(interval: string) {
       open: parseFloat(item[6]),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXG_USDT', endpoint, candles, httpStatus, contentType };
+  return { providerName, symbol: 'PAXG_USDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 const marketWaterfallCache = new Map<string, { timestamp: number; data: VerifiedMarketWaterfallResult }>();
@@ -762,38 +875,63 @@ export async function fetchVerifiedMarketWaterfall(
     }
   }
 
-  if (options?.fixtureReplay && flags.ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST) {
+  if (options?.fixtureReplay) {
+    if (!flags.ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST) {
+      return {
+        systemState: 'HALTED_DEGRADED',
+        activeTier: 'NONE_HALTED',
+        activeProvider: 'NONE (Fixture Replay Disabled in Production)',
+        activeSymbol: 'N/A',
+        activeEndpoint: 'N/A',
+        instrumentIdentity: 'NONE',
+        isFixtureReplay: false,
+        candles: [],
+        htfDailyCandles: [],
+        secondaryBenchmark: null,
+        diagnostics: [],
+        freshnessAgeSec: -1,
+        haltReasonEn: 'FIXTURE REPLAY BLOCKED: ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST is disabled in production mode.',
+        haltReasonFa: 'بازپخش داده آزمایشی در محیط عملیاتی غیرفعال است.',
+      };
+    }
+
     const fixturePath = path.join(process.cwd(), 'fixtures', 'real-market', `paxg_${interval}.json`);
     if (fs.existsSync(fixturePath)) {
       const raw = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
-      assertVerifiedProvenance(raw.candles, {
+      const cleanFixtureCandles = normalizeAndDeduplicateCandles(raw.candles || []);
+      assertVerifiedProvenance(cleanFixtureCandles, {
         providerName: `${raw.provider} [Read-Only Verified Fixture]`,
         symbol: raw.symbol,
         endpoint: `fixtures/real-market/paxg_${interval}.json`,
         tier: 'FIXTURE_TEST_REPLAY',
       });
+      const lastBarTime = cleanFixtureCandles[cleanFixtureCandles.length - 1].time;
       return {
-        systemState: 'LIVE_NOMINAL',
+        systemState: 'FIXTURE_REPLAY',
         activeTier: 'FIXTURE_TEST_REPLAY',
-        activeProvider: `${raw.provider} [Verified Fixture]`,
+        activeProvider: `${raw.provider} [Verified Fixture Replay]`,
         activeSymbol: raw.symbol,
         activeEndpoint: `fixtures/real-market/paxg_${interval}.json`,
-        candles: raw.candles,
-        htfDailyCandles: raw.candles,
+        instrumentIdentity: 'PAXG_SPOT_TOKEN',
+        isFixtureReplay: true,
+        candles: cleanFixtureCandles,
+        htfDailyCandles: cleanFixtureCandles,
         secondaryBenchmark: null,
         diagnostics: [
           {
             tier: 'FIXTURE_TEST_REPLAY',
-            providerName: raw.provider,
+            providerName: `${raw.provider} [Verified Fixture Replay]`,
             symbol: raw.symbol,
             endpoint: `fixtures/real-market/paxg_${interval}.json`,
             status: 'SUCCESS',
             latencyMs: 1,
-            candleCount: raw.candles.length,
+            candleCount: cleanFixtureCandles.length,
             timestampIso: new Date().toISOString(),
           },
         ],
-        freshnessAgeSec: 0,
+        freshnessAgeSec: Math.max(0, Math.floor(Date.now() / 1000) - lastBarTime),
+        haltReasonEn: 'FIXTURE REPLAY MODE: Operating on read-only historical verified fixture data (not live market feed).',
+        haltReasonFa: 'حالت بازپخش داده تاریخی آزمایشی (غیرزنده).',
       };
     }
   }
@@ -804,12 +942,13 @@ export async function fetchVerifiedMarketWaterfall(
 
   // Execute all 10 independent providers in parallel with complete fault isolation
   const providerOutcomes = await Promise.all([
-    // Tier 1 Primary Venues (4 independent sources)
+    // Tier 1 Primary Venues (4 independent PAXG spot sources)
     runIsolatedProvider(
       'TIER_1_PRIMARY',
       'Binance Vision Public Node (PAXG/USDT)',
       'PAXGUSDT',
       `https://data-api.binance.vision/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
+      'PAXG_SPOT_TOKEN',
       skipT1,
       () => fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision Public Node (PAXG/USDT)', interval)
     ),
@@ -818,6 +957,7 @@ export async function fetchVerifiedMarketWaterfall(
       'Binance Spot Primary Core (PAXG/USDT)',
       'PAXGUSDT',
       `https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
+      'PAXG_SPOT_TOKEN',
       skipT1,
       () => fetchBinanceHostCandles('https://api.binance.com', 'Binance Spot Primary Core (PAXG/USDT)', interval)
     ),
@@ -826,6 +966,7 @@ export async function fetchVerifiedMarketWaterfall(
       'Bybit V5 Institutional Spot (PAXG/USDT)',
       'PAXGUSDT',
       `https://api.bybit.com/v5/market/kline?category=spot&symbol=PAXGUSDT`,
+      'PAXG_SPOT_TOKEN',
       skipT1,
       () => fetchBybitSpotPaxgCandles(interval)
     ),
@@ -834,42 +975,47 @@ export async function fetchVerifiedMarketWaterfall(
       'KuCoin Institutional Spot (PAXG-USDT)',
       'PAXG-USDT',
       `https://api.kucoin.com/api/v1/market/candles?symbol=PAXG-USDT`,
+      'PAXG_SPOT_TOKEN',
       skipT1,
       () => fetchKucoinSpotPaxgCandles(interval)
     ),
 
-    // Tier 2 Secondary Venues (3 independent sources)
+    // Tier 2 Secondary Venues (3 independent sources: Yahoo COMEX GC=F, HTX PAXG/USDT, OKX PAXG-USDT)
     runIsolatedProvider(
       'TIER_2_SECONDARY',
       'Yahoo Finance COMEX Gold Futures (GC=F)',
       'GC=F',
       'https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF',
+      'COMEX_GOLD_FUTURES',
       skipT2,
       () => fetchYahooGoldSingle('query1.finance.yahoo.com', 'GC%3DF', 'GC=F', 'Yahoo Finance COMEX Gold Futures (GC=F)', interval)
     ),
     runIsolatedProvider(
       'TIER_2_SECONDARY',
-      'Yahoo Finance Institutional Spot Gold (XAUUSD=X)',
-      'XAUUSD=X',
-      'https://query2.finance.yahoo.com/v8/finance/chart/XAUUSD%3DX',
+      'HTX Global Institutional Spot (PAXG/USDT)',
+      'PAXGUSDT',
+      'https://api.huobi.pro/market/history/kline?symbol=paxgusdt',
+      'PAXG_SPOT_TOKEN',
       skipT2,
-      () => fetchYahooGoldSingle('query2.finance.yahoo.com', 'XAUUSD%3DX', 'XAUUSD=X', 'Yahoo Finance Institutional Spot Gold (XAUUSD=X)', interval)
+      () => fetchHtxSpotPaxgCandles(interval)
     ),
     runIsolatedProvider(
       'TIER_2_SECONDARY',
       'OKX Institutional Spot (PAXG-USDT)',
       'PAXG-USDT',
       'https://www.okx.com/api/v5/market/candles?instId=PAXG-USDT',
+      'PAXG_SPOT_TOKEN',
       skipT2,
       () => fetchOkxSpotPaxgCandles(interval)
     ),
 
-    // Tier 3 Tertiary Venues (3 independent sources)
+    // Tier 3 Tertiary Venues (3 independent PAXG spot sources)
     runIsolatedProvider(
       'TIER_3_TERTIARY',
       'Kraken Institutional Spot (PAXG/USD)',
       'PAXGUSD',
       'https://api.kraken.com/0/public/OHLC?pair=PAXGUSD',
+      'PAXG_SPOT_TOKEN',
       skipT3,
       () => fetchKrakenSpotPaxgCandles(interval)
     ),
@@ -878,6 +1024,7 @@ export async function fetchVerifiedMarketWaterfall(
       'Coinbase Exchange Spot (PAXG-USD)',
       'PAXG-USD',
       'https://api.exchange.coinbase.com/products/PAXG-USD/candles',
+      'PAXG_SPOT_TOKEN',
       skipT3,
       () => fetchCoinbaseSpotPaxgCandles(interval)
     ),
@@ -886,6 +1033,7 @@ export async function fetchVerifiedMarketWaterfall(
       'Gate.io Institutional Spot (PAXG_USDT)',
       'PAXG_USDT',
       'https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=PAXG_USDT',
+      'PAXG_SPOT_TOKEN',
       skipT3,
       () => fetchGateIoSpotPaxgCandles(interval)
     ),
@@ -896,13 +1044,15 @@ export async function fetchVerifiedMarketWaterfall(
     .map(o => o.res)
     .filter((r): r is NonNullable<ProviderFetchOutcome['res']> => r !== null && r.candles.length >= 20);
 
+  // Prioritize same-instrument PAXG_SPOT_TOKEN within each tier before falling back to COMEX_GOLD_FUTURES
   const tier1Success = successfulResults.find(r => r.tier === 'TIER_1_PRIMARY');
-  const tier2Success = successfulResults.find(r => r.tier === 'TIER_2_SECONDARY');
+  const tier2Success =
+    successfulResults.find(r => r.tier === 'TIER_2_SECONDARY' && r.instrumentIdentity === 'PAXG_SPOT_TOKEN') ||
+    successfulResults.find(r => r.tier === 'TIER_2_SECONDARY');
   const tier3Success = successfulResults.find(r => r.tier === 'TIER_3_TERTIARY');
   const primaryWinner = tier1Success || tier2Success || tier3Success || null;
 
   if (!primaryWinner) {
-    // If not simulating total failure, check if we have a verified real snapshot from the last 5 minutes
     if (!simFail) {
       const recentVerified = lastVerifiedRealSnapshotCache.get(interval);
       if (recentVerified && Date.now() - recentVerified.timestamp < 300000 && recentVerified.data.candles.length >= 20) {
@@ -915,6 +1065,7 @@ export async function fetchVerifiedMarketWaterfall(
         return {
           ...recentVerified.data,
           systemState: 'DEGRADED_FALLBACK',
+          isFixtureReplay: false,
           diagnostics,
           freshnessAgeSec: Math.max(
             0,
@@ -939,15 +1090,17 @@ export async function fetchVerifiedMarketWaterfall(
       activeProvider: 'NONE (All External Market Providers Unreachable)',
       activeSymbol: 'N/A',
       activeEndpoint: 'N/A',
+      instrumentIdentity: 'NONE',
+      isFixtureReplay: false,
       candles: [],
       htfDailyCandles: [],
       secondaryBenchmark: null,
       diagnostics,
       freshnessAgeSec: -1,
       haltReasonEn:
-        'CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1 (Binance/Bybit/KuCoin), Tier-2 (Yahoo COMEX/OKX), and Tier-3 (Kraken/Coinbase/Gate.io) live gold feeds failed. Filter covariance, volume-clock, and GARCH mutations are frozen. Zero synthetic data generated.',
+        'CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1 (Binance/Bybit/KuCoin), Tier-2 (Yahoo COMEX/HTX/OKX), and Tier-3 (Kraken/Coinbase/Gate.io) live gold feeds failed. Filter covariance, volume-clock, and GARCH mutations are frozen. Zero synthetic data generated.',
       haltReasonFa:
-        'مدار محافظتی فعال شد (توقف در وضعیت اضطراری): تمامی منابع زنده سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (کامکس یاهو/OKX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) قطع شده‌اند. به‌روزرسانی فیلتر کالمن و نوسانات متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.',
+        'مدار محافظتی فعال شد (توقف در وضعیت اضطراری): تمامی منابع زنده سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (کامکس یاهو/HTX/OKX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) قطع شده‌اند. به‌روزرسانی فیلتر کالمن و نوسانات متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.',
     };
   }
 
@@ -956,38 +1109,49 @@ export async function fetchVerifiedMarketWaterfall(
   const activeProvider = primaryWinner.providerName;
   const activeSymbol = primaryWinner.symbol;
   const activeEndpoint = primaryWinner.endpoint;
+  const instrumentIdentity = primaryWinner.instrumentIdentity;
 
-  // Select an independent secondary benchmark from a different provider for cross-venue dispersion & basis
+  // Select an independent secondary benchmark and align bars by UTC timestamp
   const refBench =
     successfulResults.find(r => r.providerName !== activeProvider && r.tier !== activeTier) ||
     successfulResults.find(r => r.providerName !== activeProvider) ||
     null;
 
+  const intervalToleranceMap: Record<string, number> = {
+    '1m': 120,
+    '5m': 600,
+    '15m': 1800,
+    '30m': 3600,
+    '1h': 7200,
+    '4h': 28800,
+    '1d': 172800,
+  };
+  const alignToleranceSec = intervalToleranceMap[interval] || 1800;
+
   let secondaryBenchmark: VerifiedMarketWaterfallResult['secondaryBenchmark'] = null;
   if (refBench && refBench.candles.length >= 10) {
-    const pLast = primaryCandles[primaryCandles.length - 1].close;
-    const bCandles = refBench.candles;
-    const len = Math.min(30, primaryCandles.length, bCandles.length);
-    const spreads: number[] = [];
-    for (let i = 0; i < len; i++) {
-      const pClose = primaryCandles[primaryCandles.length - len + i].close;
-      const bClose = bCandles[bCandles.length - len + i].close;
-      spreads.push(pClose - bClose);
+    const alignedPairs = alignBenchmarkCandlesByTimestamp(primaryCandles, refBench.candles, alignToleranceSec);
+    if (alignedPairs.length >= 5) {
+      const recentPairs = alignedPairs.slice(-30);
+      const spreads = recentPairs.map(pair => pair.primary.close - pair.benchmark.close);
+      const meanSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
+      const stdSpread = Math.sqrt(
+        Math.max(0.04, spreads.reduce((a, s) => a + Math.pow(s - meanSpread, 2), 0) / Math.max(1, spreads.length - 1))
+      );
+      const lastPair = recentPairs[recentPairs.length - 1];
+      const currentSpread = lastPair.primary.close - lastPair.benchmark.close;
+      const zScore = parseFloat(((currentSpread - meanSpread) / stdSpread).toFixed(2));
+      secondaryBenchmark = {
+        provider: refBench.providerName,
+        symbol: refBench.symbol,
+        instrumentIdentity: refBench.instrumentIdentity,
+        alignedBarCount: recentPairs.length,
+        candles: recentPairs.map(p => p.benchmark),
+        crossVenueSpreadUsd: parseFloat(currentSpread.toFixed(2)),
+        crossVenueZScore: zScore,
+        isOutlierDislocation: Math.abs(zScore) > 3.5,
+      };
     }
-    const meanSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
-    const stdSpread = Math.sqrt(
-      Math.max(0.04, spreads.reduce((a, s) => a + Math.pow(s - meanSpread, 2), 0) / Math.max(1, spreads.length - 1))
-    );
-    const currentSpread = pLast - bCandles[bCandles.length - 1].close;
-    const zScore = parseFloat(((currentSpread - meanSpread) / stdSpread).toFixed(2));
-    secondaryBenchmark = {
-      provider: refBench.providerName,
-      symbol: refBench.symbol,
-      candles: bCandles,
-      crossVenueSpreadUsd: parseFloat(currentSpread.toFixed(2)),
-      crossVenueZScore: zScore,
-      isOutlierDislocation: Math.abs(zScore) > 3.5,
-    };
   }
 
   const htfDailyCandles = interval === '1d' ? primaryCandles : await getOrFetchHtfDailyCandles();
@@ -1001,6 +1165,8 @@ export async function fetchVerifiedMarketWaterfall(
     activeProvider,
     activeSymbol,
     activeEndpoint,
+    instrumentIdentity,
+    isFixtureReplay: false,
     candles: primaryCandles,
     htfDailyCandles: htfDailyCandles.length >= 20 ? htfDailyCandles : primaryCandles,
     secondaryBenchmark,
@@ -1045,9 +1211,6 @@ async function fetchFredSeriesLatest(seriesId: string): Promise<number | null> {
     const csv = await res.text();
     const trimmed = csv.trim();
     if (trimmed.startsWith('<') || /^<!doctype/i.test(trimmed) || contentType.includes('text/html')) {
-      console.warn(
-        `[GDF Waterfall Non-CSV Guard] Provider="${providerName}" returned HTML instead of CSV | HTTP ${res.status} | Content-Type="${contentType}"`
-      );
       recordProviderHttpDiagnostic({
         providerName,
         endpoint: url,
@@ -1104,6 +1267,7 @@ let cachedVerifiedMacro: { timestamp: number; data: VerifiedMacroYieldResult } |
 
 /**
  * Multi-source macro yield & FX waterfall with median + z-score outlier sanity check.
+ * Never fabricates hardcoded yield/DXY numbers when individual series are missing.
  */
 export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: string }): Promise<VerifiedMacroYieldResult> {
   const simFail = (options?.simulateFailure || '').toLowerCase();
@@ -1113,21 +1277,22 @@ export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: 
       tipsRealYield10Y: cachedVerifiedMacro?.data.tipsRealYield10Y ?? 0,
       breakevenInflation10Y: cachedVerifiedMacro?.data.breakevenInflation10Y ?? 0,
       dxyIndex: cachedVerifiedMacro?.data.dxyIndex ?? 0,
-      realYieldGravity: cachedVerifiedMacro?.data.realYieldGravity ?? 0,
-      dollarDrag: cachedVerifiedMacro?.data.dollarDrag ?? 0,
+      realYieldGravity: 0,
+      dollarDrag: 0,
       centralBankTide: 0,
-      netMacroLift: cachedVerifiedMacro?.data.netMacroLift ?? 0,
+      netMacroLift: 0,
       source: 'MACRO_FEED_UNAVAILABLE (All External Macro Providers Failed)',
       status: 'MACRO_FEED_UNAVAILABLE',
       lastUpdated: new Date().toISOString().substring(11, 19) + ' UTC',
       respondingSources: [],
+      missingSeries: ['nominal10Y', 'dxyIndex', 'tipsRealYield10Y', 'breakevenInflation10Y'],
       sanityCheckZScore: 0,
       outliersRejected: [],
     };
   }
 
   const now = Date.now();
-  if (cachedVerifiedMacro && now - cachedVerifiedMacro.timestamp < 60000) {
+  if (!simFail && cachedVerifiedMacro && now - cachedVerifiedMacro.timestamp < 60000) {
     return cachedVerifiedMacro.data;
   }
 
@@ -1144,7 +1309,6 @@ export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: 
     fetchFredSeriesLatest('DGS10'),
     fetchFredSeriesLatest('DFII10'),
     fetchFredSeriesLatest('T10YIE'),
-    fetchSafeJson('https://query1.finance.yahoo.com/v8/finance/chart/%5ETYX?interval=1d&range=5d', 'Yahoo Finance (^TYX 30Y)', 3000).then(r => r.data),
   ]);
 
   if (tasks[0].status === 'fulfilled') {
@@ -1187,17 +1351,7 @@ export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: 
     }
   }
 
-  if (tasks[5].status === 'fulfilled') {
-    const p30 = tasks[5].value?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (typeof p30 === 'number' && p30 > 0.2 && p30 < 15.0) {
-      respondingSources.push('Yahoo Finance (^TYX 30Y)');
-      if (nominalCandidates.length === 0) {
-        nominalCandidates.push({ src: 'Yahoo Finance (^TYX Curve Proxy)', val: parseFloat((p30 - 0.18).toFixed(3)) });
-      }
-    }
-  }
-
-  if (nominalCandidates.length === 0 && dxyCandidates.length === 0) {
+  if (nominalCandidates.length === 0 && dxyCandidates.length === 0 && tipsRealCandidates.length === 0) {
     if (cachedVerifiedMacro) {
       return {
         ...cachedVerifiedMacro.data,
@@ -1218,40 +1372,90 @@ export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: 
       status: 'MACRO_FEED_UNAVAILABLE',
       lastUpdated: new Date().toISOString().substring(11, 19) + ' UTC',
       respondingSources: [],
+      missingSeries: ['nominal10Y', 'dxyIndex', 'tipsRealYield10Y', 'breakevenInflation10Y'],
       sanityCheckZScore: 0,
       outliersRejected: [],
     };
   }
 
-  const nominalMedian = nominalCandidates.length > 0 ? medianOf(nominalCandidates.map(c => c.val)) : 4.25;
+  const missingSeries: string[] = [];
   let maxMacroZ = 0;
-  const filteredNominal = nominalCandidates.filter(c => {
-    const diff = Math.abs(c.val - nominalMedian);
-    const z = diff / 0.25;
-    maxMacroZ = Math.max(maxMacroZ, z);
-    if (z > 3.5 && nominalCandidates.length > 1) {
-      outliersRejected.push(`${c.src}: ${c.val}`);
-      return false;
-    }
-    return true;
-  });
 
-  const nominal10Y = parseFloat(medianOf(filteredNominal.map(c => c.val)).toFixed(3));
-  const dxyIndex = dxyCandidates.length > 0 ? parseFloat(medianOf(dxyCandidates.map(c => c.val)).toFixed(2)) : 101.68;
-  const breakevenInflation10Y =
-    breakevenCandidates.length > 0 ? parseFloat(medianOf(breakevenCandidates.map(c => c.val)).toFixed(3)) : 2.28;
-  const tipsRealYield10Y =
-    tipsRealCandidates.length > 0
-      ? parseFloat(medianOf(tipsRealCandidates.map(c => c.val)).toFixed(3))
-      : parseFloat((nominal10Y - breakevenInflation10Y).toFixed(3));
+  let nominal10Y = 0;
+  let hasNominal = false;
+  if (nominalCandidates.length > 0) {
+    const nominalMedian = medianOf(nominalCandidates.map(c => c.val));
+    const filteredNominal = nominalCandidates.filter(c => {
+      const diff = Math.abs(c.val - nominalMedian);
+      const z = diff / 0.25;
+      maxMacroZ = Math.max(maxMacroZ, z);
+      if (z > 3.5 && nominalCandidates.length > 1) {
+        outliersRejected.push(`${c.src}: ${c.val}`);
+        return false;
+      }
+      return true;
+    });
+    nominal10Y = parseFloat(medianOf(filteredNominal.map(c => c.val)).toFixed(3));
+    hasNominal = true;
+  } else if (cachedVerifiedMacro && cachedVerifiedMacro.data.nominal10Y > 0) {
+    nominal10Y = cachedVerifiedMacro.data.nominal10Y;
+    hasNominal = true;
+    missingSeries.push('nominal10Y (cached)');
+  } else {
+    missingSeries.push('nominal10Y');
+  }
 
-  const realYieldGravity = parseFloat((-1.15 * (tipsRealYield10Y - 1.50)).toFixed(3));
-  const dollarDrag = parseFloat((-0.065 * (dxyIndex - 100.0)).toFixed(3));
-  const centralBankTide = parseFloat(Math.max(0.15, Math.min(0.75, 0.45 + 0.04 * (nominal10Y - 4.0))).toFixed(3));
+  let dxyIndex = 0;
+  let hasDxy = false;
+  if (dxyCandidates.length > 0) {
+    dxyIndex = parseFloat(medianOf(dxyCandidates.map(c => c.val)).toFixed(2));
+    hasDxy = true;
+  } else if (cachedVerifiedMacro && cachedVerifiedMacro.data.dxyIndex > 0) {
+    dxyIndex = cachedVerifiedMacro.data.dxyIndex;
+    hasDxy = true;
+    missingSeries.push('dxyIndex (cached)');
+  } else {
+    missingSeries.push('dxyIndex');
+  }
+
+  let breakevenInflation10Y = 0;
+  let hasBreakeven = false;
+  if (breakevenCandidates.length > 0) {
+    breakevenInflation10Y = parseFloat(medianOf(breakevenCandidates.map(c => c.val)).toFixed(3));
+    hasBreakeven = true;
+  } else if (cachedVerifiedMacro && cachedVerifiedMacro.data.breakevenInflation10Y > 0) {
+    breakevenInflation10Y = cachedVerifiedMacro.data.breakevenInflation10Y;
+    hasBreakeven = true;
+    missingSeries.push('breakevenInflation10Y (cached)');
+  } else {
+    missingSeries.push('breakevenInflation10Y');
+  }
+
+  let tipsRealYield10Y = 0;
+  let hasTips = false;
+  if (tipsRealCandidates.length > 0) {
+    tipsRealYield10Y = parseFloat(medianOf(tipsRealCandidates.map(c => c.val)).toFixed(3));
+    hasTips = true;
+  } else if (hasNominal && hasBreakeven) {
+    tipsRealYield10Y = parseFloat((nominal10Y - breakevenInflation10Y).toFixed(3));
+    hasTips = true;
+  } else if (cachedVerifiedMacro && cachedVerifiedMacro.data.tipsRealYield10Y !== 0) {
+    tipsRealYield10Y = cachedVerifiedMacro.data.tipsRealYield10Y;
+    hasTips = true;
+    missingSeries.push('tipsRealYield10Y (cached)');
+  } else {
+    missingSeries.push('tipsRealYield10Y');
+  }
+
+  const realYieldGravity = hasTips ? parseFloat((-1.15 * (tipsRealYield10Y - 1.50)).toFixed(3)) : 0;
+  const dollarDrag = hasDxy ? parseFloat((-0.065 * (dxyIndex - 100.0)).toFixed(3)) : 0;
+  const centralBankTide = hasNominal ? parseFloat(Math.max(0.15, Math.min(0.75, 0.45 + 0.04 * (nominal10Y - 4.0))).toFixed(3)) : 0;
   const netMacroLift = parseFloat((realYieldGravity + dollarDrag + centralBankTide).toFixed(3));
 
   const status: VerifiedMacroYieldResult['status'] =
-    respondingSources.length >= 2 ? 'ONLINE_MULTI_SOURCE_VERIFIED' : 'DEGRADED_SINGLE_SOURCE';
+    respondingSources.length >= 2 && missingSeries.length === 0
+      ? 'ONLINE_MULTI_SOURCE_VERIFIED'
+      : 'DEGRADED_SINGLE_SOURCE';
 
   const result: VerifiedMacroYieldResult = {
     nominal10Y,
@@ -1266,6 +1470,7 @@ export async function fetchVerifiedMacroWaterfall(options?: { simulateFailure?: 
     status,
     lastUpdated: new Date().toISOString().substring(11, 19) + ' UTC',
     respondingSources,
+    missingSeries,
     sanityCheckZScore: parseFloat(maxMacroZ.toFixed(2)),
     outliersRejected,
   };

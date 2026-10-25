@@ -246,7 +246,7 @@ export interface FeedIntegrityMetric {
 }
 
 export interface DataReliabilityTelemetry {
-  integrityState: 'QUORUM_VERIFIED' | 'PARTIAL_QUORUM' | 'SINGLE_SOURCE_DEGRADED' | 'HALTED_DEGRADED';
+  integrityState: 'QUORUM_VERIFIED' | 'PARTIAL_QUORUM' | 'SINGLE_SOURCE_DEGRADED' | 'HALTED_DEGRADED' | 'FIXTURE_REPLAY';
   gradeLabel: string;
   gradeLabelFa: string;
   gradeColor: string;

@@ -246,6 +246,11 @@ export function computeDataReliability(
     gradeLabel = 'HALTED / DEGRADED — ALL LIVE MARKET SOURCES UNREACHABLE';
     gradeLabelFa = 'توقف کامل (HALTED) — عدم دسترسی به منابع زنده بازار';
     gradeColor = '#ff1744';
+  } else if (waterfall.systemState === 'FIXTURE_REPLAY' || waterfall.activeTier === 'FIXTURE_TEST_REPLAY') {
+    integrityState = 'FIXTURE_REPLAY';
+    gradeLabel = `FIXTURE REPLAY MODE (NON-LIVE TEST SNAPSHOT · ${waterfall.activeProvider})`;
+    gradeLabelFa = `حالت بازپخش داده آزمایشی غیرزنده (${waterfall.activeProvider})`;
+    gradeColor = '#38bdf8';
   } else if (
     waterfall.systemState === 'DEGRADED_FALLBACK' ||
     (spotQuorumActive <= 1 && crossVenueDispersionBps === null) ||

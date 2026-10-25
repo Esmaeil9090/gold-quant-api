@@ -3,12 +3,12 @@ import path from 'path';
 import {
   AdaptiveDPObserver,
   evaluatePureQuantPipeline,
-} from '../src/engine/quantEngine.ts';
-import { buildHaltedDegradedForecastPayload } from '../src/services/telemetryService.ts';
+} from '../src/engine/quantEngine.js';
+import { buildHaltedDegradedForecastPayload } from '../src/services/telemetryService.js';
 import type {
   VerifiedCandle,
   VerifiedMacroYieldResult,
-} from '../src/contracts/quantContracts.ts';
+} from '../src/contracts/quantContracts.js';
 
 function fail(msg: string): never {
   console.error(`\x1b[31m[PHASE 6 COGNITIVE HIERARCHY & LABEL NEUTRALIZATION CHECK FAILED]\x1b[0m ${msg}`);

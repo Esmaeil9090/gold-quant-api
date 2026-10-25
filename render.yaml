@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: gold-quant-api
-    env: python
+    name: gdf-quant-terminal
+    env: node
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn server:app
+    buildCommand: npm install
+    startCommand: npm start
+
