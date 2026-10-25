@@ -834,14 +834,20 @@ body[dir="rtl"] .draw-status-pill {
   flex-direction: column;
   gap: 10px;
 }
-.mtf-table-scroll {
+.mtf-table-scroll,
+.mtf-table-wrap {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 10px;
   border: 1px solid rgba(40, 60, 95, 0.5);
   background: rgba(6, 10, 18, 0.7);
+  box-sizing: border-box;
 }
 .mtf-table {
   width: 100%;
+  min-width: 520px;
   border-collapse: collapse;
   font-size: 11px;
   text-align: left;
@@ -1421,9 +1427,10 @@ body[dir="rtl"] .detail-transmission {
 /* Telemetry Grid */
 .telemetry-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr));
   gap: 12px;
   margin-bottom: 12px;
+  width: 100%;
 }
 .telemetry-card {
   background: var(--panel);
@@ -1433,6 +1440,9 @@ body[dir="rtl"] .detail-transmission {
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 .telemetry-card::before {
   content: '';
@@ -1460,6 +1470,10 @@ body[dir="rtl"] .telemetry-card::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
 }
 .card-metric {
   font-size: 22px;
@@ -1510,10 +1524,16 @@ body[dir="rtl"] .telemetry-card::before {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
+  width: 100%;
 }
 @media (max-width: 900px) {
   .dp-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .dp-grid {
+    grid-template-columns: 1fr;
   }
 }
 .dp-item {
@@ -1526,6 +1546,11 @@ body[dir="rtl"] .telemetry-card::before {
   gap: 3px;
   position: relative;
   overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .dp-item.highlight-cyan {
   border-color: rgba(0, 229, 255, 0.45);
@@ -2274,11 +2299,148 @@ input:checked + .toggle-slider:before {
   transform: translateY(-1px);
 }
 
-/* Mobile & Tablet Landscape Optimization (Rotatable) */
+/* =========================================================================
+   COMPREHENSIVE RESPONSIVE ENGINE (320px, 360px, 375px, 390px, 430px, Tablet & Desktop)
+   ========================================================================= */
+@media (max-width: 900px) {
+  .dp-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
   #windyCanvas { height: 380px; }
-  .dp-grid { grid-template-columns: 1fr 1fr; }
   .pin-headline { font-size: 10px; }
+  .tier1-primary-ribbon { padding: 6px 10px; }
+  .deck-layers-box { flex-wrap: wrap; }
+  .accordion-title { font-size: 11.5px; }
+}
+
+@media (max-width: 640px) {
+  .dp-grid { grid-template-columns: 1fr !important; }
+  .tier2-core-summary-strip { grid-template-columns: 1fr; }
+  .telemetry-grid { grid-template-columns: 1fr; }
+  .bar-right { flex-direction: column; align-items: stretch; }
+  .stat-pill { align-items: flex-start; width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding-left: clamp(6px, 2vw, 10px);
+    padding-right: clamp(6px, 2vw, 10px);
+  }
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .brand-box {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .gdf-brand-name {
+    font-size: 22px;
+  }
+  .brand-subtitle {
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+  .header-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .header-actions .btn {
+    flex: 1 1 calc(50% - 4px);
+    min-height: 40px;
+    padding: 6px 8px;
+    font-size: 11px;
+    justify-content: center;
+  }
+  .tier1-ribbon-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tier1-pill {
+    width: 100%;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+  .atmosphere-bar {
+    padding: 8px 10px;
+  }
+  .bar-title {
+    font-size: 12px;
+  }
+  .conflict-track {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .conflict-gradient {
+    width: 100%;
+    min-width: 100%;
+    height: 10px;
+  }
+  #dirPressureReadout {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .chart-control-deck {
+    padding: 8px;
+  }
+  .deck-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .deck-tf-box {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .tf-quick-pills {
+    width: 100%;
+    justify-content: space-between;
+    overflow-x: auto;
+  }
+  .deck-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .deck-layers-box {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .deck-layer-btn {
+    flex: 1 1 calc(50% - 4px);
+    text-align: center;
+  }
+  .bar-countdown-tag {
+    width: 100%;
+    justify-content: center;
+  }
+  #parallelUniverseCompareBar {
+    padding: 8px 10px;
+  }
+  .panel-accordion-header {
+    padding: 10px 12px;
+  }
+  .panel-accordion-body {
+    padding: 10px 10px 12px 10px;
+  }
+  .mtf-table-scroll,
+  .mtf-table-wrap {
+    margin-left: -2px;
+    margin-right: -2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .gdf-brand-name { font-size: 20px; }
+  .header-actions .btn { flex: 1 1 100%; }
+  .tf-pill-btn { padding: 3px 5px; font-size: 9px; }
+  .deck-layer-btn { flex: 1 1 100%; }
 }
 
 @media (orientation: landscape) and (max-height: 580px) {
@@ -3945,24 +4107,118 @@ input:checked + .toggle-slider:before {
   </div>
 </div>
 
-<!-- Forced Blocking Update Modal (Triggered Automatically on App Open if Newer Build Exists) -->
-<div class="modal-overlay hidden" id="forcedUpdateOverlay" style="z-index: 200000; background: rgba(4, 7, 14, 0.96); backdrop-filter: blur(14px);">
-  <div class="modal-box" style="max-width: 500px; text-align: center; padding: 26px 24px; border: 1.5px solid var(--gold); box-shadow: 0 0 60px rgba(245, 215, 110, 0.3);">
-    <div style="font-size: 38px; margin-bottom: 10px;">⚡</div>
-    <div style="font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 0.6px; text-transform: uppercase;" id="forcedUpdateTitle">
-      Mandatory Quantitative Engine Update Required
+<!-- =========================================================================
+     Persistent Application Update & Distribution Hub Modal
+     ========================================================================= -->
+<div class="modal-overlay hidden" id="appUpdateModalOverlay" role="dialog" aria-modal="true" aria-labelledby="appUpdateModalTitle" style="z-index: 200000; background: rgba(3, 6, 12, 0.94); backdrop-filter: blur(12px);">
+  <div class="modal-box app-update-modal-box" style="max-width: 660px; border-color: rgba(0, 229, 255, 0.45); box-shadow: 0 0 60px rgba(0, 229, 255, 0.22); border-radius: 16px;">
+    <div class="modal-header" style="border-bottom: 1px solid rgba(0, 229, 255, 0.25); background: rgba(8, 14, 26, 0.9); padding: 14px 18px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 22px;">🔄</span>
+        <div>
+          <div class="modal-title" id="appUpdateModalTitle" style="color: var(--cyan); letter-spacing: 1.2px; font-size: 13.5px;">
+            Application Release &amp; Source Distribution Hub
+          </div>
+          <div style="font-size: 10.5px; color: var(--muted); font-family: monospace;" id="appUpdateModalSubtitle">
+            GDF Quantitative State-Space Architecture Distribution
+          </div>
+        </div>
+      </div>
+      <button class="modal-close" id="appUpdateModalCloseBtn" aria-label="Close update dialog" title="Close (Esc)">✕</button>
     </div>
-    <div style="font-size: 12px; color: #d1dced; line-height: 1.6; margin-top: 10px;" id="forcedUpdateDesc">
-      A newer version of GDF is available on the server. To ensure mathematical model parity, data waterfall resilience, and zero stale caches, please update the app now before continuing.
+    
+    <div class="modal-body" style="padding: 16px 20px; overflow-y: auto; max-height: calc(85vh - 130px); display: flex; flex-direction: column; gap: 14px;">
+      
+      <!-- Version & Status Comparison Strip -->
+      <div class="update-version-strip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: rgba(5, 10, 18, 0.85); padding: 12px; border-radius: 10px; border: 1px solid rgba(40, 60, 95, 0.7);">
+        <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblClientVer">Installed Client Build</span>
+          <span id="updateClientVersionLabel" style="font-family: monospace; font-size: 11px; font-weight: 700; color: #cbd5e1; word-break: break-all;">2026.10.25-v75.1-ResponsiveArchitectureAndReleaseEngine</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblServerVer">Server Release Build</span>
+          <span id="updateServerVersionLabel" style="font-family: monospace; font-size: 11px; font-weight: 700; color: var(--gold); word-break: break-all;">Checking server...</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 3px; justify-content: center; min-width: 0;">
+          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblReleaseStatus">Release Status</span>
+          <div>
+            <span id="updateStatusBadge" style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 10.5px; font-weight: 800; background: rgba(0, 229, 255, 0.15); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4);">
+              CHECKING...
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Download / Status Notification Box -->
+      <div id="updateDownloadStatusBox" class="hidden" style="padding: 10px 14px; border-radius: 8px; font-size: 11px; line-height: 1.5; font-family: monospace; border: 1px solid rgba(0, 230, 118, 0.5); background: rgba(0, 230, 118, 0.1); color: #00e676;">
+        <span id="updateDownloadStatusMsg">Download initiated. Your browser is downloading the archive.</span>
+      </div>
+
+      <!-- Release Notes Card -->
+      <div class="update-notes-card" style="background: rgba(8, 14, 26, 0.85); border: 1px solid rgba(40, 60, 95, 0.65); border-radius: 10px; padding: 12px 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+          <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--cyan);" id="lblReleaseNotes">
+            📋 Release Notes &amp; Engineering Manifest
+          </span>
+          <span id="updateReleaseDateTag" style="font-family: monospace; font-size: 9.5px; color: var(--muted); background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">
+            2026-10-25
+          </span>
+        </div>
+        <ul id="updateReleaseNotesList" style="margin: 0; padding-left: 18px; font-size: 11px; line-height: 1.6; color: #d1dced;">
+          <li>Full Mobile Responsiveness Overhaul across 320px–430px smartphone viewports.</li>
+          <li>Zero-Horizontal-Overflow architecture for multi-timeframe tables, DP cards, and Kalman telemetry.</li>
+          <li>Streaming ZIP Source &amp; Release Bundle downloads without external dependencies.</li>
+          <li>Persistent, manually closable Update Dialog with state machine and Esc/backdrop dismiss.</li>
+          <li>Client API Transport fault isolation — background checks never interrupt live market forecasting.</li>
+        </ul>
+      </div>
+
+      <!-- Download & Update Actions Grid -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);" id="lblDistributionActions">
+          Application Distribution &amp; Sync Actions
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+          <!-- Primary: Genuine Full Source ZIP Download -->
+          <a id="btnDownloadSourceZip" href="/api/download/source" download="gdf-gold-quant-source-v75.1.zip" class="btn btn-gold" style="padding: 10px 14px; font-size: 12px; font-weight: 800; text-decoration: none; justify-content: center; text-align: center; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(245, 215, 110, 0.25);">
+            <span>📦</span>
+            <span id="txtDownloadSource">Download Full Source (ZIP)</span>
+          </a>
+          <!-- Secondary: Release Bundle Download -->
+          <a id="btnDownloadReleaseBundle" href="/api/download/release-bundle" download="gdf-release-bundle-v75.1.zip" class="btn" style="border-color: rgba(0, 229, 255, 0.6); color: var(--cyan); background: rgba(0, 229, 255, 0.1); padding: 10px 14px; font-size: 12px; font-weight: 800; text-decoration: none; justify-content: center; text-align: center; display: inline-flex; align-items: center; gap: 8px;">
+            <span>🚀</span>
+            <span id="txtDownloadRelease">Download Release Bundle</span>
+          </a>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-top: 4px;">
+          <!-- Check for Updates Now -->
+          <button class="btn" id="btnCheckUpdatesNow" style="padding: 8px 12px; font-size: 11px; justify-content: center;">
+            <span>🔄</span>
+            <span id="txtCheckUpdatesNow">Check for Updates</span>
+          </button>
+          <!-- In-App PWA Cache Refresh -->
+          <button class="btn" id="btnRefreshPwaCache" style="border-color: rgba(255, 171, 0, 0.5); color: #ffd740; background: rgba(255, 171, 0, 0.08); padding: 8px 12px; font-size: 11px; justify-content: center;">
+            <span>⚡</span>
+            <span id="txtRefreshPwaCache">Purge Cache &amp; Reload</span>
+          </button>
+        </div>
+      </div>
+      
     </div>
-    <div style="margin-top: 14px; padding: 10px 12px; background: rgba(8, 14, 26, 0.9); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 8px; font-family: monospace; font-size: 11px; color: var(--cyan);" id="forcedUpdateVersionDiff">
-      Client: — → Server: —
+
+    <div class="modal-footer" style="padding: 12px 20px; border-top: 1px solid rgba(40, 60, 95, 0.5); display: flex; justify-content: space-between; align-items: center; background: rgba(6, 12, 22, 0.75); flex-wrap: wrap; gap: 8px;">
+      <span style="font-size: 10px; color: var(--muted); font-family: monospace;">
+        Status: <span id="updateFooterStatusMsg" style="color: #cbd5e1;">Persistent dialog. Will remain open until dismissed.</span>
+      </span>
+      <button class="btn" id="btnDismissUpdateModal" style="padding: 6px 16px; font-size: 11px;">
+        Close
+      </button>
     </div>
-    <button class="btn btn-apply" id="btnForcedUpdateNow" style="width: 100%; margin-top: 18px; padding: 12px 18px; font-size: 13px; font-weight: 900; justify-content: center;">
-      🔄 Update App Now (In-App Instant Sync)
-    </button>
   </div>
 </div>
+<!-- Compatibility anchor for legacy ID lookups -->
+<div id="forcedUpdateOverlay" class="hidden" style="display: none;"></div>
 
 <!-- Diagnosis Telemetry Modal -->
 <div class="modal-overlay hidden" id="diagOverlay">
@@ -4497,7 +4753,7 @@ document.getElementById('langBtn').addEventListener('click', () => {
 // ==========================================================
 // Progressive Web App (PWA) Self-Updating Engine & ServiceWorker
 // ==========================================================
-const CLIENT_APP_VERSION = '2026.10.24-v75.0-UnifiedLiquidityResilience';
+const CLIENT_APP_VERSION = '2026.10.25-v75.1-ResponsiveArchitectureAndReleaseEngine';
 let swRegistration = null;
 let isUpdating = false;
 let latestServerVersionInfo = null;
@@ -4557,21 +4813,124 @@ function showUpdateToast(msg = 'New quantitative build detected. Applying update
   if (toast) toast.classList.remove('hidden');
 }
 
+// -------------------------------------------------------------
+// Persistent Application Release & Update Hub State Machine
+// -------------------------------------------------------------
+function openAppUpdateModal(triggerCheck = true) {
+  const overlay = document.getElementById('appUpdateModalOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  
+  const clientLbl = document.getElementById('updateClientVersionLabel');
+  if (clientLbl) clientLbl.textContent = CLIENT_APP_VERSION;
+  
+  if (triggerCheck) {
+    checkReleaseManifest(true);
+  }
+}
+
+function closeAppUpdateModal() {
+  const overlay = document.getElementById('appUpdateModalOverlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+async function checkReleaseManifest(interactive = false) {
+  const statusBadge = document.getElementById('updateStatusBadge');
+  const serverLbl = document.getElementById('updateServerVersionLabel');
+  const footerMsg = document.getElementById('updateFooterStatusMsg');
+  const checkBtnTxt = document.getElementById('txtCheckUpdatesNow');
+  const notesList = document.getElementById('updateReleaseNotesList');
+  const dateTag = document.getElementById('updateReleaseDateTag');
+  
+  if (statusBadge) {
+    statusBadge.textContent = currentLang === 'fa' ? 'در حال بررسی...' : 'CHECKING...';
+    statusBadge.style.color = '#ffb300';
+    statusBadge.style.background = 'rgba(255, 179, 0, 0.15)';
+    statusBadge.style.borderColor = 'rgba(255, 179, 0, 0.4)';
+  }
+  if (checkBtnTxt) {
+    checkBtnTxt.textContent = currentLang === 'fa' ? 'در حال بررسی...' : 'Checking...';
+  }
+
+  try {
+    const res = await fetch(buildApiUrl(`/api/release-manifest?t=${Date.now()}`), { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const manifest = await res.json();
+    latestServerVersionInfo = manifest;
+
+    const latestVer = manifest.latestVersion || manifest.version || 'UNKNOWN';
+    if (serverLbl) serverLbl.textContent = latestVer;
+    if (dateTag && manifest.releaseDate) dateTag.textContent = manifest.releaseDate;
+
+    // Render release notes
+    if (notesList && Array.isArray(manifest.releaseNotes) && manifest.releaseNotes.length > 0) {
+      notesList.innerHTML = manifest.releaseNotes.map(n => `<li>${n}</li>`).join('');
+    }
+
+    const isDifferent = latestVer !== 'UNKNOWN' && latestVer !== CLIENT_APP_VERSION;
+    if (manifest.isUpdateAvailable || isDifferent) {
+      if (statusBadge) {
+        statusBadge.textContent = currentLang === 'fa' ? 'نسخه جدید موجود است' : 'UPDATE AVAILABLE';
+        statusBadge.style.color = '#00e5ff';
+        statusBadge.style.background = 'rgba(0, 229, 255, 0.2)';
+        statusBadge.style.borderColor = '#00e5ff';
+        statusBadge.style.boxShadow = '0 0 10px rgba(0, 229, 255, 0.35)';
+      }
+      if (footerMsg) {
+        footerMsg.textContent = currentLang === 'fa'
+          ? `نسخه جدید سرور (${latestVer}) در دسترس است. آرشیو کامل یا بسته انتشار را دانلود کنید.`
+          : `New server build (${latestVer}) available. You can download full source ZIP or release bundle.`;
+      }
+      const hdrTxt = document.getElementById('updateAppHeaderTxt');
+      if (hdrTxt) {
+        hdrTxt.textContent = currentLang === 'fa' ? 'نسخه جدید ⚡' : 'Update Available ⚡';
+      }
+    } else {
+      if (statusBadge) {
+        statusBadge.textContent = currentLang === 'fa' ? 'به‌روز است' : 'UP TO DATE';
+        statusBadge.style.color = '#00e676';
+        statusBadge.style.background = 'rgba(0, 230, 118, 0.15)';
+        statusBadge.style.borderColor = '#00e676';
+        statusBadge.style.boxShadow = 'none';
+      }
+      if (footerMsg) {
+        footerMsg.textContent = currentLang === 'fa'
+          ? 'نسخه نصب‌شده کاملاً منطبق بر آخرین نسخه تاییدشده سرور است.'
+          : 'Installed client matches the verified server release.';
+      }
+    }
+  } catch (err) {
+    console.warn('[GDF Release Hub] Manifest fetch failed:', err?.message);
+    logClientWarningOrError('WARN', 'RELEASE_CHECK', err?.message || 'Manifest fetch failed');
+    if (statusBadge) {
+      statusBadge.textContent = currentLang === 'fa' ? 'آفلاین / کش شده' : 'OFFLINE / CACHED';
+      statusBadge.style.color = '#7d8ba1';
+      statusBadge.style.background = 'rgba(125, 139, 161, 0.15)';
+      statusBadge.style.borderColor = '#7d8ba1';
+    }
+    if (footerMsg) {
+      footerMsg.textContent = currentLang === 'fa'
+        ? 'ارتباط با مانیفست سرور برقرار نشد؛ برنامه با کش محلی کار می‌کند.'
+        : 'Could not reach server release manifest; running in offline/cached mode.';
+    }
+  } finally {
+    if (checkBtnTxt) {
+      checkBtnTxt.textContent = currentLang === 'fa' ? 'بررسی مجدد' : 'Check for Updates';
+    }
+  }
+}
+
 function showForcedUpdateBlockingModal(serverVersion) {
-  const overlay = document.getElementById('forcedUpdateOverlay');
-  const diffEl = document.getElementById('forcedUpdateVersionDiff');
-  const titleEl = document.getElementById('forcedUpdateTitle');
-  const descEl = document.getElementById('forcedUpdateDesc');
-  const btnEl = document.getElementById('btnForcedUpdateNow');
-  if (diffEl) {
-    diffEl.textContent = `Current: ${CLIENT_APP_VERSION}  →  New Build: ${serverVersion}`;
+  openAppUpdateModal(false);
+  const serverLbl = document.getElementById('updateServerVersionLabel');
+  if (serverLbl) serverLbl.textContent = serverVersion;
+  const statusBadge = document.getElementById('updateStatusBadge');
+  if (statusBadge) {
+    statusBadge.textContent = currentLang === 'fa' ? 'نسخه جدید موجود است' : 'UPDATE AVAILABLE';
+    statusBadge.style.color = '#00e5ff';
+    statusBadge.style.background = 'rgba(0, 229, 255, 0.2)';
+    statusBadge.style.borderColor = '#00e5ff';
   }
-  if (currentLang === 'fa') {
-    if (titleEl) titleEl.textContent = 'به‌روزرسانی اجباری موتور کوانت GDF';
-    if (descEl) descEl.textContent = 'نسخه جدیدی از برنامه روی سرور منتشر شده است. برای تضمین یکپارچگی مدل ریاضی، آبشار داده و حذف حافظه پنهان قدیمی، پیش از ادامه استفاده دکمه زیر را لمس کنید.';
-    if (btnEl) btnEl.textContent = '🔄 به‌روزرسانی فوری درون‌برنامه‌ای (بدون نیاز به دانلود مجدد)';
-  }
-  if (overlay) overlay.classList.remove('hidden');
 }
 
 async function applyAppUpdate() {
@@ -4639,13 +4998,10 @@ if ('serviceWorker' in navigator) {
         console.warn('GDF ServiceWorker registration failed:', err);
       });
 
-    let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) {
-        refreshing = true;
-        console.log('[GDF PWA] Controller changed. Auto-reloading to latest build...');
-        applyAppUpdate();
-      }
+      console.log('[GDF PWA] ServiceWorker controller changed.');
+      const hdrTxt = document.getElementById('updateAppHeaderTxt');
+      if (hdrTxt) hdrTxt.textContent = currentLang === 'fa' ? 'نسخه جدید ⚡' : 'Update Available ⚡';
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -4673,11 +5029,15 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-// Server build version heartbeat & Forced Update on App Open
+// Server build version heartbeat
 async function checkServerBuildVersion(interactive = false) {
   const pwaVerLbl = document.getElementById('pwaVersionLabel');
   if (pwaVerLbl) {
     pwaVerLbl.textContent = `Build: ${CLIENT_APP_VERSION} · Auto-sync active`;
+  }
+  if (interactive) {
+    openAppUpdateModal(true);
+    return;
   }
   try {
     const res = await fetch(buildApiUrl(`/api/app-version?t=${Date.now()}`), { cache: 'no-store' });
@@ -4686,19 +5046,10 @@ async function checkServerBuildVersion(interactive = false) {
     if (!ct.includes('application/json') && !ct.includes('text/json')) return;
     const data = await res.json();
     latestServerVersionInfo = data;
-    if (data && data.version) {
-      if (data.version !== CLIENT_APP_VERSION) {
-        console.log(`[GDF PWA] Server build (${data.version}) != Client (${CLIENT_APP_VERSION}). Forcing update...`);
-        showForcedUpdateBlockingModal(data.version);
-        if (interactive) {
-          applyAppUpdate();
-        }
-      } else if (interactive) {
-        // User explicitly tapped "Update App": purge SW caches and reload fresh build
-        const hdrTxt = document.getElementById('updateAppHeaderTxt');
-        if (hdrTxt) hdrTxt.textContent = currentLang === 'fa' ? 'در حال همگام‌سازی...' : 'Syncing Build...';
-        await applyAppUpdate();
-      }
+    if (data && data.version && data.version !== CLIENT_APP_VERSION) {
+      console.log(`[GDF PWA] Server build (${data.version}) != Client (${CLIENT_APP_VERSION}). Update available.`);
+      const hdrTxt = document.getElementById('updateAppHeaderTxt');
+      if (hdrTxt) hdrTxt.textContent = currentLang === 'fa' ? 'نسخه جدید ⚡' : 'Update Available ⚡';
     }
   } catch (e) {
     logClientWarningOrError('WARN', 'VERSION_CHECK', e?.message || 'Version check failed');
@@ -7625,9 +7976,10 @@ function updateDataReliabilityUI(rel) {
     const dispTag = (rel.crossVenueDispersionBps !== null && rel.crossVenueDispersionBps !== undefined)
       ? ` · ${Number(rel.crossVenueDispersionBps).toFixed(1)} bps`
       : '';
+    const cleanLabel = String(stateLabel).replace(/^QUORUM\s*/i, '');
     t1FeedBadge.textContent = currentLang === 'fa'
       ? `${quorumStr} منبع (${stateLabel}${dispTag})`
-      : `${quorumStr} QUORUM (${stateLabel}${dispTag})`;
+      : `${quorumStr} QUORUM (${cleanLabel || stateLabel}${dispTag})`;
     t1FeedBadge.style.color = rel.gradeColor || '#00e676';
   }
 
@@ -9751,22 +10103,92 @@ console.log(
   'color: #00e5ff; font-size: 12px;'
 );
 
-// Self-Updating Mechanism Event Listeners & Forced Update Button
+// ==========================================================
+// Application Release Hub & Distribution Event Listeners
+// ==========================================================
 const btnManualUpdateCheck = document.getElementById('btnManualUpdateCheck');
 if (btnManualUpdateCheck) {
   btnManualUpdateCheck.addEventListener('click', () => {
-    const btnTxt = document.getElementById('txtUpdateBtn');
-    if (btnTxt) btnTxt.textContent = currentLang === 'fa' ? 'در حال بررسی...' : 'Checking...';
-    if (swRegistration) swRegistration.update().catch(() => {});
-    checkServerBuildVersion(true);
+    openAppUpdateModal(true);
   });
 }
 
 const updateAppHeaderBtn = document.getElementById('updateAppHeaderBtn');
 if (updateAppHeaderBtn) {
   updateAppHeaderBtn.addEventListener('click', () => {
-    if (swRegistration) swRegistration.update().catch(() => {});
-    checkServerBuildVersion(true);
+    openAppUpdateModal(true);
+  });
+}
+
+// Modal Dismiss Listeners (✕, Close button, backdrop, Escape key)
+const appUpdateModalCloseBtn = document.getElementById('appUpdateModalCloseBtn');
+if (appUpdateModalCloseBtn) {
+  appUpdateModalCloseBtn.addEventListener('click', closeAppUpdateModal);
+}
+
+const btnDismissUpdateModal = document.getElementById('btnDismissUpdateModal');
+if (btnDismissUpdateModal) {
+  btnDismissUpdateModal.addEventListener('click', closeAppUpdateModal);
+}
+
+const appUpdateModalOverlay = document.getElementById('appUpdateModalOverlay');
+if (appUpdateModalOverlay) {
+  appUpdateModalOverlay.addEventListener('click', (e) => {
+    if (e.target === appUpdateModalOverlay) closeAppUpdateModal();
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const overlay = document.getElementById('appUpdateModalOverlay');
+    if (overlay && !overlay.classList.contains('hidden')) {
+      closeAppUpdateModal();
+    }
+  }
+});
+
+// Check Updates Now in Modal
+const btnCheckUpdatesNow = document.getElementById('btnCheckUpdatesNow');
+if (btnCheckUpdatesNow) {
+  btnCheckUpdatesNow.addEventListener('click', () => {
+    checkReleaseManifest(true);
+  });
+}
+
+// Download feedback handlers
+const btnDownloadSourceZip = document.getElementById('btnDownloadSourceZip');
+if (btnDownloadSourceZip) {
+  btnDownloadSourceZip.addEventListener('click', () => {
+    const statusBox = document.getElementById('updateDownloadStatusBox');
+    const msg = document.getElementById('updateDownloadStatusMsg');
+    if (statusBox && msg) {
+      statusBox.classList.remove('hidden');
+      msg.textContent = currentLang === 'fa'
+        ? 'در حال آماده‌سازی و دانلود آرشیو کامل کد سورس (ZIP)... دریافت فایل در مرورگر آغاز شد.'
+        : 'Preparing and streaming Full Source Archive (ZIP)... Download initiated.';
+    }
+  });
+}
+
+const btnDownloadReleaseBundle = document.getElementById('btnDownloadReleaseBundle');
+if (btnDownloadReleaseBundle) {
+  btnDownloadReleaseBundle.addEventListener('click', () => {
+    const statusBox = document.getElementById('updateDownloadStatusBox');
+    const msg = document.getElementById('updateDownloadStatusMsg');
+    if (statusBox && msg) {
+      statusBox.classList.remove('hidden');
+      msg.textContent = currentLang === 'fa'
+        ? 'در حال آماده‌سازی و دانلود بسته انتشار (Release Bundle)... دریافت فایل در مرورگر آغاز شد.'
+        : 'Preparing and streaming Release Bundle... Download initiated.';
+    }
+  });
+}
+
+// In-App PWA Cache Purge & Reload
+const btnRefreshPwaCache = document.getElementById('btnRefreshPwaCache');
+if (btnRefreshPwaCache) {
+  btnRefreshPwaCache.addEventListener('click', () => {
+    applyAppUpdate();
   });
 }
 
@@ -9780,7 +10202,7 @@ if (btnForcedUpdateNow) {
 const toastReloadBtn = document.getElementById('toastReloadBtn');
 if (toastReloadBtn) {
   toastReloadBtn.addEventListener('click', () => {
-    applyAppUpdate();
+    openAppUpdateModal(true);
   });
 }
 

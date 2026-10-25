@@ -1,5 +1,60 @@
 [
   {
+    "auditId": "audit-1792961802386-uaivs",
+    "timestampIso": "2026-10-25T20:56:42.386Z",
+    "eventType": "PROMOTED_AUTOMATIC_VERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen9",
+    "targetArchitectureId": "arch-live-gen9",
+    "summaryEn": "Closed-Loop Verifier automatically promoted Verified Candidate (v9.0-ParallelCandidate-G8) to Live Yellow-Line Architecture (v9.0-LivePromoted (AUTO)) after passing all 8/8 gates · Note: Auto-promoted after passing all 8/8 closed-loop verification gates (DM t=0.54)..",
+    "summaryFa": "راستی‌آزمای حلقه بسته پس از عبور از تمامی 8/8 گیت، معماری کاندیدا (v9.0-ParallelCandidate-G8) را به صورت خودکار به خط زرد زنده (v9.0-LivePromoted (AUTO)) ارتقا داد.",
+    "verifiableMetrics": "Mode=AUTOMATIC_VERIFIED | Gates=8/8 | ActiveModels=11 | Discovered=7 | Archived=arch-live-gen8"
+  },
+  {
+    "auditId": "audit-1792961779374-36314",
+    "timestampIso": "2026-10-25T20:56:19.374Z",
+    "eventType": "PROMOTED_AUTOMATIC_VERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen8",
+    "targetArchitectureId": "arch-live-gen8",
+    "summaryEn": "Closed-Loop Verifier automatically promoted Verified Candidate (v8.0-ParallelCandidate-G7) to Live Yellow-Line Architecture (v8.0-LivePromoted (AUTO)) after passing all 8/8 gates · Note: Auto-promoted after passing all 8/8 closed-loop verification gates (DM t=1.98)..",
+    "summaryFa": "راستی‌آزمای حلقه بسته پس از عبور از تمامی 8/8 گیت، معماری کاندیدا (v8.0-ParallelCandidate-G7) را به صورت خودکار به خط زرد زنده (v8.0-LivePromoted (AUTO)) ارتقا داد.",
+    "verifiableMetrics": "Mode=AUTOMATIC_VERIFIED | Gates=8/8 | ActiveModels=13 | Discovered=8 | Archived=arch-live-gen7"
+  },
+  {
+    "auditId": "audit-1792961773885-fr97y",
+    "timestampIso": "2026-10-25T20:56:13.885Z",
+    "eventType": "PROMOTED_AUTOMATIC_VERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen7",
+    "targetArchitectureId": "arch-live-gen7",
+    "summaryEn": "Closed-Loop Verifier automatically promoted Verified Candidate (v7.0-ParallelCandidate-G6) to Live Yellow-Line Architecture (v7.0-LivePromoted (AUTO)) after passing all 8/8 gates · Note: Auto-promoted after passing all 8/8 closed-loop verification gates (DM t=1.05)..",
+    "summaryFa": "راستی‌آزمای حلقه بسته پس از عبور از تمامی 8/8 گیت، معماری کاندیدا (v7.0-ParallelCandidate-G6) را به صورت خودکار به خط زرد زنده (v7.0-LivePromoted (AUTO)) ارتقا داد.",
+    "verifiableMetrics": "Mode=AUTOMATIC_VERIFIED | Gates=8/8 | ActiveModels=11 | Discovered=7 | Archived=arch-live-gen6"
+  },
+  {
+    "auditId": "audit-1792961703390-mzf0n",
+    "timestampIso": "2026-10-25T20:55:03.390Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen7",
+    "targetArchitectureId": "arch-live-gen6",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to ENABLED.",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به فعال تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=true"
+  },
+  {
+    "auditId": "audit-1792961509318-6sxdo",
+    "timestampIso": "2026-10-25T20:51:49.318Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen6",
+    "targetArchitectureId": "arch-live-gen6",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v6.0-ParallelCandidate-G5) to Live Yellow-Line Architecture (v6.0-LivePromoted (MMI)) via MMI [Gates: 7/8] · Note: Operator manual MMI approval from GDF console.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v6.0-ParallelCandidate-G5) را به معماری خط زرد زنده (v6.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 7/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=7/8 | ActiveModels=11 | Discovered=6 | Archived=arch-live-gen5"
+  },
+  {
     "auditId": "audit-1792958117166-943al",
     "timestampIso": "2026-10-25T19:55:17.166Z",
     "eventType": "LEVEL_B_MODEL_INVENTED",

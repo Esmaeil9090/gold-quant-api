@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { ZipArchive } from 'archiver';
 import { getFeatureFlags } from './src/config/featureFlags.js';
 import {
   buildEmpiricalCalibrationBundle,
@@ -62,7 +64,7 @@ app.use(cors());
 app.use(express.json());
 
 // Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, and Live APIs are never served stale
-const APP_VERSION = '2026.10.24-v75.0-UnifiedLiquidityResilience';
+const APP_VERSION = '2026.10.25-v75.1-ResponsiveArchitectureAndReleaseEngine';
 const BUILD_TIME = Date.now();
 
 app.use((req, res, next) => {
@@ -92,6 +94,159 @@ app.get('/api/app-version', (req: Request, res: Response) => {
     serverTime: new Date().toISOString(),
     featureFlags: getFeatureFlags(),
   });
+});
+
+app.get('/api/release-manifest', (req: Request, res: Response) => {
+  const ph = getArchitecturePersistenceHealth();
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.json({
+    status: 'SUCCESS',
+    appName: 'GDF (Gold Dynamic Flow)',
+    installedVersion: APP_VERSION,
+    latestReleaseVersion: APP_VERSION,
+    buildTime: BUILD_TIME,
+    buildTimestampIso: new Date(BUILD_TIME).toISOString(),
+    isUpdateAvailable: false,
+    releaseNotes: [
+      'Comprehensive mobile responsiveness overhaul across 320px, 360px, 375px, 390px, 430px, tablet, and desktop viewports',
+      'Contained horizontal scrolling & touch-friendly ergonomics for all econometric matrices, gate checklists, and audit tables',
+      'Scalar-Gain Kalman cards adaptive responsive flow preventing multi-column screen clipping',
+      'Eliminated premature auto-closing and unprompted reload loops during application update checks',
+      'Persistent, accessible, manually closable update dialog with top-right close button and escape-key support',
+      'Genuine full repository source (ZIP) download streaming directly from server endpoint',
+      'Separated real-time market data recalibration from application software updates',
+      'Isolated client API transport guards preventing false HALTED_DEGRADED states during version checks',
+      'Preserved all 17 econometric model specifications, 8 verification gates, and parallel universe discovery engine'
+    ],
+    downloadEndpoints: {
+      fullSourceZip: '/api/download/source',
+      releaseBuildZip: '/api/download/release-bundle',
+      versionEndpoint: '/api/app-version',
+      modelSpecsEndpoint: '/api/model-specs'
+    },
+    environment: {
+      platform: process.platform,
+      nodeVersion: process.version,
+      isRender: Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID),
+      persistenceStatus: ph.statusLabel,
+      persistenceSource: ph.resolvedSource
+    }
+  });
+});
+
+app.get('/api/download/source', (req: Request, res: Response) => {
+  const zipFileName = `gdf-gold-quant-source-${APP_VERSION}.zip`;
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+  const archive = new ZipArchive({
+    zlib: { level: 9 },
+  });
+
+  archive.on('warning', (err: any) => {
+    if (err.code === 'ENOENT') {
+      console.warn('[GDF Archive Warning]', err);
+    } else {
+      throw err;
+    }
+  });
+
+  archive.on('error', (err: any) => {
+    console.error('[GDF Archive Error]', err);
+    if (!res.headersSent) {
+      res.status(500).json({ status: 'ERROR', error: 'Failed to create source archive' });
+    }
+  });
+
+  archive.pipe(res);
+
+  // Append key project files
+  const rootFiles = [
+    'server.ts',
+    'index.html',
+    'sw.js',
+    'package.json',
+    'tsconfig.json',
+    'render.yaml',
+    'Procfile',
+    'README.md',
+    'metadata.json',
+    '.env.example',
+    'REMEDIATION_MANIFEST.md'
+  ];
+
+  for (const file of rootFiles) {
+    const fullPath = path.join(__dirname, file);
+    if (fs.existsSync(fullPath)) {
+      archive.file(fullPath, { name: file });
+    }
+  }
+
+  // Append essential directories, ignoring node_modules, .git, and secrets
+  const directoriesToInclude = ['src', 'public', 'fixtures', 'data', 'scripts'];
+  for (const dir of directoriesToInclude) {
+    const dirPath = path.join(__dirname, dir);
+    if (fs.existsSync(dirPath)) {
+      archive.directory(dirPath, dir, (entry) => {
+        if (entry.name.includes('.env') || entry.name.endsWith('.tmp') || entry.name.includes('.DS_Store')) {
+          return false;
+        }
+        return entry;
+      });
+    }
+  }
+
+  archive.finalize();
+});
+
+app.get('/api/download/release-bundle', (req: Request, res: Response) => {
+  const zipFileName = `gdf-release-bundle-${APP_VERSION}.zip`;
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+  const archive = new ZipArchive({
+    zlib: { level: 9 },
+  });
+
+  archive.on('error', (err: any) => {
+    console.error('[GDF Release Bundle Error]', err);
+    if (!res.headersSent) {
+      res.status(500).json({ status: 'ERROR', error: 'Failed to create release bundle' });
+    }
+  });
+
+  archive.pipe(res);
+
+  const releaseFiles = [
+    'server.ts',
+    'index.html',
+    'sw.js',
+    'package.json',
+    'tsconfig.json',
+    'render.yaml',
+    'Procfile',
+    'README.md',
+    'metadata.json'
+  ];
+
+  for (const file of releaseFiles) {
+    const fullPath = path.join(__dirname, file);
+    if (fs.existsSync(fullPath)) {
+      archive.file(fullPath, { name: file });
+    }
+  }
+
+  const releaseDirs = ['src', 'public'];
+  for (const dir of releaseDirs) {
+    const dirPath = path.join(__dirname, dir);
+    if (fs.existsSync(dirPath)) {
+      archive.directory(dirPath, dir);
+    }
+  }
+
+  archive.finalize();
 });
 
 app.get('/api/feature-flags', (req: Request, res: Response) => {

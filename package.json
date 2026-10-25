@@ -16,11 +16,13 @@
     "start": "node server.ts"
   },
   "dependencies": {
+    "archiver": "^8.0.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@types/archiver": "^8.0.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
