@@ -6,4 +6,9 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: npm start
+    # Optional Render Persistent Disk: mount a disk at /var/data and set GDF_PERSISTENT_DATA_DIR=/var/data
+    # so liveArchitecture, candidateArchitecture, generationCounter, and auditTrail survive container redeploys.
+    envVars:
+      - key: GDF_STRICT_REAL_DATA_ONLY
+        value: "true"
 

@@ -13,14 +13,17 @@ import {
 } from './src/config/modelSpecRegistry.js';
 import {
   assertVerifiedProvenance,
+  bootstrapMultiTimeframeWaterfallCache,
   fetchVerifiedMacroNews,
   fetchVerifiedMacroWaterfall,
   fetchVerifiedMarketWaterfall,
   getLatestWaterfallSnapshot,
+  getMultiTimeframeBootstrapState,
   getProviderHttpDiagnostics,
   getSystemWarningErrorLog,
   ProviderTier,
   sanitizeUserFacingHaltReason,
+  triggerNonBlockingMultiTimeframeBootstrap,
 } from './src/services/realDataWaterfall.js';
 import {
   AdaptiveDPObserver,
@@ -37,6 +40,15 @@ import {
   evaluateCausalWalkForwardValidation,
   getLatestValidationScorecard,
 } from './src/services/walkForwardValidationService.js';
+import {
+  evaluateParallelUniverseAndAwarenessCore,
+  getArchitecturePersistenceHealth,
+  getIntelligenceCoreStateSnapshot,
+  promoteCandidateArchitecture,
+  reloadArchitectureStoreFromDisk,
+  setAutoPromotionRuntimeMode,
+  triggerSymbolicDiscoveryAuditStep,
+} from './src/services/intelligenceAwarenessCore.js';
 
 export * from './src/contracts/quantContracts.js';
 
@@ -338,6 +350,26 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       intervalStepSeconds
     );
 
+    if (!simulateFailure) {
+      triggerNonBlockingMultiTimeframeBootstrap({ fixtureReplay });
+    }
+
+    const parallelUniverse = evaluateParallelUniverseAndAwarenessCore({
+      candles,
+      liveMacro,
+      secondaryBenchmark: waterfall.secondaryBenchmark,
+      htfDailyCandles: waterfall.htfDailyCandles,
+      interval,
+      intervalStepSeconds,
+      snapshotId: waterfall.snapshotId || `gdf-snap-${interval}-${Date.now()}`,
+      instrumentIdentity: waterfall.instrumentIdentity || 'PAXG_SPOT_TOKEN',
+      systemState: waterfall.systemState,
+      activeProvider: waterfall.activeProvider,
+      activeSymbol: waterfall.activeSymbol,
+      activeEndpoint: waterfall.activeEndpoint,
+      activeTier: waterfall.activeTier,
+    });
+
     const payload = {
       status: 'SUCCESS',
       snapshotId: waterfall.snapshotId,
@@ -389,6 +421,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       candles,
       dataReliability,
       validationScorecard,
+      parallelUniverse,
     };
 
     if (!simulateFailure && !fixtureReplay) {
@@ -450,6 +483,89 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
   }
 });
 
+// Intelligence & Awareness Core + Parallel Universe MMI Endpoints
+app.get('/api/intelligence-core', (req: Request, res: Response) => {
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    buildTime: BUILD_TIME,
+    timestampIso: new Date().toISOString(),
+    ...getIntelligenceCoreStateSnapshot(),
+  });
+});
+
+app.get('/api/intelligence-core/persistence-health', (req: Request, res: Response) => {
+  const persistenceHealth = getArchitecturePersistenceHealth();
+  const mtfBootstrap = getMultiTimeframeBootstrapState();
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    buildTime: BUILD_TIME,
+    timestampIso: new Date().toISOString(),
+    persistenceHealth,
+    mtfBootstrap,
+  });
+});
+
+app.post('/api/intelligence-core/bootstrap-mtf', async (req: Request, res: Response) => {
+  const fixtureReplay = Boolean(req.body?.fixtureReplay);
+  const force = Boolean(req.body?.force);
+  const mtfBootstrap = await bootstrapMultiTimeframeWaterfallCache({ fixtureReplay, force });
+  forecastCache.clear();
+  res.json({
+    status: 'SUCCESS',
+    mtfBootstrap,
+    ...getIntelligenceCoreStateSnapshot(),
+  });
+});
+
+app.post('/api/intelligence-core/reload-store', (req: Request, res: Response) => {
+  const persistenceHealth = reloadArchitectureStoreFromDisk();
+  forecastCache.clear();
+  res.json({
+    status: 'SUCCESS',
+    persistenceHealth,
+    ...getIntelligenceCoreStateSnapshot(),
+  });
+});
+
+app.post('/api/intelligence-core/promote', (req: Request, res: Response) => {
+  const modeRaw = String(req.body?.mode || 'MANUAL_MMI').toUpperCase();
+  const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
+    modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
+  const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+
+  const result = promoteCandidateArchitecture({ mode, operatorNote });
+  if (result.promoted) {
+    forecastCache.clear();
+  }
+  res.status(result.promoted ? 200 : 409).json({
+    status: result.promoted ? 'SUCCESS' : 'PROMOTION_REJECTED',
+    ...result,
+  });
+});
+
+app.post('/api/intelligence-core/auto-promote-mode', (req: Request, res: Response) => {
+  const enabled = Boolean(req.body?.enabled);
+  const result = setAutoPromotionRuntimeMode(enabled);
+  forecastCache.clear();
+  res.json({
+    status: 'SUCCESS',
+    ...result,
+  });
+});
+
+app.post('/api/intelligence-core/discover-step', (req: Request, res: Response) => {
+  const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
+  const auditEntry = triggerSymbolicDiscoveryAuditStep(note);
+  forecastCache.clear();
+  res.json({
+    status: 'SUCCESS',
+    auditEntry,
+    ...getIntelligenceCoreStateSnapshot(),
+  });
+});
+
 app.post('/api/gold-predictions', async (req: Request, res: Response) => {
   res.redirect(307, '/api/gold-forecast');
 });
@@ -471,5 +587,17 @@ app.get('*', (req: Request, res: Response) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
+  const ph = getArchitecturePersistenceHealth();
   console.log(`GDF Quant Terminal (Phase 2 Modularized Architecture) running on http://0.0.0.0:${PORT}`);
+  console.log(`[GDF Persistence] ${ph.humanReadableStatusEn}`);
+  if (ph.warningEn) {
+    console.warn(`[GDF Persistence] ${ph.warningEn}`);
+    if (ph.remediationInstructionsEn) {
+      console.warn(`[GDF Persistence] ${ph.remediationInstructionsEn}`);
+    }
+  }
+  // Proactively and non-blockingly bootstrap the 5 multi-timeframe discovery series (5m, 15m, 1h, 4h, 1d)
+  setTimeout(() => {
+    triggerNonBlockingMultiTimeframeBootstrap();
+  }, 1000);
 });

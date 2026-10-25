@@ -15,6 +15,10 @@ import type {
 import { AdaptiveDPObserver, computeOrthogonalMacroFactors } from '../engine/quantEngine.js';
 import { evaluateProviderQuorum, sanitizeUserFacingHaltReason } from './realDataWaterfall.js';
 import { getLatestValidationScorecard } from './walkForwardValidationService.js';
+import {
+  buildHaltedParallelUniverseTelemetry,
+  getIntelligenceCoreStateSnapshot,
+} from './intelligenceAwarenessCore.js';
 
 /**
  * Validation & Telemetry Service (Layer 3)
@@ -457,13 +461,7 @@ export function buildHaltedDegradedForecastPayload(params: {
       absorptionScoreZ: 0,
       initiationMomentumZ: 0,
       liquidityPullDriftUsd: 0,
-      fusionWeights: {
-        ouMeanReversionWeight: 0.24,
-        kalmanDriftWeight: 0.24,
-        macroFactorWeight: 0.18,
-        sweepMicrostructureWeight: 0.12,
-        mtfLiquidityWeight: 0.22,
-      },
+      fusionWeights: getIntelligenceCoreStateSnapshot().liveArchitecture.dynamicFusionWeights,
       fusedNetDriftUsd: 0,
       fusedEquilibriumAnchor: lastKnownEq,
       epistemicClass: 'QUALIFIED_PROXY',
@@ -518,6 +516,11 @@ export function buildHaltedDegradedForecastPayload(params: {
     candles: cachedData?.candles || [],
     dataReliability: haltedReliability,
     validationScorecard: cachedData?.validationScorecard || getLatestValidationScorecard(interval),
+    parallelUniverse: buildHaltedParallelUniverseTelemetry(
+      waterfall.snapshotId || `gdf-halted-${interval}-${Date.now()}`,
+      waterfall.instrumentIdentity || 'NONE',
+      interval
+    ),
   };
 }
 

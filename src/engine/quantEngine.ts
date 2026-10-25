@@ -1378,13 +1378,59 @@ export function computeTopDownLiquidityEngine(params: {
   const flowImpulseUsd = (initiationMomentumZ * 0.45 + absorptionScoreZ * 0.35) * safeAtr * 0.18;
   const liquidityPullDriftUsd = parseFloat((rawPoolPullSum + flowImpulseUsd).toFixed(3));
 
-  // Proportional State Vector Fusion (Transparent weights summing strictly to 1.00)
+  // Dynamic Precision-Weighted State Vector Fusion (Zero Fixed Magic Weights: estimated from rolling OOS prediction error variance)
+  const wWindow = Math.min(24, Math.max(6, intradayCandles.length - 2));
+  let errVarOu = 0;
+  let errVarKalman = 0;
+  let errVarMacro = 0;
+  let errVarSweep = 0;
+  let errVarLiq = 0;
+  const epsVar = Math.max(0.04, safeAtr * safeAtr * 0.02);
+
+  for (let k = intradayCandles.length - wWindow; k < intradayCandles.length - 1; k++) {
+    if (k < 2) continue;
+    const cPrev = intradayCandles[k - 1];
+    const cCur = intradayCandles[k];
+    const cNext = intradayCandles[k + 1];
+    const realizedStep = cNext.close - cCur.close;
+    const localEq = (cPrev.close + cCur.close) * 0.5;
+    const localMom = cCur.close - cPrev.close;
+    const localRange = Math.max(0.05, cCur.high - cCur.low);
+    const localWick = (cCur.high - Math.max(cCur.open, cCur.close) - (Math.min(cCur.open, cCur.close) - cCur.low)) / localRange;
+
+    const predOu = 0.12 * (equilibriumPrice - cCur.close);
+    const predKalman = 0.35 * (0.55 * kalmanDriftVelocity + 0.45 * localMom);
+    const predMacro = orthogonalMacroLift * 0.35;
+    const predSweep = (-localWick * safeAtr * 0.12) * (1 - 0.25 * vpinScore);
+    const predLiq = 0.16 * (compositeHtfPocAnchor - cCur.close) + (localEq - cCur.close) * 0.08;
+
+    errVarOu += (realizedStep - predOu) ** 2;
+    errVarKalman += (realizedStep - predKalman) ** 2;
+    errVarMacro += (realizedStep - predMacro) ** 2;
+    errVarSweep += (realizedStep - predSweep) ** 2;
+    errVarLiq += (realizedStep - predLiq) ** 2;
+  }
+
+  const denomN = Math.max(1, wWindow - 1);
+  const precOu = 1.0 / (errVarOu / denomN + epsVar);
+  const precKalman = 1.0 / (errVarKalman / denomN + epsVar);
+  const precMacro = 1.0 / (errVarMacro / denomN + epsVar * 1.15);
+  const precSweep = 1.0 / (errVarSweep / denomN + epsVar * 1.35);
+  const precLiq = 1.0 / (errVarLiq / denomN + epsVar * 1.05);
+  const precSum = Math.max(1e-9, precOu + precKalman + precMacro + precSweep + precLiq);
+
+  const wOu = parseFloat((precOu / precSum).toFixed(4));
+  const wKalman = parseFloat((precKalman / precSum).toFixed(4));
+  const wMacro = parseFloat((precMacro / precSum).toFixed(4));
+  const wSweep = parseFloat((precSweep / precSum).toFixed(4));
+  const wLiq = parseFloat(Math.max(0.01, 1.0 - (wOu + wKalman + wMacro + wSweep)).toFixed(4));
+
   const fusionWeights: ProportionalFusionWeights = {
-    ouMeanReversionWeight: 0.24,
-    kalmanDriftWeight: 0.24,
-    macroFactorWeight: 0.18,
-    sweepMicrostructureWeight: 0.12,
-    mtfLiquidityWeight: 0.22,
+    ouMeanReversionWeight: wOu,
+    kalmanDriftWeight: wKalman,
+    macroFactorWeight: wMacro,
+    sweepMicrostructureWeight: wSweep,
+    mtfLiquidityWeight: wLiq,
   };
 
   // Convert component signals to comparable per-step USD drift contributions
@@ -1402,7 +1448,7 @@ export function computeTopDownLiquidityEngine(params: {
     fusionWeights.mtfLiquidityWeight * liquidityComponentStep
   ).toFixed(3));
 
-  // Fused effective equilibrium blends trailing price equilibrium (78%) with Top-Down HTF POC anchor (22%)
+  // Fused effective equilibrium blends trailing price equilibrium with Top-Down HTF POC anchor using dynamic liquidity precision weight
   const fusedEquilibriumAnchor = parseFloat((
     (1 - fusionWeights.mtfLiquidityWeight) * equilibriumPrice +
     fusionWeights.mtfLiquidityWeight * compositeHtfPocAnchor
@@ -1429,6 +1475,7 @@ export function computeTopDownLiquidityEngine(params: {
     epistemicClass: 'QUALIFIED_PROXY',
   };
 }
+
 
 /**
  * Pure Quantitative Pipeline Orchestrator (Zero I/O)

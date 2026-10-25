@@ -936,6 +936,152 @@ export function getLatestWaterfallSnapshot(interval: string = '15m'): VerifiedMa
   );
 }
 
+export const REQUIRED_DISCOVERY_TIMEFRAMES = ['5m', '15m', '1h', '4h', '1d'] as const;
+
+let mtfBootstrapInProgress = false;
+let lastMtfBootstrapAttemptMs = 0;
+let lastMtfBootstrapCompletedIso: string | null = null;
+const mtfBootstrapFailures = new Map<string, string>();
+
+export function getAllCachedWaterfallSnapshots(): Record<string, VerifiedMarketWaterfallResult> {
+  const out: Record<string, VerifiedMarketWaterfallResult> = {};
+  for (const [tf, entry] of lastVerifiedRealSnapshotCache.entries()) {
+    if (entry.data && entry.data.systemState !== 'HALTED_DEGRADED' && entry.data.candles.length >= 20) {
+      out[tf] = entry.data;
+    }
+  }
+  for (const [tf, entry] of marketWaterfallCache.entries()) {
+    if (entry.data && entry.data.systemState !== 'HALTED_DEGRADED' && entry.data.candles.length >= 20) {
+      out[tf] = entry.data;
+    }
+  }
+  return out;
+}
+
+export function getMultiTimeframeBootstrapState(): {
+  requiredTimeframes: string[];
+  verifiedCachedTimeframes: string[];
+  missingTimeframes: string[];
+  bootstrapInProgress: boolean;
+  lastBootstrapCompletedIso: string | null;
+  failureReasons: Record<string, string>;
+} {
+  const cached = getAllCachedWaterfallSnapshots();
+  const verifiedCachedTimeframes = REQUIRED_DISCOVERY_TIMEFRAMES.filter(
+    tf => Boolean(cached[tf] && cached[tf].candles.length >= 20 && cached[tf].systemState !== 'HALTED_DEGRADED')
+  );
+  const missingTimeframes = REQUIRED_DISCOVERY_TIMEFRAMES.filter(tf => !verifiedCachedTimeframes.includes(tf));
+  const failureReasons: Record<string, string> = {};
+  for (const [tf, reason] of mtfBootstrapFailures.entries()) {
+    if (missingTimeframes.includes(tf as any)) {
+      failureReasons[tf] = reason;
+    }
+  }
+  return {
+    requiredTimeframes: [...REQUIRED_DISCOVERY_TIMEFRAMES],
+    verifiedCachedTimeframes,
+    missingTimeframes,
+    bootstrapInProgress: mtfBootstrapInProgress,
+    lastBootstrapCompletedIso: lastMtfBootstrapCompletedIso,
+    failureReasons,
+  };
+}
+
+/**
+ * Proactively and safely fetches the required Multi-Timeframe Discovery timeframes
+ * (5m, 15m, 1h, 4h, 1d) through the real-data waterfall.
+ * Obeys STRICT_REAL_DATA_ONLY, provenance checks, circuit-breaker, and timeouts.
+ * If a timeframe fails or is unavailable, records the diagnostic and continues with available timeframes.
+ */
+export async function bootstrapMultiTimeframeWaterfallCache(options?: {
+  fixtureReplay?: boolean;
+  simulateUnavailableTimeframes?: string[];
+  force?: boolean;
+}): Promise<{
+  requiredTimeframes: string[];
+  verifiedCachedTimeframes: string[];
+  missingTimeframes: string[];
+  bootstrapInProgress: boolean;
+  lastBootstrapCompletedIso: string | null;
+  failureReasons: Record<string, string>;
+}> {
+  if (mtfBootstrapInProgress && !options?.force) {
+    return getMultiTimeframeBootstrapState();
+  }
+  mtfBootstrapInProgress = true;
+  lastMtfBootstrapAttemptMs = Date.now();
+
+  try {
+    const existing = getAllCachedWaterfallSnapshots();
+    const unavailableSimSet = new Set(options?.simulateUnavailableTimeframes || []);
+
+    const timeframesToFetch = REQUIRED_DISCOVERY_TIMEFRAMES.filter(tf => {
+      if (unavailableSimSet.has(tf)) return true;
+      if (options?.force) return true;
+      return !existing[tf] || existing[tf].candles.length < 20 || existing[tf].systemState === 'HALTED_DEGRADED';
+    });
+
+    await Promise.allSettled(
+      timeframesToFetch.map(async tf => {
+        if (unavailableSimSet.has(tf)) {
+          marketWaterfallCache.delete(tf);
+          lastVerifiedRealSnapshotCache.delete(tf);
+          mtfBootstrapFailures.set(tf, `Timeframe ${tf} unavailable from upstream real-data waterfall`);
+          return;
+        }
+        try {
+          const res = await fetchVerifiedMarketWaterfall(tf, {
+            fixtureReplay: options?.fixtureReplay,
+          });
+          if (res.systemState !== 'HALTED_DEGRADED' && res.candles.length >= 20) {
+            assertVerifiedProvenance(res.candles, {
+              providerName: res.activeProvider,
+              symbol: res.activeSymbol,
+              endpoint: res.activeEndpoint,
+              tier: res.activeTier as ProviderTier,
+            });
+            marketWaterfallCache.set(tf, { timestamp: Date.now(), data: res });
+            lastVerifiedRealSnapshotCache.set(tf, { timestamp: Date.now(), data: res });
+            mtfBootstrapFailures.delete(tf);
+          } else {
+            mtfBootstrapFailures.set(
+              tf,
+              res.haltReasonEn || `Insufficient real candles (${res.candles.length}) on timeframe ${tf}`
+            );
+          }
+        } catch (err: any) {
+          mtfBootstrapFailures.set(tf, err?.message || `Bootstrap fetch failed for ${tf}`);
+        }
+      })
+    );
+
+    lastMtfBootstrapCompletedIso = new Date().toISOString();
+  } finally {
+    mtfBootstrapInProgress = false;
+  }
+
+  return getMultiTimeframeBootstrapState();
+}
+
+/**
+ * Fires a non-blocking background multi-timeframe bootstrap if any required timeframe
+ * (5m, 15m, 1h, 4h, 1d) is missing from the waterfall cache.
+ * Never blocks the live yellow-line request path.
+ */
+export function triggerNonBlockingMultiTimeframeBootstrap(options?: {
+  fixtureReplay?: boolean;
+}): void {
+  const state = getMultiTimeframeBootstrapState();
+  if (state.missingTimeframes.length === 0) return;
+  if (mtfBootstrapInProgress) return;
+  if (Date.now() - lastMtfBootstrapAttemptMs < 15000) return;
+
+  void bootstrapMultiTimeframeWaterfallCache(options).catch(() => {
+    // Non-blocking background bootstrap: errors are recorded per timeframe in mtfBootstrapFailures
+  });
+}
+
+
 async function getOrFetchHtfDailyCandles(): Promise<VerifiedCandle[]> {
   if (cachedHtfDailyCandles && Date.now() - cachedHtfDailyCandles.timestamp < 300000) {
     return cachedHtfDailyCandles.candles;
@@ -1010,14 +1156,16 @@ export async function fetchVerifiedMarketWaterfall(
       };
     }
 
-    const fixturePath = path.join(process.cwd(), 'fixtures', 'real-market', `paxg_${interval}.json`);
+    const specificFixturePath = path.join(process.cwd(), 'fixtures', 'real-market', `paxg_${interval}.json`);
+    const fallbackFixturePath = path.join(process.cwd(), 'fixtures', 'real-market', 'paxg_15m.json');
+    const fixturePath = fs.existsSync(specificFixturePath) ? specificFixturePath : fallbackFixturePath;
     if (fs.existsSync(fixturePath)) {
       const raw = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
       const cleanFixtureCandles = normalizeAndDeduplicateCandles(raw.candles || []);
       assertVerifiedProvenance(cleanFixtureCandles, {
         providerName: `${raw.provider} [Read-Only Verified Fixture]`,
         symbol: raw.symbol,
-        endpoint: `fixtures/real-market/paxg_${interval}.json`,
+        endpoint: `fixtures/real-market/${path.basename(fixturePath)}`,
         tier: 'FIXTURE_TEST_REPLAY',
       });
       const lastBarTime = cleanFixtureCandles[cleanFixtureCandles.length - 1].time;
@@ -1029,7 +1177,7 @@ export async function fetchVerifiedMarketWaterfall(
         activeTier: 'FIXTURE_TEST_REPLAY',
         activeProvider: `${raw.provider} [Verified Fixture Replay]`,
         activeSymbol: raw.symbol,
-        activeEndpoint: `fixtures/real-market/paxg_${interval}.json`,
+        activeEndpoint: `fixtures/real-market/${path.basename(fixturePath)}`,
         instrumentIdentity: 'PAXG_SPOT_TOKEN',
         isFixtureReplay: true,
         candles: cleanFixtureCandles,
@@ -1040,7 +1188,7 @@ export async function fetchVerifiedMarketWaterfall(
             tier: 'FIXTURE_TEST_REPLAY',
             providerName: `${raw.provider} [Verified Fixture Replay]`,
             symbol: raw.symbol,
-            endpoint: `fixtures/real-market/paxg_${interval}.json`,
+            endpoint: `fixtures/real-market/${path.basename(fixturePath)}`,
             venueGroupId: 'fixture_replay',
             instrumentIdentity: 'PAXG_SPOT_TOKEN',
             status: 'SUCCESS',

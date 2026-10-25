@@ -378,24 +378,47 @@ export const MODEL_SPEC_REGISTRY: Record<string, ModelSpecificationEntry> = {
     id: 'PROPORTIONAL_LIQUIDITY_STATE_FUSION',
     classification: 'QUALIFIED_PROXY',
     uiCurrentLegacyLabelEn: 'Integrated Multi-Timeframe Liquidity Trajectory Fusion',
-    honestLabelEn: 'Proportional State-Vector & MTF Liquidity Trajectory Fusion Proxy [Viz: Yellow Plume Attractor]',
-    honestLabelFa: 'پروکسی ادغام متناسب بردار حالت و نقدینگی چندتایم‌فریمی در مسیر پیش‌بینی [لایه بصری: جاذب مسیر زرد]',
+    honestLabelEn: 'Dynamic Precision-Weighted State-Vector & MTF Liquidity Fusion [Viz: Yellow Plume Attractor]',
+    honestLabelFa: 'ادغام بردار حالت و نقدینگی چندتایم‌فریمی با وزن‌دهی دقت معکوس واریانس [لایه بصری: جاذب مسیر زرد]',
     visualizationLayerEn: 'Coupled Hydrodynamic & Liquidity-Well Yellow Trajectory Attractor',
     visualizationLayerFa: 'جاذب هم‌بسته هیدرودینامیک و چاه نقدینگی برای خط زرد مسیر آینده',
-    mathClassEn: 'Convex proportional linear state fusion combining 40-bar OU mean reversion (w=0.24), EKF shrunk drift (w=0.24), orthogonal macro factor lift (w=0.18), sweep microstructure log-odds impulse (w=0.12), and top-down HTF liquidity pool gravity/initiation drift (w=0.22).',
-    mathClassFa: 'ترکیب محدب و متناسب بردار حالت شامل بازگشت به میانگین OU (وزن ۰.۲۴)، رانش کالمن (۰.۲۴)، نیروی کلان (۰.۱۸)، جاروب نقدینگی (۰.۱۲) و جاذبه/رانش نقدینگی چندتایم‌فریمی (۰.۲۲).',
-    equationLatexOrAscii: 'P_eq^* = 0.78 * P_eq,OU + 0.22 * POC_HTF,   v_fused = 0.24*v_OU + 0.24*v_EKF + 0.18*v_macro + 0.12*v_sweep + 0.22*v_liq',
+    mathClassEn: 'Dynamic inverse-variance precision state fusion combining 40-bar OU mean reversion, EKF shrunk drift, orthogonal macro factor lift, sweep microstructure log-odds impulse, and top-down HTF liquidity pool gravity/initiation drift with rolling out-of-sample error variance weights w_{m,t} proportional to (sigma_{m,t}^2 + eps)^{-1}.',
+    mathClassFa: 'ترکیب محدب پویا مبتنی بر معکوس واریانس خطای خارج از نمونه شامل بازگشت به میانگین OU، رانش کالمن، نیروی کلان، جاروب نقدینگی و جاذبه/رانش نقدینگی چندتایم‌فریمی.',
+    equationLatexOrAscii: 'w_{m,t} = (sigma_{m,t}^2 + eps)^{-1} / sum_k (sigma_{k,t}^2 + eps)^{-1},   v_fused = sum_m w_{m,t} * v_{m,t}',
     inputDataFeeds: [
       '40-Bar OU Equilibrium & Scalar-Gain EKF State Velocity',
       'PCA Macro Factor Lift & Sweep Log-Odds Z-Score',
       'Top-Down MTF Liquidity Pools (Monthly→5M POC/HVN/LVN) & Absorption/Initiation State',
     ],
-    samplingAndLookbackEn: 'Synchronized at every forecast cycle across all 24 forward projection steps of the empirical quantile plume.',
-    samplingAndLookbackFa: 'همگام‌سازی‌شده در هر چرخه پیش‌بینی در تمامی ۲۴ گام رو به جلوی مخروط چندکی.',
-    dofAndCalibrationEn: 'Fixed convex combination weights summing to 1.00 (0.24 + 0.24 + 0.18 + 0.12 + 0.22 = 1.00); LVN vacuum corridors scale step dispersion within [0.85, 1.25].',
-    dofAndCalibrationFa: 'وزن‌های محدب شفاف با مجموع دقیق ۱.۰۰؛ ضریب مقیاس نوسان در دالان‌های خلاء نقدینگی LVN مقید در بازه [۰.۸۵، ۱.۲۵].',
-    structuralLimitationsEn: 'Proportional fusion weights are structural domain priors designed for transparent auditability rather than dynamically re-optimized via non-stationary reinforcement learning.',
-    structuralLimitationsFa: 'وزن‌های ادغام متناسب، پیشین‌های ساختاری شفاف و قابل حسابرسی هستند و با یادگیری تقویتی غیرایستا بهینه‌سازی مجدد نمی‌شوند.',
+    samplingAndLookbackEn: 'Synchronized at every forecast cycle across trailing realized bar residuals and all 24 forward projection steps.',
+    samplingAndLookbackFa: 'همگام‌سازی‌شده در هر چرخه پیش‌بینی بر اساس واریانس خطای کندل‌های تحقق‌یافته و ۲۴ گام رو به جلو.',
+    dofAndCalibrationEn: 'Dynamic precision weights w_{m,t} estimated online from rolling out-of-sample squared forecast errors summing strictly to 1.00; zero hardcoded constant weights.',
+    dofAndCalibrationFa: 'وزن‌های دقت پویا که به صورت آنلاین از معکوس واریانس خطای پیش‌بینی خارج از نمونه محاسبه شده و مجموع آن‌ها دقیقاً ۱.۰۰ است.',
+    structuralLimitationsEn: 'Precision weights adapt to trailing out-of-sample error variance over finite OHLCV windows; rapid structural breaks require confirmation across the walk-forward window.',
+    structuralLimitationsFa: 'وزن‌های دقت بر اساس واریانس خطای پنجره محدود کندل‌های اخیر سازگار می‌شوند.',
+  },
+
+  PARALLEL_UNIVERSE_DISCOVERY_CORE: {
+    id: 'PARALLEL_UNIVERSE_DISCOVERY_CORE',
+    classification: 'VERIFIED_EXACT',
+    uiCurrentLegacyLabelEn: 'Intelligence & Awareness Core with Parallel Universe (Level B Symbolic Discovery)',
+    honestLabelEn: 'Intelligence & Awareness Core · Multi-Timeframe Parallel Universe Symbolic Discovery & 8-Gate Closed-Loop Verifier',
+    honestLabelFa: 'هسته هوشمندی و آگاهی · جهان موازی کشف نمادین چندتایم‌فریمی و راستی‌آزمایی ۸ مرحله‌ای حلقه بسته',
+    visualizationLayerEn: 'Same-Chart Dual-Line Comparison (#windyCanvas): Live Approved Architecture (Yellow Line #f5d76e) vs. Parallel Universe Candidate (Dashed Magenta Line #e040fb)',
+    visualizationLayerFa: 'مقایسه دو خط روی نمودار واحد (#windyCanvas): معماری زنده تاییدشده (خط زرد #f5d76e) در برابر کاندیدای جهان موازی (خط خط‌چین سرخابی #e040fb)',
+    mathClassEn: 'Isolated candidate model architecture executing Level-B constrained symbolic equation discovery across 8 closed-form primitives (including lagged residual error-correction, second-order basis acceleration, multi-timeframe HTF/LTF drift-POC synergy, and asymmetric real-yield tail-shock shield), split-half stability gating, rolling ridge-regularized parameter estimation, faulty model pruning, and an 8-gate Diebold-Mariano / CVaR-95 / multi-regime walk-forward verification protocol persisted in a versioned atomic JSON store.',
+    mathClassFa: 'معماری کاندیدای ایزوله با قابلیت کشف نمادین ۸ خانواده معادله بسته سطح B (شامل تصحیح خودکار پسماند تاخیری، شتاب مرتبه دوم اسپرد، هم‌افزایی رانش چندتایم‌فریمی و سپر نامتقارن شوک بازده واقعی)، حذف مدل‌های ناپایدار، وزن‌دهی پویا و پروتکل راستی‌آزمایی ۸ گانه دیبولد-ماریانو با ذخیره‌سازی پایدار.',
+    equationLatexOrAscii: 'v_cand(t) = sum_{m in Active} w_{m,t} * phi_m(X_t^{TF}, X_t^{HTF}, X_t^{LTF}, e_{t-1}^{live}; theta_{m,t}),   DM_t = mean(d_t) / sqrt(Var(d_t) / N_eff)',
+    inputDataFeeds: [
+      'Identical Verified Real-Data Waterfall Snapshot (Active Timeframe OHLCV + Multi-Timeframe 5m/15m/1h/4h/1d Verified Series)',
+      'Multi-Source Macro Yields/DXY, Cross-Venue Basis Spread & Acceleration, and Live Yellow-Line Lagged OOS Residuals',
+    ],
+    samplingAndLookbackEn: 'Data-driven minimum evaluation window N_min >= max(16, ceil(4 * tau_half_life)) derived from empirical residual autocorrelation half-life; state persisted atomically across restarts in versioned store v2.',
+    samplingAndLookbackFa: 'پنجره ارزیابی خارج از نمونه مبتنی بر داده که از نیمه‌عمر خودهمبستگی تجربی پسماندها استخراج می‌شود؛ ذخیره اتمی نسخه ۲ برای بقا در ری‌استارت.',
+    dofAndCalibrationEn: 'Empirical variance-scaled Ridge regularization (lambda_t = Var(Delta P) / N_fit) with split-half sign stability gating; promotion restricted to Manual MMI approval or Automatic promotion when all 8 verification gates pass (VERIFIED_FOR_PROMOTION).',
+    dofAndCalibrationFa: 'تخمین پارامتر رگرسیون ریج علّی با گیت پایداری دونیمه‌ای؛ ارتقا صرفاً از طریق تایید دستی اپراتور (MMI) یا ارتقای خودکار پس از عبور از هر ۸ گیت راستی‌آزمایی.',
+    structuralLimitationsEn: 'Symbolic discovery is constrained to 8 closed-form, auditable non-linear primitives over verified OHLCV, volume-clock, basis, multi-timeframe liquidity, and macro state variables; container redeployments without a mounted volume log an explicit ephemeral storage warning.',
+    structuralLimitationsFa: 'کشف معادلات نمادین مقید به ۸ فرم ریاضی بسته و قابل حسابرسی روی داده‌های واقعی است.',
   },
 };
 
@@ -406,3 +429,4 @@ export function getModelSpecList(): ModelSpecificationEntry[] {
 export function getModelSpecById(id: string): ModelSpecificationEntry | undefined {
   return MODEL_SPEC_REGISTRY[id];
 }
+

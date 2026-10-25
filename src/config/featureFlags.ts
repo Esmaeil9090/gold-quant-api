@@ -18,6 +18,10 @@ export interface FeatureFlags {
   ENABLE_EMPIRICAL_CALIBRATION: boolean;
   /** Phase 0/1: Allow deterministic offline test replay from read-only /fixtures/real-market/ only when explicitly requested via ?fixtureReplay=1 */
   ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST: boolean;
+  /** Intelligence & Awareness Core: Enable isolated Parallel Universe candidate architecture & Level B symbolic equation discovery */
+  ENABLE_PARALLEL_UNIVERSE_CORE: boolean;
+  /** Intelligence & Awareness Core: Allow automatic promotion ONLY when candidate reaches VERIFIED_FOR_PROMOTION across all 8 gates */
+  ALLOW_AUTO_ARCHITECTURE_PROMOTION: boolean;
 }
 
 function parseBoolEnv(val: string | undefined, defaultValue: boolean): boolean {
@@ -41,5 +45,8 @@ export function getFeatureFlags(): FeatureFlags {
     ENABLE_CIRCUIT_BREAKER_HALT: parseBoolEnv(process.env.GDF_ENABLE_CIRCUIT_BREAKER_HALT, true),
     ENABLE_EMPIRICAL_CALIBRATION: parseBoolEnv(process.env.GDF_ENABLE_EMPIRICAL_CALIBRATION, true),
     ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST: parseBoolEnv(rawFixtureEnv, !isProduction),
+    ENABLE_PARALLEL_UNIVERSE_CORE: parseBoolEnv(process.env.GDF_ENABLE_PARALLEL_UNIVERSE_CORE, true),
+    ALLOW_AUTO_ARCHITECTURE_PROMOTION: parseBoolEnv(process.env.GDF_ALLOW_AUTO_ARCHITECTURE_PROMOTION, false),
   };
 }
+

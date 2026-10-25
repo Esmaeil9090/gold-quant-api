@@ -434,3 +434,242 @@ export interface IntegratedLiquidityEngineTelemetry {
   fusedEquilibriumAnchor: number;
   epistemicClass: EstimatorClassification;
 }
+
+export type AwarenessFindingCategory =
+  | 'MODEL_CONTRADICTION'
+  | 'REGIME_BLINDSPOT'
+  | 'RESIDUAL_AUTOCORRELATION'
+  | 'TAIL_EXCURSION_WEAKNESS'
+  | 'BASIS_DRIFT_MISMATCH';
+
+export interface AwarenessFinding {
+  id: string;
+  timestampIso: string;
+  category: AwarenessFindingCategory;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  affectedModelId: string;
+  regimeContext: string;
+  summaryEn: string;
+  summaryFa: string;
+  empiricalEvidence: string;
+  recommendedAction: 'INVENT_SYMBOLIC_TERM' | 'DISABLE_CONTRADICTORY_MODEL' | 'REWEIGHT_PRECISION' | 'RETUNE_DAMPING';
+}
+
+export type SymbolicPrimitiveId =
+  | 'OU_MEAN_REVERSION'
+  | 'EKF_STATE_DRIFT'
+  | 'ORTHOGONAL_MACRO_LIFT'
+  | 'SWEEP_LOG_ODDS_IMPULSE'
+  | 'MTF_LIQUIDITY_PULL'
+  | 'VOL_REGIME_NONLINEAR_INTERACTION'
+  | 'BASIS_VELOCITY_COUPLING'
+  | 'VOLUME_CLOCK_HAWKMOTH_RESTORING'
+  | 'REAL_YIELD_CONVEXITY_ASYMMETRY'
+  | 'LAGGED_RESIDUAL_SELF_CORRECTION'
+  | 'BASIS_ACCELERATION_SECOND_ORDER'
+  | 'MTF_DRIFT_CONFLUENCE_SYNERGY'
+  | 'ASYMMETRIC_TAIL_VOL_SHOCK_SHIELD';
+
+export interface DynamicModelSlot {
+  modelId: SymbolicPrimitiveId;
+  nameEn: string;
+  nameFa: string;
+  origin: 'CORE_BASELINE' | 'LEVEL_B_SYMBOLIC_DISCOVERY';
+  equationAscii: string;
+  isEnabled: boolean;
+  disabledReasonEn?: string | null;
+  /** Dynamically estimated weight from inverse OOS error variance (never a hardcoded constant) */
+  dynamicWeight: number;
+  /** Rolling OOS error variance (USD^2) used to derive dynamic precision weight */
+  rollingErrorVariance: number;
+  /** Rolling OOS Spearman Rank-IC over realized bars */
+  rollingRankIc: number;
+  /** Fitted symbolic coefficient from rolling ridge regression on real innovations */
+  fittedCoefficient: number;
+  /** Current per-step drift contribution in USD */
+  currentStepContributionUsd: number;
+  /** Causal out-of-sample residual R^2 or variance-reduction ratio */
+  oosRSquared?: number;
+  /** Split-half coefficient stability ratio in [0, 1] */
+  stabilityRatio?: number;
+  /** Number of real OOS bars used in the ridge fit */
+  sampleCountN?: number;
+  /** Timeframe scope of the feature inputs (e.g., 'ACTIVE_TF', 'CROSS_TF_HTF_LTF') */
+  timeframeScope?: 'ACTIVE_TF' | 'CROSS_TF_HTF_LTF';
+}
+
+export interface ArchitectureState {
+  architectureId: string;
+  versionTag: string;
+  role: 'LIVE_YELLOW_LINE' | 'PARALLEL_CANDIDATE_LINE';
+  createdAtIso: string;
+  promotedAtIso?: string | null;
+  promotionMode?: 'INITIAL_BASELINE' | 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED';
+  lineColorHex: string;
+  activeModelsCount: number;
+  disabledModelsCount: number;
+  discoveredModelsCount: number;
+  models: DynamicModelSlot[];
+  dynamicFusionWeights: ProportionalFusionWeights;
+  compositeNetDriftUsdPerStep: number;
+  compositeEquilibriumAnchor: number;
+}
+
+export type VerificationGateId =
+  | 'GATE_1_DATA_DRIVEN_OOS_WINDOW'
+  | 'GATE_2_STATISTICAL_SIGNIFICANCE_GAIN'
+  | 'GATE_3_TAIL_RISK_NON_DETERIORATION'
+  | 'GATE_4_MULTI_REGIME_STABILITY'
+  | 'GATE_5_PROVENANCE_AND_INSTRUMENT_IDENTITY'
+  | 'GATE_6_SAFETY_INVARIANTS_INTACT'
+  | 'GATE_7_POST_DISCOVERY_CONFIRMATION'
+  | 'GATE_8_IMMUTABLE_AUDIT_TRAIL';
+
+export interface TestAndVerifyGateResult {
+  gateId: VerificationGateId;
+  titleEn: string;
+  titleFa: string;
+  passed: boolean;
+  metricSummary: string;
+  thresholdSpec: string;
+  detailsEn: string;
+  detailsFa: string;
+}
+
+export type CandidateVerificationStatus =
+  | 'VERIFIED_FOR_PROMOTION'
+  | 'OBSERVING_CONFIRMATION_WINDOW'
+  | 'FAILED_VERIFICATION_GATE'
+  | 'HALTED_FROZEN';
+
+export interface TestAndVerifyReport {
+  evaluatedAtIso: string;
+  timeframe: string;
+  overallStatus: CandidateVerificationStatus;
+  passedGatesCount: number;
+  totalGatesCount: number;
+  /** Data-driven minimum window derived from empirical autocorrelation half-life */
+  dataDrivenMinWindowBars: number;
+  realizedOosBarsEvaluated: number;
+  postDiscoveryConfirmationBars: number;
+  requiredConfirmationBars: number;
+  liveRmseUsd: number;
+  candidateRmseUsd: number;
+  liveRankIc: number;
+  candidateRankIc: number;
+  dieboldMarianoTStat: number;
+  liveTailP95ErrorUsd: number;
+  candidateTailP95ErrorUsd: number;
+  liveMaxExcursionErrorUsd: number;
+  candidateMaxExcursionErrorUsd: number;
+  regimesObservedCount: number;
+  regimesPassedCount: number;
+  gates: TestAndVerifyGateResult[];
+}
+
+export interface ArchitectureAuditLogEntry {
+  auditId: string;
+  timestampIso: string;
+  eventType:
+    | 'LEVEL_B_MODEL_INVENTED'
+    | 'FAULTY_MODEL_DISABLED'
+    | 'DYNAMIC_PRECISION_REWEIGHT'
+    | 'PROMOTED_MANUAL_MMI'
+    | 'PROMOTED_AUTOMATIC_VERIFIED'
+    | 'AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED'
+    | 'COLD_START_STATE_RESTORED';
+  actor: 'INTELLIGENCE_AWARENESS_CORE' | 'OPERATOR_MMI' | 'CLOSED_LOOP_VERIFIER';
+  sourceArchitectureId: string;
+  targetArchitectureId: string;
+  summaryEn: string;
+  summaryFa: string;
+  verifiableMetrics: string;
+}
+
+export interface ArchitecturePersistenceHealth {
+  schemaVersion: number;
+  statusLabel: 'PERSISTENT' | 'EPHEMERAL';
+  storageMode: 'DURABLE_MOUNTED_VOLUME' | 'LOCAL_DISK_PERSISTENT' | 'EPHEMERAL_CONTAINER_FILESYSTEM';
+  resolvedSource:
+    | 'GDF_PERSISTENT_DATA_DIR'
+    | 'RENDER_DISK_MOUNT_PATH'
+    | 'DEFAULT_SYSTEM_DATA_DIR'
+    | 'PROJECT_DATA_DIR';
+  priorityOrder: string[];
+  isDurableAcrossRedeploys: boolean;
+  storeFilePath: string;
+  lastPersistedAtIso: string;
+  coldStartRestored: boolean;
+  restoredGeneration: number;
+  restoredAuditEntriesCount: number;
+  restoredLiveVersionTag: string;
+  restoredCandidateVersionTag: string;
+  restoredAutoPromotionEnabled: boolean;
+  humanReadableStatusEn: string;
+  humanReadableStatusFa: string;
+  warningEn: string | null;
+  warningFa: string | null;
+  remediationInstructionsEn: string | null;
+  remediationInstructionsFa: string | null;
+}
+
+export interface MultiTimeframeSlotDiagnostic {
+  timeframe: string;
+  available: boolean;
+  barsCount: number;
+  source:
+    | 'VERIFIED_WATERFALL_CACHE'
+    | 'ACTIVE_SNAPSHOT'
+    | 'HTF_DAILY_ANCHOR'
+    | 'CAUSAL_STRUCTURAL_AGGREGATION'
+    | 'UNAVAILABLE';
+  provider: string;
+}
+
+export interface MultiTimeframeDiscoveryContext {
+  activeTimeframe: string;
+  requiredTimeframes: string[];
+  participatingTimeframes: string[];
+  verifiedRealCacheTimeframes: string[];
+  missingTimeframes: string[];
+  bootstrapStatus: 'COMPLETE_ALL_TIMEFRAMES' | 'PARTIAL_AVAILABLE' | 'BOOTSTRAPPING_IN_PROGRESS';
+  timeframeDetails: MultiTimeframeSlotDiagnostic[];
+  htfNormalizedDriftZ: number;
+  ltfNormalizedDriftZ: number;
+  htfPocAnchorPrice: number;
+  htfVolatilityRatio: number;
+  mtfConfluenceAlignment: number;
+  summaryEn: string;
+  summaryFa: string;
+}
+
+
+export interface EnsemblePlume {
+  medianTrack: { time: number; value: number }[];
+  upper95: { time: number; value: number }[];
+  upper75: { time: number; value: number }[];
+  lower25: { time: number; value: number }[];
+  lower05: { time: number; value: number }[];
+  sampleTracks?: { id: number; path: { time: number; value: number }[] }[];
+}
+
+export interface ParallelUniverseTelemetry {
+  enabled: boolean;
+  autoPromotionEnabled: boolean;
+  snapshotId: string;
+  instrumentIdentity: string;
+  persistenceHealth: ArchitecturePersistenceHealth;
+  mtfDiscoveryContext: MultiTimeframeDiscoveryContext;
+  liveArchitecture: ArchitectureState;
+  candidateArchitecture: ArchitectureState;
+  candidateEnsemble: EnsemblePlume;
+  findings: AwarenessFinding[];
+  verificationReport: TestAndVerifyReport;
+  auditTrail: ArchitectureAuditLogEntry[];
+  promotionOccurredThisCycle: boolean;
+  lastPromotionBannerEn: string | null;
+  lastPromotionBannerFa: string | null;
+}
+
+
+

@@ -2943,13 +2943,14 @@ input:checked + .toggle-slider:before {
         </button>
       </div>
 
-      <!-- Right Box: Atmospheric Streamlines, Isobars, Plumes, Volumetric Candles Layers & Bar Countdown -->
+      <!-- Right Box: Atmospheric Streamlines, Isobars, Plumes, Parallel Universe Candidate, Volumetric Candles Layers & Bar Countdown -->
       <div class="deck-group deck-right">
         <div class="deck-layers-box">
           <span class="deck-label" data-i18n="layersLabel">Layers:</span>
           <button class="deck-layer-btn active" id="btnParticles" data-i18n="layerStream">Streamlines</button>
           <button class="deck-layer-btn active" id="btnIsobars" data-i18n="layerIsobars">Isobars</button>
           <button class="deck-layer-btn active" id="btnEnsemble" data-i18n="layerPlumes">Plumes (±1σ/±2σ)</button>
+          <button class="deck-layer-btn active" id="btnParallelCandidate" style="border-color: rgba(224, 64, 251, 0.55); color: #f381ff;" title="Toggle Parallel Universe Candidate Trajectory Line (#e040fb)">Parallel Universe</button>
           <button class="deck-layer-btn active" id="btnCandles" data-i18n="layerBattle">Volumetric Candles</button>
         </div>
 
@@ -2958,6 +2959,24 @@ input:checked + .toggle-slider:before {
           <span>⏳</span>
           <span id="countdownTimer">15:00</span>
         </div>
+      </div>
+    </div>
+
+    <!-- 5. Dual-World Trajectory Legend & Man-Machine Interface (MMI) Status Ribbon -->
+    <div id="parallelUniverseCompareBar" style="margin-top: 8px; background: linear-gradient(90deg, rgba(10, 16, 28, 0.94), rgba(24, 11, 34, 0.92)); border: 1px solid rgba(224, 64, 251, 0.38); border-radius: 10px; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="width: 14px; height: 3.5px; border-radius: 2px; background: #f5d76e; box-shadow: 0 0 8px #f5d76e; display: inline-block;"></span>
+          <span style="font-size: 11px; font-weight: 800; color: #f5d76e; font-family: monospace;" id="puLiveArchBadge">LIVE (YELLOW LINE): v1.0-LiveApproved (5 Models)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="width: 14px; height: 3.5px; border-radius: 2px; background: #e040fb; box-shadow: 0 0 8px #e040fb; display: inline-block;"></span>
+          <span style="font-size: 11px; font-weight: 800; color: #f381ff; font-family: monospace;" id="puCandArchBadge">PARALLEL UNIVERSE (CANDIDATE LINE): v2.0-ParallelCandidate (9 Models · 4 Level-B Symbolic)</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span id="puGateStatusPill" style="font-size: 10px; font-family: monospace; font-weight: 800; padding: 3px 8px; border-radius: 5px; background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.4); color: var(--cyan);">8-GATE VERIFIER: --/8 PASSED</span>
+        <button type="button" id="btnQuickOpenMmiPanel" style="background: rgba(224, 64, 251, 0.18); border: 1px solid rgba(224, 64, 251, 0.55); color: #f381ff; font-size: 10.5px; font-weight: 800; padding: 4px 10px; border-radius: 6px; cursor: pointer;">🧠 Open Intelligence Core &amp; MMI Promotion ▾</button>
       </div>
     </div>
   </section>
@@ -3514,6 +3533,154 @@ input:checked + .toggle-slider:before {
               <tbody id="liqTopDownTableBody">
                 <!-- Populated dynamically by renderLiquidityEngine -->
               </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 12: Intelligence & Awareness Core · Parallel Universe & MMI Promotion Gate (Collapsed by Default in Tier 3) -->
+    <div class="collapsible-panel" id="panelIntelligenceCore">
+      <div class="panel-accordion-header" data-panel="panelIntelligenceCore">
+        <div class="accordion-title-left">
+          <span class="accordion-icon">🧠</span>
+          <span class="accordion-title">Intelligence &amp; Awareness Core · Parallel Universe &amp; MMI Promotion Console</span>
+          <span class="epistemic-badge epistemic-filtered" data-epistemic="FILTERED_ESTIMATE">[FILTERED ESTIMATE]</span>
+          <button type="button" class="spec-badge-btn" data-model-spec="PARALLEL_UNIVERSE_DISCOVERY_CORE" title="VERIFIED_EXACT: Inspect Intelligence & Awareness Core and 8-Gate Verifier Spec">✓ Exact · Spec ⓘ</button>
+        </div>
+        <div class="accordion-header-right">
+          <span class="accordion-status-pill" id="puAccordionStatusPill" style="color: #f381ff; border-color: rgba(224, 64, 251, 0.5);">LIVE (YELLOW) vs. CANDIDATE (MAGENTA)</span>
+          <span class="accordion-arrow">▼</span>
+        </div>
+      </div>
+      <div class="panel-accordion-body">
+        <div class="recharts-card" style="margin-bottom: 0; border-color: rgba(224, 64, 251, 0.35);">
+          <div class="recharts-header" style="margin-bottom: 12px;">
+            <div class="recharts-title-box">
+              <span class="recharts-badge" style="color: #f381ff;">Dual-World Isolation · Level-B Symbolic Equation Discovery · 8-Gate Closed-Loop Verifier</span>
+              <h3 class="recharts-title">Live Architecture (Yellow Line) vs. Parallel Universe Candidate (Magenta Line)</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <button type="button" id="btnManualMmiPromote" title="Operator Manual MMI Override: Explicitly promote the Candidate Architecture to become the new Live Yellow Line immediately (writes immutable audit log)" style="background: linear-gradient(135deg, rgba(245, 215, 110, 0.28), rgba(224, 64, 251, 0.24)); border: 1.5px solid #f5d76e; color: #f5d76e; font-size: 11px; font-weight: 800; padding: 7px 13px; border-radius: 7px; cursor: pointer;">⚡ Promote Candidate to Live (Manual MMI)</button>
+              <button type="button" id="btnTriggerSymbolicDiscovery" title="Run an immediate Level-B Symbolic Equation synthesis and ridge calibration step" style="background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.45); color: var(--cyan); font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🧬 Synthesize Symbolic Step</button>
+              <button type="button" id="btnBootstrapMtfNow" title="Proactively bootstrap all 5 required discovery timeframes (5m, 15m, 1h, 4h, 1d) into the real-data waterfall cache" style="background: rgba(224, 64, 251, 0.14); border: 1px solid rgba(224, 64, 251, 0.45); color: #f381ff; font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🔄 Bootstrap 5-TF Cache</button>
+              <label style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-family: monospace; color: #e2e8f0; background: rgba(10, 16, 28, 0.95); border: 1px solid rgba(0, 230, 118, 0.5); padding: 6px 11px; border-radius: 7px; cursor: pointer;" title="Automatic Promotion Path: Strictly blocked unless all 8/8 closed-loop verification gates pass (VERIFIED_FOR_PROMOTION)">
+                <input type="checkbox" id="chkAutoPromoteVerified" style="accent-color: #00e676; cursor: pointer;">
+                <span><b>Auto-Promote Toggle</b> (Strictly Requires 8/8 Gates)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Strong Visual Safety Reminder for Automatic vs. Manual MMI Promotion -->
+          <div id="puAutoPromoteReminderBanner" style="margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; background: rgba(255, 171, 0, 0.12); border: 1px solid rgba(255, 171, 0, 0.48); color: #ffd54f; font-size: 10.5px; font-family: monospace; line-height: 1.4;">
+            🛡️ <b>PROMOTION GATE SAFETY GUARD:</b> Manual promotion (<b>Promote Candidate to Live (Manual MMI)</b>) is an explicit operator override. <b>Auto-Promote</b> is <b>STRICTLY LOCKED</b> and will <u>ONLY</u> promote automatically when <b>8/8 Gates Pass (VERIFIED_FOR_PROMOTION)</b>.
+          </div>
+
+          <div id="puPromotionStatusBanner" style="display: none; margin-bottom: 12px; padding: 9px 13px; border-radius: 8px; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676; font-size: 11.5px; font-family: monospace; font-weight: 700;"></div>
+
+          <!-- At-a-Glance Operator Status Strip: 1. Persistence | 2. Multi-Timeframe Discovery | 3. Candidate 8-Gate Verification -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 12px;">
+            <div id="puPersistenceHealthBar" style="background: rgba(8, 16, 28, 0.92); border: 1px solid rgba(0, 230, 118, 0.45); border-radius: 8px; padding: 9px 12px; font-family: monospace; font-size: 10.5px; color: #d1dced;">
+              <div>💾 <b>1. ARCHITECTURE STORE PERSISTENCE:</b> <span id="puPersistenceModeTag" style="color: #00e676; font-weight: 800;">PERSISTENT (LOCAL_DISK_PERSISTENT)</span></div>
+              <div id="puPersistenceDetails" style="margin-top: 3px; color: #b8c7de; font-size: 10px;">Cold-Start Restored: Gen-1 · Atomic Write-Through Active</div>
+              <div id="puPersistenceRemediationBox" style="display: none; margin-top: 5px; padding: 5px 8px; border-radius: 5px; background: rgba(255, 82, 82, 0.14); border: 1px solid rgba(255, 82, 82, 0.45); color: #ff8a80; font-size: 9.5px; line-height: 1.35;"></div>
+            </div>
+            <div id="puMtfDiscoveryBar" style="background: rgba(14, 12, 30, 0.92); border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 8px; padding: 9px 12px; font-family: monospace; font-size: 10.5px; color: #d1dced;">
+              <div>🌐 <b>2. MULTI-TIMEFRAME DISCOVERY:</b> <span id="puMtfHorizonsTag" style="color: var(--cyan); font-weight: 800;">[5m → 15m → 1h → 4h → 1d]</span></div>
+              <div id="puMtfMissingTag" style="margin-top: 3px; font-size: 10px; color: #00e676;">✓ All 5 Discovery Timeframes Verified in Waterfall Cache</div>
+              <div id="puMtfMetricsText" style="margin-top: 3px; color: #b8c7de; font-size: 10px;">D_HTF=+0.00σ · D_LTF=+0.00σ · HTF POC=$—</div>
+            </div>
+            <div id="puVerificationSummaryStrip" style="background: rgba(18, 12, 28, 0.92); border: 1px solid rgba(224, 64, 251, 0.5); border-radius: 8px; padding: 9px 12px; font-family: monospace; font-size: 10.5px; color: #d1dced;">
+              <div>🛡️ <b>3. CANDIDATE VERIFICATION GATE:</b> <span id="puVerifyGateFractionTag" style="color: #00e5ff; font-weight: 800;">7/8 GATES PASSED</span></div>
+              <div id="puVerifyOverallStatusTag" style="margin-top: 3px; font-size: 10px; color: #f381ff; font-weight: 700;">STATUS: OBSERVING_CONFIRMATION_WINDOW</div>
+              <div id="puVerifyAutoGateNote" style="margin-top: 3px; color: #b8c7de; font-size: 9.5px;">Auto-Promotion: LOCKED (Requires 8/8 VERIFIED_FOR_PROMOTION)</div>
+            </div>
+          </div>
+
+          <!-- Dual Architecture Comparison Cards -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-bottom: 14px;">
+            <div style="background: rgba(10, 16, 28, 0.9); border: 1px solid rgba(245, 215, 110, 0.45); border-radius: 10px; padding: 12px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 10px; font-weight: 800; color: var(--gold); text-transform: uppercase;">WORLD A · LIVE ARCHITECTURE (YELLOW LINE #F5D76E)</span>
+                <span style="font-size: 9.5px; font-family: monospace; color: var(--green);" id="puLiveRoleTag">● APPROVED LIVE</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 800; color: #fff; margin-top: 4px; font-family: monospace;" id="puLiveVersionTitle">v1.0-LiveApproved</div>
+              <div style="font-size: 11px; color: #9cb0cc; margin-top: 4px; font-family: monospace;" id="puLiveMetricsText">OOS RMSE: $— · Rank-IC: — · Net Drift: +0.000 $/step</div>
+              <div style="font-size: 10px; color: var(--gold); margin-top: 4px; font-family: monospace;" id="puLiveWeightsText">Dynamic Precision Weights: ∑w = 1.000</div>
+            </div>
+
+            <div style="background: rgba(19, 11, 29, 0.9); border: 1px solid rgba(224, 64, 251, 0.55); border-radius: 10px; padding: 12px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 10px; font-weight: 800; color: #f381ff; text-transform: uppercase;">WORLD B · PARALLEL UNIVERSE CANDIDATE (MAGENTA #E040FB)</span>
+                <span style="font-size: 9.5px; font-family: monospace; color: var(--cyan);" id="puCandVerificationTag">● OBSERVING</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 800; color: #fff; margin-top: 4px; font-family: monospace;" id="puCandVersionTitle">v2.0-ParallelCandidate-G1</div>
+              <div style="font-size: 11px; color: #9cb0cc; margin-top: 4px; font-family: monospace;" id="puCandMetricsText">OOS RMSE: $— · Rank-IC: — · DM t-stat: — · Net Drift: +0.000 $/step</div>
+              <div style="font-size: 10px; color: #f381ff; margin-top: 4px; font-family: monospace;" id="puCandWeightsText">Active Models: 13 (8 Level-B Symbolic) · ∑w = 1.000</div>
+            </div>
+          </div>
+
+          <!-- Candidate Models & Level-B Symbolic Equations Table -->
+          <div style="font-size: 10.5px; font-weight: 800; color: #f381ff; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px;">
+            1. Parallel Universe Active Mathematical Models &amp; Expanded Level-B Symbolic Grammar (13 Slots · 8 Closed-Form Symbolic Primitives)
+          </div>
+          <div class="mtf-table-wrap" style="margin-bottom: 14px;">
+            <table class="mtf-table">
+              <thead>
+                <tr>
+                  <th>Model / Symbolic Equation ID</th>
+                  <th>Origin &amp; TF Scope</th>
+                  <th>Closed-Form Symbolic Mathematical Formulation</th>
+                  <th>Status</th>
+                  <th>Fitted θ_m (Stability)</th>
+                  <th>OOS Rank-IC (R²)</th>
+                  <th>Dynamic Precision Weight (w_m)</th>
+                  <th>Step Drift ($)</th>
+                </tr>
+              </thead>
+              <tbody id="puModelsTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Structured Awareness Findings -->
+          <div style="font-size: 10.5px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px;">
+            2. Intelligence &amp; Awareness Core — Structured Diagnostic Findings (Live Yellow Line vs. Real Market Inputs)
+          </div>
+          <div id="puFindingsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px; margin-bottom: 14px;"></div>
+
+          <!-- Strict 8-Gate Closed-Loop Test & Verify Checklist -->
+          <div style="font-size: 10.5px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px;">
+            3. Closed-Loop 8-Gate Test &amp; Verify Protocol (Required for VERIFIED_FOR_PROMOTION)
+          </div>
+          <div class="mtf-table-wrap" style="margin-bottom: 14px;">
+            <table class="mtf-table">
+              <thead>
+                <tr>
+                  <th>Verification Gate</th>
+                  <th>Status</th>
+                  <th>Real Out-of-Sample Empirical Metric</th>
+                  <th>Required Threshold Specification</th>
+                </tr>
+              </thead>
+              <tbody id="puGatesTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Immutable Architecture Audit Log -->
+          <div style="font-size: 10.5px; font-weight: 800; color: #9cb0cc; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px;">
+            4. Immutable Architecture &amp; Promotion Audit Trail
+          </div>
+          <div class="mtf-table-wrap">
+            <table class="mtf-table">
+              <thead>
+                <tr>
+                  <th>Timestamp (UTC)</th>
+                  <th>Event Type</th>
+                  <th>Actor</th>
+                  <th>Audit Summary &amp; Verifiable Metrics</th>
+                </tr>
+              </thead>
+              <tbody id="puAuditTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -6869,6 +7036,293 @@ function renderHUD(d) {
   if (d.liquidityEngine) {
     renderLiquidityEngine(d.liquidityEngine);
   }
+
+  if (d.parallelUniverse) {
+    renderParallelUniverseTelemetry(d.parallelUniverse);
+  }
+}
+
+// Intelligence & Awareness Core + Parallel Universe Renderer
+function renderParallelUniverseTelemetry(pu) {
+  if (!pu) return;
+  const isFa = currentLang === 'fa';
+  const live = pu.liveArchitecture;
+  const cand = pu.candidateArchitecture;
+  const rep = pu.verificationReport;
+
+  const liveBadge = document.getElementById('puLiveArchBadge');
+  if (liveBadge && live) {
+    liveBadge.textContent = isFa
+      ? `معماری زنده (خط زرد): ${live.versionTag} (${live.activeModelsCount} مدل فعال)`
+      : `LIVE (YELLOW LINE): ${live.versionTag} (${live.activeModelsCount} Models)`;
+  }
+
+  const candBadge = document.getElementById('puCandArchBadge');
+  if (candBadge && cand) {
+    candBadge.textContent = isFa
+      ? `جهان موازی (خط سرخابی کاندیدا): ${cand.versionTag} (${cand.activeModelsCount} مدل · ${cand.discoveredModelsCount} نمادین سطح B)`
+      : `PARALLEL UNIVERSE (CANDIDATE LINE): ${cand.versionTag} (${cand.activeModelsCount} Models · ${cand.discoveredModelsCount} Level-B Symbolic)`;
+  }
+
+  const gatePill = document.getElementById('puGateStatusPill');
+  const accPill = document.getElementById('puAccordionStatusPill');
+  if (rep) {
+    const isVerified = rep.overallStatus === 'VERIFIED_FOR_PROMOTION';
+    const statusText = `${rep.overallStatus} (${rep.passedGatesCount}/${rep.totalGatesCount} GATES)`;
+    if (gatePill) {
+      gatePill.textContent = `8-GATE VERIFIER: ${statusText}`;
+      gatePill.style.color = isVerified ? '#00e676' : '#00e5ff';
+      gatePill.style.borderColor = isVerified ? 'rgba(0, 230, 118, 0.55)' : 'rgba(0, 229, 255, 0.45)';
+      gatePill.style.background = isVerified ? 'rgba(0, 230, 118, 0.16)' : 'rgba(0, 229, 255, 0.12)';
+    }
+    if (accPill) {
+      accPill.textContent = `${cand?.versionTag || 'CANDIDATE'} · ${rep.passedGatesCount}/${rep.totalGatesCount} GATES`;
+    }
+  }
+
+  const chkAuto = document.getElementById('chkAutoPromoteVerified');
+  if (chkAuto) {
+    chkAuto.checked = Boolean(pu.autoPromotionEnabled);
+  }
+
+  const bannerEl = document.getElementById('puPromotionStatusBanner');
+  if (bannerEl) {
+    const msg = isFa ? pu.lastPromotionBannerFa : pu.lastPromotionBannerEn;
+    if (msg) {
+      bannerEl.style.display = 'block';
+      bannerEl.textContent = `✓ ${msg}`;
+    }
+  }
+
+  const liveVerTitle = document.getElementById('puLiveVersionTitle');
+  if (liveVerTitle && live) liveVerTitle.textContent = `${live.versionTag} (${live.architectureId})`;
+  const liveMetricsEl = document.getElementById('puLiveMetricsText');
+  if (liveMetricsEl && live && rep) {
+    const dSign = live.compositeNetDriftUsdPerStep >= 0 ? '+' : '';
+    liveMetricsEl.textContent = `OOS RMSE: $${Number(rep.liveRmseUsd || 0).toFixed(3)} · Rank-IC: ${Number(rep.liveRankIc || 0).toFixed(3)} · Drift: ${dSign}${Number(live.compositeNetDriftUsdPerStep || 0).toFixed(3)} $/step`;
+  }
+  const liveWeightsEl = document.getElementById('puLiveWeightsText');
+  if (liveWeightsEl && live && live.dynamicFusionWeights) {
+    const fw = live.dynamicFusionWeights;
+    liveWeightsEl.textContent = `Dynamic Precision Weights: OU ${(fw.ouMeanReversionWeight * 100).toFixed(1)}% · EKF ${(fw.kalmanDriftWeight * 100).toFixed(1)}% · Macro ${(fw.macroFactorWeight * 100).toFixed(1)}% · Sweep ${(fw.sweepMicrostructureWeight * 100).toFixed(1)}% · Liq ${(fw.mtfLiquidityWeight * 100).toFixed(1)}%`;
+  }
+
+  const candVerTitle = document.getElementById('puCandVersionTitle');
+  if (candVerTitle && cand) candVerTitle.textContent = `${cand.versionTag} (${cand.architectureId})`;
+  const candTag = document.getElementById('puCandVerificationTag');
+  if (candTag && rep) {
+    candTag.textContent = `● ${rep.overallStatus} (${rep.passedGatesCount}/${rep.totalGatesCount})`;
+    candTag.style.color = rep.overallStatus === 'VERIFIED_FOR_PROMOTION' ? '#00e676' : '#00e5ff';
+  }
+  const candMetricsEl = document.getElementById('puCandMetricsText');
+  if (candMetricsEl && cand && rep) {
+    const dSign = cand.compositeNetDriftUsdPerStep >= 0 ? '+' : '';
+    const dmSign = rep.dieboldMarianoTStat >= 0 ? '+' : '';
+    candMetricsEl.textContent = `OOS RMSE: $${Number(rep.candidateRmseUsd || 0).toFixed(3)} · Rank-IC: ${Number(rep.candidateRankIc || 0).toFixed(3)} · DM t=${dmSign}${Number(rep.dieboldMarianoTStat || 0).toFixed(2)} · Drift: ${dSign}${Number(cand.compositeNetDriftUsdPerStep || 0).toFixed(3)} $/step`;
+  }
+  const candWeightsEl = document.getElementById('puCandWeightsText');
+  if (candWeightsEl && cand) {
+    candWeightsEl.textContent = `Active Models: ${cand.activeModelsCount} (${cand.discoveredModelsCount} Level-B Symbolic · ${cand.disabledModelsCount} Pruned) · Eq Anchor: $${Number(cand.compositeEquilibriumAnchor || 0).toFixed(2)}`;
+  }
+
+  // Update Store Persistence Health Bar (PERSISTENT vs EPHEMERAL + explanation & Render remediation)
+  const ph = pu.persistenceHealth;
+  if (ph) {
+    const modeTag = document.getElementById('puPersistenceModeTag');
+    const detailsEl = document.getElementById('puPersistenceDetails');
+    const remBox = document.getElementById('puPersistenceRemediationBox');
+    const barBox = document.getElementById('puPersistenceHealthBar');
+    const statusLabel = ph.statusLabel || (ph.isDurableAcrossRedeploys ? 'PERSISTENT' : 'EPHEMERAL');
+    if (modeTag) {
+      modeTag.textContent = `${statusLabel} (${ph.storageMode} · Source: ${ph.resolvedSource || 'PROJECT_DATA_DIR'})`;
+      modeTag.style.color = ph.isDurableAcrossRedeploys ? '#00e676' : '#ffab00';
+    }
+    if (barBox) {
+      barBox.style.borderColor = ph.isDurableAcrossRedeploys ? 'rgba(0, 230, 118, 0.45)' : 'rgba(255, 171, 0, 0.65)';
+    }
+    if (detailsEl) {
+      const summaryTxt = isFa ? (ph.humanReadableStatusFa || '') : (ph.humanReadableStatusEn || '');
+      detailsEl.textContent = `Schema v${ph.schemaVersion} · Gen-${ph.restoredGeneration} · Live: ${ph.restoredLiveVersionTag || live?.versionTag || 'v1.0'} · ${ph.restoredAuditEntriesCount} Audit Entries · ${summaryTxt}`;
+    }
+    if (remBox) {
+      const warnTxt = isFa ? ph.warningFa : ph.warningEn;
+      const remTxt = isFa ? ph.remediationInstructionsFa : ph.remediationInstructionsEn;
+      if (warnTxt || remTxt) {
+        remBox.style.display = 'block';
+        remBox.textContent = `⚠️ ${warnTxt || ''} ${remTxt ? ' — ' + remTxt : ''}`;
+      } else {
+        remBox.style.display = 'none';
+      }
+    }
+  }
+
+  // Update Multi-Timeframe Discovery & Cold-Start Bootstrap Bar
+  const mtf = pu.mtfDiscoveryContext;
+  if (mtf) {
+    const hTag = document.getElementById('puMtfHorizonsTag');
+    const missingTag = document.getElementById('puMtfMissingTag');
+    const mTxt = document.getElementById('puMtfMetricsText');
+    if (hTag && Array.isArray(mtf.participatingTimeframes)) {
+      hTag.textContent = `Contributing: [${mtf.participatingTimeframes.join(' → ')}]`;
+    }
+    if (missingTag) {
+      const verifiedList = Array.isArray(mtf.verifiedRealCacheTimeframes) ? mtf.verifiedRealCacheTimeframes : [];
+      const missingList = Array.isArray(mtf.missingTimeframes) ? mtf.missingTimeframes : [];
+      if (missingList.length === 0) {
+        missingTag.style.color = '#00e676';
+        missingTag.textContent = isFa
+          ? `✓ هر ۵ تایم‌فریم کلیدی در کش آبشار داده تأیید شدند: [${verifiedList.join(', ')}]`
+          : `✓ All Required Timeframes Verified in Cache: [${verifiedList.join(', ')}]`;
+      } else {
+        missingTag.style.color = '#ffab00';
+        missingTag.textContent = isFa
+          ? `⚡ تایم‌فریم‌های موجود در کش: [${verifiedList.join(', ')}] · غایب/در انتظار: [${missingList.join(', ')}] (${mtf.bootstrapStatus || 'PARTIAL'})`
+          : `⚡ Verified Cache: [${verifiedList.join(', ')}] · Missing/Unavailable: [${missingList.join(', ')}] (${mtf.bootstrapStatus || 'PARTIAL'})`;
+      }
+    }
+    if (mTxt) {
+      const hSign = mtf.htfNormalizedDriftZ >= 0 ? '+' : '';
+      const lSign = mtf.ltfNormalizedDriftZ >= 0 ? '+' : '';
+      const cSign = mtf.mtfConfluenceAlignment >= 0 ? '+' : '';
+      mTxt.textContent = `D_HTF=${hSign}${Number(mtf.htfNormalizedDriftZ || 0).toFixed(2)}σ · D_LTF=${lSign}${Number(mtf.ltfNormalizedDriftZ || 0).toFixed(2)}σ · HTF POC=$${Number(mtf.htfPocAnchorPrice || 0).toFixed(2)} · Confluence=${cSign}${Number(mtf.mtfConfluenceAlignment || 0).toFixed(2)}`;
+    }
+  }
+
+  // Update Candidate Verification Summary Strip & Auto-Promote Safety Reminder
+  if (rep) {
+    const isVerified = rep.overallStatus === 'VERIFIED_FOR_PROMOTION' && rep.passedGatesCount === rep.totalGatesCount;
+    const fracEl = document.getElementById('puVerifyGateFractionTag');
+    const statEl = document.getElementById('puVerifyOverallStatusTag');
+    const noteEl = document.getElementById('puVerifyAutoGateNote');
+    const remBanner = document.getElementById('puAutoPromoteReminderBanner');
+
+    if (fracEl) {
+      fracEl.textContent = `${rep.passedGatesCount}/${rep.totalGatesCount} GATES PASSED`;
+      fracEl.style.color = isVerified ? '#00e676' : '#00e5ff';
+    }
+    if (statEl) {
+      statEl.textContent = `OVERALL STATUS: ${rep.overallStatus}`;
+      statEl.style.color = isVerified ? '#00e676' : '#f381ff';
+    }
+    if (noteEl) {
+      if (pu.autoPromotionEnabled) {
+        noteEl.style.color = isVerified ? '#00e676' : '#ffd54f';
+        noteEl.textContent = isVerified
+          ? '✓ Auto-Promote ENABLED & 8/8 Gates Verified — Eligible for Automatic Promotion'
+          : `🔒 Auto-Promote ENABLED — Waiting for ${rep.totalGatesCount - rep.passedGatesCount} remaining gate(s) before promotion can occur`;
+      } else {
+        noteEl.style.color = '#b8c7de';
+        noteEl.textContent = 'Auto-Promote: OFF (Manual MMI Approval Only)';
+      }
+    }
+    if (remBanner) {
+      if (pu.autoPromotionEnabled) {
+        remBanner.style.background = isVerified ? 'rgba(0, 230, 118, 0.14)' : 'rgba(255, 171, 0, 0.15)';
+        remBanner.style.borderColor = isVerified ? 'rgba(0, 230, 118, 0.55)' : 'rgba(255, 171, 0, 0.65)';
+        remBanner.style.color = isVerified ? '#00e676' : '#ffd54f';
+        remBanner.innerHTML = isFa
+          ? `🛡️ <b>یادآور ایمنی ارتقای خودکار (AUTO-PROMOTE ON):</b> ارتقای خودکار روشن است اما <b>صرفاً پس از عبور از هر ۸/۸ گیت (VERIFIED_FOR_PROMOTION)</b> اجرا می‌شود. وضعیت فعلی کاندیدا: <b>${rep.passedGatesCount}/${rep.totalGatesCount} گیت (${rep.overallStatus})</b>.`
+          : `🛡️ <b>AUTO-PROMOTE ARMED (STRICT 8/8 GATE REQUIREMENT):</b> Automatic promotion is <b>ON</b>, but promotion will <u>ONLY</u> occur after all <b>8/8 Gates Pass (VERIFIED_FOR_PROMOTION)</b>. Current Candidate Gate Score: <b>${rep.passedGatesCount}/${rep.totalGatesCount} (${rep.overallStatus})</b>. For immediate operator override, use <b>⚡ Promote Candidate to Live (Manual MMI)</b>.`;
+      } else {
+        remBanner.style.background = 'rgba(14, 22, 38, 0.9)';
+        remBanner.style.borderColor = 'rgba(0, 229, 255, 0.35)';
+        remBanner.style.color = '#b8c7de';
+        remBanner.innerHTML = isFa
+          ? `ℹ️ <b>حالت کنترل دستی MMI فعال است (Auto-Promote OFF):</b> معماری کاندیدا (${rep.passedGatesCount}/${rep.totalGatesCount} گیت) تنها با تایید صریح اپراتور (دکمه ارتقای دستی MMI) جایگزین خط زرد زنده می‌شود.`
+          : `ℹ️ <b>MANUAL MMI CONTROL MODE (Auto-Promote OFF):</b> Candidate (${rep.passedGatesCount}/${rep.totalGatesCount} gates · ${rep.overallStatus}) will only replace the Live Yellow Line if you click <b>⚡ Promote Candidate to Live (Manual MMI)</b>, or if you enable Auto-Promote and all 8/8 gates pass.`;
+      }
+    }
+  }
+
+  // Populate Candidate Models Table
+  const modelsBody = document.getElementById('puModelsTableBody');
+  if (modelsBody && cand && Array.isArray(cand.models)) {
+    modelsBody.innerHTML = '';
+    cand.models.forEach(m => {
+      const tr = document.createElement('tr');
+      const isSym = m.origin === 'LEVEL_B_SYMBOLIC_DISCOVERY';
+      const tfBadge = m.timeframeScope === 'CROSS_TF_HTF_LTF'
+        ? `<div style="font-size:8.5px;color:var(--cyan);font-family:monospace;margin-top:2px;">🌐 CROSS-TF (HTF/LTF)</div>`
+        : `<div style="font-size:8.5px;color:#9cb0cc;font-family:monospace;margin-top:2px;">⏱ ACTIVE TF</div>`;
+      const originBadge = isSym
+        ? `<span style="color:#f381ff;font-weight:800;font-size:9.5px;">LEVEL-B SYMBOLIC</span>${tfBadge}`
+        : `<span style="color:var(--gold);font-weight:700;font-size:9.5px;">CORE BASELINE</span>${tfBadge}`;
+      const statusBadge = m.isEnabled
+        ? `<span style="color:var(--green);font-weight:800;">● ACTIVE</span>`
+        : `<span style="color:var(--red);font-weight:800;" title="${m.disabledReasonEn || ''}">✕ PRUNED</span>`;
+      const icSign = m.rollingRankIc >= 0 ? '+' : '';
+      const dSign = m.currentStepContributionUsd >= 0 ? '+' : '';
+      const stabStr = m.stabilityRatio !== undefined ? ` <span style="font-size:9px;color:#9cb0cc;">(S=${Number(m.stabilityRatio).toFixed(2)})</span>` : '';
+      const r2Str = m.oosRSquared !== undefined ? ` <span style="font-size:9px;color:#9cb0cc;">(R²=${Number(m.oosRSquared).toFixed(3)})</span>` : '';
+      tr.innerHTML = `
+        <td style="font-weight: 800; color: #fff; font-family: monospace;">${m.modelId}<div style="font-size:9.5px;color:#9cb0cc;font-weight:500;">${isFa ? m.nameFa : m.nameEn}</div></td>
+        <td>${originBadge}</td>
+        <td style="font-family: monospace; color: var(--cyan); font-size: 10.5px;">${m.equationAscii}</td>
+        <td style="font-family: monospace;">${statusBadge}</td>
+        <td style="font-family: monospace; color: #e2e8f0;">${Number(m.fittedCoefficient || 0).toFixed(3)}${stabStr}</td>
+        <td style="font-family: monospace; color: ${m.rollingRankIc >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight: 700;">${icSign}${Number(m.rollingRankIc || 0).toFixed(3)}${r2Str}</td>
+        <td style="font-family: monospace; color: var(--gold); font-weight: 800;">${(Number(m.dynamicWeight || 0) * 100).toFixed(2)}%</td>
+        <td style="font-family: monospace; color: ${m.currentStepContributionUsd >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight: 700;">${dSign}${Number(m.currentStepContributionUsd || 0).toFixed(4)} $</td>
+      `;
+      modelsBody.appendChild(tr);
+    });
+  }
+
+  // Populate Structured Awareness Findings
+  const findingsBox = document.getElementById('puFindingsContainer');
+  if (findingsBox && Array.isArray(pu.findings)) {
+    findingsBox.innerHTML = '';
+    pu.findings.forEach(f => {
+      const card = document.createElement('div');
+      const bCol = f.severity === 'CRITICAL' ? 'rgba(255, 23, 68, 0.5)' : f.severity === 'WARNING' ? 'rgba(255, 171, 0, 0.5)' : 'rgba(0, 229, 255, 0.4)';
+      card.style.cssText = `background: rgba(10, 16, 28, 0.9); border: 1px solid ${bCol}; border-radius: 8px; padding: 9px 11px;`;
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:10px;font-weight:800;color:var(--cyan);font-family:monospace;">${f.category} · ${f.affectedModelId}</span>
+          <span style="font-size:9px;font-family:monospace;color:var(--gold);">${f.recommendedAction}</span>
+        </div>
+        <div style="font-size:11px;color:#e2e8f0;line-height:1.35;">${isFa ? f.summaryFa : f.summaryEn}</div>
+        <div style="font-size:9.5px;font-family:monospace;color:#9cb0cc;margin-top:4px;">${f.empiricalEvidence}</div>
+      `;
+      findingsBox.appendChild(card);
+    });
+  }
+
+  // Populate 8-Gate Checklist Table
+  const gatesBody = document.getElementById('puGatesTableBody');
+  if (gatesBody && rep && Array.isArray(rep.gates)) {
+    gatesBody.innerHTML = '';
+    rep.gates.forEach(g => {
+      const tr = document.createElement('tr');
+      const badge = g.passed
+        ? `<span style="color:#00e676;font-weight:800;">✓ PASS</span>`
+        : `<span style="color:#ffab00;font-weight:800;">⏳ PENDING</span>`;
+      tr.innerHTML = `
+        <td style="font-weight: 800; color: #fff;">${isFa ? g.titleFa : g.titleEn}<div style="font-size:9.5px;color:#9cb0cc;font-weight:400;">${isFa ? g.detailsFa : g.detailsEn}</div></td>
+        <td style="font-family: monospace;">${badge}</td>
+        <td style="font-family: monospace; color: var(--cyan); font-weight: 700;">${g.metricSummary}</td>
+        <td style="font-family: monospace; color: #9cb0cc;">${g.thresholdSpec}</td>
+      `;
+      gatesBody.appendChild(tr);
+    });
+  }
+
+  // Populate Immutable Audit Trail Table
+  const auditBody = document.getElementById('puAuditTableBody');
+  if (auditBody && Array.isArray(pu.auditTrail)) {
+    auditBody.innerHTML = '';
+    pu.auditTrail.slice(0, 12).forEach(a => {
+      const tr = document.createElement('tr');
+      const tShort = String(a.timestampIso || '').replace('T', ' ').slice(0, 19);
+      tr.innerHTML = `
+        <td style="font-family: monospace; color: #9cb0cc; white-space: nowrap;">${tShort}</td>
+        <td style="font-family: monospace; font-weight: 800; color: #f381ff;">${a.eventType}</td>
+        <td style="font-family: monospace; color: var(--gold);">${a.actor}</td>
+        <td style="font-size: 11px; color: #e2e8f0;">${isFa ? a.summaryFa : a.summaryEn}<div style="font-family:monospace;font-size:9.5px;color:var(--cyan);margin-top:2px;">${a.verifiableMetrics}</div></td>
+      `;
+      auditBody.appendChild(tr);
+    });
+  }
 }
 
 // Integrated Top-Down Multi-Timeframe Liquidity Engine Renderer
@@ -7492,12 +7946,18 @@ function renderLoop() {
     const candles = allCandles.slice(startIdx, endIdx);
 
     const ensemble = forecastData.ensemble;
+    const candEnsemble = forecastData.parallelUniverse?.candidateEnsemble;
 
-    // 2. Base Price Extents + Zoom and Vertical Offset
+    // 2. Base Price Extents + Zoom and Vertical Offset (Includes BOTH Live Yellow Line & Parallel Universe Candidate Line)
     let allPrices = candles.map(c => c.close);
     if (ensemble && ensemble.upper95) {
       allPrices = allPrices.concat(ensemble.upper95.map(p => p.value));
       allPrices = allPrices.concat(ensemble.lower05.map(p => p.value));
+    }
+    if (layers.parallelCandidate !== false && candEnsemble && Array.isArray(candEnsemble.medianTrack) && candEnsemble.medianTrack.length > 0) {
+      allPrices = allPrices.concat(candEnsemble.medianTrack.map(p => p.value));
+      if (Array.isArray(candEnsemble.upper75)) allPrices = allPrices.concat(candEnsemble.upper75.map(p => p.value));
+      if (Array.isArray(candEnsemble.lower25)) allPrices = allPrices.concat(candEnsemble.lower25.map(p => p.value));
     }
     const rawMin = Math.min(...allPrices);
     const rawMax = Math.max(...allPrices);
@@ -8030,19 +8490,135 @@ function renderLoop() {
       ctx.fillStyle = 'rgba(245, 215, 110, 0.12)';
       ctx.fill();
 
-      // Median Expected Trajectory (Golden Core Flow Line)
+      // Median Expected Trajectory (LIVE APPROVED ARCHITECTURE — Yellow Line #f5d76e)
       ctx.beginPath();
       for (let s = 0; s < nSteps; s++) {
         const x = startX + s * stepW;
         const y = priceToY(ensemble.medianTrack[s].value, minP, maxP, mainHeight);
         if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
-      ctx.lineWidth = 2.4;
+      ctx.lineWidth = 2.6;
       ctx.strokeStyle = '#f5d76e';
-      ctx.shadowColor = 'rgba(245, 215, 110, 0.45)';
-      ctx.shadowBlur = 6;
+      ctx.shadowColor = 'rgba(245, 215, 110, 0.55)';
+      ctx.shadowBlur = 7;
       ctx.stroke();
       ctx.shadowBlur = 0;
+
+      // =========================================================================
+      // MANDATORY SAME-CHART DUAL-LINE COMPARISON:
+      // Draw Parallel Universe Candidate Trajectory (#e040fb Dashed Magenta Line)
+      // on the EXACT SAME 2D Canvas (#windyCanvas), Price Scale, and Time Axis
+      // =========================================================================
+      const candTrack = candEnsemble?.medianTrack;
+      if (layers.parallelCandidate !== false && Array.isArray(candTrack) && candTrack.length > 0) {
+        const cSteps = Math.min(nSteps, candTrack.length);
+
+        // Candidate Inner P25–P75 Translucent Band on Same Chart
+        if (Array.isArray(candEnsemble.upper75) && Array.isArray(candEnsemble.lower25) && candEnsemble.upper75.length >= cSteps) {
+          ctx.beginPath();
+          for (let s = 0; s < cSteps; s++) {
+            const x = startX + s * stepW;
+            const yTop = priceToY(candEnsemble.upper75[s].value, minP, maxP, mainHeight);
+            if (s === 0) ctx.moveTo(x, yTop); else ctx.lineTo(x, yTop);
+          }
+          for (let s = cSteps - 1; s >= 0; s--) {
+            const x = startX + s * stepW;
+            const yBot = priceToY(candEnsemble.lower25[s].value, minP, maxP, mainHeight);
+            ctx.lineTo(x, yBot);
+          }
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(224, 64, 251, 0.085)';
+          ctx.fill();
+        }
+
+        // Candidate Trajectory Line (#e040fb High-Contrast Dashed Magenta)
+        ctx.save();
+        ctx.beginPath();
+        for (let s = 0; s < cSteps; s++) {
+          const x = startX + s * stepW;
+          const y = priceToY(candTrack[s].value, minP, maxP, mainHeight);
+          if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#e040fb';
+        ctx.setLineDash([7, 4]);
+        ctx.shadowColor = 'rgba(224, 64, 251, 0.65)';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.restore();
+
+        // Terminal Dual-Line Price & Spread Comparison Callouts on Same Chart (#windyCanvas)
+        const lastCandVal = candTrack[cSteps - 1].value;
+        const lastLiveVal = ensemble.medianTrack[cSteps - 1].value;
+        const deltaCandLive = lastCandVal - lastLiveVal;
+        const deltaBps = (deltaCandLive / Math.max(1, lastLiveVal)) * 10000;
+        const deltaSign = deltaCandLive >= 0 ? '+' : '';
+        const yCandEnd = priceToY(lastCandVal, minP, maxP, mainHeight);
+        const yLiveEnd = priceToY(lastLiveVal, minP, maxP, mainHeight);
+        const endLabelX = startX + (cSteps - 1) * stepW - 6;
+
+        ctx.save();
+        ctx.font = 'bold 9.5px monospace';
+        ctx.textAlign = 'right';
+        const liveTagY = Math.max(14, Math.min(mainHeight - 22, yLiveEnd - 6));
+        const candTagY = Math.abs(yCandEnd - yLiveEnd) < 16 ? Math.min(mainHeight - 8, liveTagY + 15) : Math.max(14, Math.min(mainHeight - 8, yCandEnd - 6));
+
+        const liveText = `━━ LIVE (YELLOW): $${lastLiveVal.toFixed(2)}`;
+        const candText = `╌╌ CANDIDATE (PARALLEL): $${lastCandVal.toFixed(2)} (Δ ${deltaSign}$${deltaCandLive.toFixed(2)} / ${deltaSign}${deltaBps.toFixed(1)} bps)`;
+        const liveW = ctx.measureText(liveText).width + 10;
+        const candW = ctx.measureText(candText).width + 10;
+
+        ctx.fillStyle = 'rgba(6, 10, 18, 0.88)';
+        ctx.strokeStyle = 'rgba(245, 215, 110, 0.65)';
+        ctx.lineWidth = 1;
+        ctx.fillRect(endLabelX - liveW + 4, liveTagY - 10, liveW, 14);
+        ctx.strokeRect(endLabelX - liveW + 4, liveTagY - 10, liveW, 14);
+        ctx.fillStyle = '#f5d76e';
+        ctx.fillText(liveText, endLabelX, liveTagY);
+
+        ctx.fillStyle = 'rgba(18, 8, 28, 0.88)';
+        ctx.strokeStyle = 'rgba(224, 64, 251, 0.75)';
+        ctx.fillRect(endLabelX - candW + 4, candTagY - 10, candW, 14);
+        ctx.strokeRect(endLabelX - candW + 4, candTagY - 10, candW, 14);
+        ctx.fillStyle = '#f381ff';
+        ctx.fillText(candText, endLabelX, candTagY);
+        ctx.restore();
+      }
+
+      // On-Canvas Same-Chart Dual-Trajectory Legend & Spread Box (Top-Left of Forecast Zone on #windyCanvas)
+      ctx.save();
+      const puMeta = forecastData?.parallelUniverse;
+      const liveVer = puMeta?.liveArchitecture?.versionTag || 'v1.0-Live';
+      const candVer = puMeta?.candidateArchitecture?.versionTag || 'v2.0-Candidate';
+      const gateScore = puMeta?.verificationReport
+        ? `${puMeta.verificationReport.passedGatesCount}/${puMeta.verificationReport.totalGatesCount} GATES`
+        : '8-GATE VERIFIER';
+      const endLiveP = ensemble.medianTrack[nSteps - 1]?.value || 0;
+      const endCandP = candTrack && candTrack.length > 0 ? candTrack[Math.min(nSteps, candTrack.length) - 1].value : endLiveP;
+      const endSpread = endCandP - endLiveP;
+      const endSpreadBps = (endSpread / Math.max(1, endLiveP)) * 10000;
+      const spSign = endSpread >= 0 ? '+' : '';
+
+      const legX = startX + 8;
+      const legY = 10;
+      const legW = 315;
+      const legH = layers.parallelCandidate !== false ? 50 : 22;
+      ctx.fillStyle = 'rgba(6, 10, 18, 0.90)';
+      ctx.strokeStyle = 'rgba(224, 64, 251, 0.55)';
+      ctx.lineWidth = 1;
+      ctx.fillRect(legX, legY, legW, legH);
+      ctx.strokeRect(legX, legY, legW, legH);
+      ctx.font = 'bold 9.5px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#f5d76e';
+      ctx.fillText(`━━ LIVE APPROVED (#f5d76e): ${liveVer} · $${endLiveP.toFixed(2)}`, legX + 7, legY + 13);
+      if (layers.parallelCandidate !== false) {
+        ctx.fillStyle = '#f381ff';
+        ctx.fillText(`╌╌ CANDIDATE (#e040fb): ${candVer} [${gateScore}]`, legX + 7, legY + 28);
+        ctx.fillStyle = '#00e5ff';
+        ctx.fillText(`Δ Terminal Spread (Cand − Live): ${spSign}$${endSpread.toFixed(2)} (${spSign}${endSpreadBps.toFixed(1)} bps)`, legX + 7, legY + 43);
+      }
+      ctx.restore();
 
       // Phase 6: Explicit ±1σ / ±2σ Envelope Labels at Forecast Horizon End
       const lastStepIdx = nSteps - 1;
@@ -8064,14 +8640,16 @@ function renderLoop() {
         ctx.restore();
       }
 
-
-
       // Target Horizon Price & Expected Time Marker (at scrubber slider position)
       const sliderStep = parseInt(document.getElementById('timeSlider').value, 10);
       if (sliderStep > 0 && sliderStep < nSteps) {
         const markerX = startX + sliderStep * stepW;
         const markerVal = ensemble.medianTrack[sliderStep].value;
         const markerY = priceToY(markerVal, minP, maxP, mainHeight);
+        const candValAtStep =
+          layers.parallelCandidate !== false && candTrack && candTrack[sliderStep]
+            ? candTrack[sliderStep].value
+            : null;
         const markerTimeSec = ensemble.medianTrack[sliderStep]?.time || (nowTimeSec + (sliderStep + 1) * stepSec);
         const markerDate = new Date(markerTimeSec * 1000);
         const markerClock = `${String(markerDate.getHours()).padStart(2, '0')}:${String(markerDate.getMinutes()).padStart(2, '0')}`;
@@ -8089,17 +8667,30 @@ function renderLoop() {
         ctx.stroke();
         ctx.restore();
 
-        // Pulsing Marker Point on the Yellow Curve
+        // Pulsing Marker Point on the Live Yellow Curve
         ctx.beginPath();
         ctx.arc(markerX, markerY, 5.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#00e5ff';
-        ctx.shadowColor = '#00e5ff';
+        ctx.fillStyle = '#f5d76e';
+        ctx.shadowColor = '#f5d76e';
         ctx.shadowBlur = 12;
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Rich Target Callout Card
-        const cardText = `⏱ Expected: ${markerClock} UTC (${offsetTag}) · Target: $${markerVal.toFixed(2)}`;
+        // Pulsing Marker Point on the Parallel Universe Candidate Curve (#e040fb)
+        if (candValAtStep !== null) {
+          const candMarkerY = priceToY(candValAtStep, minP, maxP, mainHeight);
+          ctx.beginPath();
+          ctx.arc(markerX, candMarkerY, 5.0, 0, Math.PI * 2);
+          ctx.fillStyle = '#e040fb';
+          ctx.shadowColor = '#e040fb';
+          ctx.shadowBlur = 12;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
+        // Rich Target Callout Card (Shows Both Live Yellow & Parallel Candidate Prices)
+        const candSuffix = candValAtStep !== null ? ` · Cand: $${candValAtStep.toFixed(2)}` : '';
+        const cardText = `⏱ ${markerClock} UTC (${offsetTag}) · Live: $${markerVal.toFixed(2)}${candSuffix}`;
         ctx.save();
         ctx.direction = 'ltr';
         ctx.font = 'bold 10px monospace';
@@ -10861,6 +11452,31 @@ function updateThreeWorldData(data) {
     );
     threeWorldState.plumeGroup.add(medTube);
 
+    // Parallel Universe Candidate 3D Trajectory Tube (Vibrant Magenta 0xe040fb)
+    const candTrack = data.parallelUniverse?.candidateEnsemble?.medianTrack;
+    if (Array.isArray(candTrack) && candTrack.length > 0 && layers.parallelCandidate !== false) {
+      const candPts = [lastPt.clone()];
+      const cSteps = Math.min(14, candTrack.length);
+      for (let s = 0; s < cSteps; s++) {
+        const fx = lastPt.x + (s + 1) * 0.85;
+        const cVal = candTrack[s].value;
+        const fz = Math.max(-8, Math.min(8, mapPriceToZ(cVal) * 0.38)) + 0.28;
+        candPts.push(new THREE.Vector3(fx, mapPriceToY(cVal), fz));
+      }
+      const candCurve = new THREE.CatmullRomCurve3(candPts);
+      const candTube = new THREE.Mesh(
+        new THREE.TubeGeometry(candCurve, 36, 0.095, 10, false),
+        new THREE.MeshStandardMaterial({
+          color: 0xe040fb,
+          emissive: 0xe040fb,
+          emissiveIntensity: 1.15,
+          roughness: 0.18,
+          metalness: 0.85,
+        })
+      );
+      threeWorldState.plumeGroup.add(candTube);
+    }
+
     // Phase 6: Inner ±1σ (P25–P75) 3D Uncertainty Envelope Tubes
     const sigma1Mat = new THREE.MeshStandardMaterial({
       color: 0xf5d76e,
@@ -11220,6 +11836,115 @@ setup3dLayerBtn('btn3dCandles', 'candles', () => threeWorldState.candlesGroup);
 setup3dLayerBtn('btn3dPlume', 'plume', () => threeWorldState.plumeGroup);
 setup3dLayerBtn('btn3dFlow', 'flow', () => threeWorldState.flowInstancedMesh);
 
+// Parallel Universe Layer Toggle & MMI Promotion Controls
+const btnParallelCandidate = document.getElementById('btnParallelCandidate');
+if (btnParallelCandidate) {
+  layers.parallelCandidate = true;
+  btnParallelCandidate.addEventListener('click', () => {
+    layers.parallelCandidate = !layers.parallelCandidate;
+    btnParallelCandidate.classList.toggle('active', layers.parallelCandidate);
+    if (forecastData && threeWorldState && threeWorldState.isActive) {
+      updateThreeWorldData(forecastData);
+    }
+  });
+}
+
+const btnQuickOpenMmiPanel = document.getElementById('btnQuickOpenMmiPanel');
+if (btnQuickOpenMmiPanel) {
+  btnQuickOpenMmiPanel.addEventListener('click', () => {
+    const panel = document.getElementById('panelIntelligenceCore');
+    if (panel) {
+      panel.classList.add('is-open');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+const btnManualMmiPromote = document.getElementById('btnManualMmiPromote');
+if (btnManualMmiPromote) {
+  btnManualMmiPromote.addEventListener('click', async () => {
+    btnManualMmiPromote.disabled = true;
+    try {
+      const res = await fetch(buildApiUrl('/api/intelligence-core/promote'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'MANUAL_MMI',
+          operatorNote: 'Operator manual MMI approval from GDF console',
+        }),
+      });
+      const json = await res.json();
+      const bannerEl = document.getElementById('puPromotionStatusBanner');
+      if (bannerEl) {
+        bannerEl.style.display = 'block';
+        bannerEl.textContent = `✓ ${currentLang === 'fa' ? json.reasonFa : json.reasonEn}`;
+      }
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Manual MMI promotion error:', e);
+    } finally {
+      btnManualMmiPromote.disabled = false;
+    }
+  });
+}
+
+const btnTriggerSymbolicDiscovery = document.getElementById('btnTriggerSymbolicDiscovery');
+if (btnTriggerSymbolicDiscovery) {
+  btnTriggerSymbolicDiscovery.addEventListener('click', async () => {
+    btnTriggerSymbolicDiscovery.disabled = true;
+    try {
+      await fetch(buildApiUrl('/api/intelligence-core/discover-step'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: 'Operator-triggered Level-B symbolic synthesis step' }),
+      });
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Symbolic discovery trigger error:', e);
+    } finally {
+      btnTriggerSymbolicDiscovery.disabled = false;
+    }
+  });
+}
+
+const btnBootstrapMtfNow = document.getElementById('btnBootstrapMtfNow');
+if (btnBootstrapMtfNow) {
+  btnBootstrapMtfNow.addEventListener('click', async () => {
+    btnBootstrapMtfNow.disabled = true;
+    const origText = btnBootstrapMtfNow.textContent;
+    btnBootstrapMtfNow.textContent = '⏳ Bootstrapping 5m/15m/1h/4h/1d...';
+    try {
+      await fetch(buildApiUrl('/api/intelligence-core/bootstrap-mtf'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: true }),
+      });
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Multi-timeframe bootstrap error:', e);
+    } finally {
+      btnBootstrapMtfNow.disabled = false;
+      btnBootstrapMtfNow.textContent = origText;
+    }
+  });
+}
+
+const chkAutoPromoteVerified = document.getElementById('chkAutoPromoteVerified');
+if (chkAutoPromoteVerified) {
+  chkAutoPromoteVerified.addEventListener('change', async () => {
+    try {
+      await fetch(buildApiUrl('/api/intelligence-core/auto-promote-mode'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: chkAutoPromoteVerified.checked }),
+      });
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Auto-promote mode toggle error:', e);
+    }
+  });
+}
+
 // Startup Initialization (Strict Real-Data Mode: No Synthetic Pre-Seed)
 document.addEventListener('DOMContentLoaded', () => {
   applyLanguage(currentLang);
@@ -11245,3 +11970,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
