@@ -525,6 +525,11 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       activeTier: waterfall.activeTier,
     });
 
+    const activeLiveEnsemble =
+      parallelUniverse.liveEnsemble && parallelUniverse.liveEnsemble.medianTrack.length > 0
+        ? parallelUniverse.liveEnsemble
+        : quantOut.ensemble;
+
     const payload = {
       status: 'SUCCESS',
       snapshotId: waterfall.snapshotId,
@@ -547,7 +552,11 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       timeframe: interval,
       timeframeStepSeconds: intervalStepSeconds,
       currentPrice: quantOut.currentPrice,
-      equilibriumPrice: quantOut.equilibriumPrice,
+      equilibriumPrice:
+        parallelUniverse.liveArchitecture.promotionMode !== 'INITIAL_BASELINE' &&
+        parallelUniverse.liveArchitecture.compositeEquilibriumAnchor > 0
+          ? parallelUniverse.liveArchitecture.compositeEquilibriumAnchor
+          : quantOut.equilibriumPrice,
       atr: quantOut.atr,
       atmosphericState: quantOut.atmosphericState,
       barometerStatus: quantOut.barometerStatus,
@@ -570,7 +579,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       modelSpecRegistry: MODEL_SPEC_REGISTRY,
       isobars: quantOut.isobars,
       flowField: quantOut.flowField,
-      ensemble: quantOut.ensemble,
+      ensemble: activeLiveEnsemble,
       macroNews: realNewsFeed.events,
       macroNewsStatus: realNewsFeed,
       candles,
@@ -696,6 +705,10 @@ app.post('/api/intelligence-core/promote', (req: Request, res: Response) => {
   }
   res.status(result.promoted ? 200 : 409).json({
     status: result.promoted ? 'SUCCESS' : 'PROMOTION_REJECTED',
+    liveVersionTag: result.liveArchitecture.versionTag,
+    liveArchitectureId: result.liveArchitecture.architectureId,
+    candidateVersionTag: result.candidateArchitecture.versionTag,
+    candidateArchitectureId: result.candidateArchitecture.architectureId,
     ...result,
   });
 });

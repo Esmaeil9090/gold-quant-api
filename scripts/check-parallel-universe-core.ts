@@ -236,9 +236,37 @@ async function runParallelUniverseVerification(): Promise<void> {
   );
   console.log('✓ [PASS 8/12] Automatic promotion strictly blocked when candidate is not VERIFIED_FOR_PROMOTION.');
 
-  // 9. Verify Manual MMI Promotion & Audit Trail Persistence
-  const prevLiveId = getIntelligenceCoreStateSnapshot().liveArchitecture.architectureId;
-  const prevCandId = getIntelligenceCoreStateSnapshot().candidateArchitecture.architectureId;
+  // 9. Verify Manual MMI Promotion, Trajectory Replacement (Yellow Line = Promoted Candidate), Candidate Fork & Audit Trail
+  const prePromoEval = evaluateParallelUniverseAndAwarenessCore({
+    candles,
+    liveMacro,
+    secondaryBenchmark: {
+      provider: 'Yahoo Finance COMEX Gold Futures',
+      symbol: 'GC=F',
+      candles: comexCandles,
+      crossVenueSpreadUsd: 1.4,
+      crossVenueZScore: -0.57,
+      isOutlierDislocation: false,
+    },
+    htfDailyCandles: candles.slice(-30),
+    interval: '15m',
+    intervalStepSeconds: 900,
+    snapshotId: 'test-snap-pre-promo',
+    instrumentIdentity: 'PAXG_SPOT_TOKEN',
+    systemState: 'LIVE_NOMINAL',
+    activeProvider: 'Binance Spot Gold Token (PAXG/USDT)',
+    activeSymbol: 'PAXGUSDT',
+    activeEndpoint: 'https://data-api.binance.vision/api/v3/klines',
+    activeTier: 'TIER_1_PRIMARY',
+  });
+  const prevLiveId = prePromoEval.liveArchitecture.architectureId;
+  const prevLiveVersion = prePromoEval.liveArchitecture.versionTag;
+  const prevCandId = prePromoEval.candidateArchitecture.architectureId;
+  const prePromoLiveTrack = prePromoEval.liveEnsemble?.medianTrack || [];
+  const prePromoCandTrack = prePromoEval.candidateEnsemble.medianTrack;
+  assert.equal(prePromoLiveTrack.length, 24, 'Pre-promotion liveEnsemble must have 24 steps');
+  assert.equal(prePromoCandTrack.length, 24, 'Pre-promotion candidateEnsemble must have 24 steps');
+
   const manualPromo = promoteCandidateArchitecture({
     mode: 'MANUAL_MMI',
     operatorNote: 'Automated test verification of MMI promotion path',
@@ -250,6 +278,11 @@ async function runParallelUniverseVerification(): Promise<void> {
     'Live Architecture ID must advance upon promotion'
   );
   assert.notEqual(
+    manualPromo.liveArchitecture.versionTag,
+    prevLiveVersion,
+    'Live Architecture versionTag must update upon promotion'
+  );
+  assert.notEqual(
     manualPromo.candidateArchitecture.architectureId,
     prevCandId,
     'Parallel Universe must spawn a new generation Candidate Architecture after promotion'
@@ -257,13 +290,50 @@ async function runParallelUniverseVerification(): Promise<void> {
   assert.equal(manualPromo.liveArchitecture.role, 'LIVE_YELLOW_LINE');
   assert.equal(manualPromo.liveArchitecture.lineColorHex, '#f5d76e');
 
+  const postPromoEval = evaluateParallelUniverseAndAwarenessCore({
+    candles,
+    liveMacro,
+    secondaryBenchmark: {
+      provider: 'Yahoo Finance COMEX Gold Futures',
+      symbol: 'GC=F',
+      candles: comexCandles,
+      crossVenueSpreadUsd: 1.4,
+      crossVenueZScore: -0.57,
+      isOutlierDislocation: false,
+    },
+    htfDailyCandles: candles.slice(-30),
+    interval: '15m',
+    intervalStepSeconds: 900,
+    snapshotId: 'test-snap-post-promo',
+    instrumentIdentity: 'PAXG_SPOT_TOKEN',
+    systemState: 'LIVE_NOMINAL',
+    activeProvider: 'Binance Spot Gold Token (PAXG/USDT)',
+    activeSymbol: 'PAXGUSDT',
+    activeEndpoint: 'https://data-api.binance.vision/api/v3/klines',
+    activeTier: 'TIER_1_PRIMARY',
+  });
+  const postPromoLiveTrack = postPromoEval.liveEnsemble?.medianTrack || [];
+  const postPromoCandTrack = postPromoEval.candidateEnsemble.medianTrack;
+  assert.equal(postPromoEval.promotionOccurredThisCycle, true, 'Immediate post-promotion cycle must flag promotionOccurredThisCycle=true');
+  assert.ok(Boolean(postPromoEval.lastPromotionBannerEn), 'Immediate post-promotion cycle must preserve lastPromotionBannerEn');
+  assert.deepEqual(
+    postPromoLiveTrack,
+    prePromoCandTrack,
+    'After promotion, the Live Yellow Line (liveEnsemble.medianTrack) MUST match the promoted candidate trajectory'
+  );
+  assert.notDeepEqual(
+    postPromoCandTrack,
+    postPromoLiveTrack,
+    'After promotion, a fresh next-generation Candidate trajectory must be forked and differ from the promoted Live Yellow Line'
+  );
+
   const toggleRes = setAutoPromotionRuntimeMode(false);
   assert.equal(toggleRes.autoPromotionEnabled, false);
   const discAudit = triggerSymbolicDiscoveryAuditStep('Verification test synthesis');
   assert.equal(discAudit.eventType, 'LEVEL_B_MODEL_INVENTED');
 
   console.log(
-    `✓ [PASS 9/12] Manual MMI promotion (${prevCandId} -> ${manualPromo.liveArchitecture.architectureId}) and immutable audit trail (${getIntelligenceCoreStateSnapshot().auditTrail.length} entries) verified.`
+    `✓ [PASS 9/12] Manual MMI promotion (${prevCandId} -> ${manualPromo.liveArchitecture.architectureId}), exact Yellow-Line trajectory replacement ($${postPromoLiveTrack[23].value.toFixed(2)}), fresh Candidate fork ($${postPromoCandTrack[23].value.toFixed(2)}), and immutable audit trail (${getIntelligenceCoreStateSnapshot().auditTrail.length} entries) verified.`
   );
 
   // 10. Verify Production Persistence Priority Order & Render Ephemeral Detection

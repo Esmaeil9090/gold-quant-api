@@ -662,6 +662,7 @@ export interface ParallelUniverseTelemetry {
   mtfDiscoveryContext: MultiTimeframeDiscoveryContext;
   liveArchitecture: ArchitectureState;
   candidateArchitecture: ArchitectureState;
+  liveEnsemble?: EnsemblePlume;
   candidateEnsemble: EnsemblePlume;
   findings: AwarenessFinding[];
   verificationReport: TestAndVerifyReport;

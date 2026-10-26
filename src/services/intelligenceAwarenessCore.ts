@@ -213,6 +213,13 @@ interface RuntimeCoreStore {
   lastFindings: AwarenessFinding[];
   lastPromotionBannerEn: string | null;
   lastPromotionBannerFa: string | null;
+  pendingManualPromotionCycleAck?: boolean;
+  lastLiveStepPredictions?: number[];
+  promotedLiveReferencePreds?: number[];
+  lastCandTheta?: number;
+  lastCandDriftMult?: number;
+  promotedCandTheta?: number;
+  promotedCandDriftMult?: number;
   persistenceHealth: ArchitecturePersistenceHealth;
   lastMtfDiscoveryContext: MultiTimeframeDiscoveryContext;
 }
@@ -1379,6 +1386,13 @@ function calibrateAndWeightArchitectureOnRealSnapshot(params: {
       }
     }
 
+    if (allowSymbolicPruningAndFitting) {
+      const rawTheta = xx > 1e-6 ? xy / (xx + ridgeLambda) : m.fittedCoefficient;
+      m.fittedCoefficient = parseFloat(
+        Math.max(0.1, Math.min(1.45, 0.55 * m.fittedCoefficient + 0.45 * Math.max(0.1, rawTheta))).toFixed(4)
+      );
+    }
+
     const thetaHalf1 = xxHalf1 > 1e-6 ? xyHalf1 / (xxHalf1 + ridgeLambda) : m.fittedCoefficient;
     const thetaHalf2 = xxHalf2 > 1e-6 ? xyHalf2 / (xxHalf2 + ridgeLambda) : m.fittedCoefficient;
     const sameSign = thetaHalf1 * thetaHalf2 >= -1e-4;
@@ -1387,13 +1401,6 @@ function calibrateAndWeightArchitectureOnRealSnapshot(params: {
       Math.max(0.1, Math.min(0.99, (sameSign ? 0.85 : 0.45) * (1 - 0.35 * magDiff))).toFixed(3)
     );
     m.stabilityRatio = stabilityRatio;
-
-    if (allowSymbolicPruningAndFitting) {
-      const rawTheta = xx > 1e-6 ? xy / (xx + ridgeLambda) : m.fittedCoefficient;
-      m.fittedCoefficient = parseFloat(
-        Math.max(0.1, Math.min(1.45, 0.55 * m.fittedCoefficient + 0.45 * Math.max(0.1, rawTheta))).toFixed(4)
-      );
-    }
 
     const scaledPreds = series.map(v => v * m.fittedCoefficient);
     const rankIc = computeSpearmanCorrelation(scaledPreds, realizedChanges);
@@ -2020,8 +2027,12 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   } = params;
 
   const flags = getFeatureFlags();
-  coreStore.lastPromotionBannerEn = null;
-  coreStore.lastPromotionBannerFa = null;
+  const hadPendingPromotionAck = Boolean(coreStore.pendingManualPromotionCycleAck);
+  coreStore.pendingManualPromotionCycleAck = false;
+  if (!hadPendingPromotionAck) {
+    coreStore.lastPromotionBannerEn = null;
+    coreStore.lastPromotionBannerFa = null;
+  }
 
   if (systemState === 'HALTED_DEGRADED' || candles.length < 10) {
     return buildHaltedParallelUniverseTelemetry(snapshotId, instrumentIdentity, interval);
@@ -2107,6 +2118,34 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   });
   coreStore.lastMtfDiscoveryContext = mtfDiscoveryContext;
 
+  const isPromotedLive = coreStore.liveArchitecture.promotionMode !== 'INITIAL_BASELINE';
+  let liveRefPredsForPromoted: number[] | undefined = undefined;
+  if (isPromotedLive) {
+    const expectedEvalLen = Math.min(48, Math.max(16, candles.length - 6));
+    if (
+      coreStore.promotedLiveReferencePreds &&
+      coreStore.promotedLiveReferencePreds.length === expectedEvalLen
+    ) {
+      liveRefPredsForPromoted = coreStore.promotedLiveReferencePreds;
+    } else {
+      const baseRefEval = calibrateAndWeightArchitectureOnRealSnapshot({
+        arch: createDefaultLiveArchitecture(),
+        candles,
+        atr,
+        equilibriumPrice: rawEquilibriumPrice,
+        compositeHtfPocAnchor: liquidityEngine.compositeHtfPocAnchor,
+        orthogonalMacroLift: pcaFactors.netOrthogonalLift,
+        f1RealGeopotential: pcaFactors.f1RealGeopotential,
+        basisZScore: cointegrationBasis.zScore,
+        vpinScore: vpinBase.vpinScore,
+        garchExceededMedian,
+        garchRatioToUnconditional,
+        allowSymbolicPruningAndFitting: false,
+      });
+      liveRefPredsForPromoted = baseRefEval.stepPredictionsHistory;
+    }
+  }
+
   // 1. Evaluate Live Architecture (Yellow Line) dynamic weights & OOS predictions
   const liveEval = calibrateAndWeightArchitectureOnRealSnapshot({
     arch: coreStore.liveArchitecture,
@@ -2121,11 +2160,13 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     garchExceededMedian,
     garchRatioToUnconditional,
     allowSymbolicPruningAndFitting: false,
+    liveReferenceStepPredictions: liveRefPredsForPromoted,
   });
   coreStore.liveArchitecture = liveEval.updatedArch;
+  coreStore.lastLiveStepPredictions = [...liveEval.stepPredictionsHistory];
 
   // 2. Evaluate Isolated Parallel Universe Candidate Architecture (Magenta Dashed Line)
-  const candEval = calibrateAndWeightArchitectureOnRealSnapshot({
+  let candEval = calibrateAndWeightArchitectureOnRealSnapshot({
     arch: coreStore.candidateArchitecture,
     candles,
     atr,
@@ -2158,7 +2199,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   });
   coreStore.lastFindings = findings;
 
-  // 4. Generate Isolated Candidate Trajectory Plume (Rendered on the EXACT SAME 2D chart as the Yellow Line)
+  // 4. Generate Live (Yellow Line) & Candidate (Magenta Line) Trajectory Plumes on the shared real snapshot
   const candidateVolMult =
     liquidityEngine.interactionState === 'LVN_VACUUM_ACCELERATION'
       ? 1.12
@@ -2166,23 +2207,74 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
       ? 0.86
       : 0.96;
 
-  const candidateEnsemble: EnsemblePlume = computeEmpiricalQuantilePlumes(
-    currentPrice,
-    coreStore.candidateArchitecture.compositeEquilibriumAnchor,
-    0.135,
-    garchVolForecast,
-    returns,
-    24,
-    intervalStepSeconds,
-    candles[candles.length - 1].time,
-    {
-      fusedEquilibriumPrice: coreStore.candidateArchitecture.compositeEquilibriumAnchor,
-      fusedNetDriftUsdPerStep: coreStore.candidateArchitecture.compositeNetDriftUsdPerStep * 0.42,
-      liquidityVolatilityMultiplier: candidateVolMult,
-      nearestUpperHvn: liquidityEngine.nearestUpperHvn,
-      nearestLowerHvn: liquidityEngine.nearestLowerHvn,
+  const computeLivePlumeFromCurrentState = (): EnsemblePlume => {
+    if (coreStore.liveArchitecture.promotionMode === 'INITIAL_BASELINE') {
+      return computeEmpiricalQuantilePlumes(
+        currentPrice,
+        rawEquilibriumPrice,
+        0.12,
+        garchVolForecast,
+        returns,
+        24,
+        intervalStepSeconds,
+        candles[candles.length - 1].time,
+        {
+          fusedEquilibriumPrice: liquidityEngine.fusedEquilibriumAnchor,
+          fusedNetDriftUsdPerStep: liquidityEngine.fusedNetDriftUsd * 0.35,
+          liquidityVolatilityMultiplier: candidateVolMult,
+          nearestUpperHvn: liquidityEngine.nearestUpperHvn,
+          nearestLowerHvn: liquidityEngine.nearestLowerHvn,
+        }
+      );
     }
-  );
+    const activeLiveTheta = coreStore.promotedCandTheta ?? 0.135;
+    const activeLiveDriftMult = coreStore.promotedCandDriftMult ?? 0.42;
+    return computeEmpiricalQuantilePlumes(
+      currentPrice,
+      coreStore.liveArchitecture.compositeEquilibriumAnchor,
+      activeLiveTheta,
+      garchVolForecast,
+      returns,
+      24,
+      intervalStepSeconds,
+      candles[candles.length - 1].time,
+      {
+        fusedEquilibriumPrice: coreStore.liveArchitecture.compositeEquilibriumAnchor,
+        fusedNetDriftUsdPerStep: coreStore.liveArchitecture.compositeNetDriftUsdPerStep * activeLiveDriftMult,
+        liquidityVolatilityMultiplier: candidateVolMult,
+        nearestUpperHvn: liquidityEngine.nearestUpperHvn,
+        nearestLowerHvn: liquidityEngine.nearestLowerHvn,
+      }
+    );
+  };
+
+  const computeCandidatePlumeFromCurrentState = (): EnsemblePlume => {
+    const genOffset = Math.min(4, Math.max(0, coreStore.generationCounter - 1));
+    const candTheta = parseFloat((0.135 + 0.008 * genOffset).toFixed(4));
+    const candDriftMult = parseFloat((0.42 + 0.025 * genOffset).toFixed(4));
+    coreStore.lastCandTheta = candTheta;
+    coreStore.lastCandDriftMult = candDriftMult;
+    return computeEmpiricalQuantilePlumes(
+      currentPrice,
+      coreStore.candidateArchitecture.compositeEquilibriumAnchor,
+      candTheta,
+      garchVolForecast,
+      returns,
+      24,
+      intervalStepSeconds,
+      candles[candles.length - 1].time,
+      {
+        fusedEquilibriumPrice: coreStore.candidateArchitecture.compositeEquilibriumAnchor,
+        fusedNetDriftUsdPerStep: coreStore.candidateArchitecture.compositeNetDriftUsdPerStep * candDriftMult,
+        liquidityVolatilityMultiplier: candidateVolMult,
+        nearestUpperHvn: liquidityEngine.nearestUpperHvn,
+        nearestLowerHvn: liquidityEngine.nearestLowerHvn,
+      }
+    );
+  };
+
+  let liveEnsemble: EnsemblePlume = computeLivePlumeFromCurrentState();
+  let candidateEnsemble: EnsemblePlume = computeCandidatePlumeFromCurrentState();
 
   // Build local volatility series for Gate 4 regime partitioning
   const evalN = liveEval.realizedStepChanges.length;
@@ -2209,8 +2301,9 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   coreStore.lastVerificationReport = verificationReport;
 
   // 6. Check if Automatic Promotion is enabled AND all 8 gates passed (VERIFIED_FOR_PROMOTION)
-  let promotionOccurredThisCycle = false;
+  let promotionOccurredThisCycle = hadPendingPromotionAck;
   if (
+    !hadPendingPromotionAck &&
     coreStore.autoPromotionRuntimeEnabled &&
     verificationReport.overallStatus === 'VERIFIED_FOR_PROMOTION' &&
     verificationReport.passedGatesCount === verificationReport.totalGatesCount
@@ -2219,7 +2312,32 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
       mode: 'AUTOMATIC_VERIFIED',
       operatorNote: `Auto-promoted after passing all ${verificationReport.totalGatesCount}/${verificationReport.totalGatesCount} closed-loop verification gates (DM t=${verificationReport.dieboldMarianoTStat.toFixed(2)}).`,
     });
-    promotionOccurredThisCycle = promoRes.promoted;
+    if (promoRes.promoted) {
+      promotionOccurredThisCycle = true;
+      coreStore.pendingManualPromotionCycleAck = false;
+      // Promoted candidate trajectory immediately becomes the Live Yellow Line
+      liveEnsemble = candidateEnsemble;
+      coreStore.lastLiveStepPredictions = [...candEval.stepPredictionsHistory];
+      // Evaluate newly forked next-generation Candidate Architecture so a fresh candidate line is forked immediately
+      candEval = calibrateAndWeightArchitectureOnRealSnapshot({
+        arch: coreStore.candidateArchitecture,
+        candles,
+        atr,
+        equilibriumPrice: rawEquilibriumPrice,
+        compositeHtfPocAnchor: liquidityEngine.compositeHtfPocAnchor,
+        orthogonalMacroLift: pcaFactors.netOrthogonalLift,
+        f1RealGeopotential: pcaFactors.f1RealGeopotential,
+        basisZScore: cointegrationBasis.zScore,
+        vpinScore: vpinBase.vpinScore,
+        garchExceededMedian,
+        garchRatioToUnconditional,
+        allowSymbolicPruningAndFitting: true,
+        liveReferenceStepPredictions: candEval.stepPredictionsHistory,
+      });
+      coreStore.candidateArchitecture = candEval.updatedArch;
+      candidateEnsemble = computeCandidatePlumeFromCurrentState();
+      persistCoreStoreToDisk(coreStore);
+    }
   }
 
   return {
@@ -2231,6 +2349,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     mtfDiscoveryContext,
     liveArchitecture: coreStore.liveArchitecture,
     candidateArchitecture: coreStore.candidateArchitecture,
+    liveEnsemble,
     candidateEnsemble,
     findings,
     verificationReport,
@@ -2301,6 +2420,13 @@ export function promoteCandidateArchitecture(params: {
   coreStore.generationCounter += 1;
   const gen = coreStore.generationCounter;
 
+  // Preserve the exact reference predictions and horizon parameters that produced the candidate's trajectory
+  if (coreStore.lastLiveStepPredictions && coreStore.lastLiveStepPredictions.length > 0) {
+    coreStore.promotedLiveReferencePreds = [...coreStore.lastLiveStepPredictions];
+  }
+  coreStore.promotedCandTheta = coreStore.lastCandTheta ?? 0.135;
+  coreStore.promotedCandDriftMult = coreStore.lastCandDriftMult ?? 0.42;
+
   // Candidate becomes the new Live Architecture (Yellow Line)
   const newLiveArch: ArchitectureState = {
     ...promotedCand,
@@ -2311,13 +2437,26 @@ export function promoteCandidateArchitecture(params: {
     promotionMode: mode,
     lineColorHex: '#f5d76e',
     models: promotedCand.models.map(m => ({ ...m })),
+    dynamicFusionWeights: { ...promotedCand.dynamicFusionWeights },
+    compositeNetDriftUsdPerStep: promotedCand.compositeNetDriftUsdPerStep,
+    compositeEquilibriumAnchor: promotedCand.compositeEquilibriumAnchor,
   };
   coreStore.liveArchitecture = newLiveArch;
 
-  // Spawn next-generation Candidate Architecture in the Parallel Universe
+  // Spawn fresh next-generation Candidate Architecture in the Parallel Universe
+  // Re-seed with fresh initial candidate discovery priors scaled by generation discovery step
+  const genExplorationScale = 1 + 0.06 * ((gen % 4) + 1);
   const nextCandidateModels = createInitialCandidateModels().map(m => {
-    const prevMatch = promotedCand.models.find(pm => pm.modelId === m.modelId);
-    return prevMatch ? { ...prevMatch, isEnabled: true, disabledReasonEn: null } : m;
+    if (m.origin === 'LEVEL_B_SYMBOLIC_DISCOVERY') {
+      return {
+        ...m,
+        isEnabled: true,
+        disabledReasonEn: null,
+        fittedCoefficient: parseFloat((m.fittedCoefficient * genExplorationScale).toFixed(4)),
+      };
+    }
+    const prevBase = promotedCand.models.find(pm => pm.modelId === m.modelId);
+    return prevBase ? { ...prevBase, isEnabled: true, disabledReasonEn: null } : { ...m };
   });
 
   const newCandidateArch: ArchitectureState = {
@@ -2337,6 +2476,7 @@ export function promoteCandidateArchitecture(params: {
     compositeEquilibriumAnchor: newLiveArch.compositeEquilibriumAnchor,
   };
   coreStore.candidateArchitecture = newCandidateArch;
+  coreStore.pendingManualPromotionCycleAck = true;
 
   const passedGatesStr = report ? `${report.passedGatesCount}/${report.totalGatesCount}` : 'MMI-Override';
   const noteSuffix = operatorNote ? ` · Note: ${operatorNote}` : '';
@@ -2476,6 +2616,14 @@ export function buildHaltedParallelUniverseTelemetry(
     mtfDiscoveryContext: coreStore.lastMtfDiscoveryContext,
     liveArchitecture: coreStore.liveArchitecture,
     candidateArchitecture: coreStore.candidateArchitecture,
+    liveEnsemble: {
+      medianTrack: [],
+      upper95: [],
+      upper75: [],
+      lower25: [],
+      lower05: [],
+      sampleTracks: [],
+    },
     candidateEnsemble: {
       medianTrack: [],
       upper95: [],
