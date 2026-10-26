@@ -434,9 +434,10 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
   const intervalStepSeconds = VALID_INTERVALS[interval];
   const simulateFailure = (req.query.simulateFailure as string) || '';
   const fixtureReplay = req.query.fixtureReplay === '1' || req.query.fixtureReplay === 'true';
+  const forceRefresh = req.query.forceRefresh === '1' || req.query.forceRefresh === 'true';
 
   const cached = forecastCache.get(interval);
-  if (!simulateFailure && !fixtureReplay && cached && Date.now() - cached.timestamp < 10000) {
+  if (!simulateFailure && !fixtureReplay && !forceRefresh && cached && Date.now() - cached.timestamp < 10000) {
     return res.json(cached.data);
   }
 

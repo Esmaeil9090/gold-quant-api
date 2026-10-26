@@ -200,6 +200,9 @@ interface PersistedArchitectureDocumentV2 {
   candidateArchitecture: ArchitectureState;
   archivedArchitectures: ArchitectureState[];
   auditTrail: ArchitectureAuditLogEntry[];
+  promotedCandTheta?: number;
+  promotedCandDriftMult?: number;
+  promotedLiveReferencePreds?: number[];
 }
 
 interface RuntimeCoreStore {
@@ -220,6 +223,8 @@ interface RuntimeCoreStore {
   lastCandDriftMult?: number;
   promotedCandTheta?: number;
   promotedCandDriftMult?: number;
+  lastPromotedLiveEnsemble?: EnsemblePlume;
+  lastCandidateEnsemble?: EnsemblePlume;
   persistenceHealth: ArchitecturePersistenceHealth;
   lastMtfDiscoveryContext: MultiTimeframeDiscoveryContext;
 }
@@ -559,6 +564,9 @@ function persistCoreStoreToDisk(store: RuntimeCoreStore): void {
     candidateArchitecture: store.candidateArchitecture,
     archivedArchitectures: store.archivedArchitectures.slice(0, 20),
     auditTrail: store.auditTrail.slice(0, 100),
+    promotedCandTheta: store.promotedCandTheta,
+    promotedCandDriftMult: store.promotedCandDriftMult,
+    promotedLiveReferencePreds: store.promotedLiveReferencePreds,
   };
 
   store.persistenceHealth = {
@@ -672,6 +680,9 @@ function loadOrInitializeCoreStore(): RuntimeCoreStore {
           auditTrail: raw.auditTrail.slice(0, 100),
           autoPromotionRuntimeEnabled: autoPromo,
           generationCounter: gen,
+          promotedCandTheta: typeof raw.promotedCandTheta === 'number' ? raw.promotedCandTheta : undefined,
+          promotedCandDriftMult: typeof raw.promotedCandDriftMult === 'number' ? raw.promotedCandDriftMult : undefined,
+          promotedLiveReferencePreds: Array.isArray(raw.promotedLiveReferencePreds) ? raw.promotedLiveReferencePreds : undefined,
           lastVerificationReport: null,
           lastFindings: [],
           lastPromotionBannerEn: null,

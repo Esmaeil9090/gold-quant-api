@@ -1,5 +1,93 @@
 [
   {
+    "auditId": "audit-1793045254229-3bbox",
+    "timestampIso": "2026-10-26T20:07:34.229Z",
+    "eventType": "LEVEL_B_MODEL_INVENTED",
+    "actor": "INTELLIGENCE_AWARENESS_CORE",
+    "sourceArchitectureId": "arch-live-gen21",
+    "targetArchitectureId": "arch-cand-gen22",
+    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration (5/8 symbolic equations active in v22.0-ParallelCandidate-G21): Verification test synthesis.",
+    "summaryFa": "هسته هوشمندی و آگاهی کشف نمادین معادلات سطح B چندتایم‌فریمی و کالیبراسیون ریج را در جهان موازی اجرا کرد (5 معادله نمادین فعال).",
+    "verifiableMetrics": "Candidate=v22.0-ParallelCandidate-G21 | ActiveSymbolic=VOLUME_CLOCK_HAWKMOTH_RESTORING(w=8.7%), REAL_YIELD_CONVEXITY_ASYMMETRY(w=10.7%), LAGGED_RESIDUAL_SELF_CORRECTION(w=7.9%), BASIS_ACCELERATION_SECOND_ORDER(w=14.5%), ASYMMETRIC_TAIL_VOL_SHOCK_SHIELD(w=10.7%)"
+  },
+  {
+    "auditId": "audit-1793045254222-rqwih",
+    "timestampIso": "2026-10-26T20:07:34.222Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen22",
+    "targetArchitectureId": "arch-live-gen21",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=false"
+  },
+  {
+    "auditId": "audit-1793045254197-b98yl",
+    "timestampIso": "2026-10-26T20:07:34.197Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen21",
+    "targetArchitectureId": "arch-live-gen21",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v21.0-ParallelCandidate-G20) to Live Yellow-Line Architecture (v21.0-LivePromoted (MMI)) via MMI [Gates: 8/8] · Note: Automated test verification of MMI promotion path.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v21.0-ParallelCandidate-G20) را به معماری خط زرد زنده (v21.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 8/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=8/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen20"
+  },
+  {
+    "auditId": "audit-1793045254169-64oxu",
+    "timestampIso": "2026-10-26T20:07:34.169Z",
+    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen21",
+    "targetArchitectureId": "arch-live-gen20",
+    "summaryEn": "Automatic promotion blocked: Candidate has passed 0/8 gates (status: HALTED_FROZEN). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION).",
+    "summaryFa": "ارتقای خودکار متوقف شد: کاندیدا 0/8 گیت را گذرانده است. ارتقای خودکار نیازمند عبور از هر ۸ گیت راستی‌آزمایی است.",
+    "verifiableMetrics": "Status=HALTED_FROZEN | PassedGates=0/8"
+  },
+  {
+    "auditId": "audit-1793043972450-7ukbx",
+    "timestampIso": "2026-10-26T19:46:12.450Z",
+    "eventType": "LEVEL_B_MODEL_INVENTED",
+    "actor": "INTELLIGENCE_AWARENESS_CORE",
+    "sourceArchitectureId": "arch-live-gen20",
+    "targetArchitectureId": "arch-cand-gen21",
+    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration (5/8 symbolic equations active in v21.0-ParallelCandidate-G20): Verification test synthesis.",
+    "summaryFa": "هسته هوشمندی و آگاهی کشف نمادین معادلات سطح B چندتایم‌فریمی و کالیبراسیون ریج را در جهان موازی اجرا کرد (5 معادله نمادین فعال).",
+    "verifiableMetrics": "Candidate=v21.0-ParallelCandidate-G20 | ActiveSymbolic=VOLUME_CLOCK_HAWKMOTH_RESTORING(w=8.7%), REAL_YIELD_CONVEXITY_ASYMMETRY(w=10.7%), LAGGED_RESIDUAL_SELF_CORRECTION(w=7.9%), BASIS_ACCELERATION_SECOND_ORDER(w=14.5%), ASYMMETRIC_TAIL_VOL_SHOCK_SHIELD(w=10.7%)"
+  },
+  {
+    "auditId": "audit-1793043972404-fqv3i",
+    "timestampIso": "2026-10-26T19:46:12.404Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen21",
+    "targetArchitectureId": "arch-live-gen20",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=false"
+  },
+  {
+    "auditId": "audit-1793043972378-5esic",
+    "timestampIso": "2026-10-26T19:46:12.378Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen20",
+    "targetArchitectureId": "arch-live-gen20",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v20.0-ParallelCandidate-G19) to Live Yellow-Line Architecture (v20.0-LivePromoted (MMI)) via MMI [Gates: 8/8] · Note: Automated test verification of MMI promotion path.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v20.0-ParallelCandidate-G19) را به معماری خط زرد زنده (v20.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 8/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=8/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen19"
+  },
+  {
+    "auditId": "audit-1793043972358-u6ubb",
+    "timestampIso": "2026-10-26T19:46:12.358Z",
+    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen20",
+    "targetArchitectureId": "arch-live-gen19",
+    "summaryEn": "Automatic promotion blocked: Candidate has passed 0/8 gates (status: HALTED_FROZEN). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION).",
+    "summaryFa": "ارتقای خودکار متوقف شد: کاندیدا 0/8 گیت را گذرانده است. ارتقای خودکار نیازمند عبور از هر ۸ گیت راستی‌آزمایی است.",
+    "verifiableMetrics": "Status=HALTED_FROZEN | PassedGates=0/8"
+  },
+  {
     "auditId": "audit-1793040056362-yodrg",
     "timestampIso": "2026-10-26T18:40:56.362Z",
     "eventType": "LEVEL_B_MODEL_INVENTED",

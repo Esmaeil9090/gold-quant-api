@@ -505,12 +505,13 @@ body[dir="rtl"] .tv-3d-globe-btn {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 42%, #0d1829 0%, #06090f 80%);
+  background: radial-gradient(circle at 50% 42%, #14100c 0%, #050811 85%);
   z-index: 48;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: inset 0 0 110px rgba(0, 0, 0, 0.85);
 }
 .three-globe-stage.hidden {
   display: none !important;
@@ -529,133 +530,93 @@ body[dir="rtl"] .tv-3d-globe-btn {
   outline: none;
 }
 
-/* Minimal Top-Left Spec Badge (Zero backdrop-filter over active WebGL) */
-.three-top-spec-bar {
-  position: relative;
+/* Unboxed Floating Cinematic Movie Title Overlay (Matches Reference Image Top-Center) */
+.three-movie-title-overlay {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 5;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: calc(10px + env(safe-area-inset-top, 0px)) 78px 0 14px;
+  text-align: center;
   pointer-events: none;
-  gap: 8px;
-  flex-wrap: wrap;
+  width: min(680px, 86vw);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
-body[dir="rtl"] .three-top-spec-bar {
-  padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 0 78px;
+.three-globe-stage.is-pure-cinema .three-movie-title-overlay,
+.three-globe-stage.is-pure-cinema .three-cinematic-left-nav,
+.three-globe-stage.is-pure-cinema .three-bottom-dock {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
-.three-spec-pill {
-  pointer-events: auto;
-  background: rgba(8, 13, 22, 0.88);
-  border: 1px solid rgba(0, 229, 255, 0.45);
-  border-radius: 10px;
-  padding: 6px 11px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
-}
-.three-spec-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.three-spec-title {
-  font-size: 10px;
+.three-movie-main-title {
+  font-family: 'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif;
+  font-size: clamp(20px, 2.7vw, 32px);
   font-weight: 800;
-  color: var(--gold);
-  letter-spacing: 0.8px;
+  letter-spacing: 4.5px;
   text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  color: #f8dfa1;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.96), 0 0 28px rgba(245, 215, 110, 0.45);
+  line-height: 1.08;
 }
-.three-tf-select {
-  background: rgba(0, 229, 255, 0.14);
-  border: 1px solid rgba(0, 229, 255, 0.55);
-  color: var(--cyan);
-  font-size: 10px;
-  font-weight: 800;
-  border-radius: 6px;
-  padding: 2px 6px;
-  cursor: pointer;
-  outline: none;
+.three-movie-sub-title {
+  font-family: 'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif;
+  font-size: clamp(9.5px, 1.15vw, 13px);
+  font-weight: 700;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+  color: #e8c878;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+  margin-top: 3px;
 }
-.three-tf-select option {
-  background: #090e18;
-  color: #fff;
+.three-movie-gold-rule {
+  width: min(240px, 55vw);
+  height: 1px;
+  margin: 6px auto 5px auto;
+  background: linear-gradient(90deg, transparent 0%, rgba(245, 215, 110, 0.85) 50%, transparent 100%);
+  box-shadow: 0 0 8px rgba(245, 215, 110, 0.45);
 }
-.three-spec-metrics {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  font-family: monospace;
-  color: #d1dced;
-  flex-wrap: wrap;
-}
-.three-candle-inspector {
-  pointer-events: auto;
-  background: rgba(8, 13, 22, 0.88);
-  border: 1px solid rgba(245, 215, 110, 0.55);
-  border-radius: 10px;
-  padding: 6px 11px;
-  font-size: 10px;
-  color: #e6edf7;
-  max-width: 340px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
-}
-@media (max-width: 640px) {
-  .three-top-spec-bar {
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 70px 0 10px;
-    gap: 6px;
-  }
-  .three-spec-pill {
-    padding: 5px 9px;
-  }
-  .three-spec-title {
-    font-size: 9px;
-  }
-  .three-spec-metrics {
-    font-size: 9px;
-    gap: 6px;
-  }
-  .three-candle-inspector {
-    padding: 5px 9px;
-    font-size: 9px;
-    max-width: 100%;
-  }
+.three-movie-caption {
+  font-size: clamp(9.5px, 1vw, 12px);
+  font-weight: 500;
+  color: rgba(236, 230, 214, 0.88);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.98);
+  letter-spacing: 0.3px;
+  line-height: 1.35;
 }
 
-/* Unified Collapsible Bottom Control Dock (Zero Viewport Occlusion) */
+/* Hide Legacy Scattered Telemetry & Inspector Boxes Inside 3D Movie Stage */
+.three-top-spec-bar,
+.three-candle-inspector,
+.three-right-market-hud {
+  display: none !important;
+}
+
+/* Unified Low-Profile Bottom Movie Storyboard Dock */
 .three-bottom-dock-wrapper {
   position: absolute;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: auto;
-  max-width: min(940px, 96vw);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  width: min(1040px, 96vw);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
 }
 .three-bottom-dock-wrapper.is-collapsed .three-bottom-dock {
   display: none;
 }
 .three-dock-collapse-btn {
-  background: rgba(8, 13, 22, 0.95);
-  border: 1px solid rgba(40, 60, 95, 0.8);
+  background: rgba(8, 10, 16, 0.72);
+  border: 1px solid rgba(245, 215, 110, 0.35);
   border-bottom: none;
-  color: var(--cyan);
-  font-size: 9px;
+  color: #f5d76e;
+  font-size: 8.5px;
   font-weight: 800;
-  letter-spacing: 0.7px;
-  padding: 3px 12px;
-  border-radius: 7px 7px 0 0;
+  letter-spacing: 1.2px;
+  padding: 3px 14px;
+  border-radius: 6px 6px 0 0;
   cursor: pointer;
   text-transform: uppercase;
 }
@@ -1014,164 +975,140 @@ body[dir="rtl"] .draw-status-pill {
   right: 12px;
 }
 
-/* 3D Cinematic Market Theatre Reference HUD & Synchronized Replay Timeline */
+/* 3D Cinematic Market Theatre Floating Crest, Scene Selector & 7-Chapter Movie Storyboard */
 .three-cinematic-left-nav {
   position: absolute;
-  top: 84px;
-  left: 12px;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 16px;
   z-index: 6;
   display: flex;
   flex-direction: column;
   gap: 5px;
-  width: 158px;
-  background: linear-gradient(180deg, rgba(8, 12, 22, 0.92), rgba(14, 18, 30, 0.88));
-  border: 1px solid rgba(245, 215, 110, 0.42);
-  border-radius: 10px;
-  padding: 8px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.8);
+  width: 168px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  transition: opacity 0.35s ease;
 }
 .three-brand-crest {
-  border-bottom: 1px solid rgba(245, 215, 110, 0.28);
-  padding-bottom: 6px;
-  margin-bottom: 2px;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
   text-align: center;
+  pointer-events: none;
 }
 .three-brand-crest-gdf {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  color: #f5d76e;
-  line-height: 1.05;
-  text-shadow: 0 0 12px rgba(245, 215, 110, 0.45);
+  font-family: 'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif;
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 3.5px;
+  color: #f8dfa1;
+  line-height: 0.95;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.96), 0 0 24px rgba(245, 215, 110, 0.48);
 }
 .three-brand-crest-sub {
-  font-size: 8px;
-  font-weight: 800;
-  color: #cbd5e1;
-  letter-spacing: 0.9px;
+  font-family: 'Cinzel', 'Playfair Display', 'Times New Roman', Georgia, serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: #e6d19a;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 4px;
+  line-height: 1.35;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.96);
 }
 .three-zone-nav-btn {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   width: 100%;
-  padding: 6px 9px;
-  border-radius: 6px;
-  background: rgba(15, 23, 38, 0.78);
-  border: 1px solid rgba(60, 80, 115, 0.45);
-  color: #cbd5e1;
-  font-size: 10.5px;
-  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: rgba(8, 11, 18, 0.58);
+  border: 1px solid rgba(245, 215, 110, 0.22);
+  color: rgba(235, 228, 212, 0.88);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.16s ease;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
 }
 .three-zone-nav-btn:hover,
 .three-zone-nav-btn.active {
-  background: linear-gradient(90deg, rgba(245, 215, 110, 0.24), rgba(245, 215, 110, 0.06));
+  background: linear-gradient(90deg, rgba(245, 215, 110, 0.28), rgba(20, 16, 10, 0.72));
   border-color: #f5d76e;
-  color: #f5d76e;
-  box-shadow: 0 0 12px rgba(245, 215, 110, 0.28);
-}
-.three-right-market-hud {
-  position: absolute;
-  top: 84px;
-  right: 12px;
-  z-index: 6;
-  width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  pointer-events: auto;
-}
-.three-hud-card {
-  background: rgba(8, 12, 22, 0.90);
-  border: 1px solid rgba(60, 85, 125, 0.6);
-  border-radius: 10px;
-  padding: 8px 10px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.78);
-}
-.three-hud-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 9.5px;
-  font-family: monospace;
-  padding: 2.5px 0;
-  border-bottom: 1px solid rgba(40, 60, 95, 0.35);
-}
-.three-hud-row:last-child {
-  border-bottom: none;
+  color: #fff6d6;
+  box-shadow: 0 0 16px rgba(245, 215, 110, 0.35);
 }
 .three-replay-bar {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 8px;
   width: 100%;
-  background: rgba(10, 16, 28, 0.95);
-  border: 1px solid rgba(245, 215, 110, 0.45);
-  border-radius: 9px;
-  padding: 5px 10px;
-  margin-bottom: 5px;
+  background: rgba(8, 12, 20, 0.84);
+  border: 1px solid rgba(245, 215, 110, 0.48);
+  border-radius: 8px;
+  padding: 5px 12px;
+  margin-bottom: 6px;
+}
+.three-replay-bar.is-visible {
+  display: flex;
 }
 .three-storyboard-strip {
   display: flex;
   align-items: stretch;
-  gap: 5px;
+  gap: 6px;
   width: 100%;
   overflow-x: auto;
-  padding-bottom: 3px;
-  margin-bottom: 5px;
+  padding-bottom: 2px;
+  margin-bottom: 4px;
   scrollbar-width: none;
 }
 .three-storyboard-strip::-webkit-scrollbar {
   display: none;
 }
 .three-story-act-btn {
-  flex: 1 0 104px;
-  background: linear-gradient(180deg, rgba(16, 24, 42, 0.92), rgba(8, 12, 22, 0.96));
-  border: 1px solid rgba(60, 85, 125, 0.55);
-  border-radius: 7px;
-  padding: 5px 7px;
+  flex: 1 0 118px;
+  background: linear-gradient(180deg, rgba(14, 18, 28, 0.78), rgba(6, 9, 15, 0.88));
+  border: 1px solid rgba(245, 215, 110, 0.26);
+  border-radius: 6px;
+  padding: 6px 9px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.16s ease;
+  transition: all 0.18s ease;
 }
 .three-story-act-btn:hover,
 .three-story-act-btn.active {
   border-color: #f5d76e;
-  background: linear-gradient(180deg, rgba(245, 215, 110, 0.22), rgba(14, 20, 34, 0.95));
-  box-shadow: 0 0 12px rgba(245, 215, 110, 0.25);
+  background: linear-gradient(180deg, rgba(245, 215, 110, 0.25), rgba(14, 12, 8, 0.92));
+  box-shadow: 0 0 16px rgba(245, 215, 110, 0.32);
 }
 .three-story-act-title {
-  font-size: 9px;
-  font-weight: 900;
-  color: #f5d76e;
-  letter-spacing: 0.5px;
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #f8dfa1;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
 }
 .three-story-act-sub {
-  font-size: 8px;
-  color: #9cb0cc;
-  margin-top: 1px;
+  font-size: 8.5px;
+  color: rgba(226, 218, 200, 0.78);
+  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 @media (max-width: 768px) {
   .three-cinematic-left-nav {
-    top: auto;
-    bottom: 132px;
+    top: calc(74px + env(safe-area-inset-top, 0px));
     left: 8px;
     width: auto;
     max-width: calc(100vw - 16px);
     flex-direction: row;
     overflow-x: auto;
-    padding: 5px;
+    padding: 2px;
   }
   .three-brand-crest {
     display: none;
@@ -1179,11 +1116,8 @@ body[dir="rtl"] .draw-status-pill {
   .three-zone-nav-btn {
     width: auto;
     white-space: nowrap;
-    padding: 5px 8px;
+    padding: 4px 8px;
     font-size: 9.5px;
-  }
-  .three-right-market-hud {
-    display: none;
   }
 }
 
@@ -3045,30 +2979,44 @@ input:checked + .toggle-slider:before {
   display: inline-block;
 }
 
-/* Phase 6: 3D HALTED_DEGRADED Freeze Overlay */
+/* Phase 6: 3D HALTED_DEGRADED Freeze Overlay (Keeps Frozen 3D World Visible Beneath Readable Banner) */
 .three-halted-overlay {
   position: absolute;
   inset: 0;
   z-index: 45;
-  background: rgba(14, 6, 12, 0.78);
-  backdrop-filter: blur(4px);
+  background: rgba(14, 6, 12, 0.34);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: 86px 20px 20px 20px;
   pointer-events: none;
 }
 .three-halted-overlay.hidden {
-  display: none;
+  display: none !important;
 }
 .three-halted-card {
   max-width: 540px;
-  background: rgba(28, 8, 16, 0.95);
+  background: rgba(28, 8, 16, 0.94);
   border: 1.5px solid rgba(255, 23, 68, 0.85);
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   text-align: center;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 24px rgba(255, 23, 68, 0.35);
+}
+
+/* 3D Mathematical-to-Visual Mapping Modal (Hidden by Default, Zero Backdrop-Blur Over WebGL) */
+.three-math-mapping-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(4, 8, 16, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.three-math-mapping-modal.hidden {
+  display: none !important;
 }
 </style>
 </head>
@@ -3341,16 +3289,25 @@ input:checked + .toggle-slider:before {
           </div>
         </div>
 
-        <!-- Minimal Top Theatre Header & Collapsible Spec Telemetry Bar -->
-        <div class="three-top-spec-bar">
-          <div class="three-spec-pill" style="background: rgba(6, 10, 18, 0.84); backdrop-filter: blur(12px); border-color: rgba(245, 215, 110, 0.45);">
+        <!-- Unboxed Top-Center Cinematic Movie Title (Matches Reference Picture) -->
+        <div class="three-movie-title-overlay" id="threeMovieTitleOverlay">
+          <div class="three-movie-main-title" id="threeMovieMainTitle">THE ARENA</div>
+          <div class="three-movie-sub-title" id="threeMovieSubTitle">THE BATTLE OF BULLS AND BEARS</div>
+          <div class="three-movie-gold-rule"></div>
+          <div class="three-movie-caption" id="threeMovieCaption">
+            Visualizes real market forces: buying and selling pressure, liquidity, volatility and momentum.
+          </div>
+        </div>
+
+        <!-- Hidden Technical Telemetry Nodes (Preserved in DOM for Phase 6 & Audit Verification, Zero Screen Clutter) -->
+        <div class="three-top-spec-bar" aria-hidden="true">
+          <div class="three-spec-pill">
             <div class="three-spec-title-row">
               <div class="three-spec-title">
-                <span>🎬</span>
                 <span id="threeSceneChapterHeadline" data-i18n="threeWorldTitle">THE ARENA — THE CONVERGENCE OF BULLS AND BEARS</span>
                 <span class="epistemic-badge epistemic-proxy" data-epistemic="HEURISTIC_PROXY">[HEURISTIC PROXY]</span>
-                <button type="button" class="spec-badge-btn spec-proxy" id="btnOpen3dMathMapping" title="Inspect Documented 2D-to-3D Mathematical-to-Visual Mapping">Math→3D Map ⓘ</button>
-                <button type="button" class="spec-badge-btn spec-proxy" data-model-spec="MORSE_POTENTIAL_MANIFOLD" title="Inspect 3D Morse Manifold & MTF Liquidity Terrain Specification">Spec ⓘ</button>
+                <button type="button" class="spec-badge-btn spec-proxy" id="btnOpen3dMathMapping">Math→3D Map ⓘ</button>
+                <button type="button" class="spec-badge-btn spec-proxy" data-model-spec="MORSE_POTENTIAL_MANIFOLD">Spec ⓘ</button>
               </div>
               <select id="threeTimeframeSelect" class="three-tf-select" title="Switch Synchronized 2D/3D Timeframe">
                 <option value="1m">1m · Short</option>
@@ -3362,27 +3319,23 @@ input:checked + .toggle-slider:before {
                 <option value="1d">1D · Macro</option>
               </select>
             </div>
-            <div id="threeStorySubtitle" style="font-size: 10.5px; color: #f5d76e; font-weight: 600; letter-spacing: 0.3px; margin-top: 2px;">
+            <div id="threeStorySubtitle">
               2D-Synchronized Real Market Forces: Buying &amp; Selling Pressure · Top-Down MTF Liquidity · GARCH Volatility · Kalman State
             </div>
-            <div class="three-spec-metrics" style="opacity: 0.85; font-size: 9px;">
-              <span id="threeSpecTau" data-model-spec="VOLUME_CLOCK_SUBORDINATOR_PROXY" style="cursor:pointer;" title="Inspect Relative Bar-Volume Clock Proxy">Δτ: 1.00 (Vol-Clock Proxy)</span>
-              <span>·</span>
-              <span id="threeSpecSweep" data-model-spec="SWEEP_LOG_ODDS_PROXY" style="color: var(--green); cursor:pointer;" title="Inspect OHLCV Wick-Volume Sweep Log-Odds Proxy">L_t: +0.42 (LAMINAR)</span>
-              <span>·</span>
-              <span id="threeSpecMorse" data-model-spec="MORSE_POTENTIAL_MANIFOLD" style="color: var(--gold); cursor:pointer;" title="Inspect Anharmonic Morse Potential Proxy">U(P): 1.24 eV</span>
-              <span>·</span>
-              <span id="threeUncertaintyModBadge" style="color: var(--cyan); font-family: monospace;">±1σ/±2σ Envelopes · Coherence: HIGH (WITHIN_2SIGMA)</span>
+            <div class="three-spec-metrics">
+              <span id="threeSpecTau" data-model-spec="VOLUME_CLOCK_SUBORDINATOR_PROXY">Δτ: 1.00 (Vol-Clock Proxy)</span>
+              <span id="threeSpecSweep" data-model-spec="SWEEP_LOG_ODDS_PROXY">L_t: +0.42 (LAMINAR)</span>
+              <span id="threeSpecMorse" data-model-spec="MORSE_POTENTIAL_MANIFOLD">U(P): 1.24 eV</span>
+              <span id="threeUncertaintyModBadge">±1σ/±2σ Envelopes · Coherence: HIGH (WITHIN_2SIGMA)</span>
             </div>
           </div>
-
-          <div class="three-candle-inspector" id="threeCandleInspector" style="background: rgba(6, 10, 18, 0.82); backdrop-filter: blur(12px);">
-            <div style="font-weight: 800; color: var(--gold); margin-bottom: 2px;" id="threeInspHeader">⚔️ Live Arena &amp; Graveyard Chronicle (Tap any 3D monument)</div>
-            <div id="threeInspBody" style="font-family: monospace; color: #b8c7de;">Bull vs Bear Force Balance driven by real Close Location, Wick Rejection &amp; Volume Absorption</div>
+          <div class="three-candle-inspector" id="threeCandleInspector">
+            <div id="threeInspHeader">Live Arena &amp; Graveyard Chronicle</div>
+            <div id="threeInspBody">Bull vs Bear Force Balance driven by real Close Location, Wick Rejection &amp; Volume Absorption</div>
           </div>
         </div>
 
-        <!-- Reference-Matched Left Theatre Zone Navigation Stack -->
+        <!-- Reference-Matched Unboxed Left GDF Crest & Scene Selector -->
         <nav class="three-cinematic-left-nav" aria-label="3D Market Theatre Zones">
           <div class="three-brand-crest">
             <div class="three-brand-crest-gdf">GDF</div>
@@ -3403,64 +3356,27 @@ input:checked + .toggle-slider:before {
           <button type="button" class="three-zone-nav-btn" data-cam="replay">
             <span>⏱️</span><span>Historical Replay</span>
           </button>
-          <button type="button" class="three-zone-nav-btn" id="btnLeftNavMathMap">
-            <span>📐</span><span>Math→3D Matrix</span>
-          </button>
         </nav>
 
-        <!-- Reference-Matched Right Synchronized Market Data & Live Macro Event HUD -->
-        <aside class="three-right-market-hud" aria-label="Synchronized 2D/3D Market Data">
+        <!-- Hidden Synchronized Telemetry Nodes (Kept Out of 3D Movie Frame) -->
+        <aside class="three-right-market-hud" aria-hidden="true">
           <div class="three-hud-card">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(245,215,110,0.3);padding-bottom:4px;margin-bottom:4px;">
-              <span style="font-size:10.5px;font-weight:900;color:#fff;font-family:monospace;" id="threeHudSymbol">XAUUSD</span>
-              <span style="font-size:12px;font-weight:900;color:var(--gold);font-family:monospace;" id="threeHudPrice">$—</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">DXY Index</span>
-              <span id="threeHudDxy" style="color:#fff;font-weight:700;">—</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">US10Y Nominal</span>
-              <span id="threeHudUs10y" style="color:var(--cyan);font-weight:700;">—%</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">TIPS 10Y Real</span>
-              <span id="threeHudTips10y" style="color:#7be6ff;font-weight:700;">—%</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">10Y Breakeven</span>
-              <span id="threeHudBreakeven" style="color:var(--amber);font-weight:700;">—%</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">GC=F Basis</span>
-              <span id="threeHudBasis" style="color:#00e676;font-weight:700;">—</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">GARCH Vol (σ_t)</span>
-              <span id="threeHudGarchVol" style="color:var(--gold);font-weight:700;">—%</span>
-            </div>
-            <div class="three-hud-row">
-              <span style="color:#9cb0cc;">EKF Residual ε_t</span>
-              <span id="threeHudResidual" style="color:#f381ff;font-weight:700;">$0.00</span>
-            </div>
-          </div>
-
-          <div class="three-hud-card" style="border-color:rgba(245,215,110,0.4);">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-              <span style="font-size:13px;">🏛️</span>
-              <span style="font-size:9.5px;font-weight:900;color:var(--gold);letter-spacing:0.5px;">VERIFIED MACRO &amp; EVENT STATE</span>
-            </div>
-            <div id="threeHudEventHeadline" style="font-size:9.5px;color:#e6edf7;font-weight:700;line-height:1.35;">
-              Synchronized to real-time macro yields &amp; verified news feed
-            </div>
-            <div id="threeHudEventMetrics" style="font-size:8.5px;color:#9cb0cc;font-family:monospace;margin-top:4px;line-height:1.35;">
-              Real Yield Gravity: — · Dollar Drag: — · Quorum: —
-            </div>
+            <span id="threeHudSymbol">XAUUSD</span>
+            <span id="threeHudPrice">$—</span>
+            <span id="threeHudDxy">—</span>
+            <span id="threeHudUs10y">—%</span>
+            <span id="threeHudTips10y">—%</span>
+            <span id="threeHudBreakeven">—%</span>
+            <span id="threeHudBasis">—</span>
+            <span id="threeHudGarchVol">—%</span>
+            <span id="threeHudResidual">$0.00</span>
+            <div id="threeHudEventHeadline">Synchronized to real-time macro yields</div>
+            <div id="threeHudEventMetrics">Real Yield Gravity: — · Dollar Drag: —</div>
           </div>
         </aside>
 
-        <!-- Documented Mathematical-to-Visual Mapping Inspector Modal (Inside 3D Stage) -->
-        <div id="threeMathMappingModal" class="hidden" style="position:absolute;inset:0;z-index:20;background:rgba(4,8,16,0.86);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;">
+        <!-- Documented Mathematical-to-Visual Mapping Inspector Modal (Opened Only On Demand) -->
+        <div id="threeMathMappingModal" class="three-math-mapping-modal hidden">
           <div style="background:rgba(8,13,24,0.98);border:1px solid rgba(245,215,110,0.6);border-radius:12px;max-width:780px;width:100%;max-height:84vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.9);">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(40,60,95,0.7);background:rgba(12,20,36,0.95);">
               <span style="font-size:12px;font-weight:800;color:var(--gold);">📐 GDF 2D-to-3D Mathematical-to-Visual Mapping Matrix (Single Source of Truth)</span>
@@ -3520,70 +3436,67 @@ input:checked + .toggle-slider:before {
           </div>
         </div>
 
-        <!-- Ergonomic Collapsible Bottom Cinema Director, Synchronized Historical Replay & 7-Act Storyboard Dock -->
+        <!-- Low-Profile Bottom 7-Chapter Movie Storyboard & Director Bar -->
         <div class="three-bottom-dock-wrapper" id="threeBottomDockWrapper">
-          <button class="three-dock-collapse-btn" id="threeDockToggleBtn" data-i18n="threeHideControls">▾ Hide Controls</button>
-          <div class="three-bottom-dock" style="flex-direction:column;align-items:stretch;">
-            <!-- Synchronized 2D+3D Historical Bar Replay Timeline -->
+          <button class="three-dock-collapse-btn" id="threeDockToggleBtn" data-i18n="threeHideControls">▾ Hide Storyboard</button>
+          <div class="three-bottom-dock" style="flex-direction:column;align-items:stretch;background:rgba(6,8,14,0.74);border-color:rgba(245,215,110,0.32);">
+            <!-- Synchronized 2D+3D Historical Bar Replay Timeline (Shown When Historical Replay Scene Is Selected) -->
             <div class="three-replay-bar" id="threeReplayTimelineBar">
-              <button type="button" class="three-dock-btn" id="btn3dReplayPlay" title="Play / Pause Historical Candle-by-Candle Replay (Synchronized with 2D Chart)">▶ Replay</button>
-              <button type="button" class="three-dock-btn" id="btn3dReplayLive" title="Jump Back to Live Real-Time Bar (Offset = 0)">⚡ Live Now</button>
-              <span style="font-size:9.5px;font-weight:800;color:var(--gold);font-family:monospace;white-space:nowrap;">HISTORICAL REPLAY:</span>
+              <button type="button" class="three-dock-btn" id="btn3dReplayPlay" title="Play / Pause Historical Candle-by-Candle Replay (Synchronized with 2D Chart)">▶ Play</button>
+              <button type="button" class="three-dock-btn" id="btn3dReplayLive" title="Jump Back to Live Real-Time Bar (Offset = 0)">⚡ Live</button>
+              <span style="font-size:9.5px;font-weight:800;color:var(--gold);font-family:monospace;white-space:nowrap;">REPLAY:</span>
               <input type="range" id="threeHistoricalReplaySlider" min="0" max="35" value="0" step="1" style="flex:1;accent-color:#f5d76e;cursor:pointer;" title="Scrub backward through verified historical bars (synchronizes both 2D Chart and 3D Theatre)">
               <span id="threeReplayTimestampTag" style="font-size:9.5px;font-family:monospace;color:var(--cyan);font-weight:800;white-space:nowrap;">LIVE (Bar t-0)</span>
             </div>
 
             <!-- Reference-Matched 7-Chapter Cinematic Storyboard Strip -->
             <div class="three-storyboard-strip" id="threeStoryboardStrip">
-              <button type="button" class="three-story-act-btn active" data-story-act="opening" data-cam="overview">
-                <div class="three-story-act-title">1. Opening</div>
+              <button type="button" class="three-story-act-btn" data-story-act="opening" data-cam="overview">
+                <div class="three-story-act-title">Opening</div>
                 <div class="three-story-act-sub">The world of gold</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="tension" data-cam="manifold">
-                <div class="three-story-act-title">2. Rising Tension</div>
-                <div class="three-story-act-sub">Liquidity &amp; HVNs build</div>
+                <div class="three-story-act-title">Rising Tension</div>
+                <div class="three-story-act-sub">Market forces build</div>
               </button>
-              <button type="button" class="three-story-act-btn" data-story-act="clash" data-cam="battle">
-                <div class="three-story-act-title">3. The Clash</div>
-                <div class="three-story-act-sub">Bull vs Bear in Arena</div>
+              <button type="button" class="three-story-act-btn active" data-story-act="clash" data-cam="battle">
+                <div class="three-story-act-title">The Clash</div>
+                <div class="three-story-act-sub">Bull vs Bear</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="macro" data-cam="forecast">
-                <div class="three-story-act-title">4. Macro Event</div>
-                <div class="three-story-act-sub">Yields &amp; DXY forces</div>
+                <div class="three-story-act-title">Macro Event</div>
+                <div class="three-story-act-sub">News shakes the market</div>
               </button>
-              <button type="button" class="three-story-act-btn" data-story-act="aftermath" data-cam="battle">
-                <div class="three-story-act-title">5. Aftermath</div>
-                <div class="three-story-act-sub">Kalman equilibrium</div>
+              <button type="button" class="three-story-act-btn" data-story-act="aftermath" data-cam="aftermath">
+                <div class="three-story-act-title">Aftermath</div>
+                <div class="three-story-act-sub">New balance forms</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="graveyard" data-cam="graveyard">
-                <div class="three-story-act-title">6. The Graveyard</div>
-                <div class="three-story-act-sub">Memory of past bars</div>
+                <div class="three-story-act-title">The Graveyard</div>
+                <div class="three-story-act-sub">History remains</div>
               </button>
-              <button type="button" class="three-story-act-btn" data-story-act="ahead" data-cam="forecast">
-                <div class="three-story-act-title">7. Looking Ahead</div>
-                <div class="three-story-act-sub">±1σ/±2σ &amp; Parallel Line</div>
+              <button type="button" class="three-story-act-btn" data-story-act="ahead" data-cam="ahead">
+                <div class="three-story-act-title">Looking Ahead</div>
+                <div class="three-story-act-sub">Uncertainty continues</div>
               </button>
             </div>
 
-            <!-- Camera Presets & Layer Toggles Row -->
-            <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;">
+            <!-- Minimal Director Action Row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
               <div class="three-dock-group">
-                <button class="three-dock-btn active" data-cam="overview" data-i18n="camOverview">Establishing Shot</button>
-                <button class="three-dock-btn" data-cam="battle" data-i18n="camBattle">1. The Arena</button>
-                <button class="three-dock-btn" data-cam="graveyard" data-i18n="camGraveyard">2. The Graveyard</button>
-                <button class="three-dock-btn" data-cam="manifold" data-i18n="camManifold">3. Deep Terrain</button>
-                <button class="three-dock-btn" data-cam="forecast" data-i18n="camForecast">4. Macro Sky</button>
-                <button class="three-dock-btn active" id="btn3dAutoCinema" title="Toggle Gentle Cinematic Camera Drift">🎥 Cinema Drift</button>
+                <button class="three-dock-btn active" id="btn3dAutoCinema" title="Continuous Cinematic Camera Director">🎬 Auto-Director</button>
+                <button class="three-dock-btn" id="btn3dPureCinemaToggle" title="Hide All Overlays for Pure Unobstructed 3D Movie">👁️ Pure Movie</button>
+                <button class="three-dock-btn" id="btnLeftNavMathMap" title="Inspect Documented 2D-to-3D Mathematical Mapping">📐 Math Mapping</button>
+              </div>
+              <div class="three-dock-group" style="display:none;">
+                <button class="three-dock-btn active" id="btn3dTerrain">MTF Terrain</button>
+                <button class="three-dock-btn active" id="btn3dCandles">Arena &amp; Graveyard</button>
+                <button class="three-dock-btn active" id="btn3dPlume">Macro Sky &amp; Plume</button>
+                <button class="three-dock-btn active" id="btn3dFlow">Atmospheric Wind</button>
+                <button class="three-dock-btn active" id="btn3dFullscreenToggle">⛶ Fullscreen</button>
               </div>
               <div class="three-dock-group">
-                <button class="three-dock-btn active" id="btn3dTerrain" data-i18n="layer3dTerrain">MTF Terrain</button>
-                <button class="three-dock-btn active" id="btn3dCandles" data-i18n="layer3dCandles">Arena &amp; Graveyard</button>
-                <button class="three-dock-btn active" id="btn3dPlume" data-i18n="layer3dPlume">Macro Sky &amp; Plume</button>
-                <button class="three-dock-btn active" id="btn3dFlow" data-i18n="layer3dFlow">Atmospheric Wind</button>
-              </div>
-              <div class="three-dock-group">
-                <button class="three-dock-btn active" id="btn3dFullscreenToggle" title="Toggle Fullscreen / Docked View">⛶ Fullscreen</button>
-                <button class="three-dock-btn gold-exit" id="btnExit3dWorld" data-i18n="btnReturn2d">↩ 2D Chart</button>
+                <button class="three-dock-btn gold-exit" id="btnExit3dWorld" data-i18n="btnReturn2d">↩ Return to 2D Chart</button>
               </div>
             </div>
           </div>
@@ -7942,6 +7855,7 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     const simFail = urlParams.get('simulateFailure') || '';
     const fixReplay = urlParams.get('fixtureReplay') || '';
     let apiPath = `/api/gold-forecast?interval=${encodeURIComponent(targetInterval)}&_t=${Date.now()}`;
+    if (force) apiPath += '&forceRefresh=1';
     if (simFail) apiPath += `&simulateFailure=${encodeURIComponent(simFail)}`;
     if (fixReplay) apiPath += `&fixtureReplay=${encodeURIComponent(fixReplay)}`;
     const apiUrl = buildApiUrl(apiPath);
@@ -8112,6 +8026,9 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     forecastData = haltedState;
     updateCircuitBreakerBanner(haltedState);
     updateDataReliabilityUI(transportReliability);
+    if (typeof updateThreeWorldData === 'function' && threeWorldState && threeWorldState.isInitialized) {
+      updateThreeWorldData(haltedState);
+    }
 
     const atmLabel = document.getElementById('atmStateLabel');
     const atmSub = document.getElementById('atmSubLabel');
@@ -12262,308 +12179,536 @@ function computeRealBullBearBattleMetrics(data, candles, meanVol) {
   };
 }
 
-// Build Stylized Architectural/Sculptural Bull Titan (9-part non-cartoonish bronze/gold sculpture, bottom-center pivot)
+// Helper: Create Beveled Armor Plate Geometry via ExtrudeGeometry
+function createBeveledArmorPlateGeo(THREE, width, height, depth, curveArch = 0.18) {
+  const shape = new THREE.Shape();
+  const hw = width * 0.5;
+  const hh = height * 0.5;
+  shape.moveTo(-hw, -hh);
+  shape.quadraticCurveTo(0, -hh - curveArch * height, hw, -hh);
+  shape.lineTo(hw * 0.88, hh);
+  shape.quadraticCurveTo(0, hh + curveArch * height, -hw * 0.88, hh);
+  shape.closePath();
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    steps: 1,
+    depth: depth,
+    bevelEnabled: true,
+    bevelThickness: Math.min(width, height) * 0.14,
+    bevelSize: Math.min(width, height) * 0.12,
+    bevelSegments: 3,
+  });
+  geo.center();
+  return geo;
+}
+
+// Build High-Craft Anatomical & Armored Bull Titan (Forged 24K Gold & Molten Magma Veins, Matches Reference Artwork)
 function buildBullTitanGroup(THREE, bullStrength, isSoftwareGl) {
   const group = new THREE.Group();
 
-  const bronzeMat = new THREE.MeshStandardMaterial({
-    color: 0xc99e48,
-    emissive: 0x3a2608,
-    emissiveIntensity: 0.32,
-    roughness: 0.34,
-    metalness: 0.84,
+  const MatClass = THREE.MeshPhysicalMaterial || THREE.MeshStandardMaterial;
+  const forgedGoldMat = new MatClass({
+    color: 0xf6d365,
+    emissive: 0x593806,
+    emissiveIntensity: 0.42 + bullStrength * 0.28,
+    roughness: 0.19,
+    metalness: 0.94,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.18,
   });
-  const armorMat = new THREE.MeshStandardMaterial({
-    color: 0xf5d76e,
-    emissive: 0x5c420e,
-    emissiveIntensity: 0.42,
-    roughness: 0.20,
-    metalness: 0.92,
+  const antiqueBronzeMat = new MatClass({
+    color: 0x9c7228,
+    emissive: 0x2e1c04,
+    emissiveIntensity: 0.30,
+    roughness: 0.32,
+    metalness: 0.88,
   });
-  const darkBronzeMat = new THREE.MeshStandardMaterial({
-    color: 0x4a3818,
-    roughness: 0.58,
-    metalness: 0.68,
+  const darkUnderArmorMat = new THREE.MeshStandardMaterial({
+    color: 0x3b2810,
+    emissive: 0x1c1004,
+    emissiveIntensity: 0.25,
+    roughness: 0.48,
+    metalness: 0.76,
   });
-  const hornMat = new THREE.MeshStandardMaterial({
-    color: 0xfff3c4,
-    emissive: 0xf5d76e,
-    emissiveIntensity: 0.85 + bullStrength * 0.65,
-    roughness: 0.14,
-    metalness: 0.96,
+  const hornGoldMat = new MatClass({
+    color: 0xfff5cc,
+    emissive: 0xffb300,
+    emissiveIntensity: 0.95 + bullStrength * 0.75,
+    roughness: 0.12,
+    metalness: 0.97,
+    clearcoat: 0.85,
   });
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: 0x00e676,
-    emissive: 0x00e676,
-    emissiveIntensity: 1.15 + bullStrength * 1.1,
-    roughness: 0.15,
-    metalness: 0.35,
+  const moltenVeinMat = new THREE.MeshStandardMaterial({
+    color: 0xffdf70,
+    emissive: 0xff6d00,
+    emissiveIntensity: 1.85 + bullStrength * 1.4,
+    roughness: 0.10,
+    metalness: 0.25,
   });
 
-  // 1. Grounded Basal Plinth
-  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.12, 0.22, 16), darkBronzeMat);
-  plinth.position.y = 0.11;
-  group.add(plinth);
+  // 1. Shattered Obsidian & Molten Gold Impact Hoof Rings on the Arena Floor
+  const impactRingGeo = new THREE.RingGeometry(0.45, 1.45, 24);
+  impactRingGeo.rotateX(-Math.PI / 2);
+  const impactRing = new THREE.Mesh(
+    impactRingGeo,
+    new THREE.MeshBasicMaterial({
+      color: 0xffab00,
+      transparent: true,
+      opacity: 0.48 + bullStrength * 0.3,
+      side: THREE.DoubleSide,
+    })
+  );
+  impactRing.position.set(0.15, 0.03, 0);
+  group.add(impactRing);
 
-  // 2. Braced Forelimbs & Hind-pillars
-  const legGeo = new THREE.BoxGeometry(0.24, 0.95, 0.28);
-  const flLeg = new THREE.Mesh(legGeo, darkBronzeMat);
-  flLeg.position.set(0.38, 0.62, 0.34);
-  flLeg.rotation.z = -0.18;
-  group.add(flLeg);
+  // 2. Inner Glowing Molten Magma Core & Rib-Furnace (Visible through armor gaps)
+  const innerCore = new THREE.Mesh(new THREE.SphereGeometry(0.68, 18, 16), moltenVeinMat);
+  innerCore.scale.set(1.75, 1.05, 1.02);
+  innerCore.position.set(0.15, 1.48, 0);
+  group.add(innerCore);
 
-  const frLeg = new THREE.Mesh(legGeo, darkBronzeMat);
-  frLeg.position.set(0.38, 0.62, -0.34);
-  frLeg.rotation.z = -0.18;
-  group.add(frLeg);
+  // 3. Sculpted Muscular Torso, Chest & Haunches
+  const chestMesh = new THREE.Mesh(new THREE.SphereGeometry(0.78, 22, 18), antiqueBronzeMat);
+  chestMesh.scale.set(1.35, 1.18, 1.12);
+  chestMesh.position.set(0.42, 1.52, 0);
+  if (!isSoftwareGl) chestMesh.castShadow = true;
+  group.add(chestMesh);
 
-  const blLeg = new THREE.Mesh(legGeo, darkBronzeMat);
-  blLeg.position.set(-0.48, 0.58, 0.30);
-  blLeg.rotation.z = 0.22;
-  group.add(blLeg);
+  const bellyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.56, 1.55, 18), darkUnderArmorMat);
+  bellyMesh.rotation.z = Math.PI / 2 - 0.14;
+  bellyMesh.position.set(-0.15, 1.38, 0);
+  group.add(bellyMesh);
 
-  const brLeg = new THREE.Mesh(legGeo, darkBronzeMat);
-  brLeg.position.set(-0.48, 0.58, -0.30);
-  brLeg.rotation.z = 0.22;
-  group.add(brLeg);
+  const haunchMesh = new THREE.Mesh(new THREE.SphereGeometry(0.68, 20, 16), antiqueBronzeMat);
+  haunchMesh.scale.set(1.22, 1.12, 1.04);
+  haunchMesh.position.set(-0.82, 1.42, 0);
+  if (!isSoftwareGl) haunchMesh.castShadow = true;
+  group.add(haunchMesh);
 
-  // 3. Heavy Forward-Charging Torso & Rib Cage
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.88, 0.92), bronzeMat);
-  torso.position.set(-0.05, 1.25, 0);
-  torso.rotation.z = -0.12;
-  if (!isSoftwareGl) torso.castShadow = true;
-  group.add(torso);
+  // 4. Layered Beveled 24K Gold Armor Plates Across Shoulder Hump, Ribs & Flanks
+  const shoulderArmorGeo = createBeveledArmorPlateGeo(THREE, 1.15, 1.12, 0.18, 0.22);
+  for (let side of [-1, 1]) {
+    const sPlate = new THREE.Mesh(shoulderArmorGeo, forgedGoldMat);
+    sPlate.position.set(0.48, 1.72, side * 0.52);
+    sPlate.rotation.set(side * 0.32, side * 0.24, -0.28);
+    if (!isSoftwareGl) sPlate.castShadow = true;
+    group.add(sPlate);
 
-  // 4. Broad Armored Shoulder Mantle (Hump)
-  const shoulder = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.96, 1.08), armorMat);
-  shoulder.position.set(0.35, 1.52, 0);
-  shoulder.rotation.z = -0.22;
-  if (!isSoftwareGl) shoulder.castShadow = true;
-  group.add(shoulder);
+    // Glowing Filigree Seam under Shoulder Plate
+    const seamTube = new THREE.Mesh(
+      new THREE.TorusGeometry(0.54, 0.032, 8, 24, Math.PI * 1.15),
+      moltenVeinMat
+    );
+    seamTube.position.set(0.48, 1.65, side * 0.58);
+    seamTube.rotation.y = side * 0.2;
+    group.add(seamTube);
+  }
 
-  // 5. Glowing Molten Emerald-Gold Heart Core
-  const heartCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.34, 1), coreMat);
-  heartCore.position.set(0.45, 1.32, 0);
-  group.add(heartCore);
+  // Massive Cervical Neck Hump Armor Crest (5 Overlapping Golden Plates)
+  for (let p = 0; p < 5; p++) {
+    const t = p / 4;
+    const crestPlateGeo = createBeveledArmorPlateGeo(THREE, 0.52 - t * 0.14, 0.42, 0.92 - t * 0.22, 0.16);
+    const crestPlate = new THREE.Mesh(crestPlateGeo, forgedGoldMat);
+    crestPlate.position.set(0.68 - p * 0.34, 2.18 - p * 0.11, 0);
+    crestPlate.rotation.z = -0.35 + p * 0.12;
+    if (!isSoftwareGl) crestPlate.castShadow = true;
+    group.add(crestPlate);
+  }
 
-  // 6. Sculpted Lowered Charging Head Group
+  // Ribcage Segmented Golden Flank Plates (4 ribs per side with glowing magma veins between them)
+  for (let r = 0; r < 4; r++) {
+    for (let side of [-1, 1]) {
+      const ribGeo = createBeveledArmorPlateGeo(THREE, 0.22, 0.78 - r * 0.06, 0.12, 0.14);
+      const ribMesh = new THREE.Mesh(ribGeo, forgedGoldMat);
+      ribMesh.position.set(0.05 - r * 0.24, 1.38 - r * 0.02, side * (0.64 - r * 0.03));
+      ribMesh.rotation.set(side * 0.22, side * 0.12, 0.24);
+      group.add(ribMesh);
+    }
+  }
+
+  // 5. Articulated Muscular Forelegs & Hindlegs with Cloven Golden Hooves
+  const buildBullLeg = (x, z, isFront, isPawing) => {
+    const legGrp = new THREE.Group();
+    legGrp.position.set(x, 1.18, z);
+
+    const upperLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.19, 0.72, 14), antiqueBronzeMat);
+    upperLeg.position.set(0, -0.24, 0);
+    upperLeg.rotation.z = isFront ? (isPawing ? 0.48 : -0.28) : 0.34;
+    legGrp.add(upperLeg);
+
+    const kneeJoint = new THREE.Mesh(new THREE.SphereGeometry(0.21, 12, 12), forgedGoldMat);
+    kneeJoint.position.set(isFront ? (isPawing ? 0.22 : -0.12) : -0.14, -0.58, 0);
+    legGrp.add(kneeJoint);
+
+    const lowerLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.65, 12), forgedGoldMat);
+    lowerLeg.position.set(isFront ? (isPawing ? 0.18 : 0.02) : -0.26, -0.88, 0);
+    lowerLeg.rotation.z = isFront ? (isPawing ? -0.35 : 0.18) : -0.22;
+    legGrp.add(lowerLeg);
+
+    const hoof = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.24, 0.22, 8), hornGoldMat);
+    hoof.position.set(isFront ? (isPawing ? 0.08 : 0.08) : -0.32, isPawing ? -1.04 : -1.12, 0);
+    legGrp.add(hoof);
+
+    return legGrp;
+  };
+
+  const flLegGrp = buildBullLeg(0.65, 0.44, true, true);
+  const frLegGrp = buildBullLeg(0.58, -0.44, true, false);
+  const blLegGrp = buildBullLeg(-0.82, 0.38, false, false);
+  const brLegGrp = buildBullLeg(-0.88, -0.38, false, false);
+  group.add(flLegGrp, frLegGrp, blLegGrp, brLegGrp);
+
+  // 6. Sculpted Lowered Charging Bull Head, Armored Snout, Blazing Eyes & Sweeping Curved 3D Horns
   const headGroup = new THREE.Group();
-  headGroup.position.set(0.92, 1.36, 0);
-  headGroup.rotation.z = -0.32;
+  headGroup.position.set(1.18, 1.54, 0);
+  headGroup.rotation.z = -0.36;
 
-  const skull = new THREE.Mesh(new THREE.ConeGeometry(0.46, 0.92, 6), armorMat);
-  skull.rotation.z = -Math.PI / 2;
-  headGroup.add(skull);
+  // Cranium & Forehead Shield Plate
+  const cranium = new THREE.Mesh(new THREE.DodecahedronGeometry(0.46, 1), antiqueBronzeMat);
+  cranium.scale.set(1.25, 0.95, 1.05);
+  headGroup.add(cranium);
 
-  // 7. Sweeping Crescent Gold Horns (Left & Right)
-  const hornGeo = new THREE.ConeGeometry(0.11, 1.05, 8);
-  const leftHorn = new THREE.Mesh(hornGeo, hornMat);
-  leftHorn.position.set(0.18, 0.36, 0.42);
-  leftHorn.rotation.set(0.48, 0.15, -0.85);
-  headGroup.add(leftHorn);
+  const foreheadPlate = new THREE.Mesh(createBeveledArmorPlateGeo(THREE, 0.62, 0.46, 0.58, 0.15), forgedGoldMat);
+  foreheadPlate.position.set(0.12, 0.18, 0);
+  foreheadPlate.rotation.z = -0.42;
+  headGroup.add(foreheadPlate);
 
-  const rightHorn = new THREE.Mesh(hornGeo, hornMat);
-  rightHorn.position.set(0.18, 0.36, -0.42);
-  rightHorn.rotation.set(-0.48, -0.15, -0.85);
-  headGroup.add(rightHorn);
+  // Tapered Armored Snout & Nostrils
+  const snoutMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.38, 0.72, 8), forgedGoldMat);
+  snoutMesh.rotation.z = -Math.PI / 2 - 0.18;
+  snoutMesh.position.set(0.46, -0.08, 0);
+  headGroup.add(snoutMesh);
+
+  // Glowing Molten Nostrils & Blazing Eyes
+  for (let side of [-1, 1]) {
+    const eyeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 10), moltenVeinMat);
+    eyeMesh.scale.set(1.4, 0.8, 1.0);
+    eyeMesh.position.set(0.22, 0.08, side * 0.36);
+    headGroup.add(eyeMesh);
+
+    const nostrilMesh = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), moltenVeinMat);
+    nostrilMesh.position.set(0.76, -0.14, side * 0.14);
+    headGroup.add(nostrilMesh);
+
+    // Sweeping Curved 3D Bull Horn (CatmullRomCurve3 + TubeGeometry + Segmented Rings)
+    const hornCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.02, 0.24, side * 0.34),
+      new THREE.Vector3(-0.08, 0.42, side * 0.82),
+      new THREE.Vector3(0.28, 0.62, side * 1.12),
+      new THREE.Vector3(0.82, 0.78, side * 0.86),
+      new THREE.Vector3(1.18, 0.96, side * 0.48),
+    ]);
+    const hornTube = new THREE.Mesh(new THREE.TubeGeometry(hornCurve, 24, 0.13, 12, false), hornGoldMat);
+    headGroup.add(hornTube);
+
+    const hornTip = new THREE.Mesh(new THREE.ConeGeometry(0.125, 0.48, 12), hornGoldMat);
+    hornTip.position.set(1.34, 1.04, side * 0.36);
+    hornTip.rotation.set(side * -0.45, 0, -1.15);
+    headGroup.add(hornTip);
+  }
 
   group.add(headGroup);
 
-  // 8. Dorsal Spine Crest Plates
-  for (let s = 0; s < 3; s++) {
-    const crest = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.28, 0.16), hornMat);
-    crest.position.set(-0.45 + s * 0.36, 1.82 - s * 0.06, 0);
-    crest.rotation.z = 0.25;
-    group.add(crest);
-  }
+  // 7. Dynamic Whipping Armored Tail
+  const tailCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-1.32, 1.55, 0),
+    new THREE.Vector3(-1.78, 1.82, 0.18),
+    new THREE.Vector3(-2.15, 2.24, -0.14),
+    new THREE.Vector3(-2.38, 2.58, 0.08),
+  ]);
+  const tailMesh = new THREE.Mesh(new THREE.TubeGeometry(tailCurve, 16, 0.065, 8, false), forgedGoldMat);
+  group.add(tailMesh);
 
   group.userData = {
     headGroup,
-    heartCore,
-    hornMat,
-    coreMat,
-    armorMat,
+    heartCore: innerCore,
+    flLegGrp,
+    hornMat: hornGoldMat,
+    coreMat: moltenVeinMat,
+    armorMat: forgedGoldMat,
   };
   return group;
 }
 
-// Build Stylized Architectural/Sculptural Bear Titan (9-part forged iron & crimson obsidian sculpture, bottom-center pivot)
+// Build High-Craft Anatomical & Armored Bear Titan (Forged Dark Steel, Bronze Trim & Crimson/Lightning Veins, Matches Reference Artwork)
 function buildBearTitanGroup(THREE, bearStrength, isSoftwareGl) {
   const group = new THREE.Group();
 
-  const ironMat = new THREE.MeshStandardMaterial({
-    color: 0x262b38,
-    emissive: 0x1a050a,
-    emissiveIntensity: 0.35,
-    roughness: 0.42,
-    metalness: 0.78,
+  const MatClass = THREE.MeshPhysicalMaterial || THREE.MeshStandardMaterial;
+  const darkSteelMat = new MatClass({
+    color: 0x262d3d,
+    emissive: 0x12060c,
+    emissiveIntensity: 0.38,
+    roughness: 0.25,
+    metalness: 0.89,
+    clearcoat: 0.55,
+    clearcoatRoughness: 0.22,
   });
-  const carapaceMat = new THREE.MeshStandardMaterial({
-    color: 0x3b1d2e,
-    emissive: 0x380612,
-    emissiveIntensity: 0.45,
-    roughness: 0.26,
-    metalness: 0.86,
+  const oxidizedBronzeMat = new MatClass({
+    color: 0x8a6432,
+    emissive: 0x291504,
+    emissiveIntensity: 0.34,
+    roughness: 0.28,
+    metalness: 0.90,
   });
-  const darkObsidianMat = new THREE.MeshStandardMaterial({
-    color: 0x141722,
-    roughness: 0.64,
-    metalness: 0.56,
+  const obsidianFurMat = new THREE.MeshStandardMaterial({
+    color: 0x151924,
+    roughness: 0.54,
+    metalness: 0.68,
   });
-  const clawMat = new THREE.MeshStandardMaterial({
-    color: 0xff5252,
+  const crimsonVeinMat = new THREE.MeshStandardMaterial({
+    color: 0xff3d5a,
     emissive: 0xff1744,
-    emissiveIntensity: 0.90 + bearStrength * 0.75,
-    roughness: 0.16,
-    metalness: 0.92,
-  });
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: 0xff1744,
-    emissive: 0xff1744,
-    emissiveIntensity: 1.2 + bearStrength * 1.15,
-    roughness: 0.18,
+    emissiveIntensity: 1.65 + bearStrength * 1.35,
+    roughness: 0.14,
     metalness: 0.35,
   });
+  const electricVeinMat = new THREE.MeshStandardMaterial({
+    color: 0x80d8ff,
+    emissive: 0x00b0ff,
+    emissiveIntensity: 1.35 + bearStrength * 0.95,
+    roughness: 0.14,
+    metalness: 0.4,
+  });
+  const fangClawMat = new MatClass({
+    color: 0xf4ece1,
+    emissive: 0xff5252,
+    emissiveIntensity: 0.55 + bearStrength * 0.55,
+    roughness: 0.15,
+    metalness: 0.92,
+  });
 
-  // 1. Grounded Basal Plinth
-  const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.18, 0.22, 16), darkObsidianMat);
-  plinth.position.y = 0.11;
-  group.add(plinth);
+  // 1. Shattered Crimson & Frost Impact Ring on the Arena Floor
+  const impactRingGeo = new THREE.RingGeometry(0.5, 1.55, 24);
+  impactRingGeo.rotateX(-Math.PI / 2);
+  const impactRing = new THREE.Mesh(
+    impactRingGeo,
+    new THREE.MeshBasicMaterial({
+      color: 0xff1744,
+      transparent: true,
+      opacity: 0.46 + bearStrength * 0.32,
+      side: THREE.DoubleSide,
+    })
+  );
+  impactRing.position.set(-0.15, 0.03, 0);
+  group.add(impactRing);
 
-  // 2. Planted Hind Pillars
-  const legGeo = new THREE.BoxGeometry(0.34, 1.05, 0.36);
-  const lLeg = new THREE.Mesh(legGeo, darkObsidianMat);
-  lLeg.position.set(0.25, 0.65, 0.38);
-  group.add(lLeg);
-
-  const rLeg = new THREE.Mesh(legGeo, darkObsidianMat);
-  rLeg.position.set(0.25, 0.65, -0.38);
-  group.add(rLeg);
-
-  // 3. Towering Hunched Torso Monolith
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(1.28, 1.55, 1.12), ironMat);
-  torso.position.set(0.05, 1.48, 0);
-  torso.rotation.z = 0.22;
-  if (!isSoftwareGl) torso.castShadow = true;
-  group.add(torso);
-
-  // 4. Massive Dorsal Carapace Mantle
-  const mantle = new THREE.Mesh(new THREE.DodecahedronGeometry(0.76, 0), carapaceMat);
-  mantle.position.set(-0.12, 2.12, 0);
-  mantle.scale.set(1.15, 0.95, 1.18);
-  if (!isSoftwareGl) mantle.castShadow = true;
-  group.add(mantle);
-
-  // 5. Smoldering Crimson Furnace Core
-  const furnaceCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.36, 1), coreMat);
-  furnaceCore.position.set(-0.48, 1.62, 0);
+  // 2. Massive Hunched Bear Torso, Chest & glowing Crimson Furnace Core
+  const furnaceCore = new THREE.Mesh(new THREE.SphereGeometry(0.72, 18, 16), crimsonVeinMat);
+  furnaceCore.scale.set(1.45, 1.25, 1.15);
+  furnaceCore.position.set(-0.22, 1.65, 0);
   group.add(furnaceCore);
 
-  // 6. Angular Iron Cranium & Brow
+  const chestMonolith = new THREE.Mesh(new THREE.SphereGeometry(0.88, 22, 18), darkSteelMat);
+  chestMonolith.scale.set(1.32, 1.36, 1.24);
+  chestMonolith.position.set(-0.15, 1.72, 0);
+  if (!isSoftwareGl) chestMonolith.castShadow = true;
+  group.add(chestMonolith);
+
+  const hindHaunch = new THREE.Mesh(new THREE.SphereGeometry(0.82, 20, 16), obsidianFurMat);
+  hindHaunch.scale.set(1.28, 1.18, 1.15);
+  hindHaunch.position.set(0.68, 1.28, 0);
+  if (!isSoftwareGl) hindHaunch.castShadow = true;
+  group.add(hindHaunch);
+
+  // 3. Layered Pauldron Shoulder Armor & Dorsal Carapace Plates with Bronze Trim
+  const pauldronGeo = createBeveledArmorPlateGeo(THREE, 1.24, 1.18, 0.20, 0.24);
+  for (let side of [-1, 1]) {
+    const pauldron = new THREE.Mesh(pauldronGeo, darkSteelMat);
+    pauldron.position.set(-0.32, 1.92, side * 0.68);
+    pauldron.rotation.set(side * -0.34, side * -0.22, 0.32);
+    if (!isSoftwareGl) pauldron.castShadow = true;
+    group.add(pauldron);
+
+    const bronzeRim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.58, 0.042, 8, 24, Math.PI * 1.2),
+      oxidizedBronzeMat
+    );
+    bronzeRim.position.set(-0.32, 1.88, side * 0.75);
+    bronzeRim.rotation.y = side * -0.22;
+    group.add(bronzeRim);
+
+    const lightningSeam = new THREE.Mesh(
+      new THREE.TorusGeometry(0.46, 0.026, 6, 20, Math.PI),
+       side > 0 ? crimsonVeinMat : electricVeinMat
+    );
+    lightningSeam.position.set(-0.36, 1.84, side * 0.77);
+    group.add(lightningSeam);
+  }
+
+  // Spiked Dorsal Carapace Plates along the Bear's Spine
+  for (let d = 0; d < 5; d++) {
+    const dPlateGeo = createBeveledArmorPlateGeo(THREE, 0.56 - d * 0.06, 0.44, 0.98 - d * 0.12, 0.18);
+    const dPlate = new THREE.Mesh(dPlateGeo, d % 2 === 0 ? darkSteelMat : oxidizedBronzeMat);
+    dPlate.position.set(-0.48 + d * 0.34, 2.42 - d * 0.16, 0);
+    dPlate.rotation.z = 0.36 + d * 0.08;
+    group.add(dPlate);
+  }
+
+  // 4. Planted Hind Pillars & Armored Paws
+  for (let side of [-1, 1]) {
+    const hLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.28, 1.15, 14), darkSteelMat);
+    hLeg.position.set(0.58, 0.68, side * 0.48);
+    hLeg.rotation.z = -0.18;
+    group.add(hLeg);
+
+    const hPaw = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.24, 0.38), oxidizedBronzeMat);
+    hPaw.position.set(0.42, 0.12, side * 0.48);
+    group.add(hPaw);
+  }
+
+  // 5. Ferocious Roaring Bear Head, Articulated Open Fanged Jaw, Armored Brow & Glowing Crimson Eyes
   const headGroup = new THREE.Group();
-  headGroup.position.set(-0.68, 2.18, 0);
-  headGroup.rotation.z = 0.28;
+  headGroup.position.set(-1.12, 2.04, 0);
+  headGroup.rotation.z = 0.18;
 
-  const skull = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.56, 0.64), carapaceMat);
-  headGroup.add(skull);
+  const skullMesh = new THREE.Mesh(new THREE.SphereGeometry(0.52, 18, 16), darkSteelMat);
+  skullMesh.scale.set(1.22, 1.05, 1.08);
+  headGroup.add(skullMesh);
 
-  const snout = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.34, 0.42), ironMat);
-  snout.position.set(-0.42, -0.08, 0);
-  headGroup.add(snout);
+  const browArmor = new THREE.Mesh(createBeveledArmorPlateGeo(THREE, 0.58, 0.38, 0.66, 0.16), oxidizedBronzeMat);
+  browArmor.position.set(-0.18, 0.28, 0);
+  browArmor.rotation.z = 0.45;
+  headGroup.add(browArmor);
 
-  const brow = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.16, 0.68), clawMat);
-  brow.position.set(-0.26, 0.22, 0);
-  headGroup.add(brow);
+  // Upper Snout & Nose Bridge
+  const upperJaw = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.28, 0.48), darkSteelMat);
+  upperJaw.position.set(-0.48, 0.04, 0);
+  upperJaw.rotation.z = 0.08;
+  headGroup.add(upperJaw);
+
+  // Roaring Open Lower Jaw + Glowing Throat Furnace + Razor Fangs
+  const lowerJaw = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.20, 0.42), obsidianFurMat);
+  lowerJaw.position.set(-0.44, -0.26, 0);
+  lowerJaw.rotation.z = 0.48;
+  headGroup.add(lowerJaw);
+
+  const throatGlow = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), crimsonVeinMat);
+  throatGlow.position.set(-0.34, -0.10, 0);
+  headGroup.add(throatGlow);
+
+  for (let side of [-1, 1]) {
+    // Upper & Lower Canine Fangs
+    const uFang = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.22, 8), fangClawMat);
+    uFang.position.set(-0.68, -0.10, side * 0.16);
+    uFang.rotation.z = Math.PI;
+    headGroup.add(uFang);
+
+    const lFang = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.20, 8), fangClawMat);
+    lFang.position.set(-0.62, -0.22, side * 0.14);
+    lFang.rotation.z = -0.35;
+    headGroup.add(lFang);
+
+    // Blazing Crimson Eye & Rounded Armored Bear Ear
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 10), crimsonVeinMat);
+    eye.position.set(-0.34, 0.16, side * 0.36);
+    headGroup.add(eye);
+
+    const ear = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.10, 12), oxidizedBronzeMat);
+    ear.rotation.z = Math.PI / 2;
+    ear.position.set(0.08, 0.44, side * 0.38);
+    headGroup.add(ear);
+  }
   group.add(headGroup);
 
-  // 7. Raised Striking Fore-Arms & Crimson Claws
-  const leftArmGroup = new THREE.Group();
-  leftArmGroup.position.set(-0.35, 1.85, 0.64);
-  const armMeshL = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.36, 0.34), carapaceMat);
-  armMeshL.position.set(-0.35, -0.1, 0);
-  armMeshL.rotation.z = 0.38;
-  leftArmGroup.add(armMeshL);
-  const clawL = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.58, 5), clawMat);
-  clawL.position.set(-0.78, -0.35, 0);
-  clawL.rotation.z = 2.4;
-  leftArmGroup.add(clawL);
-  group.add(leftArmGroup);
+  // 6. Articulated Swiping Forearms & 5-Clawed Razor Paws (Left & Right)
+  const buildBearArm = (side) => {
+    const armGrp = new THREE.Group();
+    armGrp.position.set(-0.48, 1.72, side * 0.72);
 
-  const rightArmGroup = new THREE.Group();
-  rightArmGroup.position.set(-0.35, 1.85, -0.64);
-  const armMeshR = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.36, 0.34), carapaceMat);
-  armMeshR.position.set(-0.35, -0.1, 0);
-  armMeshR.rotation.z = 0.38;
-  rightArmGroup.add(armMeshR);
-  const clawR = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.58, 5), clawMat);
-  clawR.position.set(-0.78, -0.35, 0);
-  clawR.rotation.z = 2.4;
-  rightArmGroup.add(clawR);
-  group.add(rightArmGroup);
+    const bicep = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.28, 0.82, 14), darkSteelMat);
+    bicep.position.set(-0.32, -0.22, 0);
+    bicep.rotation.z = -0.78;
+    armGrp.add(bicep);
+
+    const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.24, 0.76, 14), oxidizedBronzeMat);
+    forearm.position.set(-0.78, -0.48, side * -0.08);
+    forearm.rotation.z = -1.12;
+    armGrp.add(forearm);
+
+    const paw = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), darkSteelMat);
+    paw.scale.set(1.25, 0.75, 1.15);
+    paw.position.set(-1.12, -0.58, side * -0.12);
+    armGrp.add(paw);
+
+    // 4 Curved Razor Claws per Paw
+    for (let c = -1.5; c <= 1.5; c += 1.0) {
+      const clawCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-1.26, -0.54, side * -0.12 + c * 0.08),
+        new THREE.Vector3(-1.52, -0.58, side * -0.12 + c * 0.09),
+        new THREE.Vector3(-1.68, -0.74, side * -0.12 + c * 0.09),
+      ]);
+      const clawMesh = new THREE.Mesh(new THREE.TubeGeometry(clawCurve, 10, 0.032, 6, false), fangClawMat);
+      armGrp.add(clawMesh);
+    }
+    return armGrp;
+  };
+
+  const leftArmGroup = buildBearArm(1);
+  const rightArmGroup = buildBearArm(-1);
+  group.add(leftArmGroup, rightArmGroup);
 
   group.userData = {
     headGroup,
     leftArmGroup,
     rightArmGroup,
     furnaceCore,
-    clawMat,
-    coreMat,
+    clawMat: fangClawMat,
+    coreMat: crimsonVeinMat,
   };
   return group;
 }
 
-// Build Fallen Kneeling/Broken Silhouette for The Graveyard (Recent Past)
+// Build Fallen Titan Relic & Sword Monument for The Graveyard (Recent Past)
 function buildFallenSilhouetteGroup(THREE, defeatedSide, ageRatio, volRatio) {
   const group = new THREE.Group();
   const isFallenBull = defeatedSide === 'BULL';
-  const fadeAlpha = Math.max(0.14, Number((0.82 * (1.0 - ageRatio * 0.78)).toFixed(2)));
+  const fadeAlpha = Math.max(0.22, Number((0.88 * (1.0 - ageRatio * 0.72)).toFixed(2)));
 
   const relicMat = new THREE.MeshStandardMaterial({
-    color: isFallenBull ? 0x6e5a32 : 0x3b232e,
-    emissive: isFallenBull ? 0x241a08 : 0x1f0810,
-    emissiveIntensity: 0.22 * (1.0 - ageRatio * 0.7),
-    roughness: 0.72,
-    metalness: 0.42,
+    color: isFallenBull ? 0x7a6234 : 0x362430,
+    emissive: isFallenBull ? 0x2e2008 : 0x240812,
+    emissiveIntensity: 0.28 * (1.0 - ageRatio * 0.65),
+    roughness: 0.62,
+    metalness: 0.58,
     transparent: true,
     opacity: fadeAlpha,
   });
 
   const accentMat = new THREE.MeshStandardMaterial({
-    color: isFallenBull ? 0xc2a25a : 0x9e3648,
+    color: isFallenBull ? 0xd9b358 : 0xb83b52,
     emissive: isFallenBull ? 0xf5d76e : 0xff1744,
-    emissiveIntensity: 0.38 * (1.0 - ageRatio * 0.8),
-    roughness: 0.45,
-    metalness: 0.68,
+    emissiveIntensity: 0.46 * (1.0 - ageRatio * 0.75),
+    roughness: 0.35,
+    metalness: 0.78,
     transparent: true,
     opacity: fadeAlpha,
   });
 
-  // Weathered Grave Mound Base
-  const mound = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.62, 0.16, 10), relicMat);
-  mound.position.y = 0.08;
+  // Cracked Stone & Ash Grave Mound
+  const mound = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.78, 0.22, 12), relicMat);
+  mound.position.y = 0.11;
   group.add(mound);
 
-  // Kneeling / Bowed Torso Silhouette
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.48, 0.44), relicMat);
-  body.position.set(0, 0.34, 0);
-  body.rotation.z = isFallenBull ? -0.42 : 0.42;
-  body.rotation.x = 0.18;
+  // Fallen Armored Pauldron & Rib Carcass
+  const body = new THREE.Mesh(new THREE.DodecahedronGeometry(0.46, 0), relicMat);
+  body.scale.set(1.35, 0.82, 0.95);
+  body.position.set(0, 0.38, 0);
+  body.rotation.z = isFallenBull ? -0.38 : 0.38;
   group.add(body);
 
-  // Bowed / Fractured Head & Horn or Carapace Crest
-  const head = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.46, 5), accentMat);
-  head.position.set(isFallenBull ? 0.28 : -0.28, 0.26, 0.08);
-  head.rotation.z = isFallenBull ? -1.15 : 1.15;
-  group.add(head);
-
-  // Memorial Stele Obelisk behind the fallen fighter
-  const steleH = 0.65 + Math.min(0.65, volRatio * 0.28);
-  const stele = new THREE.Mesh(new THREE.BoxGeometry(0.14, steleH, 0.26), accentMat);
-  stele.position.set(0, steleH * 0.5, -0.32);
-  stele.rotation.z = (ageRatio - 0.3) * 0.16;
+  // Planted Greatsword / Ruined Obelisk Blade sticking out of the Battleground (Matches Graveyard Reference Frame)
+  const steleH = 0.95 + Math.min(0.85, volRatio * 0.38);
+  const stele = new THREE.Mesh(new THREE.BoxGeometry(0.12, steleH, 0.28), accentMat);
+  stele.position.set(0, steleH * 0.5, -0.28);
+  stele.rotation.z = (ageRatio - 0.35) * 0.22;
   group.add(stele);
 
-  const scale = 0.78 + Math.min(0.32, volRatio * 0.14);
+  const crossGuard = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.08, 0.14), accentMat);
+  crossGuard.position.set(0, steleH * 0.76, -0.28);
+  crossGuard.rotation.z = (ageRatio - 0.35) * 0.22;
+  group.add(crossGuard);
+
+  const scale = 0.85 + Math.min(0.38, volRatio * 0.16);
   group.scale.setScalar(scale);
   return { group, stele };
 }
@@ -12577,7 +12722,7 @@ function initThreeGlobeWorld() {
   _dummyObj = new THREE.Object3D();
   _tmpVec3 = new THREE.Vector3();
   _tmpColor = new THREE.Color();
-  _bullColor = new THREE.Color(0x00e676);
+  _bullColor = new THREE.Color(0xf5d76e);
   _bearColor = new THREE.Color(0xff1744);
   _goldColor = new THREE.Color(0xf5d76e);
 
@@ -12587,14 +12732,14 @@ function initThreeGlobeWorld() {
   const aspect = w / h;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050912);
-  scene.fog = new THREE.FogExp2(0x050912, 0.0105);
+  scene.background = new THREE.Color(0x070910);
+  scene.fog = new THREE.FogExp2(0x080a12, 0.0082);
 
-  const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 450);
-  const initCam = getResponsiveOverviewCamera(aspect);
-  camera.position.set(initCam.pos[0], initCam.pos[1], initCam.pos[2]);
+  // Start directly in Heroic Arena Movie Framing (Matches Reference Image)
+  const camera = new THREE.PerspectiveCamera(42, aspect, 0.1, 480);
+  camera.position.set(4.0, 5.2, aspect < 1 ? 15.5 : 10.6);
 
-  let renderer;
+  let renderer = null;
   try {
     renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -12602,7 +12747,17 @@ function initThreeGlobeWorld() {
       powerPreference: 'high-performance',
     });
   } catch (e) {
-    renderer = new THREE.WebGLRenderer({ antialias: false });
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: false });
+    } catch (err2) {
+      const haltedOverlay = document.getElementById('threeHaltedOverlay');
+      const titleEl = document.getElementById('threeHaltedTitle');
+      const subEl = document.getElementById('threeHaltedSub') || document.getElementById('threeHaltedBody');
+      if (haltedOverlay) haltedOverlay.classList.remove('hidden');
+      if (titleEl) titleEl.textContent = 'WEBGL INITIALIZATION FAILED — 3D RENDERER UNAVAILABLE';
+      if (subEl) subEl.textContent = `Browser or hardware blocked WebGL context creation (${err2?.message || 'WebGL error'}). Return to the 2D chart or enable hardware acceleration.`;
+      return;
+    }
   }
 
   let isSoftwareGl = false;
@@ -12616,7 +12771,7 @@ function initThreeGlobeWorld() {
 
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.24;
+  renderer.toneMappingExposure = 1.32;
   renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(w, h);
   renderer.shadowMap.enabled = !isSoftwareGl;
@@ -12640,22 +12795,90 @@ function initThreeGlobeWorld() {
     } catch (_) {}
   }
 
-  // Cinematic Theatre Lighting Rig (Atmospheric Sky Hemisphere + Warm Key + Macro Rim + Arena Clash Point Light)
-  const ambientLight = new THREE.AmbientLight(0xb8d0f0, 0.78);
+  // Custom GLSL Split Golden-Dawn vs Electric-Storm Sky Dome (Matches Reference Artwork Sky)
+  const skyDomeMat = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0 },
+      bullRatio: { value: 0.5 },
+      stormIntensity: { value: 0.45 },
+    },
+    vertexShader: `
+      varying vec3 vWorldPos;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorldPos = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vWorldPos;
+      varying vec2 vUv;
+      uniform float time;
+      uniform float bullRatio;
+      uniform float stormIntensity;
+
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+          mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+          u.y
+        );
+      }
+      void main() {
+        vec3 dir = normalize(vWorldPos);
+        float elev = clamp(dir.y * 0.5 + 0.5, 0.0, 1.0);
+        float eastWest = smoothstep(-0.55, 0.55, dir.x - (bullRatio - 0.5) * 0.4);
+
+        vec2 cloudUv = dir.xz / (abs(dir.y) + 0.38) * 2.2;
+        float n1 = noise(cloudUv + vec2(time * 0.04, -time * 0.02));
+        float n2 = noise(cloudUv * 2.4 - vec2(time * 0.07, time * 0.03));
+        float clouds = clamp(n1 * 0.65 + n2 * 0.35, 0.0, 1.0);
+
+        // West (Bull Side): Warm Golden Sunbreak & Amber Clouds
+        vec3 westColor = mix(vec3(0.08, 0.05, 0.03), vec3(0.78, 0.52, 0.16), pow(clouds, 1.4) * (1.0 - elev * 0.45));
+        westColor += vec3(1.0, 0.85, 0.42) * pow(max(0.0, 1.0 - length(dir - normalize(vec3(-0.45, 0.28, -0.65)))), 5.0) * 0.75;
+
+        // East (Bear / Macro Side): Turbulent Indigo-Slate Storm & Electric Lightning Veins
+        vec3 eastColor = mix(vec3(0.03, 0.05, 0.10), vec3(0.16, 0.32, 0.58), pow(clouds, 1.5));
+        float lightning = smoothstep(0.76, 0.82, n2) * step(0.65, sin(time * 6.5 + n1 * 12.0)) * stormIntensity;
+        eastColor += vec3(0.45, 0.82, 1.0) * lightning * 1.4;
+
+        vec3 skyCol = mix(westColor, eastColor, eastWest);
+        skyCol = mix(vec3(0.04, 0.05, 0.08), skyCol, smoothstep(0.32, 0.56, elev));
+        gl_FragColor = vec4(skyCol, 1.0);
+      }
+    `,
+    side: THREE.BackSide,
+    depthWrite: false,
+  });
+  const skyDomeMesh = new THREE.Mesh(new THREE.SphereGeometry(195, 32, 24), skyDomeMat);
+  scene.add(skyDomeMesh);
+  threeWorldState.skyDomeMat = skyDomeMat;
+
+  // Cinematic Theatre Lighting Rig (Warm Golden Sun Key on Bull Side + Electric Storm Rim on Bear Side + Clash Core Light)
+  const ambientLight = new THREE.AmbientLight(0xd8c8b0, 0.88);
   scene.add(ambientLight);
 
-  const hemiLight = new THREE.HemisphereLight(0x78c8ff, 0x0c1322, 1.05);
-  hemiLight.position.set(0, 46, 0);
+  const hemiLight = new THREE.HemisphereLight(0xffdf9e, 0x0d1526, 1.25);
+  hemiLight.position.set(0, 48, 0);
   scene.add(hemiLight);
 
-  const keyLight = new THREE.DirectionalLight(0xffe8b8, 2.15);
-  keyLight.position.set(16, 36, 22);
+  const keyLight = new THREE.DirectionalLight(0xffe09e, 2.65);
+  keyLight.position.set(-14, 34, 18);
   if (!isSoftwareGl) {
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(1024, 1024);
     keyLight.shadow.camera.near = 2;
     keyLight.shadow.camera.far = 95;
-    const d = 28;
+    const d = 26;
     keyLight.shadow.camera.left = -d;
     keyLight.shadow.camera.right = d;
     keyLight.shadow.camera.top = d;
@@ -12665,24 +12888,24 @@ function initThreeGlobeWorld() {
   }
   scene.add(keyLight);
 
-  const rimLight = new THREE.DirectionalLight(0x00e5ff, 1.45);
-  rimLight.position.set(-24, 20, -18);
+  const rimLight = new THREE.DirectionalLight(0x38b6ff, 1.95);
+  rimLight.position.set(22, 26, -16);
   scene.add(rimLight);
 
-  const corePointLight = new THREE.PointLight(0xf5d76e, 2.4, 38);
-  corePointLight.position.set(9.2, 6.5, 0);
+  const corePointLight = new THREE.PointLight(0xffab00, 3.4, 42);
+  corePointLight.position.set(4.0, 5.5, 0);
   scene.add(corePointLight);
 
-  const arenaSpotLight = new THREE.PointLight(0x00e676, 1.8, 26);
-  arenaSpotLight.position.set(9.2, 9.5, 2.5);
+  const arenaSpotLight = new THREE.PointLight(0xff3d5a, 2.4, 32);
+  arenaSpotLight.position.set(6.5, 6.5, 2.2);
   scene.add(arenaSpotLight);
 
   // Subtle Reference Grid beneath the Deep History Terrain
-  const baseGrid = new THREE.GridHelper(56, 28, 0x00e5ff, 0x122038);
+  const baseGrid = new THREE.GridHelper(56, 28, 0xd4af37, 0x121c2e);
   baseGrid.position.y = -2.2;
   if (baseGrid.material) {
     baseGrid.material.transparent = true;
-    baseGrid.material.opacity = 0.24;
+    baseGrid.material.opacity = 0.14;
   }
   scene.add(baseGrid);
   threeWorldState.baseGrid = baseGrid;
@@ -12694,16 +12917,16 @@ function initThreeGlobeWorld() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.maxPolarAngle = Math.PI * 0.485;
-    controls.minDistance = 4.5;
+    controls.minDistance = 4.0;
     controls.maxDistance = 95;
-    controls.target.set(initCam.look[0], initCam.look[1], initCam.look[2]);
+    controls.target.set(4.0, 2.3, 0.0);
     controls.update();
 
     controls.addEventListener('start', () => {
       threeWorldState.isCameraTransitioning = false;
     });
   } else {
-    camera.lookAt(initCam.look[0], initCam.look[1], initCam.look[2]);
+    camera.lookAt(4.0, 2.3, 0.0);
   }
 
   // Scene Layer Groups
@@ -12722,26 +12945,24 @@ function initThreeGlobeWorld() {
   scene.add(candlesGroup);
   scene.add(plumeGroup);
 
-  // Instanced Atmospheric & Macro Story Wind Particles (150 particles)
-  const particleCount = 150;
-  const partGeo = new THREE.SphereGeometry(0.11, 7, 7);
-  const partMat = new THREE.MeshStandardMaterial({
-    color: 0xf5d76e,
-    emissive: 0x00e5ff,
-    emissiveIntensity: 1.25,
-    roughness: 0.15,
-    metalness: 0.5,
+  // Instanced Atmospheric & Arena Clash Sparks / Embers (360 glowing particles)
+  const particleCount = isSoftwareGl ? 140 : 360;
+  const partGeo = new THREE.OctahedronGeometry(0.085, 0);
+  const partMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.92,
   });
   const flowMesh = new THREE.InstancedMesh(partGeo, partMat, particleCount);
   flowMesh.frustumCulled = false;
 
   const pData = [];
   for (let i = 0; i < particleCount; i++) {
-    const isArenaEmber = i < 42;
-    const px = isArenaEmber ? (7.2 + Math.random() * 4.0) : (-24 + Math.random() * 48);
-    const pz = isArenaEmber ? (-2.0 + Math.random() * 4.0) : (-14 + Math.random() * 28);
-    const py = isArenaEmber ? (1.0 + Math.random() * 6.0) : (0.8 + Math.random() * 8.5);
-    const speed = isArenaEmber ? (1.6 + Math.random() * 2.2) : (2.4 + Math.random() * 3.4);
+    const isArenaEmber = i < Math.floor(particleCount * 0.58);
+    const px = isArenaEmber ? (2.0 + Math.random() * 6.0) : (-24 + Math.random() * 48);
+    const pz = isArenaEmber ? (-3.2 + Math.random() * 6.4) : (-14 + Math.random() * 28);
+    const py = isArenaEmber ? (0.4 + Math.random() * 5.8) : (0.8 + Math.random() * 8.5);
+    const speed = isArenaEmber ? (1.8 + Math.random() * 2.8) : (2.2 + Math.random() * 3.2);
     pData.push({
       x: px,
       y: py,
@@ -12750,13 +12971,17 @@ function initThreeGlobeWorld() {
       phase: Math.random() * Math.PI * 2,
       isArenaEmber,
       angle: Math.random() * Math.PI * 2,
-      radius: 1.1 + Math.random() * 2.1,
+      radius: 0.45 + Math.random() * 3.4,
     });
     _dummyObj.position.set(px, py, pz);
-    _dummyObj.scale.setScalar(0.7 + Math.random() * 0.65);
+    _dummyObj.scale.setScalar(0.5 + Math.random() * 0.85);
     _dummyObj.updateMatrix();
     flowMesh.setMatrixAt(i, _dummyObj.matrix);
-    _tmpColor.setHex(isArenaEmber ? 0xf5d76e : (i % 3 === 0 ? 0xf5d76e : 0x00e5ff));
+    _tmpColor.setHex(
+      isArenaEmber
+        ? (i % 3 === 0 ? 0xff3d5a : 0xffca28)
+        : (i % 2 === 0 ? 0xf5d76e : 0x40c4ff)
+    );
     flowMesh.setColorAt(i, _tmpColor);
   }
   flowMesh.instanceMatrix.needsUpdate = true;
@@ -12785,8 +13010,9 @@ function initThreeGlobeWorld() {
   threeWorldState.flowParticleData = pData;
   threeWorldState.raycaster = new THREE.Raycaster();
   threeWorldState.pointer = new THREE.Vector2();
-  threeWorldState.targetCamPos = new THREE.Vector3(initCam.pos[0], initCam.pos[1], initCam.pos[2]);
-  threeWorldState.targetLookAt = new THREE.Vector3(initCam.look[0], initCam.look[1], initCam.look[2]);
+  threeWorldState.activeCameraPreset = 'battle';
+  threeWorldState.targetCamPos = new THREE.Vector3(4.0, 5.2, aspect < 1 ? 15.5 : 10.6);
+  threeWorldState.targetLookAt = new THREE.Vector3(4.0, 2.3, 0.0);
   threeWorldState.isInitialized = true;
 
   if (typeof ResizeObserver !== 'undefined' && !_threeResizeObserver) {
@@ -12810,17 +13036,25 @@ function initThreeGlobeWorld() {
       const meta = hits[0].object.userData.candleMeta;
       const hdr = document.getElementById('threeInspHeader');
       const bdy = document.getElementById('threeInspBody');
+      const cap = document.getElementById('threeMovieCaption');
+      const zSign = meta.dirZ >= 0 ? '+' : '';
       if (hdr && bdy) {
-        const zSign = meta.dirZ >= 0 ? '+' : '';
-        hdr.textContent = `${meta.zoneLabel || '⚔️ Market Monument'} [${meta.timeStr}] · Close: $${meta.close.toFixed(2)} (Δτ=${meta.deltaTau.toFixed(2)})`;
+        hdr.textContent = `${meta.zoneLabel || 'Market Monument'} [${meta.timeStr}] · Close: $${meta.close.toFixed(2)} (Δτ=${meta.deltaTau.toFixed(2)})`;
         bdy.textContent = `Dir Pressure Z: ${zSign}${meta.dirZ.toFixed(2)}σ (P${meta.dirPercentile} · ±1 SE) · Range: $${meta.low.toFixed(1)}–$${meta.high.toFixed(1)} · ${meta.sweepStatus}`;
+      }
+      if (cap) {
+        cap.textContent = `${meta.zoneLabel} (${meta.timeStr}) — $${meta.close.toFixed(2)} · Pressure ${zSign}${meta.dirZ.toFixed(2)}σ · ${meta.sweepStatus}`;
       }
     }
   });
 
-  if (forecastData) {
-    updateThreeWorldData(forecastData);
-  }
+  updateThreeWorldData(
+    forecastData || {
+      systemState: 'LOADING_AWAITING_DATA',
+      isHalted: false,
+      candles: [],
+    }
+  );
 }
 
 function disposeGroupChildren(group) {
@@ -12842,17 +13076,19 @@ function disposeGroupChildren(group) {
 
 // Build The Terrain (Deep MTF Liquidity History) + The Graveyard (Recent Past) + The Arena (Live Duel) + Macro Story Forces
 function updateThreeWorldData(data) {
-  if (!threeWorldState.isInitialized || !window.THREE || !data) return;
+  if (!threeWorldState.isInitialized || !window.THREE) return;
   const THREE = window.THREE;
+  const safeData = data || { systemState: 'LOADING_AWAITING_DATA', isHalted: false, candles: [] };
 
-  // Phase 6: Check HALTED_DEGRADED circuit breaker state & freeze/dim entire 3D theatre
-  const isHalted = data.systemState === 'HALTED_DEGRADED' || Boolean(data.isHalted);
+  // Phase 6: Check HALTED_DEGRADED circuit breaker state & freeze/dim 3D theatre while keeping world visible
+  const isHalted = safeData.systemState === 'HALTED_DEGRADED' || Boolean(safeData.isHalted);
   threeWorldState.isHaltedDegraded = isHalted;
   const haltedOverlay = document.getElementById('threeHaltedOverlay');
   if (haltedOverlay) {
+    haltedOverlay.classList.toggle('hidden', !isHalted);
     haltedOverlay.classList.toggle('is-halted', isHalted);
     const titleEl = document.getElementById('threeHaltedTitle');
-    const bodyEl = document.getElementById('threeHaltedBody');
+    const bodyEl = document.getElementById('threeHaltedSub') || document.getElementById('threeHaltedBody');
     if (titleEl) {
       titleEl.textContent = currentLang === 'fa'
         ? 'تئاتر ۳بعدی بازار متوقف شد — وضعیت کسوف اضطراری (HALTED_DEGRADED)'
@@ -12866,16 +13102,16 @@ function updateThreeWorldData(data) {
   }
 
   // Phase 6: Modulate 3D surface opacity, grid sharpness, and particle coherence from NIS & Feed Integrity
-  const nisState = data.observerTelemetry?.innovationConsistency?.state || 'WITHIN_2SIGMA';
-  const quorumRatio = data.dataReliability?.quorumRatio !== undefined
-    ? Number(data.dataReliability.quorumRatio)
+  const nisState = safeData.observerTelemetry?.innovationConsistency?.state || 'WITHIN_2SIGMA';
+  const quorumRatio = safeData.dataReliability?.quorumRatio !== undefined
+    ? Number(safeData.dataReliability.quorumRatio)
     : (isHalted ? 0 : 1.0);
   const nisCoherenceFactor = nisState === 'WITHIN_2SIGMA' ? 1.0 : nisState === 'TAIL_SHOCK' ? 0.68 : 0.42;
   const feedFactor = Math.max(0.35, Math.min(1.0, quorumRatio));
   const compositeCoherence = isHalted ? 0.0 : Number((nisCoherenceFactor * (0.65 + 0.35 * feedFactor)).toFixed(2));
-  const surfaceOpacity = isHalted ? 0.34 : Number((0.52 + 0.38 * compositeCoherence).toFixed(2));
-  const wireSharpness = isHalted ? 0.08 : Number((0.10 + 0.20 * compositeCoherence).toFixed(2));
-  const gridOpacity = isHalted ? 0.10 : Number((0.14 + 0.22 * compositeCoherence).toFixed(2));
+  const surfaceOpacity = isHalted ? 0.62 : Number((0.52 + 0.38 * compositeCoherence).toFixed(2));
+  const wireSharpness = isHalted ? 0.16 : Number((0.10 + 0.20 * compositeCoherence).toFixed(2));
+  const gridOpacity = isHalted ? 0.20 : Number((0.14 + 0.22 * compositeCoherence).toFixed(2));
 
   threeWorldState.particleCoherence = compositeCoherence;
   threeWorldState.innovationJitter = nisState === 'FILTER_DIVERGENCE' ? 1.35 : nisState === 'TAIL_SHOCK' ? 0.65 : 0.08;
@@ -12884,15 +13120,15 @@ function updateThreeWorldData(data) {
     threeWorldState.baseGrid.material.opacity = gridOpacity;
   }
 
-  // Atmospheric Eclipse Dimming when HALTED_DEGRADED
+  // Atmospheric Eclipse Dimming when HALTED_DEGRADED (keeps 3D world clearly visible while frozen)
   if (threeWorldState.renderer && threeWorldState.scene) {
-    threeWorldState.renderer.toneMappingExposure = isHalted ? 0.58 : 1.24;
+    threeWorldState.renderer.toneMappingExposure = isHalted ? 0.92 : 1.24;
     if (threeWorldState.scene.fog) {
       threeWorldState.scene.fog.color.setHex(isHalted ? 0x12060c : 0x050912);
-      threeWorldState.scene.fog.density = isHalted ? 0.0165 : 0.0102;
+      threeWorldState.scene.fog.density = isHalted ? 0.0125 : 0.0102;
     }
     if (threeWorldState.keyLight) {
-      threeWorldState.keyLight.intensity = isHalted ? 0.45 : 2.15;
+      threeWorldState.keyLight.intensity = isHalted ? 1.35 : 2.15;
     }
   }
 
@@ -12903,7 +13139,9 @@ function updateThreeWorldData(data) {
       : `Manifold Coherence: ${compositeCoherence.toFixed(2)} · Opacity: ${surfaceOpacity.toFixed(2)} · NIS: ${nisState} · ±1σ/±2σ Tubes`;
   }
 
-  if (isHalted && (!data.candles || data.candles.length < 4)) {
+  const allCandles = Array.isArray(safeData.candles) ? safeData.candles : [];
+  // If HALTED_DEGRADED occurs after valid candles were already rendered, preserve existing 3D geometry in frozen stasis
+  if (isHalted && allCandles.length < 4 && threeWorldState.arenaGroup && threeWorldState.arenaGroup.children.length > 0) {
     if (threeWorldState.renderer && threeWorldState.scene && threeWorldState.camera) {
       threeWorldState.renderer.render(threeWorldState.scene, threeWorldState.camera);
     }
@@ -12935,34 +13173,38 @@ function updateThreeWorldData(data) {
   threeWorldState.animatedCandleParts = [];
   threeWorldState.clickableCandleMeshes = [];
 
-  const allCandles = data.candles || [];
-  if (allCandles.length < 4) return;
-
+  const hasVerifiedCandles = allCandles.length >= 4;
   // Synchronized 2D-to-3D Historical Replay Slicing (2D chart is the single source of truth)
-  const replayOffset = Math.max(0, Math.min(allCandles.length - 5, Number(threeWorldState.replayBarOffset || 0)));
-  const replayEndIdx = allCandles.length - replayOffset;
-  const slicedCandles = allCandles.slice(0, replayEndIdx);
+  const replayOffset = hasVerifiedCandles
+    ? Math.max(0, Math.min(allCandles.length - 5, Number(threeWorldState.replayBarOffset || 0)))
+    : 0;
+  const replayEndIdx = hasVerifiedCandles ? allCandles.length - replayOffset : 0;
+  const slicedCandles = hasVerifiedCandles ? allCandles.slice(0, replayEndIdx) : [];
   const candles = slicedCandles.slice(-26);
-  if (candles.length < 4) return;
 
   const replaySliderEl = document.getElementById('threeHistoricalReplaySlider');
   if (replaySliderEl) {
-    replaySliderEl.max = String(Math.max(0, allCandles.length - 6));
+    replaySliderEl.max = String(hasVerifiedCandles ? Math.max(0, allCandles.length - 6) : 0);
     replaySliderEl.value = String(replayOffset);
   }
-  const activeRepCandle = candles[candles.length - 1];
+  const activeRepCandle = candles.length > 0 ? candles[candles.length - 1] : null;
   const repTagEl = document.getElementById('threeReplayTimestampTag');
-  if (repTagEl && activeRepCandle) {
-    const dtRep = new Date(activeRepCandle.time * 1000);
-    const tsFmt = dtRep.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
-    repTagEl.textContent = replayOffset === 0 ? `LIVE BAR · ${tsFmt}` : `REPLAY -${replayOffset}B · ${tsFmt}`;
+  if (repTagEl) {
+    if (activeRepCandle) {
+      const dtRep = new Date(activeRepCandle.time * 1000);
+      const tsFmt = dtRep.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+      repTagEl.textContent = replayOffset === 0 ? `LIVE BAR · ${tsFmt}` : `REPLAY -${replayOffset}B · ${tsFmt}`;
+    } else {
+      repTagEl.textContent = isHalted ? 'HALTED STASIS (NO LIVE BARS)' : 'AWAITING VERIFIED SNAPSHOT';
+    }
   }
 
-  const minP = Math.min(...candles.map(c => c.low));
-  const maxP = Math.max(...candles.map(c => c.high));
+  const anchorFallback = Number(safeData.liquidityEngine?.fusedEquilibriumAnchor || safeData.equilibriumPrice || safeData.currentPrice || 0);
+  const minP = candles.length > 0 ? Math.min(...candles.map(c => c.low)) : (anchorFallback - 10);
+  const maxP = candles.length > 0 ? Math.max(...candles.map(c => c.high)) : (anchorFallback + 10);
   const spanP = Math.max(0.5, maxP - minP);
-  const eqP = data.liquidityEngine?.fusedEquilibriumAnchor || data.equilibriumPrice || ((minP + maxP) * 0.5);
-  const meanVol = Math.max(1, candles.reduce((a, c) => a + c.volume, 0) / candles.length);
+  const eqP = safeData.liquidityEngine?.fusedEquilibriumAnchor || safeData.equilibriumPrice || ((minP + maxP) * 0.5);
+  const meanVol = candles.length > 0 ? Math.max(1, candles.reduce((a, c) => a + c.volume, 0) / candles.length) : 1;
 
   const mapPriceToY = (p) => {
     const val = ((p - minP) / spanP) * 8.2 + 1.0;
@@ -12974,7 +13216,7 @@ function updateThreeWorldData(data) {
   };
 
   // Extract Multi-Timeframe Volume Profile Pools for Permanent Terrain Shaping
-  const pools = data.liquidityEngine?.topDownPools || [];
+  const pools = safeData.liquidityEngine?.topDownPools || [];
   const htfHvnList = [];
   const ltfHvnList = [];
   const lvnList = [];
@@ -13011,7 +13253,7 @@ function updateThreeWorldData(data) {
   const colors = new Float32Array(posAttr.count * 3);
   const col = new THREE.Color();
 
-  const absorptionZ = Number(data.liquidityEngine?.absorptionScoreZ || 0);
+  const absorptionZ = Number(safeData.liquidityEngine?.absorptionScoreZ || 0);
   const scarIntensity = Math.min(1.0, Math.max(0.0, Math.abs(absorptionZ) * 0.42));
 
   for (let i = 0; i < posAttr.count; i++) {
@@ -13186,15 +13428,15 @@ function updateThreeWorldData(data) {
   // =========================================================================
   // LAYER 2: THE GRAVEYARD — Recent Past (Fallen Silhouettes of Closed Candles)
   // =========================================================================
-  const closedCandles = candles.slice(0, -1);
-  const liveCandle = candles[candles.length - 1];
+  const closedCandles = candles.length > 1 ? candles.slice(0, -1) : [];
+  const liveCandle = candles.length > 0 ? candles[candles.length - 1] : null;
   const startX = -18.5;
   const candleSpacing = 1.06;
   const ekfPoints = [];
   const ekfPlus1Pts = [];
   const ekfMinus1Pts = [];
-  const garchPctBar = (data.garchVolatility?.currentVolPct || 0.35) / 100;
-  const barSigDol = Math.max(0.45, (data.currentPrice || eqP) * garchPctBar);
+  const garchPctBar = (safeData.garchVolatility?.currentVolPct || 0.35) / 100;
+  const barSigDol = Math.max(0.45, (safeData.currentPrice || eqP || 1) * garchPctBar);
 
   closedCandles.forEach((c, idx) => {
     const cx = startX + idx * candleSpacing;
@@ -13305,19 +13547,33 @@ function updateThreeWorldData(data) {
   // =========================================================================
   // LAYER 1: THE ARENA — Present Live Candle Battle (Bull Titan vs Bear Titan)
   // =========================================================================
-  const battleMetrics = computeRealBullBearBattleMetrics(data, candles, meanVol);
-  const arenaX = startX + closedCandles.length * candleSpacing + 1.65;
+  const battleMetrics = liveCandle
+    ? computeRealBullBearBattleMetrics(safeData, candles, meanVol)
+    : {
+        bullStrength: 0.5,
+        bearStrength: 0.5,
+        clv01: 0.5,
+        wickRejectionNet: 0,
+        volRatio: 1.0,
+        absorptionZ: 0,
+        initiationZ: 0,
+        macroLift: 0,
+        prevWinSide: 'BULL',
+        prevLoserSide: 'BEAR',
+      };
+  const arenaX = liveCandle ? (startX + closedCandles.length * candleSpacing + 1.65) : 4.0;
   const arenaZ = 0.0;
-  const yHigh = mapPriceToY(liveCandle.high);
-  const yLow = mapPriceToY(liveCandle.low);
-  const yOpen = mapPriceToY(liveCandle.open);
-  const yClose = mapPriceToY(liveCandle.close);
+  const yHigh = liveCandle ? mapPriceToY(liveCandle.high) : 3.2;
+  const yLow = liveCandle ? mapPriceToY(liveCandle.low) : 1.8;
+  const yOpen = liveCandle ? mapPriceToY(liveCandle.open) : 2.5;
+  const yClose = liveCandle ? mapPriceToY(liveCandle.close) : 2.5;
   const liveRangeH = Math.max(1.25, yHigh - yLow);
   const liveMidY = (yHigh + yLow) * 0.5;
-  const arenaBaseY = Math.max(0.1, yLow - 0.65);
+  const arenaBaseY = liveCandle ? Math.max(0.1, yLow - 0.65) : 1.15;
 
   // Detect Candle Close Transition to trigger dignified Defeat Sequence
   if (
+    liveCandle &&
     threeWorldState.lastLiveCandleTime > 0 &&
     liveCandle.time > threeWorldState.lastLiveCandleTime &&
     threeWorldState.clock
@@ -13330,32 +13586,109 @@ function updateThreeWorldData(data) {
       duration: 3.8,
     };
   }
-  threeWorldState.lastLiveCandleTime = liveCandle.time;
+  if (liveCandle) {
+    threeWorldState.lastLiveCandleTime = liveCandle.time;
+  }
   threeWorldState.lastLiveBullStrength = battleMetrics.bullStrength;
 
-  // Arena Amphitheatre Obsidian & Gold Dais
+  // =========================================================================
+  // MONUMENTAL ROMAN COLOSSEUM ARENA & MOLTEN FISSURE FLOOR SHADER
+  // =========================================================================
   const daisGroup = new THREE.Group();
   daisGroup.position.set(arenaX, arenaBaseY, arenaZ);
 
+  // Custom GLSL Molten Fissure & Shockwave Arena Floor (Driven by GDF Volatility & Bull/Bear Balance)
+  let arenaFloorMat;
+  if (!threeWorldState.isSoftwareGl && THREE.ShaderMaterial) {
+    arenaFloorMat = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0.0 },
+        bullStrength: { value: battleMetrics.bullStrength },
+        volRatio: { value: battleMetrics.volRatio },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vLocalPos;
+        void main() {
+          vUv = uv;
+          vLocalPos = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform float bullStrength;
+        uniform float volRatio;
+        varying vec2 vUv;
+        varying vec3 vLocalPos;
+
+        float hash2(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+        }
+        float noise2(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+          return mix(
+            mix(hash2(i), hash2(i + vec2(1.0, 0.0)), f.x),
+            mix(hash2(i + vec2(0.0, 1.0)), hash2(i + vec2(1.0, 1.0)), f.x),
+            f.y
+          );
+        }
+        void main() {
+          vec2 p = vLocalPos.xz;
+          float r = length(p);
+          float angle = atan(p.y, p.x);
+
+          // Obsidian basalt stone base
+          vec3 basalt = vec3(0.05, 0.04, 0.045);
+
+          // Radial fracture lines + concentric shockwave rings
+          float radialCrack = abs(sin(angle * 9.0 + noise2(p * 1.4) * 3.5));
+          float fissureMask = smoothstep(0.18, 0.02, radialCrack) * smoothstep(6.2, 0.3, r);
+          float microCrack = smoothstep(0.14, 0.01, abs(noise2(p * 2.4 + time * 0.12) - 0.5)) * 0.75;
+
+          // Expanding shockwave pulse from the central clash
+          float wave = sin(r * 2.6 - time * (2.4 + volRatio * 1.2)) * 0.5 + 0.5;
+          float ringGlow = pow(wave, 5.0) * smoothstep(5.8, 0.4, r);
+
+          // West (x < 0) glows warm 24K molten gold; East (x > 0) glows crimson/electric ember
+          float sideMix = smoothstep(-2.2, 2.2, p.x);
+          vec3 bullMagma = vec3(1.0, 0.68, 0.14);
+          vec3 bearMagma = vec3(1.0, 0.18, 0.28);
+          vec3 magmaCol = mix(bullMagma, bearMagma, sideMix * (1.15 - bullStrength * 0.3));
+
+          float totalGlow = clamp((fissureMask * 1.15 + microCrack + ringGlow * 0.65) * (0.65 + volRatio * 0.45), 0.0, 1.4);
+          vec3 col = mix(basalt, magmaCol, clamp(totalGlow, 0.0, 1.0));
+          col += vec3(1.0, 0.92, 0.65) * pow(max(0.0, totalGlow - 0.55), 2.0);
+
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `,
+    });
+  } else {
+    arenaFloorMat = new THREE.MeshStandardMaterial({
+      color: 0x16110c,
+      emissive: 0xd84315,
+      emissiveIntensity: 0.48,
+      roughness: 0.42,
+      metalness: 0.68,
+    });
+  }
+
   const daisPlatform = new THREE.Mesh(
-    new THREE.CylinderGeometry(4.4, 4.9, 0.36, 32),
-    new THREE.MeshStandardMaterial({
-      color: 0x0d1526,
-      emissive: 0x070d18,
-      emissiveIntensity: 0.45,
-      roughness: 0.38,
-      metalness: 0.72,
-    })
+    new THREE.CylinderGeometry(5.8, 6.4, 0.42, 40),
+    arenaFloorMat
   );
-  daisPlatform.position.y = -0.18;
+  daisPlatform.position.y = -0.21;
   daisGroup.add(daisPlatform);
 
   const arenaOuterRing = new THREE.Mesh(
-    new THREE.TorusGeometry(4.45, 0.075, 10, 48),
+    new THREE.TorusGeometry(5.85, 0.095, 12, 56),
     new THREE.MeshStandardMaterial({
       color: 0xf5d76e,
-      emissive: 0xf5d76e,
-      emissiveIntensity: 0.95,
+      emissive: 0xff8f00,
+      emissiveIntensity: 1.05,
       roughness: 0.18,
       metalness: 0.92,
     })
@@ -13364,188 +13697,333 @@ function updateThreeWorldData(data) {
   arenaOuterRing.position.y = 0.02;
   daisGroup.add(arenaOuterRing);
 
-  // Colosseum Classical Amphitheatre Colonnade Archways around the Northern Perimeter of the Dais
-  const colonnadeCount = 9;
+  // Monumental Two-Tier Roman Colosseum Amphitheatre Archways & Flaming Braziers
+  const colonnadeCount = 13;
   const colPillarMat = new THREE.MeshStandardMaterial({
-    color: 0x262118,
-    emissive: 0x120d06,
-    emissiveIntensity: 0.35,
-    roughness: 0.52,
-    metalness: 0.64,
+    color: 0x2d241b,
+    emissive: 0x140d06,
+    emissiveIntensity: 0.38,
+    roughness: 0.55,
+    metalness: 0.58,
   });
   const colGoldTrimMat = new THREE.MeshStandardMaterial({
     color: 0xf5d76e,
     emissive: 0xd4af37,
-    emissiveIntensity: 0.65,
+    emissiveIntensity: 0.72,
     roughness: 0.22,
-    metalness: 0.9,
+    metalness: 0.92,
   });
+  const bannerRedMat = new THREE.MeshStandardMaterial({
+    color: 0x99111c,
+    emissive: 0x4a060b,
+    emissiveIntensity: 0.55,
+    roughness: 0.65,
+    metalness: 0.2,
+    side: THREE.DoubleSide,
+  });
+
+  const bannerMeshes = [];
   for (let cIdx = 0; cIdx < colonnadeCount; cIdx++) {
-    const theta = Math.PI * 1.08 + (cIdx / (colonnadeCount - 1)) * (Math.PI * 0.84);
-    const colR = 4.65;
+    const u = cIdx / (colonnadeCount - 1);
+    const theta = Math.PI * 0.96 + u * (Math.PI * 1.08);
+    const colR = 6.15;
     const px = Math.cos(theta) * colR;
     const pz = Math.sin(theta) * colR;
-    const pHeight = 3.2 + Math.sin((cIdx / (colonnadeCount - 1)) * Math.PI) * 1.15;
-    const colMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, pHeight, 10), colPillarMat);
-    colMesh.position.set(px, pHeight * 0.5, pz);
+    const tier1H = 4.2 + Math.sin(u * Math.PI) * 1.4;
+    const tier2H = tier1H + 2.4;
+
+    // Lower Tier Fluted Column
+    const colMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, tier1H, 12), colPillarMat);
+    colMesh.position.set(px, tier1H * 0.5, pz);
     daisGroup.add(colMesh);
-    const capMesh = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.16, 0.52), colGoldTrimMat);
-    capMesh.position.set(px, pHeight + 0.08, pz);
+
+    // Lower Tier Corinthian Gold Capital
+    const capMesh = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.22, 0.68), colGoldTrimMat);
+    capMesh.position.set(px, tier1H + 0.1, pz);
     daisGroup.add(capMesh);
+
+    // Upper Tier Colosseum Arcade Column
+    const upperColMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 2.2, 10), colPillarMat);
+    upperColMesh.position.set(px * 1.03, tier1H + 1.2, pz * 1.03);
+    daisGroup.add(upperColMesh);
+
+    const upperCap = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.18, 0.56), colGoldTrimMat);
+    upperCap.position.set(px * 1.03, tier2H, pz * 1.03);
+    daisGroup.add(upperCap);
+
+    // Crimson & Gold War Banners hanging from outer columns (matching reference image)
+    if (cIdx === 1 || cIdx === 3 || cIdx === 9 || cIdx === 11) {
+      const bannerGeo = new THREE.PlaneGeometry(0.72, 2.5, 2, 6);
+      const bannerMesh = new THREE.Mesh(bannerGeo, bannerRedMat);
+      bannerMesh.position.set(px * 0.92, tier1H * 0.72, pz * 0.92);
+      bannerMesh.lookAt(arenaX, arenaBaseY + tier1H * 0.72, arenaZ + 8.0);
+      bannerMesh.userData.baseZ = bannerMesh.position.z;
+      bannerMesh.userData.phase = cIdx * 1.1;
+      daisGroup.add(bannerMesh);
+      bannerMeshes.push(bannerMesh);
+    }
+
+    // Flaming Braziers along the Colosseum inner ring
+    if (cIdx % 2 === 0) {
+      const brazierBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.14, 0.26, 10), colGoldTrimMat);
+      brazierBowl.position.set(px * 0.86, 0.16, pz * 0.86);
+      daisGroup.add(brazierBowl);
+
+      const flameCone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.22, 0.68, 8),
+        new THREE.MeshBasicMaterial({
+          color: cIdx < colonnadeCount / 2 ? 0xffb300 : 0xff3d00,
+          transparent: true,
+          opacity: 0.88,
+        })
+      );
+      flameCone.position.set(px * 0.86, 0.58, pz * 0.86);
+      daisGroup.add(flameCone);
+    }
   }
 
-  // Live Forming Candle Central Monolith
-  const liveRadius = 0.46 + Math.min(0.22, battleMetrics.volRatio * 0.12);
-  const liveShellMat = new THREE.MeshStandardMaterial({
-    color: 0xf5d76e,
-    emissive: 0x00e676,
-    emissiveIntensity: 0.65,
+  // Foreground Silhouettes of Classical Helmets & Spears along the Southern Rim (framing the camera like the reference artwork)
+  const silhouetteMat = new THREE.MeshStandardMaterial({
+    color: 0x0c0907,
+    emissive: 0x1a1005,
+    emissiveIntensity: 0.25,
+    roughness: 0.4,
+    metalness: 0.85,
+  });
+  for (let sIdx = 0; sIdx < 14; sIdx++) {
+    const sFrac = (sIdx / 13) - 0.5;
+    const sx = sFrac * 8.4;
+    const sz = 4.65 + Math.abs(sFrac) * 0.75;
+    // Warrior shoulders & crested helm silhouette
+    const torsoSil = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.46, 0.22), silhouetteMat);
+    torsoSil.position.set(sx, 0.23, sz);
+    daisGroup.add(torsoSil);
+    const helmSil = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), silhouetteMat);
+    helmSil.position.set(sx, 0.56, sz);
+    daisGroup.add(helmSil);
+    // Raised Spear / Standard
+    const spearSil = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.018, 1.85, 6), colGoldTrimMat);
+    spearSil.position.set(sx + 0.14, 0.92, sz - 0.05);
+    spearSil.rotation.z = (sFrac < 0 ? -0.18 : 0.18);
+    daisGroup.add(spearSil);
+  }
+
+  // Volumetric God-Ray Cones (West Golden Sunbeams + East Electric Storm Beams)
+  const godRayGeo = new THREE.ConeGeometry(2.6, 11.5, 16, 1, true);
+  const westGodRayMat = new THREE.MeshBasicMaterial({
+    color: 0xffca28,
     transparent: true,
-    opacity: 0.42,
-    roughness: 0.14,
-    metalness: 0.35,
+    opacity: 0.08 + battleMetrics.bullStrength * 0.06,
+    side: THREE.DoubleSide,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,
   });
-  const liveShellMesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(liveRadius, liveRadius, liveRangeH, 20),
-    liveShellMat
-  );
-  liveShellMesh.position.set(0, liveMidY - arenaBaseY, 0);
-  liveShellMesh.renderOrder = 3;
+  const westGodRay = new THREE.Mesh(godRayGeo, westGodRayMat);
+  westGodRay.position.set(-2.6, 5.2, -1.2);
+  westGodRay.rotation.z = -0.24;
+  daisGroup.add(westGodRay);
 
-  const liveTimeStr = new Date(liveCandle.time * 1000).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
+  const eastGodRayMat = new THREE.MeshBasicMaterial({
+    color: 0x40c4ff,
+    transparent: true,
+    opacity: 0.08 + battleMetrics.bearStrength * 0.06,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
   });
-  liveShellMesh.userData.candleMeta = {
-    zoneLabel: '⚔️ THE ARENA (Forming Candle)',
-    timeStr: liveTimeStr,
-    open: liveCandle.open,
-    high: liveCandle.high,
-    low: liveCandle.low,
-    close: liveCandle.close,
-    dirZ: Number(data.directionalPressure?.zScore || 0),
-    dirPercentile: Number(data.directionalPressure?.percentileRank || 50),
-    deltaTau: Number((0.72 * battleMetrics.volRatio + 0.28).toFixed(2)),
-    sweepStatus: `Bull ${(battleMetrics.bullStrength * 100).toFixed(0)}% vs Bear ${(battleMetrics.bearStrength * 100).toFixed(0)}%`,
-  };
-  threeWorldState.clickableCandleMeshes.push(liveShellMesh);
-  daisGroup.add(liveShellMesh);
+  const eastGodRay = new THREE.Mesh(godRayGeo, eastGodRayMat);
+  eastGodRay.position.set(2.6, 5.2, -1.2);
+  eastGodRay.rotation.z = 0.24;
+  daisGroup.add(eastGodRay);
 
-  // Inner Bullish Lower Core & Bearish Upper Core inside the Live Candle
-  const bullH = Math.max(0.2, liveRangeH * battleMetrics.bullStrength);
-  const bearH = Math.max(0.2, liveRangeH * battleMetrics.bearStrength);
+  const liveTimeStr = liveCandle
+    ? new Date(liveCandle.time * 1000).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    : 'STASIS';
 
-  const bullCoreMesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(liveRadius * 0.78, liveRadius * 0.84, bullH, 16),
-    new THREE.MeshStandardMaterial({
-      color: 0x00e676,
-      emissive: 0x00e676,
-      emissiveIntensity: 0.95 + battleMetrics.bullStrength * 0.6,
-      roughness: 0.22,
-      metalness: 0.55,
-    })
-  );
-  bullCoreMesh.position.set(0, (yLow - arenaBaseY) + bullH * 0.5, 0);
-  daisGroup.add(bullCoreMesh);
+  let liveShellMesh = null;
+  let liveShellMat = null;
+  let bullCoreMesh = null;
+  let bearCoreMesh = null;
+  let clashRingMesh = null;
 
-  const bearCoreMesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(liveRadius * 0.84, liveRadius * 0.78, bearH, 16),
-    new THREE.MeshStandardMaterial({
-      color: 0xff1744,
-      emissive: 0xff1744,
-      emissiveIntensity: 0.95 + battleMetrics.bearStrength * 0.6,
-      roughness: 0.22,
-      metalness: 0.55,
-    })
-  );
-  bearCoreMesh.position.set(0, (yHigh - arenaBaseY) - bearH * 0.5, 0);
-  daisGroup.add(bearCoreMesh);
-
-  // Clash Energy Partition Ring on the Live Candle
-  const clashRingMesh = new THREE.Mesh(
-    new THREE.TorusGeometry(liveRadius * 1.38, 0.065, 10, 28),
-    new THREE.MeshStandardMaterial({
+  // Subtle Central Clash Energy Nexus (Preserves clickable live candle inspection & Phase 6 variable contracts without blocking the Titans)
+  if (liveCandle) {
+    const liveRadius = 0.24 + Math.min(0.14, battleMetrics.volRatio * 0.08);
+    liveShellMat = new THREE.MeshStandardMaterial({
       color: 0xf5d76e,
-      emissive: 0xf5d76e,
-      emissiveIntensity: 1.45,
-      roughness: 0.15,
-      metalness: 0.9,
-    })
-  );
-  clashRingMesh.rotation.x = Math.PI / 2;
-  clashRingMesh.position.set(0, (yLow - arenaBaseY) + bullH, 0);
-  daisGroup.add(clashRingMesh);
+      emissive: 0xffab00,
+      emissiveIntensity: 0.85,
+      transparent: true,
+      opacity: 0.26,
+      roughness: 0.14,
+      metalness: 0.35,
+      depthWrite: false,
+    });
+    liveShellMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(liveRadius, liveRadius, liveRangeH, 20),
+      liveShellMat
+    );
+    liveShellMesh.position.set(0, liveMidY - arenaBaseY, -0.45);
+    liveShellMesh.renderOrder = 3;
 
-  // Place Sculptural Bull Titan (West/Bid Side of Arena) & Bear Titan (East/Ask Side of Arena)
+    liveShellMesh.userData.candleMeta = {
+      zoneLabel: '⚔️ THE ARENA (Forming Candle)',
+      timeStr: liveTimeStr,
+      open: liveCandle.open,
+      high: liveCandle.high,
+      low: liveCandle.low,
+      close: liveCandle.close,
+      dirZ: Number(safeData.directionalPressure?.zScore || 0),
+      dirPercentile: Number(safeData.directionalPressure?.percentileRank || 50),
+      deltaTau: Number((0.72 * battleMetrics.volRatio + 0.28).toFixed(2)),
+      sweepStatus: `Bull ${(battleMetrics.bullStrength * 100).toFixed(0)}% vs Bear ${(battleMetrics.bearStrength * 100).toFixed(0)}%`,
+    };
+    threeWorldState.clickableCandleMeshes.push(liveShellMesh);
+    daisGroup.add(liveShellMesh);
+
+    const bullH = Math.max(0.2, liveRangeH * battleMetrics.bullStrength);
+    const bearH = Math.max(0.2, liveRangeH * battleMetrics.bearStrength);
+
+    bullCoreMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(liveRadius * 0.65, liveRadius * 0.72, bullH, 16),
+      new THREE.MeshStandardMaterial({
+        color: 0xffca28,
+        emissive: 0xff8f00,
+        emissiveIntensity: 1.1 + battleMetrics.bullStrength * 0.6,
+        transparent: true,
+        opacity: 0.55,
+        roughness: 0.22,
+        metalness: 0.55,
+      })
+    );
+    bullCoreMesh.position.set(0, (yLow - arenaBaseY) + bullH * 0.5, -0.45);
+    daisGroup.add(bullCoreMesh);
+
+    bearCoreMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(liveRadius * 0.72, liveRadius * 0.65, bearH, 16),
+      new THREE.MeshStandardMaterial({
+        color: 0xff1744,
+        emissive: 0xff1744,
+        emissiveIntensity: 1.1 + battleMetrics.bearStrength * 0.6,
+        transparent: true,
+        opacity: 0.55,
+        roughness: 0.22,
+        metalness: 0.55,
+      })
+    );
+    bearCoreMesh.position.set(0, (yHigh - arenaBaseY) - bearH * 0.5, -0.45);
+    daisGroup.add(bearCoreMesh);
+
+    clashRingMesh = new THREE.Mesh(
+      new THREE.TorusGeometry(liveRadius * 2.2, 0.055, 10, 32),
+      new THREE.MeshStandardMaterial({
+        color: 0xf5d76e,
+        emissive: 0xffab00,
+        emissiveIntensity: 1.65,
+        roughness: 0.15,
+        metalness: 0.9,
+      })
+    );
+    clashRingMesh.rotation.x = Math.PI / 2;
+    clashRingMesh.position.set(0, (yLow - arenaBaseY) + bullH, 0);
+    daisGroup.add(clashRingMesh);
+  }
+
+  // Heroic Scale Bull Titan (West/Bid Side) & Bear Titan (East/Ask Side) Clashing Center-Frame
   const bullTitan = buildBullTitanGroup(THREE, battleMetrics.bullStrength, threeWorldState.isSoftwareGl);
-  const bullScale = 0.88 + battleMetrics.bullStrength * 0.52;
+  const bullScale = 1.22 + battleMetrics.bullStrength * 0.55;
   bullTitan.scale.setScalar(bullScale);
-  bullTitan.position.set(-2.35, 0, 0.35);
-  bullTitan.rotation.y = -0.12;
+  bullTitan.position.set(-2.05, 0, 0.22);
+  bullTitan.rotation.y = -0.08;
   daisGroup.add(bullTitan);
 
   const bearTitan = buildBearTitanGroup(THREE, battleMetrics.bearStrength, threeWorldState.isSoftwareGl);
-  const bearScale = 0.88 + battleMetrics.bearStrength * 0.52;
+  const bearScale = 1.22 + battleMetrics.bearStrength * 0.55;
   bearTitan.scale.setScalar(bearScale);
-  bearTitan.position.set(2.35, 0, -0.35);
-  bearTitan.rotation.y = -0.12;
+  bearTitan.position.set(2.05, 0, -0.15);
+  bearTitan.rotation.y = 0.08;
   daisGroup.add(bearTitan);
 
   threeWorldState.arenaGroup.add(daisGroup);
 
-  threeWorldState.arenaLiveState = {
-    arenaX,
-    arenaBaseY,
-    arenaZ,
-    yLow,
-    yHigh,
-    liveRangeH,
-    bullStrength: battleMetrics.bullStrength,
-    bearStrength: battleMetrics.bearStrength,
-    volRatio: battleMetrics.volRatio,
-    liveShellMesh,
-    liveShellMat,
-    bullCoreMesh,
-    bearCoreMesh,
-    clashRingMesh,
-    arenaOuterRing,
-    bullTitan,
-    bearTitan,
-    baseBullScale: bullScale,
-    baseBearScale: bearScale,
-  };
+  threeWorldState.arenaLiveState = liveCandle
+    ? {
+        arenaX,
+        arenaBaseY,
+        arenaZ,
+        yLow,
+        yHigh,
+        liveRangeH,
+        bullStrength: battleMetrics.bullStrength,
+        bearStrength: battleMetrics.bearStrength,
+        volRatio: battleMetrics.volRatio,
+        liveShellMesh,
+        liveShellMat,
+        bullCoreMesh,
+        bearCoreMesh,
+        clashRingMesh,
+        arenaOuterRing,
+        arenaFloorMat,
+        westGodRayMat,
+        eastGodRayMat,
+        bannerMeshes,
+        bullTitan,
+        bearTitan,
+        baseBullScale: bullScale,
+        baseBearScale: bearScale,
+      }
+    : null;
 
-  // Preserve animatedCandleParts entry for Phase 6 compatibility
-  threeWorldState.animatedCandleParts.push({
-    bullMesh: bullCoreMesh,
-    bearMesh: bearCoreMesh,
-    ringMesh: clashRingMesh,
-    yLow: yLow - arenaBaseY,
-    yHigh: yHigh - arenaBaseY,
-    rangeH: liveRangeH,
-    baseBullFrac: battleMetrics.bullStrength,
-    volRatio: battleMetrics.volRatio,
-    phase: 0.0,
-  });
+  if (liveCandle && bullCoreMesh && bearCoreMesh && clashRingMesh) {
+    // Preserve animatedCandleParts entry for Phase 6 compatibility
+    threeWorldState.animatedCandleParts.push({
+      bullMesh: bullCoreMesh,
+      bearMesh: bearCoreMesh,
+      ringMesh: clashRingMesh,
+      yLow: yLow - arenaBaseY,
+      yHigh: yHigh - arenaBaseY,
+      rangeH: liveRangeH,
+      baseBullFrac: battleMetrics.bullStrength,
+      volRatio: battleMetrics.volRatio,
+      phase: 0.0,
+    });
 
-  ekfPoints.push(new THREE.Vector3(arenaX, (yOpen + yClose) * 0.5, arenaZ));
-  ekfPlus1Pts.push(new THREE.Vector3(arenaX, mapPriceToY((liveCandle.open + liveCandle.close) * 0.5 + barSigDol), arenaZ - 0.35));
-  ekfMinus1Pts.push(new THREE.Vector3(arenaX, mapPriceToY((liveCandle.open + liveCandle.close) * 0.5 - barSigDol), arenaZ + 0.35));
+    ekfPoints.push(new THREE.Vector3(arenaX, (yOpen + yClose) * 0.5, arenaZ));
+    ekfPlus1Pts.push(new THREE.Vector3(arenaX, mapPriceToY((liveCandle.open + liveCandle.close) * 0.5 + barSigDol), arenaZ - 0.35));
+    ekfMinus1Pts.push(new THREE.Vector3(arenaX, mapPriceToY((liveCandle.open + liveCandle.close) * 0.5 - barSigDol), arenaZ + 0.35));
+  }
 
   // =========================================================================
   // LAYER 4: MACRO EVENTS AS STORY FORCES (Sky Symbols, Lighting & Atmosphere)
   // =========================================================================
-  const macro = data.macroYieldFeed || {};
+  const macro = safeData.macroYieldFeed || {};
   const realYieldGravity = Number(macro.realYieldGravity || 0);
   const centralBankTide = Number(macro.centralBankTide || 0);
   const dollarDrag = Number(macro.dollarDrag || 0);
   const netMacroLift = Number(macro.netMacroLift || 0);
-  const newsItems = data.macroNews?.items || [];
+  const newsItems = Array.isArray(safeData.macroNews)
+    ? safeData.macroNews
+    : (safeData.macroNews?.items || safeData.macroNews?.events || []);
   const hasShockHeadline = newsItems.some((item) =>
     /war|tariff|cpi|fed|fomc|sanction|crisis|emergency|shock|rate|inflation/i.test(String(item.title || ''))
   );
+
+  // Update Sky Dome Shader Uniforms from Real Market Forces
+  if (threeWorldState.skyDomeMat && threeWorldState.skyDomeMat.uniforms) {
+    if (threeWorldState.skyDomeMat.uniforms.bullRatio) {
+      threeWorldState.skyDomeMat.uniforms.bullRatio.value = battleMetrics.bullStrength;
+    }
+    if (threeWorldState.skyDomeMat.uniforms.stormIntensity) {
+      threeWorldState.skyDomeMat.uniforms.stormIntensity.value = Math.min(
+        1.35,
+        0.45 + battleMetrics.volRatio * 0.45 + (hasShockHeadline ? 0.35 : 0)
+      );
+    }
+  }
 
   // 4A. Rising Real Yields (realYieldGravity < -0.1) -> Glacial Frost Obelisks & Cold Northern Wind
   const frostStrength = Math.min(1.0, Math.max(0.15, Math.abs(Math.min(0, realYieldGravity)) * 0.65));
@@ -13561,7 +14039,7 @@ function updateThreeWorldData(data) {
   for (let f = 0; f < 5; f++) {
     const spire = new THREE.Mesh(new THREE.OctahedronGeometry(0.65 + frostStrength * 0.45, 0), frostMat);
     spire.scale.set(0.65, 2.8 + frostStrength * 1.6, 0.65);
-    spire.position.set(arenaX - 5.5 + f * 2.6, 9.5 + (f % 2) * 1.4, -7.8);
+    spire.position.set(arenaX - 5.5 + f * 2.6, 9.5 + (f % 2) * 1.4, -8.8);
     spire.rotation.z = 0.22;
     threeWorldState.macroForceGroup.add(spire);
   }
@@ -13569,7 +14047,7 @@ function updateThreeWorldData(data) {
   // 4B. Central Bank / Liquidity Inflows (centralBankTide > 0.1) -> Golden Solar Tide Ring & Warm Ascent Pillars
   const tideStrength = Math.min(1.0, Math.max(0.2, (centralBankTide + Math.max(0, netMacroLift * 0.5)) * 0.75));
   const solarTideRing = new THREE.Mesh(
-    new THREE.TorusGeometry(6.2, 0.09, 10, 56),
+    new THREE.TorusGeometry(6.8, 0.09, 10, 56),
     new THREE.MeshStandardMaterial({
       color: 0xf5d76e,
       emissive: 0xf5d76e,
@@ -13586,7 +14064,7 @@ function updateThreeWorldData(data) {
 
   // 4C. Geopolitical / News Storm Halo overhead when news feed has active macro catalysts
   const stormHalo = new THREE.Mesh(
-    new THREE.TorusGeometry(8.5, 0.22, 8, 48),
+    new THREE.TorusGeometry(8.8, 0.22, 8, 48),
     new THREE.MeshStandardMaterial({
       color: hasShockHeadline ? 0xff5252 : 0x3a506b,
       emissive: hasShockHeadline ? 0xff1744 : 0x00e5ff,
@@ -13598,7 +14076,7 @@ function updateThreeWorldData(data) {
     })
   );
   stormHalo.rotation.x = Math.PI / 2;
-  stormHalo.position.set(arenaX - 2.0, 12.2, 0);
+  stormHalo.position.set(arenaX - 2.0, 12.6, -2.0);
   threeWorldState.macroForceGroup.add(stormHalo);
 
   threeWorldState.macroWeatherState = {
@@ -13615,27 +14093,35 @@ function updateThreeWorldData(data) {
   if (!isHalted) {
     if (threeWorldState.rimLight) {
       threeWorldState.rimLight.color.setHex(realYieldGravity < -0.35 ? 0x40c4ff : 0x00e5ff);
-      threeWorldState.rimLight.intensity = 1.25 + frostStrength * 0.85;
+      threeWorldState.rimLight.intensity = 1.65 + frostStrength * 0.95;
     }
     if (threeWorldState.corePointLight) {
-      threeWorldState.corePointLight.position.set(arenaX, arenaBaseY + 5.5, arenaZ);
+      threeWorldState.corePointLight.position.set(arenaX, arenaBaseY + 4.8, arenaZ + 1.2);
       threeWorldState.corePointLight.color.setHex(
-        battleMetrics.bullStrength >= 0.5 ? 0xf5d76e : 0xff3d5a
+        battleMetrics.bullStrength >= 0.5 ? 0xffab00 : 0xff1744
       );
+      threeWorldState.corePointLight.intensity = 3.2 + battleMetrics.volRatio * 1.1;
     }
     if (threeWorldState.arenaSpotLight) {
-      threeWorldState.arenaSpotLight.position.set(arenaX, arenaBaseY + 8.5, arenaZ + 2.5);
+      threeWorldState.arenaSpotLight.position.set(arenaX, arenaBaseY + 8.5, arenaZ + 3.0);
     }
   }
 
-  // Update Narrative Story Strip & Synchronized Right Market Data HUD
+  // Update Clean Floating Movie Caption & Hidden DOM Telemetry Nodes
+  const domForce = battleMetrics.bullStrength >= 0.52
+    ? (currentLang === 'fa' ? 'غالب: گاو طلایی (Bull)' : 'Bull Titan Advancing')
+    : battleMetrics.bearStrength >= 0.52
+    ? (currentLang === 'fa' ? 'غالب: خرس پولادین (Bear)' : 'Bear Titan Advancing')
+    : (currentLang === 'fa' ? 'نبرد سنگین در آرنا' : 'Fierce Equilibrium Clash');
+  const priceTxt = liveCandle ? `$${Number(liveCandle.close).toFixed(2)}` : (isHalted ? 'HALTED' : '$—');
+  const replayBadge = replayOffset > 0 ? `[REPLAY -${replayOffset}B] ` : '';
+  const movieCaptionEl = document.getElementById('threeMovieCaption');
+  if (movieCaptionEl && (!threeWorldState.activeCameraPreset || threeWorldState.activeCameraPreset === 'battle')) {
+    movieCaptionEl.textContent = `${replayBadge}XAUUSD ${priceTxt} · ${domForce} (${(battleMetrics.bullStrength * 100).toFixed(0)}% vs ${(battleMetrics.bearStrength * 100).toFixed(0)}%) · Visualizes real buying/selling pressure, liquidity, volatility & momentum`;
+  }
+
   const storySub = document.getElementById('threeStorySubtitle');
   if (storySub) {
-    const domForce = battleMetrics.bullStrength >= 0.52
-      ? (currentLang === 'fa' ? 'غالب: گاو (Bull)' : 'Bull Force Dominant')
-      : battleMetrics.bearStrength >= 0.52
-      ? (currentLang === 'fa' ? 'غالب: خرس (Bear)' : 'Bear Force Dominant')
-      : (currentLang === 'fa' ? 'نبرد متعادل در آرنا' : 'Balanced Arena Clash');
     const macroWeatherLabel = netMacroLift >= 0.15
       ? 'Golden Liquidity Tide (+Macro)'
       : realYieldGravity <= -0.35
@@ -13643,18 +14129,17 @@ function updateThreeWorldData(data) {
       : hasShockHeadline
       ? 'Macro Catalyst Storm Front'
       : 'Equilibrium Macro Breeze';
-    const liqState = data.liquidityEngine?.interactionState || 'INSIDE_VALUE_AREA';
-    const replayBadge = replayOffset > 0 ? `[REPLAY -${replayOffset}B] ` : '';
+    const liqState = safeData.liquidityEngine?.interactionState || 'INSIDE_VALUE_AREA';
     storySub.textContent = `${replayBadge}⚔️ THE ARENA: ${domForce} (${(battleMetrics.bullStrength * 100).toFixed(0)}% / ${(battleMetrics.bearStrength * 100).toFixed(0)}%) · 🪦 GRAVEYARD: ${Math.min(16, closedCandles.length)} Fallen Silhouettes · 🏔️ TERRAIN: ${liqState} · 🌩️ MACRO: ${macroWeatherLabel}`;
   }
 
-  // Populate Right-Side Synchronized Market Data & Verified Macro Event HUD from 2D Chart Snapshot
+  // Populate Hidden Right-Side Synchronized Market Data DOM Nodes (Preserved for Phase 6 & Data Verification)
   const hudPriceEl = document.getElementById('threeHudPrice');
-  if (hudPriceEl && liveCandle) {
-    hudPriceEl.textContent = `$${Number(liveCandle.close).toFixed(2)}`;
+  if (hudPriceEl) {
+    hudPriceEl.textContent = liveCandle ? `$${Number(liveCandle.close).toFixed(2)}` : (isHalted ? '$— (HALTED)' : '$—');
   }
   const hudChangeEl = document.getElementById('threeHudChange');
-  if (hudChangeEl && candles.length >= 2) {
+  if (hudChangeEl && liveCandle && candles.length >= 2) {
     const firstOpen = candles[0].open || liveCandle.open;
     const diff = liveCandle.close - firstOpen;
     const pct = firstOpen > 0 ? (diff / firstOpen) * 100 : 0;
@@ -13667,61 +14152,67 @@ function updateThreeWorldData(data) {
     el.textContent = txt;
     if (cls) el.className = `three-hud-metric-val ${cls}`;
   };
+  const dxyVal = Number.isFinite(macro.dxyIndex) && macro.dxyIndex > 0
+    ? macro.dxyIndex
+    : (Number.isFinite(macro.dxyLevel) && macro.dxyLevel > 0 ? macro.dxyLevel : null);
   setHudText(
     'threeHudDxy',
-    Number.isFinite(macro.dxyLevel) ? `${Number(macro.dxyLevel).toFixed(2)} (${dollarDrag >= 0 ? '+' : ''}${dollarDrag.toFixed(2)})` : 'UNAVAILABLE',
+    dxyVal !== null ? `${Number(dxyVal).toFixed(2)} (${dollarDrag >= 0 ? '+' : ''}${dollarDrag.toFixed(2)})` : 'UNAVAILABLE',
     dollarDrag >= 0 ? 'up' : 'down'
   );
   setHudText(
     'threeHudUs10y',
-    Number.isFinite(macro.nominal10Y) ? `${Number(macro.nominal10Y).toFixed(2)}%` : 'UNAVAILABLE',
+    Number.isFinite(macro.nominal10Y) && macro.nominal10Y > 0 ? `${Number(macro.nominal10Y).toFixed(2)}%` : 'UNAVAILABLE',
     'neutral'
   );
   setHudText(
     'threeHudTips10y',
-    Number.isFinite(macro.tipsRealYield10Y) ? `${Number(macro.tipsRealYield10Y).toFixed(2)}%` : 'UNAVAILABLE',
+    Number.isFinite(macro.tipsRealYield10Y) && (!isHalted || macro.tipsRealYield10Y !== 0) ? `${Number(macro.tipsRealYield10Y).toFixed(2)}%` : 'UNAVAILABLE',
     realYieldGravity >= 0 ? 'up' : 'down'
   );
   setHudText(
     'threeHudBreakeven',
-    Number.isFinite(macro.breakevenInflation10Y) ? `${Number(macro.breakevenInflation10Y).toFixed(2)}%` : 'UNAVAILABLE',
+    Number.isFinite(macro.breakevenInflation10Y) && macro.breakevenInflation10Y > 0 ? `${Number(macro.breakevenInflation10Y).toFixed(2)}%` : 'UNAVAILABLE',
     'neutral'
   );
-  const basisSpread = data.comexBasis?.spreadDollars ?? data.basisSpread;
+  const basisSpread = safeData.cointegrationBasis?.basisSpread ?? safeData.comexBasis?.spreadDollars ?? safeData.basisSpread;
   setHudText(
     'threeHudBasis',
-    Number.isFinite(basisSpread) ? `${basisSpread >= 0 ? '+' : ''}$${Number(basisSpread).toFixed(2)}` : 'UNAVAILABLE',
+    Number.isFinite(basisSpread) && (!isHalted || basisSpread !== 0) ? `${basisSpread >= 0 ? '+' : ''}$${Number(basisSpread).toFixed(2)}` : 'UNAVAILABLE',
     'neutral'
   );
   setHudText(
     'threeHudGarchVol',
-    Number.isFinite(data.garchVolatility?.currentVolPct)
-      ? `${Number(data.garchVolatility.currentVolPct).toFixed(2)}% (${data.garchVolatility.regime || 'NORMAL'})`
+    Number.isFinite(safeData.garchVolatility?.currentVolPct) && safeData.garchVolatility.currentVolPct > 0
+      ? `${Number(safeData.garchVolatility.currentVolPct).toFixed(2)}% (${safeData.garchVolatility.regime || 'NORMAL'})`
       : 'UNAVAILABLE',
     'neutral'
   );
-  const kalmanPrice = data.kalmanState?.filteredPrice ?? ((liveCandle.open + liveCandle.close) * 0.5);
-  const kalmanResidual = liveCandle.close - kalmanPrice;
+  const kalmanResidual = liveCandle
+    ? (safeData.observerTelemetry?.innovationError ?? (liveCandle.close - ((liveCandle.open + liveCandle.close) * 0.5)))
+    : null;
   setHudText(
     'threeHudResidual',
-    `${kalmanResidual >= 0 ? '+' : ''}$${kalmanResidual.toFixed(2)} (${(Math.abs(kalmanResidual) / Math.max(0.25, barSigDol)).toFixed(2)}σ)`,
-    Math.abs(kalmanResidual) <= barSigDol ? 'up' : 'down'
+    kalmanResidual !== null
+      ? `${kalmanResidual >= 0 ? '+' : ''}$${Number(kalmanResidual).toFixed(2)} (${(Math.abs(kalmanResidual) / Math.max(0.25, barSigDol)).toFixed(2)}σ)`
+      : 'UNAVAILABLE',
+    kalmanResidual !== null && Math.abs(kalmanResidual) <= barSigDol ? 'up' : 'down'
   );
 
   const hudEvtHeadline = document.getElementById('threeHudEventHeadline');
-  const hudEvtMeta = document.getElementById('threeHudEventMeta');
-  const hudEvtImpact = document.getElementById('threeHudEventImpact');
-  if (hudEvtHeadline && hudEvtMeta && hudEvtImpact) {
+  const hudEvtMetrics = document.getElementById('threeHudEventMetrics') || document.getElementById('threeHudEventImpact');
+  if (hudEvtHeadline) {
     const topNews = newsItems[0];
-    if (topNews && topNews.title) {
+    if (isHalted) {
+      hudEvtHeadline.textContent = 'HALTED_DEGRADED — Live Providers Unreachable';
+    } else if (topNews && topNews.title) {
       hudEvtHeadline.textContent = String(topNews.title).slice(0, 88);
-      hudEvtMeta.textContent = `${topNews.source || 'Macro Wire'} · Synchronized to ${liveTimeStr} UTC`;
-      hudEvtImpact.textContent = `Net Macro Lift: ${netMacroLift >= 0 ? '+' : ''}${netMacroLift.toFixed(2)} · Real-Yield Gravity: ${realYieldGravity.toFixed(2)} · Uncertainty: ${compositeCoherence < 0.65 ? 'Elevated' : 'Anchored'}`;
     } else {
-      hudEvtHeadline.textContent = `Macro Equilibrium Regime (${data.regime || 'CONSOLIDATION'})`;
-      hudEvtMeta.textContent = `Verified 2D Snapshot · ${liveTimeStr} UTC`;
-      hudEvtImpact.textContent = `Net Macro Lift: ${netMacroLift >= 0 ? '+' : ''}${netMacroLift.toFixed(2)} · EKF Residual: ${kalmanResidual >= 0 ? '+' : ''}$${kalmanResidual.toFixed(2)}`;
+      hudEvtHeadline.textContent = `Macro Equilibrium Regime (${safeData.atmosphericState || safeData.regime || 'CONSOLIDATION'})`;
     }
+  }
+  if (hudEvtMetrics) {
+    hudEvtMetrics.textContent = `Real Yield Gravity: ${realYieldGravity.toFixed(2)} · Dollar Drag: ${dollarDrag.toFixed(2)} · Quorum: ${Math.round(quorumRatio * 100)}%`;
   }
 
   // =========================================================================
@@ -13770,7 +14261,12 @@ function updateThreeWorldData(data) {
   }
 
   const lastPt = ekfPoints[ekfPoints.length - 1] || new THREE.Vector3(arenaX, 4, 0);
-  const ensemble = data.ensemble;
+  const ensemble =
+    (safeData.parallelUniverse?.liveEnsemble &&
+     Array.isArray(safeData.parallelUniverse.liveEnsemble.medianTrack) &&
+     safeData.parallelUniverse.liveEnsemble.medianTrack.length > 0)
+      ? safeData.parallelUniverse.liveEnsemble
+      : safeData.ensemble;
   if (ensemble && ensemble.medianTrack && ensemble.medianTrack.length > 0) {
     const medPts = [lastPt.clone()];
     const up75Pts = [lastPt.clone()];
@@ -13809,7 +14305,7 @@ function updateThreeWorldData(data) {
     threeWorldState.plumeGroup.add(medTube);
 
     // Parallel Universe Candidate 3D Trajectory Tube (Vibrant Magenta 0xe040fb)
-    const candTrack = data.parallelUniverse?.candidateEnsemble?.medianTrack;
+    const candTrack = safeData.parallelUniverse?.candidateEnsemble?.medianTrack;
     if (Array.isArray(candTrack) && candTrack.length > 0 && layers.parallelCandidate !== false) {
       const candPts = [lastPt.clone()];
       const cSteps = Math.min(14, candTrack.length);
@@ -13875,18 +14371,23 @@ function tickThreeWorld() {
   const dt = Math.min(0.1, threeWorldState.clock.getDelta());
   const elapsed = threeWorldState.clock.getElapsedTime();
 
+  // Animate Custom GLSL Sky Dome & Molten Arena Floor Shaders
+  if (threeWorldState.skyDomeMat && threeWorldState.skyDomeMat.uniforms) {
+    threeWorldState.skyDomeMat.uniforms.time.value = elapsed;
+  }
+
   // Smooth exponential camera damping when transitioning to a preset
   if (threeWorldState.isCameraTransitioning && threeWorldState.camera && threeWorldState.controls) {
     const cam = threeWorldState.camera;
     const tgt = threeWorldState.controls.target;
-    cam.position.x = THREE.MathUtils.damp(cam.position.x, threeWorldState.targetCamPos.x, 3.8, dt);
-    cam.position.y = THREE.MathUtils.damp(cam.position.y, threeWorldState.targetCamPos.y, 3.8, dt);
-    cam.position.z = THREE.MathUtils.damp(cam.position.z, threeWorldState.targetCamPos.z, 3.8, dt);
-    tgt.x = THREE.MathUtils.damp(tgt.x, threeWorldState.targetLookAt.x, 3.8, dt);
-    tgt.y = THREE.MathUtils.damp(tgt.y, threeWorldState.targetLookAt.y, 3.8, dt);
-    tgt.z = THREE.MathUtils.damp(tgt.z, threeWorldState.targetLookAt.z, 3.8, dt);
+    cam.position.x = THREE.MathUtils.damp(cam.position.x, threeWorldState.targetCamPos.x, 3.6, dt);
+    cam.position.y = THREE.MathUtils.damp(cam.position.y, threeWorldState.targetCamPos.y, 3.6, dt);
+    cam.position.z = THREE.MathUtils.damp(cam.position.z, threeWorldState.targetCamPos.z, 3.6, dt);
+    tgt.x = THREE.MathUtils.damp(tgt.x, threeWorldState.targetLookAt.x, 3.6, dt);
+    tgt.y = THREE.MathUtils.damp(tgt.y, threeWorldState.targetLookAt.y, 3.6, dt);
+    tgt.z = THREE.MathUtils.damp(tgt.z, threeWorldState.targetLookAt.z, 3.6, dt);
 
-    if (cam.position.distanceToSquared(threeWorldState.targetCamPos) < 0.06) {
+    if (cam.position.distanceToSquared(threeWorldState.targetCamPos) < 0.05) {
       threeWorldState.isCameraTransitioning = false;
     }
   } else if (
@@ -13895,10 +14396,10 @@ function tickThreeWorld() {
     threeWorldState.camera &&
     threeWorldState.controls
   ) {
-    // Subtle Cinematic Camera Drift (like a living 3D movie camera)
+    // Living 3D Movie Camera Breathing & Slow Heroic Arc
     const cam = threeWorldState.camera;
-    cam.position.x += Math.sin(elapsed * 0.24) * 0.012;
-    cam.position.y += Math.cos(elapsed * 0.18) * 0.006;
+    cam.position.x += Math.sin(elapsed * 0.28) * 0.014;
+    cam.position.y += Math.cos(elapsed * 0.21) * 0.006;
   }
 
   if (threeWorldState.controls) {
@@ -13912,6 +14413,10 @@ function tickThreeWorld() {
     const arena = threeWorldState.arenaLiveState;
 
     if (arena) {
+      if (arena.arenaFloorMat && arena.arenaFloorMat.uniforms) {
+        arena.arenaFloorMat.uniforms.time.value = elapsed;
+      }
+
       // Smoothly modulate Live Candle Color & Bull vs Bear Titan Combat Choreography
       const swing = Math.sin(elapsed * 3.1) * 0.065 * arena.volRatio * coherence;
       const dynBull = Math.max(0.08, Math.min(0.92, arena.bullStrength + swing));
@@ -13920,27 +14425,43 @@ function tickThreeWorld() {
       const bullH = Math.max(0.16, arena.liveRangeH * dynBull);
       const bearH = Math.max(0.16, arena.liveRangeH * dynBear);
 
-      arena.bullCoreMesh.scale.y = bullH / Math.max(0.18, arena.liveRangeH * arena.bullStrength);
-      arena.bullCoreMesh.position.y = (arena.yLow - arena.arenaBaseY) + bullH * 0.5;
+      if (arena.bullCoreMesh && arena.bearCoreMesh && arena.clashRingMesh) {
+        arena.bullCoreMesh.scale.y = bullH / Math.max(0.18, arena.liveRangeH * arena.bullStrength);
+        arena.bullCoreMesh.position.y = (arena.yLow - arena.arenaBaseY) + bullH * 0.5;
 
-      arena.bearCoreMesh.scale.y = bearH / Math.max(0.18, arena.liveRangeH * arena.bearStrength);
-      arena.bearCoreMesh.position.y = (arena.yHigh - arena.arenaBaseY) - bearH * 0.5;
+        arena.bearCoreMesh.scale.y = bearH / Math.max(0.18, arena.liveRangeH * arena.bearStrength);
+        arena.bearCoreMesh.position.y = (arena.yHigh - arena.arenaBaseY) - bearH * 0.5;
+
+        arena.clashRingMesh.position.y = (arena.yLow - arena.arenaBaseY) + bullH;
+        const ringPulse = 1.0 + 0.18 * Math.sin(elapsed * 5.6);
+        arena.clashRingMesh.scale.set(ringPulse, ringPulse, 1.0);
+      }
+
+      // Pulse Volumetric God-Rays & Colosseum Banners
+      if (arena.westGodRayMat) {
+        arena.westGodRayMat.opacity = (0.065 + dynBull * 0.075) * (0.85 + 0.15 * Math.sin(elapsed * 1.9));
+      }
+      if (arena.eastGodRayMat) {
+        arena.eastGodRayMat.opacity = (0.065 + dynBear * 0.075) * (0.85 + 0.15 * Math.cos(elapsed * 2.3));
+      }
+      if (Array.isArray(arena.bannerMeshes)) {
+        for (let bIdx = 0; bIdx < arena.bannerMeshes.length; bIdx++) {
+          const bm = arena.bannerMeshes[bIdx];
+          bm.rotation.x = Math.sin(elapsed * 2.4 + (bm.userData.phase || 0)) * 0.09;
+        }
+      }
 
       // Smoothly shift forming candle body color toward the dominant force
-      if (_tmpColor && _bullColor && _bearColor) {
+      if (_tmpColor && _bullColor && _bearColor && arena.liveShellMat) {
         _tmpColor.lerpColors(_bearColor, _bullColor, dynBull);
         arena.liveShellMat.color.copy(_tmpColor);
         arena.liveShellMat.emissive.copy(_tmpColor);
         arena.liveShellMat.emissiveIntensity = 0.52 + 0.45 * Math.abs(dynBull - 0.5) * 2.0;
         if (threeWorldState.arenaSpotLight) {
           threeWorldState.arenaSpotLight.color.copy(_tmpColor);
-          threeWorldState.arenaSpotLight.intensity = 1.45 + 1.1 * Math.abs(dynBull - 0.5);
+          threeWorldState.arenaSpotLight.intensity = 1.65 + 1.25 * Math.abs(dynBull - 0.5);
         }
       }
-
-      arena.clashRingMesh.position.y = (arena.yLow - arena.arenaBaseY) + bullH;
-      const ringPulse = 1.0 + 0.14 * Math.sin(elapsed * 5.2);
-      arena.clashRingMesh.scale.set(ringPulse, ringPulse, 1.0);
 
       // Check if a candle-close Defeat Sequence is active
       const defSeq = threeWorldState.defeatSequence;
@@ -13951,40 +14472,48 @@ function tickThreeWorld() {
         } else {
           const easeP = Math.sin(prog * Math.PI);
           if (defSeq.loserSide === 'BEAR') {
-            // Bear performs dignified kneeling defeat & sinks toward the Graveyard while Bull rises
             arena.bearTitan.position.y = -easeP * 1.15;
-            arena.bearTitan.position.z = -0.35 + easeP * 2.2;
+            arena.bearTitan.position.z = -0.15 + easeP * 2.2;
             arena.bearTitan.rotation.z = easeP * 0.48;
             arena.bullTitan.position.y = easeP * 0.35;
             arena.bullTitan.scale.setScalar(arena.baseBullScale * (1.0 + 0.18 * easeP));
           } else {
-            // Bull performs dignified kneeling defeat & sinks toward the Graveyard while Bear towers
             arena.bullTitan.position.y = -easeP * 1.15;
-            arena.bullTitan.position.z = 0.35 + easeP * 2.2;
+            arena.bullTitan.position.z = 0.22 + easeP * 2.2;
             arena.bullTitan.rotation.z = -easeP * 0.48;
             arena.bearTitan.position.y = easeP * 0.35;
             arena.bearTitan.scale.setScalar(arena.baseBearScale * (1.0 + 0.18 * easeP));
           }
         }
       } else {
-        // Active Live Duel Choreography between Bull Titan and Bear Titan
-        const bullLunge = Math.max(0, Math.sin(elapsed * 2.8)) * 0.42 * dynBull;
-        const bearStrike = Math.max(0, Math.sin(elapsed * 2.8 + Math.PI * 0.85)) * 0.42 * dynBear;
+        // Active Movie-Grade Duel Choreography between Bull Titan and Bear Titan
+        const bullCharge = Math.max(0, Math.sin(elapsed * 2.6)) * 0.46 * dynBull;
+        const bearSwipe = Math.max(0, Math.sin(elapsed * 2.6 + Math.PI * 0.85)) * 0.46 * dynBear;
 
-        arena.bullTitan.position.set(-2.35 + bullLunge, 0, 0.35);
-        arena.bullTitan.rotation.z = -0.05 + bullLunge * 0.18;
+        arena.bullTitan.position.set(-2.05 + bullCharge, 0, 0.22);
+        arena.bullTitan.rotation.z = -0.04 + bullCharge * 0.15;
         arena.bullTitan.scale.setScalar(arena.baseBullScale * (0.96 + 0.08 * dynBull));
         if (arena.bullTitan.userData.headGroup) {
-          arena.bullTitan.userData.headGroup.rotation.z = -0.32 + Math.sin(elapsed * 4.2) * 0.16 * dynBull;
+          arena.bullTitan.userData.headGroup.rotation.z = -0.26 + Math.sin(elapsed * 4.4) * 0.18 * dynBull;
+          arena.bullTitan.userData.headGroup.rotation.y = Math.cos(elapsed * 2.2) * 0.08;
+        }
+        if (arena.bullTitan.userData.frontLeftLeg) {
+          arena.bullTitan.userData.frontLeftLeg.rotation.z = 0.22 + Math.sin(elapsed * 5.2) * 0.18 * dynBull;
         }
 
-        arena.bearTitan.position.set(2.35 - bearStrike, 0, -0.35);
-        arena.bearTitan.rotation.z = 0.05 - bearStrike * 0.18;
+        arena.bearTitan.position.set(2.05 - bearSwipe, 0, -0.15);
+        arena.bearTitan.rotation.z = 0.04 - bearSwipe * 0.15;
         arena.bearTitan.scale.setScalar(arena.baseBearScale * (0.96 + 0.08 * dynBear));
+        if (arena.bearTitan.userData.headGroup) {
+          arena.bearTitan.userData.headGroup.rotation.z = 0.12 - Math.sin(elapsed * 3.9) * 0.14 * dynBear;
+        }
+        if (arena.bearTitan.userData.jawGroup) {
+          arena.bearTitan.userData.jawGroup.rotation.z = 0.28 + Math.abs(Math.sin(elapsed * 4.2)) * 0.26 * dynBear;
+        }
         if (arena.bearTitan.userData.leftArmGroup && arena.bearTitan.userData.rightArmGroup) {
-          const strikeRot = Math.sin(elapsed * 3.8) * 0.32 * dynBear;
-          arena.bearTitan.userData.leftArmGroup.rotation.z = strikeRot;
-          arena.bearTitan.userData.rightArmGroup.rotation.z = -strikeRot * 0.8;
+          const strikeRot = Math.sin(elapsed * 3.8) * 0.38 * dynBear;
+          arena.bearTitan.userData.leftArmGroup.rotation.z = 0.34 + strikeRot;
+          arena.bearTitan.userData.rightArmGroup.rotation.z = -0.22 - strikeRot * 0.85;
         }
       }
     }
@@ -14006,20 +14535,20 @@ function tickThreeWorld() {
       const pList = threeWorldState.flowParticleData;
       const mesh = threeWorldState.flowInstancedMesh;
       const arenaX = arena ? arena.arenaX : 9.2;
-      const arenaY = arena ? arena.arenaBaseY + 1.5 : 3.2;
+      const arenaY = arena ? arena.arenaBaseY + 1.2 : 3.0;
       const macroWindZ = (macroW?.realYieldGravity || 0) < -0.25 ? 0.85 : -0.25;
 
       for (let i = 0; i < pList.length; i++) {
         const p = pList[i];
         if (p.isArenaEmber) {
-          // Spiral clash sparks around the Live Arena Candle
-          p.angle += dt * p.speed * (0.8 + coherence * 0.6);
-          const rad = p.radius * (0.75 + 0.25 * Math.sin(elapsed * 3.0 + p.phase));
+          // Spiral molten sparks & clash embers erupting around the Bull and Bear Titans
+          p.angle += dt * p.speed * (0.85 + coherence * 0.65);
+          const rad = p.radius * (0.65 + 0.35 * Math.sin(elapsed * 3.2 + p.phase));
           const ex = arenaX + Math.cos(p.angle) * rad;
           const ez = Math.sin(p.angle) * rad;
-          const ey = arenaY + ((p.y + elapsed * p.speed * 0.7) % 5.2);
+          const ey = arenaY + ((p.y + elapsed * p.speed * 0.85) % 5.6);
           _dummyObj.position.set(ex, ey, ez);
-          _dummyObj.scale.setScalar(0.55 + 0.35 * Math.sin(elapsed * 6.0 + p.phase));
+          _dummyObj.scale.setScalar(0.65 + 0.45 * Math.sin(elapsed * 6.5 + p.phase));
         } else {
           // Macro Atmospheric Wind Streamlines across the Terrain
           p.x += p.speed * dt * (0.45 + 0.55 * coherence);
@@ -14120,6 +14649,16 @@ if (btn3dFullscreenToggle) {
     setTimeout(resizeThreeGlobeWorld, 80);
   });
 }
+const btn3dPureCinemaToggle = document.getElementById('btn3dPureCinemaToggle');
+if (btn3dPureCinemaToggle) {
+  btn3dPureCinemaToggle.addEventListener('click', () => {
+    const stage = document.getElementById('threeGlobeStage');
+    if (!stage) return;
+    const isPure = stage.classList.toggle('is-pure-cinema');
+    btn3dPureCinemaToggle.classList.toggle('active', isPure);
+    btn3dPureCinemaToggle.textContent = isPure ? '👁️ Show Nav' : '👁️ Pure Movie';
+  });
+}
 const btn3dAutoCinema = document.getElementById('btn3dAutoCinema');
 if (btn3dAutoCinema) {
   btn3dAutoCinema.addEventListener('click', () => {
@@ -14142,28 +14681,44 @@ if (threeDockToggleBtn) {
 // Cinematic Camera Director Presets (Shared across Bottom Dock, Left Zone Stack & 7-Chapter Storyboard)
 const ZONE_CHAPTER_COPY = {
   overview: {
-    title: 'GLOBAL OVERVIEW · THE WORLD OF GOLD',
-    sub: 'Full 3D Market Theatre synchronizing Arena, Graveyard, Deep Terrain, Macro Sky, and Future Plume',
+    mainTitle: 'GOLD DYNAMIC FLOW',
+    subTitle: 'THE WORLD OF GOLD · 3D MARKET THEATRE',
+    caption: 'A cinematic visualization of the real forces moving gold across Arena, Graveyard, Deep Terrain & Macro Sky',
   },
   battle: {
-    title: 'THE ARENA · THE BATTLE OF BULLS AND BEARS',
-    sub: 'Visualizes real market forces: buying and selling pressure, liquidity, volatility and momentum',
+    mainTitle: 'THE ARENA',
+    subTitle: 'THE BATTLE OF BULLS AND BEARS',
+    caption: 'Visualizes real market forces: buying and selling pressure, liquidity, volatility and momentum.',
   },
   graveyard: {
-    title: 'THE GRAVEYARD · MEMORY OF PAST BATTLES',
-    sub: 'Fallen Titans and closed historical candles show how gold has reacted to recent market auctions',
+    mainTitle: 'THE GRAVEYARD',
+    subTitle: 'MEMORY OF PAST BATTLES',
+    caption: 'Fallen Titans and historical events show how gold has reacted to major moments.',
   },
   manifold: {
-    title: 'DEEP TERRAIN · LIQUIDITY · VOLUME · MARKET STRUCTURE',
-    sub: 'A living landscape of multi-timeframe HVN/LVN liquidity pools, absorption scars and equilibrium flows',
+    mainTitle: 'DEEP TERRAIN',
+    subTitle: 'LIQUIDITY · VOLUME · MARKET STRUCTURE',
+    caption: 'A living landscape of liquidity, order flow, key levels and market activity.',
   },
   forecast: {
-    title: 'MACRO SKY & FUTURE TRAJECTORY · GLOBAL FORCES',
-    sub: 'TIPS real yields, DXY dollar drag, central bank tides and ensemble P5–P95 uncertainty trajectories',
+    mainTitle: 'MACRO SKY',
+    subTitle: 'GLOBAL FORCES',
+    caption: 'Economic data, geopolitical events and central bank actions shape the environment.',
+  },
+  aftermath: {
+    mainTitle: 'AFTERMATH',
+    subTitle: 'NEW BALANCE FORMS',
+    caption: 'Kalman-filtered state trajectories and residual struts reveal where market equilibrium settles.',
+  },
+  ahead: {
+    mainTitle: 'LOOKING AHEAD',
+    subTitle: 'UNCERTAINTY CONTINUES',
+    caption: 'Live yellow and Parallel Universe magenta trajectories branch into P5–P95 uncertainty fans.',
   },
   replay: {
-    title: 'HISTORICAL REPLAY · RELIVE THE MARKET’S STORY',
-    sub: 'Synchronized 2D-to-3D bar-by-bar historical state reconstruction without inventing past events',
+    mainTitle: 'HISTORICAL REPLAY',
+    subTitle: 'RELIVE THE MARKET’S STORY',
+    caption: 'Cinematic reconstruction of key periods synchronized bar-by-bar with the 2D analytical chart.',
   },
 };
 
@@ -14176,35 +14731,47 @@ function applyThreeCameraPreset(preset) {
   threeWorldState.isCameraTransitioning = true;
   const aspect = threeWorldState.camera ? threeWorldState.camera.aspect : 1.5;
   const ax = threeWorldState.arenaLiveState ? threeWorldState.arenaLiveState.arenaX : 9.2;
-  const ay = threeWorldState.arenaLiveState ? threeWorldState.arenaLiveState.arenaBaseY + 2.2 : 3.8;
+  const ay = threeWorldState.arenaLiveState ? threeWorldState.arenaLiveState.arenaBaseY + 1.8 : 3.6;
 
   const chapMeta = ZONE_CHAPTER_COPY[preset] || ZONE_CHAPTER_COPY.battle;
-  const titleEl = document.getElementById('threeSceneChapterTitle');
-  const subEl = document.getElementById('threeSceneChapterSubtitle');
-  if (titleEl) titleEl.textContent = chapMeta.title;
-  if (subEl) subEl.textContent = chapMeta.sub;
+  const mainTitleEl = document.getElementById('threeMovieMainTitle');
+  const subTitleEl = document.getElementById('threeMovieSubTitle');
+  const captionEl = document.getElementById('threeMovieCaption');
+  if (mainTitleEl) mainTitleEl.textContent = chapMeta.mainTitle;
+  if (subTitleEl) subTitleEl.textContent = chapMeta.subTitle;
+  if (captionEl) captionEl.textContent = chapMeta.caption;
+
+  const repBar = document.getElementById('threeReplayTimelineBar');
+  if (repBar) {
+    repBar.classList.toggle('is-visible', preset === 'replay');
+  }
 
   if (preset === 'overview') {
     const ov = getResponsiveOverviewCamera(aspect);
     threeWorldState.targetCamPos.set(ov.pos[0], ov.pos[1], ov.pos[2]);
     threeWorldState.targetLookAt.set(ov.look[0], ov.look[1], ov.look[2]);
   } else if (preset === 'battle') {
-    threeWorldState.targetCamPos.set(ax, ay + 3.2, aspect < 1 ? 13.5 : 9.2);
-    threeWorldState.targetLookAt.set(ax, ay + 0.6, 0);
+    // Low-angle heroic Colosseum framing right in front of the clashing Bull and Bear Titans
+    threeWorldState.targetCamPos.set(ax, ay + 1.35, aspect < 1 ? 9.8 : 6.6);
+    threeWorldState.targetLookAt.set(ax, ay + 0.35, -0.2);
   } else if (preset === 'graveyard') {
-    threeWorldState.targetCamPos.set(-4.5, 4.8, aspect < 1 ? 19.5 : 15.2);
+    threeWorldState.targetCamPos.set(-4.2, 4.2, aspect < 1 ? 18.5 : 14.2);
     threeWorldState.targetLookAt.set(-3.5, 0.8, 7.2);
   } else if (preset === 'manifold') {
-    threeWorldState.targetCamPos.set(-16, 18.5, aspect < 1 ? 26 : 19.5);
-    threeWorldState.targetLookAt.set(-2, 2.2, -5.5);
+    threeWorldState.targetCamPos.set(-14.5, 16.5, aspect < 1 ? 24.0 : 18.0);
+    threeWorldState.targetLookAt.set(-1.5, 2.0, -5.0);
   } else if (preset === 'forecast') {
-    threeWorldState.targetCamPos.set(ax + 6.5, 11.5, aspect < 1 ? 24 : 18.5);
-    threeWorldState.targetLookAt.set(ax + 2.5, 5.2, -1.5);
+    threeWorldState.targetCamPos.set(ax, ay + 6.5, aspect < 1 ? 19.5 : 14.8);
+    threeWorldState.targetLookAt.set(ax - 1.0, ay + 5.2, -3.5);
+  } else if (preset === 'aftermath') {
+    threeWorldState.targetCamPos.set(ax - 3.2, ay + 2.8, aspect < 1 ? 13.5 : 9.8);
+    threeWorldState.targetLookAt.set(ax - 0.5, ay + 0.5, 0.2);
+  } else if (preset === 'ahead') {
+    threeWorldState.targetCamPos.set(ax + 7.2, ay + 4.8, aspect < 1 ? 19.5 : 14.5);
+    threeWorldState.targetLookAt.set(ax + 4.5, ay + 1.2, 0);
   } else if (preset === 'replay') {
-    threeWorldState.targetCamPos.set(-2.5, 7.2, aspect < 1 ? 21.0 : 15.8);
-    threeWorldState.targetLookAt.set(0.5, 3.2, 1.5);
-    const repBar = document.getElementById('threeReplayTimelineBar');
-    if (repBar) repBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    threeWorldState.targetCamPos.set(ax - 1.5, ay + 2.4, aspect < 1 ? 12.8 : 9.2);
+    threeWorldState.targetLookAt.set(ax - 0.5, ay + 0.4, 0.2);
   }
 }
 
@@ -14218,10 +14785,17 @@ document.querySelectorAll('.three-bottom-dock [data-cam], .three-cinematic-left-
 // 7-Chapter Cinematic Storyboard Strip Wiring
 document.querySelectorAll('#threeStoryboardStrip [data-story-act]').forEach((card) => {
   card.addEventListener('click', () => {
-    document.querySelectorAll('#threeStoryboardStrip .three-story-card').forEach((c) => c.classList.remove('active'));
+    document.querySelectorAll('#threeStoryboardStrip .three-story-act-btn, #threeStoryboardStrip .three-story-card').forEach((c) => c.classList.remove('active'));
     card.classList.add('active');
-    const camPreset = card.getAttribute('data-cam-target') || 'battle';
-    applyThreeCameraPreset(camPreset);
+    const actNum = card.getAttribute('data-story-act');
+    const camPreset = card.getAttribute('data-cam') || card.getAttribute('data-cam-target') || 'battle';
+    if (actNum === '5') {
+      applyThreeCameraPreset('aftermath');
+    } else if (actNum === '7') {
+      applyThreeCameraPreset('ahead');
+    } else {
+      applyThreeCameraPreset(camPreset);
+    }
   });
 });
 
@@ -14242,6 +14816,13 @@ if (btnClose3dMathMapping && threeMathMappingModal) {
     threeMathMappingModal.classList.add('hidden');
   });
 }
+if (threeMathMappingModal) {
+  threeMathMappingModal.addEventListener('click', (e) => {
+    if (e.target === threeMathMappingModal) {
+      threeMathMappingModal.classList.add('hidden');
+    }
+  });
+}
 
 // Synchronized 2D + 3D Historical Replay Scrubber Wiring
 const threeHistoricalReplaySlider = document.getElementById('threeHistoricalReplaySlider');
@@ -14251,8 +14832,17 @@ const btn3dReplayLive = document.getElementById('btn3dReplayLive');
 function setHistoricalReplayOffset(nextOffset) {
   const maxOff = forecastData && Array.isArray(forecastData.candles) ? Math.max(0, forecastData.candles.length - 6) : 24;
   threeWorldState.replayBarOffset = Math.max(0, Math.min(maxOff, Math.round(Number(nextOffset) || 0)));
-  if (forecastData && threeWorldState.isActive) {
-    updateThreeWorldData(forecastData);
+  // Synchronize the 2D analytical chart viewport to the exact same historical bar offset
+  if (typeof chartViewport === 'object' && chartViewport !== null) {
+    chartViewport.candleOffset = threeWorldState.replayBarOffset;
+  }
+  if (forecastData) {
+    if (typeof drawWindyRadar === 'function') {
+      drawWindyRadar(forecastData);
+    }
+    if (threeWorldState.isActive) {
+      updateThreeWorldData(forecastData);
+    }
   }
 }
 
@@ -14369,7 +14959,30 @@ if (btnManualMmiPromote) {
         bannerEl.textContent = `✓ ${currentLang === 'fa' ? json.reasonFa : json.reasonEn}`;
       }
 
-      // Immediately fetch fresh forecast data bypassing cache so Live Yellow Line adopts the promoted candidate trajectory
+      if (json && json.promoted && forecastData) {
+        const promotedEnsemble =
+          (json.promotedLiveEnsemble && Array.isArray(json.promotedLiveEnsemble.medianTrack) && json.promotedLiveEnsemble.medianTrack.length > 0)
+            ? json.promotedLiveEnsemble
+            : (forecastData.parallelUniverse?.candidateEnsemble || forecastData.ensemble);
+        if (promotedEnsemble) {
+          forecastData.ensemble = promotedEnsemble;
+          if (forecastData.parallelUniverse) {
+            forecastData.parallelUniverse.liveEnsemble = promotedEnsemble;
+            if (json.liveArchitecture) {
+              forecastData.parallelUniverse.liveArchitecture = json.liveArchitecture;
+              if (json.liveArchitecture.compositeEquilibriumAnchor > 0) {
+                forecastData.equilibriumPrice = json.liveArchitecture.compositeEquilibriumAnchor;
+              }
+            }
+            if (json.candidateArchitecture) {
+              forecastData.parallelUniverse.candidateArchitecture = json.candidateArchitecture;
+            }
+          }
+          renderHUD(forecastData);
+        }
+      }
+
+      // Immediately fetch fresh forecast data bypassing cache so Live Yellow Line adopts the promoted candidate trajectory and fresh Candidate is forked
       await fetchQuantData(currentTimeframe, true);
 
       const postLiveVer = forecastData?.parallelUniverse?.liveArchitecture?.versionTag || json.liveVersionTag;
