@@ -3,6 +3,7 @@ import type {
   ProviderTier,
   TerminalSystemState,
   ProviderAttemptDiagnostic,
+  VerifiedVenueCameraObservation,
   VerifiedMarketWaterfallResult,
   VerifiedMacroYieldResult,
   VerifiedMacroNewsItem,
@@ -24,6 +25,7 @@ export type {
   ProviderTier,
   TerminalSystemState,
   ProviderAttemptDiagnostic,
+  VerifiedVenueCameraObservation,
   VerifiedMarketWaterfallResult,
   VerifiedMacroYieldResult,
   VerifiedMacroNewsItem,
@@ -577,7 +579,9 @@ export interface ArchitectureAuditLogEntry {
     | 'PROMOTED_MANUAL_MMI'
     | 'PROMOTED_AUTOMATIC_VERIFIED'
     | 'AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED'
-    | 'COLD_START_STATE_RESTORED';
+    | 'COLD_START_STATE_RESTORED'
+    | 'LATENT_MATH_WRITEBACK_APPLIED'
+    | 'RESIDUAL_ORACLE_COMPONENT_PRUNED';
   actor: 'INTELLIGENCE_AWARENESS_CORE' | 'OPERATOR_MMI' | 'CLOSED_LOOP_VERIFIER';
   sourceArchitectureId: string;
   targetArchitectureId: string;
@@ -643,7 +647,6 @@ export interface MultiTimeframeDiscoveryContext {
   summaryFa: string;
 }
 
-
 export interface EnsemblePlume {
   medianTrack: { time: number; value: number }[];
   upper95: { time: number; value: number }[];
@@ -651,6 +654,308 @@ export interface EnsemblePlume {
   lower25: { time: number; value: number }[];
   lower05: { time: number; value: number }[];
   sampleTracks?: { id: number; path: { time: number; value: number }[] }[];
+}
+
+/**
+ * GDF Scientific Core Upgrade — 6-Dimensional Latent State Vector X(τ)
+ */
+export interface LatentStateVector6D {
+  /** x1: Latent log price level ln(P_τ) */
+  logPriceLevel: number;
+  /** x2: Instantaneous drift rate per unit information clock Δτ */
+  localDrift: number;
+  /** x3: Instantaneous log-return volatility per sqrt(Δτ) */
+  localVolatility: number;
+  /** x4: Order-flow pressure & informed toxicity in [-1, +1] */
+  pressureToxicity: number;
+  /** x5: Order-book replenishment & depth resilience rate in [0.05, 0.99] on information clock τ */
+  liquidityResilience: number;
+  /** x6: Exogenous + endogenous macro residual force per unit Δτ */
+  macroResidualForce: number;
+}
+
+export interface InformationClockState {
+  currentDeltaTau: number;
+  cumulativeTau: number;
+  wallClockBarIndex: number;
+  clockRegime: 'QUIET_CONSOLIDATION' | 'NORMAL_FLOW' | 'ACTIVE_INFORMATION_BURST' | 'HALTED_FREEZE';
+  volumeIntensityRatio: number;
+  rangeActivityRatio: number;
+  crossVenueActivityRatio: number;
+  volumeWeight: number;
+  rangeWeight: number;
+  crossVenueWeight: number;
+  empiricalWeights: {
+    volumeWeight: number;
+    rangeWeight: number;
+    crossVenueWeight: number;
+  };
+  tauMinEmpirical: number;
+  tauMaxEmpirical: number;
+}
+
+export interface VenueObservationEquationRecord {
+  cameraId: string;
+  venueName: string;
+  providerName: string;
+  symbol: string;
+  instrumentIdentity: string;
+  observationChannel:
+    | 'SPOT_TOKEN_PRICE'
+    | 'FUTURES_BASIS_COINTEGRATED'
+    | 'PARK_RANGE_VOLATILITY'
+    | 'MACRO_YIELD_FX'
+    | 'PULSE_ECHO_SONAR';
+  equationAscii: string;
+  observedPriceUsd: number;
+  latentImpliedPriceUsd: number;
+  estimatedBasisUsd: number;
+  microstructureNoiseVarUsd2: number;
+  kalmanObservationWeight: number;
+  innovationResidualUsd: number;
+  provenanceVerified: true;
+}
+
+export type PulseType =
+  | 'VOLUME_ACTIVITY_BURST'
+  | 'LIQUIDITY_STOP_SWEEP'
+  | 'AGGRESSIVE_DIRECTIONAL_INITIATION'
+  | 'CROSS_VENUE_BASIS_DISLOCATION'
+  | 'MACRO_YIELD_OR_NEWS_IMPULSE';
+
+export interface DetectedPulseEvent {
+  pulseId: string;
+  barTime: number;
+  tauAtPulse: number;
+  deltaTauAtPulse: number;
+  pulseType: PulseType;
+  direction: number; // +1 UP, -1 DOWN, 0 NEUTRAL
+  directionLabel: 'UP' | 'DOWN' | 'NEUTRAL';
+  impulseMagnitudeSigma: number;
+  adaptiveThresholdSigma: number;
+  volumeAtPulse: number;
+  priceAtPulse: number;
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface MeasuredPulseEcho {
+  pulseId: string;
+  pulseType: PulseType;
+  barTime: number;
+  elapsedDeltaTau: number;
+  priceImpactPerUnitVolume: number;
+  recoverySpeedPerTau: number;
+  upDownAsymmetryRatio: number;
+  crossVenuePropagationBps: number;
+  deltaTauAcceleration: number;
+  predictedEchoImpactUsd: number;
+  realizedEchoImpactUsd: number;
+  echoPredictionResidualUsd: number;
+  resilienceStateUpdateDelta: number;
+  toxicityStateUpdateDelta: number;
+}
+
+/**
+ * Clean, typed extension interface ready for L2/L3 order-book, trade-level aggressor volume,
+ * scheduled economic-calendar pulses, and higher-frequency real-yield / DXY observations.
+ */
+export interface OrderBookMicrostructureExtensionInput {
+  l2OrderBookSnapshots?: {
+    venue: string;
+    timestampSec: number;
+    bidDepthTop5Usd: number;
+    askDepthTop5Usd: number;
+    spreadBps: number;
+    orderBookImbalance: number;
+  }[];
+  aggressorTradeFlow?: {
+    barTimeSec: number;
+    buyerInitiatedVolume: number;
+    sellerInitiatedVolume: number;
+    tradeCount: number;
+  }[];
+  scheduledEconomicPulses?: {
+    eventId: string;
+    timestampSec: number;
+    title: string;
+    surpriseZScore?: number;
+  }[];
+  highFreqMacroYieldTicks?: {
+    timestampSec: number;
+    tipsRealYield10Y: number;
+    dxyIndex: number;
+  }[];
+  aggressorBuyVolume?: number[];
+  aggressorSellVolume?: number[];
+  tradeCountPerBar?: number[];
+  topOfBookSpreadBps?: number[];
+  bidDepthTop5Usd?: number[];
+  askDepthTop5Usd?: number[];
+}
+
+export interface PulseEchoSonarTelemetry {
+  totalPulsesDetected: number;
+  measuredEchoCount: number;
+  adaptivePulseThresholdSigma: number;
+  meanPriceImpactPerUnitVol: number;
+  meanEchoRecoverySpeedPerTau: number;
+  upDownEchoAsymmetryRatio: number;
+  crossVenueBasisPropagationSpeed: number;
+  echoFeedbackToToxicity: number;
+  echoFeedbackToResilience: number;
+  latestPulse: DetectedPulseEvent | null;
+  latestEcho: MeasuredPulseEcho | null;
+  recentPulses: DetectedPulseEvent[];
+  recentEchoes: MeasuredPulseEcho[];
+  sonarSummaryEn: string;
+  sonarSummaryFa: string;
+  extensionInterfacesReady: {
+    aggressorVolumeAndTradeCount: boolean;
+    topOfBookSpreadAndDepthProxy: boolean;
+    scheduledEconomicCalendarPulses: boolean;
+    highFrequencyRealYieldDxy: boolean;
+  };
+}
+
+export interface ResidualOraclePoint {
+  barTime: number;
+  tau: number;
+  realizedPrice: number;
+  predictedYellowPrice: number;
+  priceResidualUsd: number;
+  standardizedResidualSigma: number;
+  echoResidualUsd: number;
+  deltaTau: number;
+  regime: string;
+}
+
+export interface ResidualStructureDiagnostics {
+  sampleSize: number;
+  sampleSizeN: number;
+  meanResidualUsd: number;
+  rmseUsd: number;
+  lag1Autocorrelation: number;
+  lag2Autocorrelation: number;
+  ljungBoxQ5Stat: number;
+  ljungBoxPValueApprox: number;
+  isWhiteNoiseCompatible: boolean;
+  isStatisticallyStructured: boolean;
+  highLowVolVarianceRatio: number;
+  highVolRmseUsd: number;
+  lowVolRmseUsd: number;
+  corrWithCrossVenueBasis: number;
+  corrWithEchoToxicity: number;
+  corrWithMacroForce: number;
+  corrWithInfoClockDeltaTau: number;
+  dominantBlindspotChannel:
+    | 'NONE_WHITE_NOISE'
+    | 'SERIAL_PERSISTENCE_AUTOCORR'
+    | 'CROSS_VENUE_BASIS_LEAKAGE'
+    | 'PULSE_ECHO_TOXICITY_LAG'
+    | 'MACRO_REAL_YIELD_DRIFT'
+    | 'VOL_REGIME_HETEROSKEDASTICITY';
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface ResidualOracleTelemetry {
+  immutableLogCount: number;
+  latestRealizedResidualUsd: number;
+  latestStandardizedResidualSigma: number;
+  latestEchoResidualUsd: number;
+  diagnostics: ResidualStructureDiagnostics;
+  recentResiduals: ResidualOraclePoint[];
+}
+
+export interface LatentModelMathWriteBackState {
+  writeBackGeneration: number;
+  lastWriteBackIso: string | null;
+  sourceCandidateArchId: string | null;
+  driftPersistencePhi: number;
+  meanReversionKappa: number;
+  echoToxicityCouplingBeta: number;
+  echoResilienceCouplingGamma: number;
+  macroResidualCouplingEta: number;
+  crossVenueObservationPrecisionMult: number;
+  activeSymbolicTermsWrittenBack: string[];
+  prunedFaultyComponents: string[];
+}
+
+export interface BaselineModelComparisonItem {
+  baselineId: string;
+  baselineNameEn: string;
+  baselineNameFa: string;
+  oosRmseUsd: number;
+  directionalHitRate: number;
+  brierScore: number;
+  relativeRmseRatio: number;
+  latentModelOutperforms: boolean;
+}
+
+export interface RegimeConditionedOosEntry {
+  regimeId: string;
+  regimeLabelEn: string;
+  regimeLabelFa: string;
+  sampleSizeN: number;
+  directionalHitRate: number;
+  hitRateCi95Lower: number;
+  hitRateCi95Upper: number;
+  oosRmseUsd: number;
+  brierScore: number;
+  oosRankIc: number;
+}
+
+export interface PermanentOosScientificScoreboard {
+  calibrationStatus: 'CALIBRATING' | 'CALIBRATED_OOS_ACTIVE' | 'HALTED_FREEZE';
+  isCalibrating: boolean;
+  realizedOosBarsCount: number;
+  requiredMinOosBars: number;
+  calibrationNoticeEn: string;
+  calibrationNoticeFa: string;
+  directionalHitRate: number;
+  directionalHitRateCi95Lower: number;
+  directionalHitRateCi95Upper: number;
+  directionalBrierScore: number;
+  oosRmseUsd: number;
+  oosSpearmanRankIc: number;
+  pulseEchoRmseUsd: number | null;
+  residualLag1Autocorr: number;
+  residualLjungBoxQ5: number;
+  residualWhiteNoisePassed: boolean;
+  baselineComparisons: BaselineModelComparisonItem[];
+  regimeConditionedPerformance: RegimeConditionedOosEntry[];
+  honestLimitationsNoteEn: string;
+  honestLimitationsNoteFa: string;
+}
+
+export interface ScientificCoreTelemetry {
+  schemaVersion: string;
+  instrumentIdentity: string;
+  latentState: LatentStateVector6D;
+  impliedLatentPriceUsd: number;
+  impliedDriftUsdPerTau: number;
+  impliedVolPctPerSqrtTau: number;
+  latentCovarianceDiagonal: LatentStateVector6D;
+  latentCovarianceMatrix6x6: number[][];
+  informationClock: InformationClockState;
+  clockHistory: { barTime: number; deltaTau: number; cumulativeTau: number; latentPriceUsd: number }[];
+  venueObservations: VenueObservationEquationRecord[];
+  activeCamerasCount: number;
+  paxgComexBasisChannel: {
+    active: boolean;
+    paxgSpotUsd: number;
+    comexBenchmarkUsd: number;
+    basisSpreadUsd: number;
+    basisZScore: number;
+    observationEquationAscii: string;
+  };
+  pulseEchoSonar: PulseEchoSonarTelemetry;
+  yellowLineConditionalExpectation: EnsemblePlume;
+  candidateLatentExpectation?: EnsemblePlume;
+  residualOracle: ResidualOracleTelemetry;
+  latentMathWriteBack: LatentModelMathWriteBackState;
+  scientificScoreboard: PermanentOosScientificScoreboard;
 }
 
 export interface ParallelUniverseTelemetry {
@@ -670,7 +975,6 @@ export interface ParallelUniverseTelemetry {
   promotionOccurredThisCycle: boolean;
   lastPromotionBannerEn: string | null;
   lastPromotionBannerFa: string | null;
+  scientificCore?: ScientificCoreTelemetry;
+  latentMathWriteBack?: LatentModelMathWriteBackState;
 }
-
-
-

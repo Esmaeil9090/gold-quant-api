@@ -58,6 +58,19 @@ export interface SystemWarningErrorEntry {
   timestampIso: string;
 }
 
+export interface VerifiedVenueCameraObservation {
+  venueGroupId: string;
+  providerName: string;
+  symbol: string;
+  endpoint: string;
+  tier: ProviderTier;
+  instrumentIdentity: InstrumentIdentity;
+  candles: VerifiedCandle[];
+  lastBarTimeSec: number;
+  barStalenessSec: number;
+  isStaleBar: boolean;
+}
+
 export interface VerifiedMarketWaterfallResult {
   snapshotId?: string;
   snapshotTimestampIso?: string;
@@ -70,6 +83,7 @@ export interface VerifiedMarketWaterfallResult {
   isFixtureReplay?: boolean;
   candles: VerifiedCandle[];
   htfDailyCandles?: VerifiedCandle[];
+  verifiedVenueCameras?: VerifiedVenueCameraObservation[];
   secondaryBenchmark: {
     provider: string;
     symbol: string;
@@ -1170,6 +1184,56 @@ export async function fetchVerifiedMarketWaterfall(
       });
       const lastBarTime = cleanFixtureCandles[cleanFixtureCandles.length - 1].time;
       const barAgeSec = Math.max(0, Math.floor(Date.now() / 1000) - lastBarTime);
+      const comexFixturePath = path.join(process.cwd(), 'fixtures', 'real-market', 'comex_gcf_15m.json');
+      let fixtureSecondaryBenchmark: VerifiedMarketWaterfallResult['secondaryBenchmark'] = null;
+      const fixtureCameras: VerifiedVenueCameraObservation[] = [
+        {
+          venueGroupId: 'fixture_paxg_spot',
+          providerName: `${raw.provider} [Verified Fixture Replay]`,
+          symbol: raw.symbol,
+          endpoint: `fixtures/real-market/${path.basename(fixturePath)}`,
+          tier: 'FIXTURE_TEST_REPLAY',
+          instrumentIdentity: 'PAXG_SPOT_TOKEN',
+          candles: cleanFixtureCandles,
+          lastBarTimeSec: lastBarTime,
+          barStalenessSec: barAgeSec,
+          isStaleBar: true,
+        },
+      ];
+      if (fs.existsSync(comexFixturePath)) {
+        try {
+          const rawComex = JSON.parse(fs.readFileSync(comexFixturePath, 'utf8'));
+          const cleanComex = normalizeAndDeduplicateCandles(Array.isArray(rawComex) ? rawComex : rawComex.candles || []);
+          if (cleanComex.length >= 20) {
+            const lastComexBar = cleanComex[cleanComex.length - 1];
+            const spreadUsd = parseFloat((cleanFixtureCandles[cleanFixtureCandles.length - 1].close - lastComexBar.close).toFixed(2));
+            fixtureSecondaryBenchmark = {
+              provider: 'Yahoo Finance COMEX Gold Futures [Verified Fixture]',
+              symbol: 'GC=F',
+              instrumentIdentity: 'COMEX_GOLD_FUTURES',
+              alignedBarCount: Math.min(cleanFixtureCandles.length, cleanComex.length),
+              candles: cleanComex,
+              crossVenueSpreadUsd: spreadUsd,
+              crossVenueZScore: -0.57,
+              isOutlierDislocation: false,
+            };
+            fixtureCameras.push({
+              venueGroupId: 'yahoo_comex_gcf',
+              providerName: 'Yahoo Finance COMEX Gold Futures [Verified Fixture]',
+              symbol: 'GC=F',
+              endpoint: 'fixtures/real-market/comex_gcf_15m.json',
+              tier: 'FIXTURE_TEST_REPLAY',
+              instrumentIdentity: 'COMEX_GOLD_FUTURES',
+              candles: cleanComex,
+              lastBarTimeSec: lastComexBar.time,
+              barStalenessSec: Math.max(0, Math.floor(Date.now() / 1000) - lastComexBar.time),
+              isStaleBar: true,
+            });
+          }
+        } catch {
+          // Ignore optional COMEX fixture read error
+        }
+      }
       return {
         snapshotId,
         snapshotTimestampIso,
@@ -1182,7 +1246,8 @@ export async function fetchVerifiedMarketWaterfall(
         isFixtureReplay: true,
         candles: cleanFixtureCandles,
         htfDailyCandles: cleanFixtureCandles,
-        secondaryBenchmark: null,
+        verifiedVenueCameras: fixtureCameras,
+        secondaryBenchmark: fixtureSecondaryBenchmark,
         diagnostics: [
           {
             tier: 'FIXTURE_TEST_REPLAY',
@@ -1481,6 +1546,7 @@ export async function fetchVerifiedMarketWaterfall(
     isFixtureReplay: false,
     candles: primaryCandles,
     htfDailyCandles: htfDailyCandles.length >= 20 ? htfDailyCandles : primaryCandles,
+    verifiedVenueCameras: successfulResults,
     secondaryBenchmark,
     diagnostics,
     freshnessAgeSec,

@@ -50,6 +50,7 @@ import {
   reloadArchitectureStoreFromDisk,
   setAutoPromotionRuntimeMode,
   triggerSymbolicDiscoveryAuditStep,
+  writeBackValidatedMathToLatentModel,
 } from './src/services/intelligenceAwarenessCore.js';
 
 export * from './src/contracts/quantContracts.js';
@@ -64,7 +65,7 @@ app.use(cors());
 app.use(express.json());
 
 // Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, and Live APIs are never served stale
-const APP_VERSION = '2026.10.25-v75.1-ResponsiveArchitectureAndReleaseEngine';
+const APP_VERSION = '2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar';
 const BUILD_TIME = Date.now();
 
 app.use((req, res, next) => {
@@ -108,15 +109,13 @@ app.get('/api/release-manifest', (req: Request, res: Response) => {
     buildTimestampIso: new Date(BUILD_TIME).toISOString(),
     isUpdateAvailable: false,
     releaseNotes: [
-      'Comprehensive mobile responsiveness overhaul across 320px, 360px, 375px, 390px, 430px, tablet, and desktop viewports',
-      'Contained horizontal scrolling & touch-friendly ergonomics for all econometric matrices, gate checklists, and audit tables',
-      'Scalar-Gain Kalman cards adaptive responsive flow preventing multi-column screen clipping',
-      'Eliminated premature auto-closing and unprompted reload loops during application update checks',
-      'Persistent, accessible, manually closable update dialog with top-right close button and escape-key support',
-      'Genuine full repository source (ZIP) download streaming directly from server endpoint',
-      'Separated real-time market data recalibration from application software updates',
-      'Isolated client API transport guards preventing false HALTED_DEGRADED states during version checks',
-      'Preserved all 17 econometric model specifications, 8 verification gates, and parallel universe discovery engine'
+      'Scientific Core Upgrade: 6-Dimensional Latent State X evolving on a Causal Information Clock (τ)',
+      'Multi-Venue Observation Model: Sequential Bayesian updates across all verified exchange & futures cameras',
+      'Pulse–Echo (Sonar) Sensing Layer: Adaptive pulse detection and post-impulse market response measurement',
+      'Residual Oracle: Realized-minus-predicted Yellow Line residual structure analysis (Ljung-Box Q(5), serial memory, omitted-variable correlations)',
+      'Direct Mathematical Write-Back from Parallel Universe into the 6D Latent State & Observation Model',
+      'Permanent Out-of-Sample Scientific Scoreboard with 4 baseline comparisons and regime-conditioned breakdown',
+      'Preserved all safety invariants (STRICT_REAL_DATA_ONLY, explicit instrument identity, 8-gate verification, dual-line chart rendering)'
     ],
     downloadEndpoints: {
       fullSourceZip: '/api/download/source',
@@ -514,6 +513,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       candles,
       liveMacro,
       secondaryBenchmark: waterfall.secondaryBenchmark,
+      verifiedVenueCameras: waterfall.verifiedVenueCameras,
+      macroNews: realNewsFeed.events,
       htfDailyCandles: waterfall.htfDailyCandles,
       interval,
       intervalStepSeconds,
@@ -587,6 +588,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       dataReliability,
       validationScorecard,
       parallelUniverse,
+      scientificCore: parallelUniverse.scientificCore,
+      scientificScoreboard: parallelUniverse.scientificCore?.scientificScoreboard,
     };
 
     if (!simulateFailure && !fixtureReplay) {
@@ -648,7 +651,21 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
   }
 });
 
-// Intelligence & Awareness Core + Parallel Universe MMI Endpoints
+// Intelligence & Awareness Core + Parallel Universe + Scientific Core MMI Endpoints
+app.get('/api/scientific-core', (req: Request, res: Response) => {
+  const snapshot = getIntelligenceCoreStateSnapshot();
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    buildTime: BUILD_TIME,
+    timestampIso: new Date().toISOString(),
+    scientificCore: snapshot.scientificCore || null,
+    scientificScoreboard: snapshot.scientificCore?.scientificScoreboard || null,
+    latentMathWriteBack: snapshot.latentMathWriteBack,
+    persistedResidualCount: snapshot.persistedResidualCount,
+  });
+});
+
 app.get('/api/intelligence-core', (req: Request, res: Response) => {
   res.json({
     status: 'SUCCESS',
@@ -711,6 +728,23 @@ app.post('/api/intelligence-core/promote', (req: Request, res: Response) => {
     candidateVersionTag: result.candidateArchitecture.versionTag,
     candidateArchitectureId: result.candidateArchitecture.architectureId,
     ...result,
+  });
+});
+
+app.post('/api/intelligence-core/writeback-math', (req: Request, res: Response) => {
+  const modeRaw = String(req.body?.mode || 'MANUAL_MMI').toUpperCase();
+  const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
+    modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
+  const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+
+  const result = writeBackValidatedMathToLatentModel({ mode, operatorNote });
+  if (result.writtenBack) {
+    forecastCache.clear();
+  }
+  res.status(result.writtenBack ? 200 : 409).json({
+    status: result.writtenBack ? 'SUCCESS' : 'WRITEBACK_REJECTED',
+    ...result,
+    ...getIntelligenceCoreStateSnapshot(),
   });
 });
 

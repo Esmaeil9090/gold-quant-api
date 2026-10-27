@@ -10,14 +10,21 @@ import type {
   CandidateVerificationStatus,
   DynamicModelSlot,
   EnsemblePlume,
+  LatentModelMathWriteBackState,
   MultiTimeframeDiscoveryContext,
+  OrderBookMicrostructureExtensionInput,
   ParallelUniverseTelemetry,
   ProportionalFusionWeights,
+  ResidualOraclePoint,
+  ResidualStructureDiagnostics,
+  ScientificCoreTelemetry,
   SymbolicPrimitiveId,
   TerminalSystemState,
   TestAndVerifyGateResult,
   TestAndVerifyReport,
+  VerifiedMacroNewsItem,
   VerifiedMacroYieldResult,
+  VerifiedVenueCameraObservation,
 } from '../contracts/quantContracts.js';
 import {
   AdaptiveDPObserver,
@@ -27,6 +34,11 @@ import {
   computeTopDownLiquidityEngine,
   computeVpinAndShrinkage,
 } from '../engine/quantEngine.js';
+import {
+  evaluateLatentStateFilterOnInformationClock,
+  evaluateScientificCorePipeline,
+  LatentFilterTuningOverrides,
+} from '../engine/scientificCore.js';
 import {
   buildEmpiricalCalibrationBundle,
   computeEmpiricalQuantilePlumes,
@@ -191,6 +203,22 @@ export function resolvePersistenceConfig(): {
 }
 
 
+function createDefaultLatentMathWriteBackState(): LatentModelMathWriteBackState {
+  return {
+    writeBackGeneration: 1,
+    lastWriteBackIso: null,
+    sourceCandidateArchId: null,
+    driftPersistencePhi: 0.78,
+    meanReversionKappa: 0.12,
+    echoToxicityCouplingBeta: 0.34,
+    echoResilienceCouplingGamma: 0.42,
+    macroResidualCouplingEta: 0.25,
+    crossVenueObservationPrecisionMult: 1.0,
+    activeSymbolicTermsWrittenBack: [],
+    prunedFaultyComponents: [],
+  };
+}
+
 interface PersistedArchitectureDocumentV2 {
   schemaVersion: number;
   savedAtIso: string;
@@ -203,6 +231,9 @@ interface PersistedArchitectureDocumentV2 {
   promotedCandTheta?: number;
   promotedCandDriftMult?: number;
   promotedLiveReferencePreds?: number[];
+  promotedCandTuningOverrides?: LatentFilterTuningOverrides;
+  latentMathWriteBack?: LatentModelMathWriteBackState;
+  persistedResidualLog?: ResidualOraclePoint[];
 }
 
 interface RuntimeCoreStore {
@@ -223,8 +254,13 @@ interface RuntimeCoreStore {
   lastCandDriftMult?: number;
   promotedCandTheta?: number;
   promotedCandDriftMult?: number;
+  lastCandTuningOverrides?: LatentFilterTuningOverrides;
+  promotedCandTuningOverrides?: LatentFilterTuningOverrides;
   lastPromotedLiveEnsemble?: EnsemblePlume;
   lastCandidateEnsemble?: EnsemblePlume;
+  latentMathWriteBack: LatentModelMathWriteBackState;
+  persistedResidualLog: ResidualOraclePoint[];
+  lastScientificCore?: ScientificCoreTelemetry;
   persistenceHealth: ArchitecturePersistenceHealth;
   lastMtfDiscoveryContext: MultiTimeframeDiscoveryContext;
 }
@@ -567,6 +603,9 @@ function persistCoreStoreToDisk(store: RuntimeCoreStore): void {
     promotedCandTheta: store.promotedCandTheta,
     promotedCandDriftMult: store.promotedCandDriftMult,
     promotedLiveReferencePreds: store.promotedLiveReferencePreds,
+    promotedCandTuningOverrides: store.promotedCandTuningOverrides,
+    latentMathWriteBack: store.latentMathWriteBack,
+    persistedResidualLog: store.persistedResidualLog.slice(-200),
   };
 
   store.persistenceHealth = {
@@ -683,6 +722,9 @@ function loadOrInitializeCoreStore(): RuntimeCoreStore {
           promotedCandTheta: typeof raw.promotedCandTheta === 'number' ? raw.promotedCandTheta : undefined,
           promotedCandDriftMult: typeof raw.promotedCandDriftMult === 'number' ? raw.promotedCandDriftMult : undefined,
           promotedLiveReferencePreds: Array.isArray(raw.promotedLiveReferencePreds) ? raw.promotedLiveReferencePreds : undefined,
+          promotedCandTuningOverrides: raw.promotedCandTuningOverrides,
+          latentMathWriteBack: raw.latentMathWriteBack || createDefaultLatentMathWriteBackState(),
+          persistedResidualLog: Array.isArray(raw.persistedResidualLog) ? raw.persistedResidualLog.slice(-200) : [],
           lastVerificationReport: null,
           lastFindings: [],
           lastPromotionBannerEn: null,
@@ -760,6 +802,8 @@ function loadOrInitializeCoreStore(): RuntimeCoreStore {
     auditTrail: migratedAudit,
     autoPromotionRuntimeEnabled: defaultAutoPromo,
     generationCounter: 1,
+    latentMathWriteBack: createDefaultLatentMathWriteBackState(),
+    persistedResidualLog: [],
     lastVerificationReport: null,
     lastFindings: [],
     lastPromotionBannerEn: null,
@@ -1601,7 +1645,8 @@ function calibrateAndWeightArchitectureOnRealSnapshot(params: {
 
 /**
  * Generates structured Awareness Findings by inspecting real market inputs,
- * live yellow-line residuals, multi-timeframe confluence, and model contradictions.
+ * live yellow-line residuals (Residual Oracle), pulse-echo sonar anomalies,
+ * multi-timeframe confluence, and model contradictions.
  */
 function generateStructuredAwarenessFindings(params: {
   liveArch: ArchitectureState;
@@ -1612,9 +1657,19 @@ function generateStructuredAwarenessFindings(params: {
   garchExceededMedian: boolean;
   prunedModelIds: SymbolicPrimitiveId[];
   mtfContext: MultiTimeframeDiscoveryContext;
+  residualDiagnostics?: ResidualStructureDiagnostics;
 }): AwarenessFinding[] {
-  const { liveArch, candArch, livePreds, realized, basisZScore, garchExceededMedian, prunedModelIds, mtfContext } =
-    params;
+  const {
+    liveArch,
+    candArch,
+    livePreds,
+    realized,
+    basisZScore,
+    garchExceededMedian,
+    prunedModelIds,
+    mtfContext,
+    residualDiagnostics,
+  } = params;
   const nowIso = new Date().toISOString();
   const findings: AwarenessFinding[] = [];
 
@@ -1636,8 +1691,24 @@ function generateStructuredAwarenessFindings(params: {
     }
   }
 
-  // 2. Check residual autocorrelation on Live Yellow Line -> LAGGED_RESIDUAL_SELF_CORRECTION
-  if (livePreds.length >= 8 && realized.length >= 8) {
+  // 2. Check Residual Oracle structure on Live Yellow Line -> LAGGED_RESIDUAL_SELF_CORRECTION
+  if (residualDiagnostics && residualDiagnostics.sampleSize >= 6) {
+    const resRho1 = residualDiagnostics.lag1Autocorrelation;
+    if (Math.abs(resRho1) > 0.08 || residualDiagnostics.dominantBlindspotChannel !== 'NONE_WHITE_NOISE') {
+      findings.push({
+        id: 'finding-residual-oracle-structure',
+        timestampIso: nowIso,
+        category: 'RESIDUAL_AUTOCORRELATION',
+        severity: residualDiagnostics.isStatisticallyStructured ? 'WARNING' : 'INFO',
+        affectedModelId: 'LAGGED_RESIDUAL_SELF_CORRECTION',
+        regimeContext: `ORACLE_${residualDiagnostics.dominantBlindspotChannel}`,
+        summaryEn: `Residual Oracle [${residualDiagnostics.dominantBlindspotChannel}]: ${residualDiagnostics.summaryEn}`,
+        summaryFa: `اوراکل پسماند [${residualDiagnostics.dominantBlindspotChannel}]: ${residualDiagnostics.summaryFa}`,
+        empiricalEvidence: `ρ₁=${resRho1.toFixed(3)}, Q(5)=${residualDiagnostics.ljungBoxQ5Stat.toFixed(2)} (p=${residualDiagnostics.ljungBoxPValueApprox.toFixed(3)}) | Corr(Basis)=${residualDiagnostics.corrWithCrossVenueBasis.toFixed(2)}, Corr(Echo)=${residualDiagnostics.corrWithEchoToxicity.toFixed(2)}, Corr(Δτ)=${residualDiagnostics.corrWithInfoClockDeltaTau.toFixed(2)}`,
+        recommendedAction: 'INVENT_SYMBOLIC_TERM',
+      });
+    }
+  } else if (livePreds.length >= 8 && realized.length >= 8) {
     const residuals = realized.map((y, i) => y - (livePreds[i] || 0));
     const meanRes = residuals.reduce((a, b) => a + b, 0) / residuals.length;
     let num = 0;
@@ -1996,8 +2067,41 @@ function runStrictEightGateVerification(params: {
 }
 
 /**
+ * Helper to construct deterministic 6D Latent State Filter tuning overrides
+ * from a Candidate Architecture and generation counter.
+ */
+function buildCandidateLatentTuningOverrides(arch: ArchitectureState, genCounter: number) {
+  const gOffset = Math.min(4, Math.max(0, genCounter - 1));
+  const phiResCoeff =
+    arch.models.find(m => m.modelId === 'LAGGED_RESIDUAL_SELF_CORRECTION')?.fittedCoefficient ?? 0.22;
+  const basisVelCoeff =
+    arch.models.find(m => m.modelId === 'BASIS_VELOCITY_COUPLING')?.fittedCoefficient ?? 0.26;
+  const vpinExhaustCoeff =
+    arch.models.find(m => m.modelId === 'VOLUME_CLOCK_HAWKMOTH_RESTORING')?.fittedCoefficient ?? 0.24;
+  const cMult = parseFloat((0.42 + 0.025 * gOffset).toFixed(4));
+  return {
+    driftPersistencePhi: parseFloat(
+      Math.max(0.55, Math.min(0.95, 0.8 + 0.04 * gOffset + 0.05 * Math.tanh(phiResCoeff))).toFixed(4)
+    ),
+    meanReversionKappa: parseFloat((0.135 + 0.008 * gOffset).toFixed(4)),
+    echoToxicityCouplingBeta: parseFloat(
+      Math.max(0.15, Math.min(0.85, 0.36 + 0.08 * Math.abs(vpinExhaustCoeff))).toFixed(4)
+    ),
+    echoResilienceCouplingGamma: parseFloat(Math.max(0.15, Math.min(0.85, 0.4 + 0.04 * gOffset)).toFixed(4)),
+    macroResidualCouplingEta: parseFloat(
+      Math.max(0.12, Math.min(0.75, 0.26 + 0.06 * Math.abs(basisVelCoeff))).toFixed(4)
+    ),
+    crossVenueObservationPrecisionMult: parseFloat((1.08 + 0.05 * gOffset).toFixed(4)),
+    equilibriumAnchorOverride: arch.compositeEquilibriumAnchor,
+    symbolicStepDriftUsd: parseFloat((arch.compositeNetDriftUsdPerStep * cMult).toFixed(4)),
+  };
+}
+
+/**
  * Evaluates both the Live Architecture (Yellow Line) and the isolated Parallel Universe
- * Candidate Architecture (Magenta Dashed Line) on the exact same verified real-data snapshot.
+ * Candidate Architecture (Magenta Dashed Line) on the exact same verified real-data snapshot,
+ * driven by the 6D Latent State Filter on the Causal Information Clock τ, Multi-Venue Observation
+ * Equations, Pulse–Echo (Sonar) Sensing Layer, and Residual Oracle.
  */
 export function evaluateParallelUniverseAndAwarenessCore(params: {
   candles: Candle[];
@@ -2010,6 +2114,9 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     crossVenueZScore: number;
     isOutlierDislocation: boolean;
   } | null;
+  verifiedVenueCameras?: VerifiedVenueCameraObservation[];
+  macroNews?: VerifiedMacroNewsItem[];
+  extensionInput?: OrderBookMicrostructureExtensionInput;
   htfDailyCandles?: Candle[];
   interval: string;
   intervalStepSeconds: number;
@@ -2025,6 +2132,9 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     candles,
     liveMacro,
     secondaryBenchmark,
+    verifiedVenueCameras,
+    macroNews,
+    extensionInput,
     htfDailyCandles,
     interval,
     intervalStepSeconds,
@@ -2194,99 +2304,6 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   });
   coreStore.candidateArchitecture = candEval.updatedArch;
 
-  // Persist updated weights & fitted coefficients atomically
-  persistCoreStoreToDisk(coreStore);
-
-  // 3. Generate Structured Awareness Findings
-  const findings = generateStructuredAwarenessFindings({
-    liveArch: coreStore.liveArchitecture,
-    candArch: coreStore.candidateArchitecture,
-    livePreds: liveEval.stepPredictionsHistory,
-    realized: liveEval.realizedStepChanges,
-    basisZScore: cointegrationBasis.zScore,
-    garchExceededMedian,
-    prunedModelIds: candEval.prunedModelIds,
-    mtfContext: mtfDiscoveryContext,
-  });
-  coreStore.lastFindings = findings;
-
-  // 4. Generate Live (Yellow Line) & Candidate (Magenta Line) Trajectory Plumes on the shared real snapshot
-  const candidateVolMult =
-    liquidityEngine.interactionState === 'LVN_VACUUM_ACCELERATION'
-      ? 1.12
-      : liquidityEngine.interactionState === 'HTF_HVN_MAGNET_GRAVITY'
-      ? 0.86
-      : 0.96;
-
-  const computeLivePlumeFromCurrentState = (): EnsemblePlume => {
-    if (coreStore.liveArchitecture.promotionMode === 'INITIAL_BASELINE') {
-      return computeEmpiricalQuantilePlumes(
-        currentPrice,
-        rawEquilibriumPrice,
-        0.12,
-        garchVolForecast,
-        returns,
-        24,
-        intervalStepSeconds,
-        candles[candles.length - 1].time,
-        {
-          fusedEquilibriumPrice: liquidityEngine.fusedEquilibriumAnchor,
-          fusedNetDriftUsdPerStep: liquidityEngine.fusedNetDriftUsd * 0.35,
-          liquidityVolatilityMultiplier: candidateVolMult,
-          nearestUpperHvn: liquidityEngine.nearestUpperHvn,
-          nearestLowerHvn: liquidityEngine.nearestLowerHvn,
-        }
-      );
-    }
-    const activeLiveTheta = coreStore.promotedCandTheta ?? 0.135;
-    const activeLiveDriftMult = coreStore.promotedCandDriftMult ?? 0.42;
-    return computeEmpiricalQuantilePlumes(
-      currentPrice,
-      coreStore.liveArchitecture.compositeEquilibriumAnchor,
-      activeLiveTheta,
-      garchVolForecast,
-      returns,
-      24,
-      intervalStepSeconds,
-      candles[candles.length - 1].time,
-      {
-        fusedEquilibriumPrice: coreStore.liveArchitecture.compositeEquilibriumAnchor,
-        fusedNetDriftUsdPerStep: coreStore.liveArchitecture.compositeNetDriftUsdPerStep * activeLiveDriftMult,
-        liquidityVolatilityMultiplier: candidateVolMult,
-        nearestUpperHvn: liquidityEngine.nearestUpperHvn,
-        nearestLowerHvn: liquidityEngine.nearestLowerHvn,
-      }
-    );
-  };
-
-  const computeCandidatePlumeFromCurrentState = (): EnsemblePlume => {
-    const genOffset = Math.min(4, Math.max(0, coreStore.generationCounter - 1));
-    const candTheta = parseFloat((0.135 + 0.008 * genOffset).toFixed(4));
-    const candDriftMult = parseFloat((0.42 + 0.025 * genOffset).toFixed(4));
-    coreStore.lastCandTheta = candTheta;
-    coreStore.lastCandDriftMult = candDriftMult;
-    return computeEmpiricalQuantilePlumes(
-      currentPrice,
-      coreStore.candidateArchitecture.compositeEquilibriumAnchor,
-      candTheta,
-      garchVolForecast,
-      returns,
-      24,
-      intervalStepSeconds,
-      candles[candles.length - 1].time,
-      {
-        fusedEquilibriumPrice: coreStore.candidateArchitecture.compositeEquilibriumAnchor,
-        fusedNetDriftUsdPerStep: coreStore.candidateArchitecture.compositeNetDriftUsdPerStep * candDriftMult,
-        liquidityVolatilityMultiplier: candidateVolMult,
-        nearestUpperHvn: liquidityEngine.nearestUpperHvn,
-        nearestLowerHvn: liquidityEngine.nearestLowerHvn,
-      }
-    );
-  };
-
-  let liveEnsemble: EnsemblePlume = computeLivePlumeFromCurrentState();
-  let candidateEnsemble: EnsemblePlume = computeCandidatePlumeFromCurrentState();
-
   // Build local volatility series for Gate 4 regime partitioning
   const evalN = liveEval.realizedStepChanges.length;
   const garchVolSeries: number[] = [];
@@ -2295,7 +2312,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     garchVolSeries.push(Math.abs(returns[rIdx] || 0));
   }
 
-  // 5. Run Strict 8-Gate Closed-Loop Verification on Active Timeframe Real OOS Bars
+  // 3. Run Strict 8-Gate Closed-Loop Verification on Active Timeframe Real OOS Bars
   const verificationReport = runStrictEightGateVerification({
     timeframe: interval,
     candles,
@@ -2311,7 +2328,99 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   });
   coreStore.lastVerificationReport = verificationReport;
 
-  // 6. Check if Automatic Promotion is enabled AND all 8 gates passed (VERIFIED_FOR_PROMOTION)
+  // 4. Evaluate Scientific Core Pipeline (6D Latent State on Information Clock τ,
+  //    Multi-Venue Observation Model, Pulse-Echo Sonar, Residual Oracle, and Permanent OOS Scoreboard)
+  const genOffset = Math.min(4, Math.max(0, coreStore.generationCounter - 1));
+  const candTheta = parseFloat((0.135 + 0.008 * genOffset).toFixed(4));
+  const candDriftMult = parseFloat((0.42 + 0.025 * genOffset).toFixed(4));
+  coreStore.lastCandTheta = candTheta;
+  coreStore.lastCandDriftMult = candDriftMult;
+
+  const candTuningOverrides = buildCandidateLatentTuningOverrides(
+    coreStore.candidateArchitecture,
+    coreStore.generationCounter
+  );
+  coreStore.lastCandTuningOverrides = candTuningOverrides;
+
+  const liveBaseTuning =
+    coreStore.liveArchitecture.promotionMode === 'INITIAL_BASELINE'
+      ? {
+          ...coreStore.latentMathWriteBack,
+          equilibriumAnchorOverride: liquidityEngine.fusedEquilibriumAnchor,
+          symbolicStepDriftUsd: parseFloat((liquidityEngine.fusedNetDriftUsd * 0.35).toFixed(4)),
+        }
+      : {
+          ...coreStore.latentMathWriteBack,
+          ...(coreStore.promotedCandTuningOverrides || {
+            driftPersistencePhi: coreStore.latentMathWriteBack.driftPersistencePhi,
+            meanReversionKappa: coreStore.promotedCandTheta ?? 0.135,
+            echoToxicityCouplingBeta: coreStore.latentMathWriteBack.echoToxicityCouplingBeta,
+            echoResilienceCouplingGamma: coreStore.latentMathWriteBack.echoResilienceCouplingGamma,
+            macroResidualCouplingEta: coreStore.latentMathWriteBack.macroResidualCouplingEta,
+            crossVenueObservationPrecisionMult:
+              coreStore.latentMathWriteBack.crossVenueObservationPrecisionMult,
+            equilibriumAnchorOverride: coreStore.liveArchitecture.compositeEquilibriumAnchor,
+            symbolicStepDriftUsd: parseFloat(
+              (
+                coreStore.liveArchitecture.compositeNetDriftUsdPerStep *
+                (coreStore.promotedCandDriftMult ?? 0.42)
+              ).toFixed(4)
+            ),
+          }),
+        };
+
+  let scientificCore = evaluateScientificCorePipeline({
+    candles,
+    interval,
+    intervalStepSeconds,
+    atr,
+    htfPocAnchorPrice: liquidityEngine.compositeHtfPocAnchor,
+    liveMacro,
+    secondaryBenchmark,
+    verifiedVenueCameras,
+    macroNews,
+    extensionInput,
+    liveTuning: liveBaseTuning,
+    candidateTuningOverrides: candTuningOverrides,
+    dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
+  });
+
+  // Update persisted residual log with latest realized OOS residual points
+  if (scientificCore.residualOracle.recentResiduals.length > 0) {
+    const existingTimes = new Set(coreStore.persistedResidualLog.map(r => r.barTime));
+    for (const pt of scientificCore.residualOracle.recentResiduals) {
+      if (!existingTimes.has(pt.barTime)) {
+        coreStore.persistedResidualLog.push(pt);
+        existingTimes.add(pt.barTime);
+      }
+    }
+    if (coreStore.persistedResidualLog.length > 160) {
+      coreStore.persistedResidualLog = coreStore.persistedResidualLog.slice(-160);
+    }
+  }
+  coreStore.lastScientificCore = scientificCore;
+
+  // 5. Generate Structured Awareness Findings driven by the Residual Oracle & Market State
+  const findings = generateStructuredAwarenessFindings({
+    liveArch: coreStore.liveArchitecture,
+    candArch: coreStore.candidateArchitecture,
+    livePreds: liveEval.stepPredictionsHistory,
+    realized: liveEval.realizedStepChanges,
+    basisZScore: cointegrationBasis.zScore,
+    garchExceededMedian,
+    prunedModelIds: candEval.prunedModelIds,
+    mtfContext: mtfDiscoveryContext,
+    residualDiagnostics: scientificCore.residualOracle.diagnostics,
+  });
+  coreStore.lastFindings = findings;
+
+  // 6. Yellow Line = Conditional Expectation of 6D Latent State X on Information Clock τ
+  //    Magenta Dashed Line = Parallel Universe Candidate Latent State Conditional Expectation
+  let liveEnsemble: EnsemblePlume = scientificCore.yellowLineConditionalExpectation;
+  let candidateEnsemble: EnsemblePlume =
+    scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation;
+
+  // 7. Check if Automatic Promotion is enabled AND all 8 gates passed (VERIFIED_FOR_PROMOTION)
   let promotionOccurredThisCycle = hadPendingPromotionAck;
   if (
     !hadPendingPromotionAck &&
@@ -2346,10 +2455,40 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
         liveReferenceStepPredictions: candEval.stepPredictionsHistory,
       });
       coreStore.candidateArchitecture = candEval.updatedArch;
-      candidateEnsemble = computeCandidatePlumeFromCurrentState();
-      persistCoreStoreToDisk(coreStore);
+
+      const forkedCandTuningOverrides = buildCandidateLatentTuningOverrides(
+        coreStore.candidateArchitecture,
+        coreStore.generationCounter
+      );
+      coreStore.lastCandTuningOverrides = forkedCandTuningOverrides;
+
+      scientificCore = evaluateScientificCorePipeline({
+        candles,
+        interval,
+        intervalStepSeconds,
+        atr,
+        htfPocAnchorPrice: liquidityEngine.compositeHtfPocAnchor,
+        liveMacro,
+        secondaryBenchmark,
+        verifiedVenueCameras,
+        macroNews,
+        extensionInput,
+        liveTuning: {
+          ...coreStore.latentMathWriteBack,
+          ...(coreStore.promotedCandTuningOverrides || {}),
+        },
+        candidateTuningOverrides: forkedCandTuningOverrides,
+        dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
+      });
+      coreStore.lastScientificCore = scientificCore;
+      liveEnsemble = scientificCore.yellowLineConditionalExpectation;
+      candidateEnsemble =
+        scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation;
     }
   }
+
+  // Persist updated weights, fitted coefficients, residual log, and write-back state atomically
+  persistCoreStoreToDisk(coreStore);
 
   return {
     enabled: flags.ENABLE_PARALLEL_UNIVERSE_CORE,
@@ -2368,6 +2507,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     promotionOccurredThisCycle,
     lastPromotionBannerEn: coreStore.lastPromotionBannerEn,
     lastPromotionBannerFa: coreStore.lastPromotionBannerFa,
+    scientificCore,
+    latentMathWriteBack: coreStore.latentMathWriteBack,
   };
 }
 
@@ -2428,15 +2569,40 @@ export function promoteCandidateArchitecture(params: {
   }
 
   const promotedCand = coreStore.candidateArchitecture;
+  const prePromoGen = coreStore.generationCounter;
   coreStore.generationCounter += 1;
   const gen = coreStore.generationCounter;
 
-  // Preserve the exact reference predictions and horizon parameters that produced the candidate's trajectory
+  // Preserve the exact reference predictions and 6D Latent Filter parameters that produced the candidate's trajectory
   if (coreStore.lastLiveStepPredictions && coreStore.lastLiveStepPredictions.length > 0) {
     coreStore.promotedLiveReferencePreds = [...coreStore.lastLiveStepPredictions];
   }
   coreStore.promotedCandTheta = coreStore.lastCandTheta ?? 0.135;
   coreStore.promotedCandDriftMult = coreStore.lastCandDriftMult ?? 0.42;
+  const capturedCandTuning =
+    coreStore.lastCandTuningOverrides || buildCandidateLatentTuningOverrides(promotedCand, prePromoGen);
+  coreStore.promotedCandTuningOverrides = { ...capturedCandTuning };
+
+  // Also synchronize Latent Math Write-Back state with the promoted candidate's validated parameters
+  const activeSymbolicIds = promotedCand.models
+    .filter(m => m.origin === 'LEVEL_B_SYMBOLIC_DISCOVERY' && m.isEnabled)
+    .map(m => m.modelId);
+  const prunedSymbolicIds = promotedCand.models
+    .filter(m => !m.isEnabled)
+    .map(m => m.modelId);
+  coreStore.latentMathWriteBack = {
+    writeBackGeneration: coreStore.latentMathWriteBack.writeBackGeneration + 1,
+    lastWriteBackIso: nowIso,
+    sourceCandidateArchId: promotedCand.architectureId,
+    driftPersistencePhi: capturedCandTuning.driftPersistencePhi,
+    meanReversionKappa: capturedCandTuning.meanReversionKappa,
+    echoToxicityCouplingBeta: capturedCandTuning.echoToxicityCouplingBeta,
+    echoResilienceCouplingGamma: capturedCandTuning.echoResilienceCouplingGamma,
+    macroResidualCouplingEta: capturedCandTuning.macroResidualCouplingEta,
+    crossVenueObservationPrecisionMult: capturedCandTuning.crossVenueObservationPrecisionMult,
+    activeSymbolicTermsWrittenBack: activeSymbolicIds,
+    prunedFaultyComponents: prunedSymbolicIds,
+  };
 
   // Candidate becomes the new Live Architecture (Yellow Line)
   const newLiveArch: ArchitectureState = {
@@ -2525,6 +2691,117 @@ export function promoteCandidateArchitecture(params: {
   };
 }
 
+/**
+ * Direct Mathematical Write-Back from the Parallel Universe into the 6D Latent State &
+ * Multi-Venue Observation Model. Validated parameters (drift persistence φ, mean-reversion κ,
+ * pulse-echo couplings β/γ, macro residual force η, cross-venue observation precision, and
+ * pruned faulty components) are written back into the live latent state filter and logged
+ * immutably in the audit trail.
+ */
+export function writeBackValidatedMathToLatentModel(params?: {
+  mode?: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED';
+  operatorNote?: string;
+}): {
+  writtenBack: boolean;
+  reasonEn: string;
+  reasonFa: string;
+  latentMathWriteBack: LatentModelMathWriteBackState;
+  auditEntry: ArchitectureAuditLogEntry;
+  persistenceHealth: ArchitecturePersistenceHealth;
+} {
+  const mode = params?.mode || 'MANUAL_MMI';
+  const operatorNote = params?.operatorNote;
+  const report = coreStore.lastVerificationReport;
+
+  if (mode === 'AUTOMATIC_VERIFIED') {
+    if (
+      !report ||
+      report.overallStatus !== 'VERIFIED_FOR_PROMOTION' ||
+      report.passedGatesCount < report.totalGatesCount
+    ) {
+      const passedStr = report ? `${report.passedGatesCount}/${report.totalGatesCount}` : '0/8';
+      const rejectedEntry = appendAuditEntry({
+        eventType: 'AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED',
+        actor: 'CLOSED_LOOP_VERIFIER',
+        sourceArchitectureId: coreStore.candidateArchitecture.architectureId,
+        targetArchitectureId: coreStore.liveArchitecture.architectureId,
+        summaryEn: `Automatic Latent-Math Write-Back blocked: Candidate has passed ${passedStr} gates. Automatic write-back requires 8/8 gates (VERIFIED_FOR_PROMOTION).`,
+        summaryFa: `بازنویسی خودکار ریاضیات مدل پنهان متوقف شد: کاندیدا ${passedStr} گیت را گذرانده است (نیازمند ۸ از ۸ گیت).`,
+        verifiableMetrics: `Status=${report?.overallStatus || 'NONE'} | PassedGates=${passedStr}`,
+      });
+      return {
+        writtenBack: false,
+        reasonEn: rejectedEntry.summaryEn,
+        reasonFa: rejectedEntry.summaryFa,
+        latentMathWriteBack: coreStore.latentMathWriteBack,
+        auditEntry: rejectedEntry,
+        persistenceHealth: coreStore.persistenceHealth,
+      };
+    }
+  }
+
+  const cand = coreStore.candidateArchitecture;
+  const candTuning =
+    coreStore.lastCandTuningOverrides ||
+    buildCandidateLatentTuningOverrides(cand, coreStore.generationCounter);
+  const nowIso = new Date().toISOString();
+
+  const activeSymbolicIds = cand.models
+    .filter(m => m.origin === 'LEVEL_B_SYMBOLIC_DISCOVERY' && m.isEnabled)
+    .map(m => m.modelId);
+  const prunedIds = cand.models.filter(m => !m.isEnabled).map(m => m.modelId);
+
+  const nextWriteBack: LatentModelMathWriteBackState = {
+    writeBackGeneration: coreStore.latentMathWriteBack.writeBackGeneration + 1,
+    lastWriteBackIso: nowIso,
+    sourceCandidateArchId: cand.architectureId,
+    driftPersistencePhi: candTuning.driftPersistencePhi,
+    meanReversionKappa: candTuning.meanReversionKappa,
+    echoToxicityCouplingBeta: candTuning.echoToxicityCouplingBeta,
+    echoResilienceCouplingGamma: candTuning.echoResilienceCouplingGamma,
+    macroResidualCouplingEta: candTuning.macroResidualCouplingEta,
+    crossVenueObservationPrecisionMult: candTuning.crossVenueObservationPrecisionMult,
+    activeSymbolicTermsWrittenBack: activeSymbolicIds,
+    prunedFaultyComponents: prunedIds,
+  };
+
+  coreStore.latentMathWriteBack = nextWriteBack;
+  if (coreStore.promotedCandTuningOverrides) {
+    coreStore.promotedCandTuningOverrides = {
+      ...coreStore.promotedCandTuningOverrides,
+      driftPersistencePhi: nextWriteBack.driftPersistencePhi,
+      meanReversionKappa: nextWriteBack.meanReversionKappa,
+      echoToxicityCouplingBeta: nextWriteBack.echoToxicityCouplingBeta,
+      echoResilienceCouplingGamma: nextWriteBack.echoResilienceCouplingGamma,
+      macroResidualCouplingEta: nextWriteBack.macroResidualCouplingEta,
+      crossVenueObservationPrecisionMult: nextWriteBack.crossVenueObservationPrecisionMult,
+    };
+  }
+
+  const noteSuffix = operatorNote ? ` · Note: ${operatorNote}` : '';
+  const summaryEn = `Validated Parallel Universe mathematics from ${cand.versionTag} written back into 6D Latent State & Observation Model (Gen #${nextWriteBack.writeBackGeneration}: φ=${nextWriteBack.driftPersistencePhi}, κ=${nextWriteBack.meanReversionKappa}, β_echo=${nextWriteBack.echoToxicityCouplingBeta}, γ_res=${nextWriteBack.echoResilienceCouplingGamma}, η_macro=${nextWriteBack.macroResidualCouplingEta}, pruned=${prunedIds.length})${noteSuffix}.`;
+  const summaryFa = `ریاضیات تاییدشده جهان موازی (${cand.versionTag}) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #${nextWriteBack.writeBackGeneration}: φ=${nextWriteBack.driftPersistencePhi}، κ=${nextWriteBack.meanReversionKappa}، β=${nextWriteBack.echoToxicityCouplingBeta}، γ=${nextWriteBack.echoResilienceCouplingGamma}).`;
+
+  const auditEntry = appendAuditEntry({
+    eventType: 'LATENT_MATH_WRITEBACK_APPLIED',
+    actor: mode === 'MANUAL_MMI' ? 'OPERATOR_MMI' : 'CLOSED_LOOP_VERIFIER',
+    sourceArchitectureId: cand.architectureId,
+    targetArchitectureId: coreStore.liveArchitecture.architectureId,
+    summaryEn,
+    summaryFa,
+    verifiableMetrics: `WriteBackGen=${nextWriteBack.writeBackGeneration} | phi=${nextWriteBack.driftPersistencePhi} | kappa=${nextWriteBack.meanReversionKappa} | beta=${nextWriteBack.echoToxicityCouplingBeta} | gamma=${nextWriteBack.echoResilienceCouplingGamma} | eta=${nextWriteBack.macroResidualCouplingEta} | obsPrecMult=${nextWriteBack.crossVenueObservationPrecisionMult}`,
+  });
+
+  return {
+    writtenBack: true,
+    reasonEn: summaryEn,
+    reasonFa: summaryFa,
+    latentMathWriteBack: coreStore.latentMathWriteBack,
+    auditEntry,
+    persistenceHealth: coreStore.persistenceHealth,
+  };
+}
+
 export function setAutoPromotionRuntimeMode(enabled: boolean): {
   autoPromotionEnabled: boolean;
   auditEntry: ArchitectureAuditLogEntry;
@@ -2573,6 +2850,9 @@ export function getIntelligenceCoreStateSnapshot() {
     lastVerificationReport: coreStore.lastVerificationReport,
     lastFindings: coreStore.lastFindings,
     auditTrail: coreStore.auditTrail,
+    scientificCore: coreStore.lastScientificCore,
+    latentMathWriteBack: coreStore.latentMathWriteBack,
+    persistedResidualCount: coreStore.persistedResidualLog.length,
   };
 }
 
@@ -2649,6 +2929,8 @@ export function buildHaltedParallelUniverseTelemetry(
     promotionOccurredThisCycle: false,
     lastPromotionBannerEn: null,
     lastPromotionBannerFa: null,
+    scientificCore: coreStore.lastScientificCore,
+    latentMathWriteBack: coreStore.latentMathWriteBack,
   };
 }
 

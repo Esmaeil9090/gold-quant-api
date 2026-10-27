@@ -4248,11 +4248,12 @@ input:checked + .toggle-slider:before {
         <div class="recharts-card" style="margin-bottom: 0; border-color: rgba(224, 64, 251, 0.35);">
           <div class="recharts-header" style="margin-bottom: 12px;">
             <div class="recharts-title-box">
-              <span class="recharts-badge" style="color: #f381ff;">Dual-World Isolation · Level-B Symbolic Equation Discovery · 8-Gate Closed-Loop Verifier</span>
-              <h3 class="recharts-title">Live Architecture (Yellow Line) vs. Parallel Universe Candidate (Magenta Line)</h3>
+              <span class="recharts-badge" style="color: #f381ff;">6D Latent State on Information Clock (τ) · Multi-Venue Camera Model · Pulse–Echo Sonar · Residual Oracle</span>
+              <h3 class="recharts-title">Scientific Forecasting Core &amp; Parallel Universe Discovery (Yellow Line vs. Magenta Line)</h3>
             </div>
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
               <button type="button" id="btnManualMmiPromote" title="Operator Manual MMI Override: Explicitly promote the Candidate Architecture to become the new Live Yellow Line immediately (writes immutable audit log)" style="background: linear-gradient(135deg, rgba(245, 215, 110, 0.28), rgba(224, 64, 251, 0.24)); border: 1.5px solid #f5d76e; color: #f5d76e; font-size: 11px; font-weight: 800; padding: 7px 13px; border-radius: 7px; cursor: pointer;">⚡ Promote Candidate to Live (Manual MMI)</button>
+              <button type="button" id="btnWriteBackLatentMath" title="Direct Mathematical Write-Back: Write validated Parallel Universe mathematical parameters (φ, κ, β_echo, γ_res, η_macro, and pruned components) directly into the 6D Latent State & Observation Model" style="background: rgba(0, 230, 118, 0.16); border: 1.5px solid rgba(0, 230, 118, 0.6); color: #00e676; font-size: 11px; font-weight: 800; padding: 7px 12px; border-radius: 7px; cursor: pointer;">🔬 Write Back Validated Math to Latent Model</button>
               <button type="button" id="btnTriggerSymbolicDiscovery" title="Run an immediate Level-B Symbolic Equation synthesis and ridge calibration step" style="background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.45); color: var(--cyan); font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🧬 Synthesize Symbolic Step</button>
               <button type="button" id="btnBootstrapMtfNow" title="Proactively bootstrap all 5 required discovery timeframes (5m, 15m, 1h, 4h, 1d) into the real-data waterfall cache" style="background: rgba(224, 64, 251, 0.14); border: 1px solid rgba(224, 64, 251, 0.45); color: #f381ff; font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🔄 Bootstrap 5-TF Cache</button>
               <label style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-family: monospace; color: #e2e8f0; background: rgba(10, 16, 28, 0.95); border: 1px solid rgba(0, 230, 118, 0.5); padding: 6px 11px; border-radius: 7px; cursor: pointer;" title="Automatic Promotion Path: Strictly blocked unless all 8/8 closed-loop verification gates pass (VERIFIED_FOR_PROMOTION)">
@@ -4268,6 +4269,152 @@ input:checked + .toggle-slider:before {
           </div>
 
           <div id="puPromotionStatusBanner" style="display: none; margin-bottom: 12px; padding: 9px 13px; border-radius: 8px; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676; font-size: 11.5px; font-family: monospace; font-weight: 700;"></div>
+
+          <!-- Scientific Core Section A: 6D Latent State X(τ) on Information Clock τ, Pulse-Echo Sonar, and Residual Oracle -->
+          <div style="background: rgba(7, 13, 24, 0.94); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 10.5px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.7px;">
+                  0A. 6-Dimensional Latent State X(τ) on Information Clock τ &amp; Pulse–Echo (Sonar) Sensing
+                </span>
+                <div style="font-size: 10px; color: #9cb0cc; font-family: monospace; margin-top: 2px;" id="sciInfoClockSummary">
+                  Information Clock Δτ = 1.000 (NORMAL_FLOW) · Cumulative τ = — · Active Multi-Venue Cameras: —
+                </div>
+              </div>
+              <span id="sciWriteBackStatusBadge" style="font-family: monospace; font-size: 10px; font-weight: 800; color: #00e676; background: rgba(0, 230, 118, 0.12); border: 1px solid rgba(0, 230, 118, 0.4); padding: 3px 8px; border-radius: 6px;">
+                LATENT MATH WRITE-BACK: GEN #0
+              </span>
+            </div>
+
+            <!-- 6D Latent State Vector Cards -->
+            <div id="sciLatentStateGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 8px; margin-bottom: 10px; font-family: monospace; font-size: 10.5px;">
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(245, 215, 110, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: var(--gold); font-weight: 800;">x₁ · logPriceLevel</div>
+                <div id="sciX1LogPrice" style="font-size: 12px; color: #fff; font-weight: 800; margin-top: 2px;">— ($—)</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: var(--cyan); font-weight: 800;">x₂ · localDrift (per Δτ)</div>
+                <div id="sciX2LocalDrift" style="font-size: 12px; color: #fff; font-weight: 800; margin-top: 2px;">— $/Δτ</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(255, 171, 0, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: var(--amber); font-weight: 800;">x₃ · localVolatility (σ_τ)</div>
+                <div id="sciX3LocalVol" style="font-size: 12px; color: #fff; font-weight: 800; margin-top: 2px;">— %</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(255, 82, 82, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: #ff8a80; font-weight: 800;">x₄ · pressureToxicity</div>
+                <div id="sciX4Toxicity" style="font-size: 12px; color: #fff; font-weight: 800; margin-top: 2px;">—</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 230, 118, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: var(--green); font-weight: 800;">x₅ · liquidityResilience</div>
+                <div id="sciX5Resilience" style="font-size: 12px; color: #fff; font-weight: 800; margin-top: 2px;">—</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(224, 64, 251, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: #f381ff; font-weight: 800;">x₆ · macroResidualForce</div>
+                <div id="sciX6MacroForce" style="font-size: 12px; color: #fff; font-weight: 800; margin-top: 2px;">— $/Δτ</div>
+              </div>
+            </div>
+
+            <!-- Pulse-Echo Sonar & Residual Oracle Strip -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 10px; font-family: monospace; font-size: 10px;">
+              <div style="background: rgba(10, 18, 32, 0.92); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 8px; padding: 8px 11px;">
+                <div style="color: var(--cyan); font-weight: 800;">📡 PULSE–ECHO (SONAR) SENSING LAYER</div>
+                <div id="sciPulseEchoMetrics" style="color: #e2e8f0; margin-top: 3px;">Pulses: — · Recovery/Δτ: — · Impact/Vol (λ): — · Asymmetry: —</div>
+                <div id="sciPulseEchoLatest" style="color: #9cb0cc; margin-top: 2px; font-size: 9.5px;">Latest Pulse: —</div>
+              </div>
+              <div style="background: rgba(16, 12, 28, 0.92); border: 1px solid rgba(245, 215, 110, 0.4); border-radius: 8px; padding: 8px 11px;">
+                <div style="color: var(--gold); font-weight: 800;">🔮 THE RESIDUAL PROCESS (ORACLE = REALIZED − YELLOW LINE)</div>
+                <div id="sciResidualOracleMetrics" style="color: #e2e8f0; margin-top: 3px;">Lag-1 ρ₁ = — · Ljung-Box Q(5) = — · Regime Ratio = —</div>
+                <div id="sciResidualOracleBlindspot" style="color: #9cb0cc; margin-top: 2px; font-size: 9.5px;">Dominant Channel: —</div>
+              </div>
+            </div>
+
+            <!-- Multi-Venue Observation Model Table -->
+            <div style="font-size: 9.5px; font-weight: 800; color: #9cb0cc; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">
+              Multi-Venue Observation Model: Y^(k) = H^(k)(X) + basis^(k) + microstructureNoise^(k)
+            </div>
+            <div class="mtf-table-wrap">
+              <table class="mtf-table">
+                <thead>
+                  <tr>
+                    <th>Camera / Venue Source</th>
+                    <th>Instrument Identity</th>
+                    <th>Observed Y^(k) ($)</th>
+                    <th>Latent H^(k)(X) ($)</th>
+                    <th>Basis^(k) ($)</th>
+                    <th>Noise Var R^(k)</th>
+                    <th>Kalman Weight</th>
+                    <th>Innovation Residual ($)</th>
+                  </tr>
+                </thead>
+                <tbody id="sciVenueCamerasTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Scientific Core Section B: Permanent Out-of-Sample Scientific Scoreboard -->
+          <div style="background: rgba(8, 15, 26, 0.95); border: 1px solid rgba(245, 215, 110, 0.45); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+              <div>
+                <span style="font-size: 10.5px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 0.7px;">
+                  0B. Permanent Out-of-Sample Scientific Scoreboard (Realized Bars Only · Honest Calibration Gate)
+                </span>
+                <div style="font-size: 10px; color: #9cb0cc; font-family: monospace; margin-top: 2px;" id="sciScoreboardSummaryText">
+                  Evaluating strictly on realized OOS bars...
+                </div>
+              </div>
+              <span id="sciScoreboardStatusBadge" style="font-family: monospace; font-size: 10.5px; font-weight: 800; color: #00e676; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.45); padding: 3px 9px; border-radius: 6px;">
+                VERIFIED_OOS_ACTIVE
+              </span>
+            </div>
+
+            <div id="sciScoreboardMetricsStrip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin-bottom: 10px; font-family: monospace; font-size: 10.5px;">
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 230, 118, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: #9cb0cc;">Directional Hit Rate (95% CI)</div>
+                <div id="sciSbHitRate" style="font-size: 12px; color: var(--green); font-weight: 800; margin-top: 2px;">—</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: #9cb0cc;">OOS RMSE &amp; Spearman Rank-IC</div>
+                <div id="sciSbRmseIc" style="font-size: 12px; color: var(--cyan); font-weight: 800; margin-top: 2px;">—</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(245, 215, 110, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: #9cb0cc;">Directional Brier &amp; Echo RMSE</div>
+                <div id="sciSbBrierEcho" style="font-size: 12px; color: var(--gold); font-weight: 800; margin-top: 2px;">—</div>
+              </div>
+              <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(224, 64, 251, 0.35); border-radius: 7px; padding: 7px 10px;">
+                <div style="font-size: 9px; color: #9cb0cc;">Residual White-Noise Check</div>
+                <div id="sciSbResidualDiag" style="font-size: 12px; color: #f381ff; font-weight: 800; margin-top: 2px;">—</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px;">
+              <div class="mtf-table-wrap">
+                <table class="mtf-table">
+                  <thead>
+                    <tr>
+                      <th>Baseline Model Comparison</th>
+                      <th>Baseline RMSE ($)</th>
+                      <th>Relative RMSE</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sciBaselinesTableBody"></tbody>
+                </table>
+              </div>
+              <div class="mtf-table-wrap">
+                <table class="mtf-table">
+                  <thead>
+                    <tr>
+                      <th>Regime-Conditioned OOS Partition</th>
+                      <th>Sample N</th>
+                      <th>Hit Rate (95% CI)</th>
+                      <th>OOS RMSE / Rank-IC</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sciRegimesTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
 
           <!-- At-a-Glance Operator Status Strip: 1. Persistence | 2. Multi-Timeframe Discovery | 3. Candidate 8-Gate Verification -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 12px;">
@@ -8931,6 +9078,176 @@ function renderParallelUniverseTelemetry(pu) {
       `;
       auditBody.appendChild(tr);
     });
+  }
+
+  // Populate Scientific Core (6D Latent State X(τ), Information Clock τ, Multi-Venue Cameras, Pulse-Echo Sonar, Residual Oracle, and Permanent OOS Scoreboard)
+  const sci = pu.scientificCore;
+  const wb = pu.latentMathWriteBack;
+  const wbBadge = document.getElementById('sciWriteBackStatusBadge');
+  if (wbBadge && wb) {
+    wbBadge.textContent = `LATENT MATH WRITE-BACK: GEN #${wb.writeBackGeneration || 0} (φ=${Number(wb.driftPersistencePhi || 0.78).toFixed(3)} · κ=${Number(wb.meanReversionKappa || 0.12).toFixed(3)} · β=${Number(wb.echoToxicityCouplingBeta || 0.34).toFixed(3)})`;
+  }
+
+  if (sci) {
+    const ic = sci.informationClock;
+    const ls = sci.latentState;
+    const pe = sci.pulseEchoSonar;
+    const ro = sci.residualOracle;
+    const sb = sci.scientificScoreboard;
+
+    const icSummaryEl = document.getElementById('sciInfoClockSummary');
+    if (icSummaryEl && ic) {
+      icSummaryEl.textContent = `Information Clock Δτ = ${Number(ic.currentDeltaTau).toFixed(4)} (${ic.clockRegime}) · Cumulative τ = ${Number(ic.cumulativeTau).toFixed(2)} · Active Multi-Venue Cameras: ${(sci.venueObservations || []).length} · Weights [Vol=${Number(ic.volumeWeight).toFixed(2)}, Range=${Number(ic.rangeWeight).toFixed(2)}, Cross=${Number(ic.crossVenueWeight).toFixed(2)}]`;
+    }
+
+    if (ls) {
+      const x1El = document.getElementById('sciX1LogPrice');
+      if (x1El) x1El.textContent = `${Number(ls.logPriceLevel).toFixed(5)} ($${Number(sci.impliedLatentPriceUsd).toFixed(2)})`;
+      const x2El = document.getElementById('sciX2LocalDrift');
+      if (x2El) {
+        const s = sci.impliedDriftUsdPerTau >= 0 ? '+' : '';
+        x2El.textContent = `${s}${Number(sci.impliedDriftUsdPerTau).toFixed(3)} $/Δτ`;
+        x2El.style.color = sci.impliedDriftUsdPerTau >= 0 ? 'var(--green)' : 'var(--red)';
+      }
+      const x3El = document.getElementById('sciX3LocalVol');
+      if (x3El) x3El.textContent = `${(Number(ls.localVolatility) * 100).toFixed(3)} %/√τ`;
+      const x4El = document.getElementById('sciX4Toxicity');
+      if (x4El) {
+        const s = ls.pressureToxicity >= 0 ? '+' : '';
+        x4El.textContent = `${s}${Number(ls.pressureToxicity).toFixed(3)} (${ls.pressureToxicity >= 0 ? 'BUY_INIT' : 'SELL_INIT'})`;
+        x4El.style.color = ls.pressureToxicity >= 0 ? 'var(--cyan)' : '#ff8a80';
+      }
+      const x5El = document.getElementById('sciX5Resilience');
+      if (x5El) {
+        x5El.textContent = `${(Number(ls.liquidityResilience) * 100).toFixed(1)}% depth`;
+        x5El.style.color = ls.liquidityResilience >= 0.5 ? 'var(--green)' : 'var(--amber)';
+      }
+      const x6El = document.getElementById('sciX6MacroForce');
+      if (x6El) {
+        const mfUsd = Number(ls.macroResidualForce) * Number(sci.impliedLatentPriceUsd || 2600);
+        const s = mfUsd >= 0 ? '+' : '';
+        x6El.textContent = `${s}${mfUsd.toFixed(3)} $/Δτ`;
+      }
+    }
+
+    if (pe) {
+      const peMetEl = document.getElementById('sciPulseEchoMetrics');
+      if (peMetEl) {
+        peMetEl.textContent = `Pulses Detected: ${pe.totalPulsesDetected} · Recovery/Δτ: ${Number(pe.meanEchoRecoverySpeedPerTau).toFixed(3)} · Impact/Vol (λ): ${Number(pe.meanPriceImpactPerUnitVol).toFixed(4)} · Up/Down Asym: ${Number(pe.upDownEchoAsymmetryRatio).toFixed(2)}x`;
+      }
+      const peLatEl = document.getElementById('sciPulseEchoLatest');
+      if (peLatEl) {
+        if (pe.latestPulse) {
+          const lp = pe.latestPulse;
+          const le = pe.latestEcho;
+          peLatEl.textContent = `Latest Pulse: [${lp.pulseType}] (${lp.direction > 0 ? 'UP' : 'DOWN'} ${Number(lp.impulseMagnitudeSigma).toFixed(2)}σ · Δτ=${Number(lp.deltaTauAtPulse).toFixed(2)})` +
+            (le ? ` → Echo Residual: ${le.echoPredictionResidualUsd >= 0 ? '+' : ''}$${Number(le.echoPredictionResidualUsd).toFixed(3)} (ΔResilience=${le.resilienceStateUpdateDelta >= 0 ? '+' : ''}${Number(le.resilienceStateUpdateDelta).toFixed(3)})` : '');
+        } else {
+          peLatEl.textContent = isFa ? pe.sonarSummaryFa : pe.sonarSummaryEn;
+        }
+      }
+    }
+
+    if (ro && ro.diagnostics) {
+      const d = ro.diagnostics;
+      const roMetEl = document.getElementById('sciResidualOracleMetrics');
+      if (roMetEl) {
+        roMetEl.textContent = `Lag-1 ρ₁ = ${Number(d.lag1Autocorrelation).toFixed(3)} · Ljung-Box Q(5) = ${Number(d.ljungBoxQ5Stat).toFixed(2)} (p=${Number(d.ljungBoxPValueApprox).toFixed(3)}) · Regime Vol Ratio = ${Number(d.highLowVolVarianceRatio).toFixed(2)}x`;
+      }
+      const roBsEl = document.getElementById('sciResidualOracleBlindspot');
+      if (roBsEl) {
+        roBsEl.textContent = `Dominant Channel: ${d.dominantBlindspotChannel} · Corr[Basis=${Number(d.corrWithCrossVenueBasis).toFixed(2)}, Echo=${Number(d.corrWithEchoToxicity).toFixed(2)}, Macro=${Number(d.corrWithMacroForce).toFixed(2)}, Δτ=${Number(d.corrWithInfoClockDeltaTau).toFixed(2)}]`;
+      }
+    }
+
+    const camBody = document.getElementById('sciVenueCamerasTableBody');
+    if (camBody && Array.isArray(sci.venueObservations)) {
+      camBody.innerHTML = '';
+      sci.venueObservations.forEach(cam => {
+        const tr = document.createElement('tr');
+        const bSign = cam.estimatedBasisUsd >= 0 ? '+' : '';
+        const rSign = cam.innovationResidualUsd >= 0 ? '+' : '';
+        tr.innerHTML = `
+          <td style="font-weight: 800; color: #fff; font-family: monospace;">${cam.venueName} <span style="font-size:9px;color:var(--muted);">(${cam.symbol})</span></td>
+          <td style="font-family: monospace; color: var(--gold); font-size: 10px;">${cam.instrumentIdentity}</td>
+          <td style="font-family: monospace; font-weight: 700; color: #fff;">$${Number(cam.observedPriceUsd).toFixed(2)}</td>
+          <td style="font-family: monospace; color: var(--cyan);">$${Number(cam.latentImpliedPriceUsd).toFixed(2)}</td>
+          <td style="font-family: monospace; color: #e2e8f0;">${bSign}$${Number(cam.estimatedBasisUsd).toFixed(3)}</td>
+          <td style="font-family: monospace; color: #9cb0cc;">${Number(cam.microstructureNoiseVarUsd2).toFixed(4)}</td>
+          <td style="font-family: monospace; color: var(--green); font-weight: 700;">${(Number(cam.kalmanObservationWeight) * 100).toFixed(1)}%</td>
+          <td style="font-family: monospace; color: ${Math.abs(cam.innovationResidualUsd) < 1.5 ? 'var(--green)' : 'var(--amber)'};">${rSign}$${Number(cam.innovationResidualUsd).toFixed(3)}</td>
+        `;
+        camBody.appendChild(tr);
+      });
+    }
+
+    if (sb) {
+      const sbStatEl = document.getElementById('sciScoreboardStatusBadge');
+      if (sbStatEl) {
+        const isCalib = sb.calibrationStatus === 'CALIBRATING';
+        sbStatEl.textContent = `${sb.calibrationStatus} (N=${sb.realizedOosBarsCount}/${sb.requiredMinOosBars})`;
+        sbStatEl.style.color = isCalib ? '#ffab00' : '#00e676';
+        sbStatEl.style.borderColor = isCalib ? 'rgba(255, 171, 0, 0.5)' : 'rgba(0, 230, 118, 0.5)';
+        sbStatEl.style.background = isCalib ? 'rgba(255, 171, 0, 0.14)' : 'rgba(0, 230, 118, 0.14)';
+      }
+      const sbSumEl = document.getElementById('sciScoreboardSummaryText');
+      if (sbSumEl) {
+        sbSumEl.textContent = isFa ? sb.calibrationNoticeFa : sb.calibrationNoticeEn;
+      }
+      const sbHitEl = document.getElementById('sciSbHitRate');
+      if (sbHitEl) {
+        sbHitEl.textContent = `${(Number(sb.directionalHitRate) * 100).toFixed(1)}% [${(Number(sb.directionalHitRateCi95Lower) * 100).toFixed(1)}%, ${(Number(sb.directionalHitRateCi95Upper) * 100).toFixed(1)}%]`;
+      }
+      const sbRmseIcEl = document.getElementById('sciSbRmseIc');
+      if (sbRmseIcEl) {
+        const icS = sb.oosSpearmanRankIc >= 0 ? '+' : '';
+        sbRmseIcEl.textContent = `RMSE: $${Number(sb.oosRmseUsd).toFixed(3)} · IC: ${icS}${Number(sb.oosSpearmanRankIc).toFixed(3)}`;
+      }
+      const sbBrierEchoEl = document.getElementById('sciSbBrierEcho');
+      if (sbBrierEchoEl) {
+        const echoStr = sb.pulseEchoRmseUsd !== null && sb.pulseEchoRmseUsd !== undefined ? `$${Number(sb.pulseEchoRmseUsd).toFixed(3)}` : 'N/A';
+        sbBrierEchoEl.textContent = `Brier: ${Number(sb.directionalBrierScore).toFixed(4)} · Echo RMSE: ${echoStr}`;
+      }
+      const sbResEl = document.getElementById('sciSbResidualDiag');
+      if (sbResEl) {
+        sbResEl.textContent = `ρ₁=${Number(sb.residualLag1Autocorr).toFixed(3)} · Q(5)=${Number(sb.residualLjungBoxQ5).toFixed(2)} · ${sb.residualWhiteNoisePassed ? 'WHITE_NOISE_OK' : 'STRUCTURED'}`;
+        sbResEl.style.color = sb.residualWhiteNoisePassed ? 'var(--green)' : 'var(--amber)';
+      }
+
+      const blBody = document.getElementById('sciBaselinesTableBody');
+      if (blBody && Array.isArray(sb.baselineComparisons)) {
+        blBody.innerHTML = '';
+        sb.baselineComparisons.forEach(b => {
+          const tr = document.createElement('tr');
+          const badge = b.latentModelOutperforms
+            ? `<span style="color:var(--green);font-weight:800;">✓ OUTPERFORMS</span>`
+            : `<span style="color:var(--amber);font-weight:800;">≈ PARITY</span>`;
+          tr.innerHTML = `
+            <td style="font-weight: 700; color: #fff;">${isFa ? b.baselineNameFa : b.baselineNameEn}</td>
+            <td style="font-family: monospace; color: #e2e8f0;">$${Number(b.oosRmseUsd).toFixed(3)}</td>
+            <td style="font-family: monospace; color: var(--cyan); font-weight: 700;">${Number(b.relativeRmseRatio).toFixed(3)}x</td>
+            <td style="font-family: monospace;">${badge}</td>
+          `;
+          blBody.appendChild(tr);
+        });
+      }
+
+      const rgBody = document.getElementById('sciRegimesTableBody');
+      if (rgBody && Array.isArray(sb.regimeConditionedPerformance)) {
+        rgBody.innerHTML = '';
+        sb.regimeConditionedPerformance.forEach(r => {
+          const tr = document.createElement('tr');
+          const icS = r.oosRankIc >= 0 ? '+' : '';
+          tr.innerHTML = `
+            <td style="font-weight: 700; color: #fff;">${isFa ? r.regimeLabelFa : r.regimeLabelEn}</td>
+            <td style="font-family: monospace; color: #9cb0cc;">N=${r.sampleSizeN}</td>
+            <td style="font-family: monospace; color: var(--green); font-weight: 700;">${(Number(r.directionalHitRate) * 100).toFixed(1)}% <span style="font-size:9px;color:#9cb0cc;">[${(Number(r.hitRateCi95Lower) * 100).toFixed(0)}–${(Number(r.hitRateCi95Upper) * 100).toFixed(0)}%]</span></td>
+            <td style="font-family: monospace; color: var(--cyan);">$${Number(r.oosRmseUsd).toFixed(3)} / IC ${icS}${Number(r.oosRankIc).toFixed(3)}</td>
+          `;
+          rgBody.appendChild(tr);
+        });
+      }
+    }
   }
 }
 
@@ -15007,6 +15324,34 @@ if (btnManualMmiPromote) {
       console.warn('Manual MMI promotion error:', e);
     } finally {
       btnManualMmiPromote.disabled = false;
+    }
+  });
+}
+
+const btnWriteBackLatentMath = document.getElementById('btnWriteBackLatentMath');
+if (btnWriteBackLatentMath) {
+  btnWriteBackLatentMath.addEventListener('click', async () => {
+    btnWriteBackLatentMath.disabled = true;
+    try {
+      const res = await fetch(buildApiUrl('/api/intelligence-core/writeback-math'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'MANUAL_MMI',
+          operatorNote: 'Operator triggered Direct Mathematical Write-Back into 6D Latent State & Observation Model',
+        }),
+      });
+      const json = await res.json();
+      const bannerEl = document.getElementById('puPromotionStatusBanner');
+      if (bannerEl && json) {
+        bannerEl.style.display = 'block';
+        bannerEl.textContent = `🔬 ${currentLang === 'fa' ? json.reasonFa : json.reasonEn}`;
+      }
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Latent math write-back error:', e);
+    } finally {
+      btnWriteBackLatentMath.disabled = false;
     }
   });
 }
