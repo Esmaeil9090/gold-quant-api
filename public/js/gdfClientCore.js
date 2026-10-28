@@ -351,28 +351,60 @@
       id: 'PROPORTIONAL_LIQUIDITY_STATE_FUSION',
       classification: 'QUALIFIED_PROXY',
       uiCurrentLegacyLabelEn: 'Integrated Multi-Timeframe Liquidity Trajectory Fusion',
-      honestLabelEn: 'Proportional State-Vector & MTF Liquidity Trajectory Fusion Proxy [Viz: Yellow Plume Attractor]',
-      honestLabelFa: 'پروکسی ادغام متناسب بردار حالت و نقدینگی چندتایم‌فریمی در مسیر پیش‌بینی [لایه بصری: جاذب مسیر زرد]',
+      honestLabelEn: 'Dynamic Precision-Weighted State-Vector & MTF Liquidity Fusion [Viz: Yellow Plume Attractor]',
+      honestLabelFa: 'ادغام بردار وضعیت و نقدینگی چندزمانه با وزن‌دهی دقت معکوس واریانس [لایه بصری: جاذب مسیر زرد]',
       visualizationLayerEn: 'Coupled Hydrodynamic & Liquidity-Well Yellow Trajectory Attractor',
-      visualizationLayerFa: 'جاذب هم‌بسته هیدرودینامیک و چاه نقدینگی برای خط زرد مسیر آینده',
-      mathClassEn: 'Convex proportional linear state fusion combining 40-bar OU mean reversion (w=0.24), EKF shrunk drift (w=0.24), orthogonal macro factor lift (w=0.18), sweep microstructure log-odds impulse (w=0.12), and top-down HTF liquidity pool gravity/initiation drift (w=0.22).',
-      mathClassFa: 'ترکیب محدب و متناسب بردار حالت شامل بازگشت به میانگین OU (وزن ۰.۲۴)، رانش کالمن (۰.۲۴)، نیروی کلان (۰.۱۸)، جاروب نقدینگی (۰.۱۲) و جاذبه/رانش نقدینگی چندتایم‌فریمی (۰.۲۲).',
-      equationLatexOrAscii: 'P_eq^* = 0.78 * P_eq,OU + 0.22 * POC_HTF,   v_fused = 0.24*v_OU + 0.24*v_EKF + 0.18*v_macro + 0.12*v_sweep + 0.22*v_liq',
+      visualizationLayerFa: 'جاذب هم‌بسته هیدرودینامیک و چاه نقدینگی برای خط زرد مسیر پیش‌بینی اصلی',
+      mathClassEn: 'Dynamic inverse-variance precision state fusion combining 40-bar OU mean reversion, EKF shrunk drift, orthogonal macro factor lift, sweep microstructure log-odds impulse, and top-down HTF liquidity pool gravity/initiation drift with rolling out-of-sample error variance weights w_{m,t} proportional to (sigma_{m,t}^2 + eps)^{-1}.',
+      mathClassFa: 'ترکیب محدب پویا مبتنی بر معکوس واریانس خطای خارج از نمونه شامل بازگشت به میانگین OU، رانش فیلتر کالمن، محرک کلان، جاروب نقدینگی و جاذبه/رانش نقدینگی چندزمانه.',
+      equationLatexOrAscii: 'w_{m,t} = (sigma_{m,t}^2 + eps)^{-1} / sum_k (sigma_{k,t}^2 + eps)^{-1},   v_fused = sum_m w_{m,t} * v_{m,t}',
       inputDataFeeds: [
         '40-Bar OU Equilibrium & Scalar-Gain EKF State Velocity',
         'PCA Macro Factor Lift & Sweep Log-Odds Z-Score',
         'Top-Down MTF Liquidity Pools (Monthly→5M POC/HVN/LVN) & Absorption/Initiation State',
       ],
-      samplingAndLookbackEn: 'Synchronized at every forecast cycle across all 24 forward projection steps of the empirical quantile plume.',
-      samplingAndLookbackFa: 'همگام‌سازی‌شده در هر چرخه پیش‌بینی در تمامی ۲۴ گام رو به جلوی مخروط چندکی.',
-      dofAndCalibrationEn: 'Fixed convex combination weights summing to 1.00 (0.24 + 0.24 + 0.18 + 0.12 + 0.22 = 1.00); LVN vacuum corridors scale step dispersion within [0.85, 1.25].',
-      dofAndCalibrationFa: 'وزن‌های محدب شفاف با مجموع دقیق ۱.۰۰؛ ضریب مقیاس نوسان در دالان‌های خلاء نقدینگی LVN مقید در بازه [۰.۸۵، ۱.۲۵].',
-      structuralLimitationsEn: 'Proportional fusion weights are structural domain priors designed for transparent auditability rather than dynamically re-optimized via non-stationary reinforcement learning.',
-      structuralLimitationsFa: 'وزن‌های ادغام متناسب، پیشین‌های ساختاری شفاف و قابل حسابرسی هستند و با یادگیری تقویتی غیرایستا بهینه‌سازی مجدد نمی‌شوند.',
+      samplingAndLookbackEn: 'Synchronized at every forecast cycle across trailing realized bar residuals and all 24 forward projection steps.',
+      samplingAndLookbackFa: 'همگام‌سازی‌شده در هر چرخه پیش‌بینی بر اساس واریانس خطای کندل‌های تحقق‌یافته و ۲۴ گام رو به جلو.',
+      dofAndCalibrationEn: 'Dynamic precision weights w_{m,t} estimated online from rolling out-of-sample squared forecast errors summing strictly to 1.00; zero hardcoded constant weights.',
+      dofAndCalibrationFa: 'وزن‌های دقت پویا که به‌صورت آنلاین از معکوس واریانس خطای پیش‌بینی خارج از نمونه محاسبه شده و مجموع آن‌ها دقیقاً ۱.۰۰ است.',
+      structuralLimitationsEn: 'Precision weights adapt to trailing out-of-sample error variance over finite OHLCV windows; rapid structural breaks require confirmation across the walk-forward window.',
+      structuralLimitationsFa: 'وزن‌های دقت بر اساس واریانس خطای پنجره محدود کندل‌های اخیر سازگار می‌شوند.',
+    },
+    PARALLEL_UNIVERSE_DISCOVERY_CORE: {
+      id: 'PARALLEL_UNIVERSE_DISCOVERY_CORE',
+      classification: 'VERIFIED_EXACT',
+      uiCurrentLegacyLabelEn: 'Intelligence & Awareness Core with Parallel Universe (Level B Symbolic Discovery)',
+      honestLabelEn: 'Intelligence & Awareness Core · Multi-Timeframe Parallel Universe Symbolic Discovery & 8-Gate Closed-Loop Verifier',
+      honestLabelFa: 'هسته هوشمندی و اعتبارسنجی تطبیقی · سناریوی جایگزین پیش‌بینی (جهان موازی) و راستی‌آزمایی ۸ مرحله‌ای حلقه بسته',
+      visualizationLayerEn: 'Same-Chart Dual-Line Comparison (#windyCanvas): Live Approved Architecture (Yellow Line #f5d76e) vs. Parallel Universe Candidate (Dashed Magenta Line #e040fb)',
+      visualizationLayerFa: 'مقایسه دو خط روی نمودار واحد (#windyCanvas): مسیر پیش‌بینی اصلی تاییدشده (خط زرد #f5d76e) در برابر مسیر پیش‌بینی نامزد (خط خط‌چین سرخابی #e040fb)',
+      mathClassEn: 'Isolated candidate model architecture executing Level-B constrained symbolic equation discovery across 8 closed-form primitives (including lagged residual error-correction, second-order basis acceleration, multi-timeframe HTF/LTF drift-POC synergy, and asymmetric real-yield tail-shock shield), split-half stability gating, rolling ridge-regularized parameter estimation, faulty model pruning, and an 8-gate Diebold-Mariano / CVaR-95 / multi-regime walk-forward verification protocol persisted in a versioned atomic JSON store.',
+      mathClassFa: 'معماری نامزد ایزوله با قابلیت کشف نمادین ۸ خانواده معادله بسته سطح B (شامل تصحیح خودکار باقیمانده تأخیری، شتاب مرتبه دوم پایه قیمتی، هم‌افزایی رانش چندزمانه و محافظ نامتقارن شوک بازده حقیقی)، حذف مدل‌های ناپایدار، وزن‌دهی پویا و پروتکل راستی‌آزمایی ۸ گانه دیبولد-ماریانو با ذخیره‌سازی پایدار.',
+      equationLatexOrAscii: 'v_cand(t) = sum_{m in Active} w_{m,t} * phi_m(X_t^{TF}, X_t^{HTF}, X_t^{LTF}, e_{t-1}^{live}; theta_{m,t}),   DM_t = mean(d_t) / sqrt(Var(d_t) / N_eff)',
+      inputDataFeeds: [
+        'Identical Verified Real-Data Waterfall Snapshot (Active Timeframe OHLCV + Multi-Timeframe 5m/15m/1h/4h/1d Verified Series)',
+        'Multi-Source Macro Yields/DXY, Cross-Venue Basis Spread & Acceleration, and Live Yellow-Line Lagged OOS Residuals',
+      ],
+      samplingAndLookbackEn: 'Data-driven minimum evaluation window N_min >= max(16, ceil(4 * tau_half_life)) derived from empirical residual autocorrelation half-life; state persisted atomically across restarts in versioned store v2.',
+      samplingAndLookbackFa: 'پنجره ارزیابی خارج از نمونه مبتنی بر داده که از نیمه‌عمر خودهمبستگی تجربی باقیمانده‌ها استخراج می‌شود؛ ذخیره اتمی نسخه ۲ برای پایداری در بازراه‌اندازی.',
+      dofAndCalibrationEn: 'Empirical variance-scaled Ridge regularization (lambda_t = Var(Delta P) / N_fit) with split-half sign stability gating; promotion restricted to Manual MMI approval or Automatic promotion when all 8 verification gates pass (VERIFIED_FOR_PROMOTION).',
+      dofAndCalibrationFa: 'تخمین پارامتر رگرسیون ریج علّی با دروازه پایداری دونیمه‌ای؛ ارتقا صرفاً از طریق تأیید دستی اپراتور (MMI) یا ارتقای خودکار پس از عبور از هر ۸ دروازه راستی‌آزمایی.',
+      structuralLimitationsEn: 'Symbolic discovery is constrained to 8 closed-form, auditable non-linear primitives over verified OHLCV, volume-clock, basis, multi-timeframe liquidity, and macro state variables; container redeployments without a mounted volume log an explicit ephemeral storage warning.',
+      structuralLimitationsFa: 'کشف معادلات نمادین مقید به ۸ فرم ریاضی بسته و قابل حسابرسی روی داده‌های واقعی است.',
     },
   };
 
   let activeSpecId = 'EKF_STATE_OBSERVER';
+
+  function normalizePersianTypography(input) {
+    if (!input || typeof input !== 'string') return input;
+    return input
+      .replace(/[\u064A\u0649]/g, '\u06CC')
+      .replace(/\u0643/g, '\u06A9')
+      .replace(/[\uAC00-\uD7AF\u3040-\u30FF\u4E00-\u9FFF]/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
 
   function syncModelSpecRegistry(serverRegistry) {
     if (serverRegistry && typeof serverRegistry === 'object') {
@@ -411,7 +443,7 @@
     const defaultEn =
       'All live external market feeds (Tier-1, Tier-2, Tier-3) are temporarily unreachable. Filter covariance (P), volume-clock (τ), and GARCH variance mutations are FROZEN. Zero synthetic data generated.';
     const defaultFa =
-      'تمامی منابع داده زنده بازار (سطح ۱، ۲ و ۳) موقتاً در دسترس نیستند. به‌روزرسانی فیلتر کالمن (EKF)، ساعت حجمی (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
+      'تمامی منابع داده زنده بازار (سطح ۱، ۲ و ۳) موقتاً در دسترس نیستند. به‌روزرسانی فیلتر کالمن (EKF)، ساعت اطلاعاتی همگام با حجم (τ) و نوسانات GARCH متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.';
     if (!rawMsg || typeof rawMsg !== 'string') {
       return isFa ? defaultFa : defaultEn;
     }
@@ -426,7 +458,7 @@
     ) {
       return isFa ? defaultFa : defaultEn;
     }
-    return rawMsg;
+    return isFa ? normalizePersianTypography(rawMsg) : rawMsg;
   }
 
   /**
@@ -512,7 +544,7 @@
     }
     if (headerSub) {
       headerSub.textContent = isFa
-        ? 'تفکیک شفاف تخمین‌گرهای دقیق (VERIFIED_EXACT) از پروکسی‌های کندلی (QUALIFIED_PROXY) و لایه استعاره بصری'
+        ? 'تفکیک شفاف تخمین‌گرهای دقیق (VERIFIED_EXACT) از پروکسی‌های کندلی (QUALIFIED_PROXY) و لایه بازنمایی بصری'
         : 'Audited Estimator Classification (VERIFIED_EXACT vs. QUALIFIED_PROXY) & Visualization Metaphor Separation';
     }
 
@@ -532,7 +564,7 @@
       .map(item => {
         const active = item.id === targetId;
         const dotColor = item.classification === 'VERIFIED_EXACT' ? '#00e676' : '#f5d76e';
-        const shortTitle = (isFa ? item.honestLabelFa : item.honestLabelEn).split('[')[0].trim();
+        const shortTitle = normalizePersianTypography((isFa ? item.honestLabelFa : item.honestLabelEn).split('[')[0].trim());
         return `<button type="button" class="model-spec-nav-pill ${active ? 'active' : ''}" data-select-spec="${item.id}" style="display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid ${
           active ? '#00e5ff' : 'rgba(40,60,95,0.65)'
         };background:${active ? 'rgba(0,229,255,0.16)' : 'rgba(10,16,28,0.85)'};color:${
@@ -545,9 +577,10 @@
       .join('');
 
     const feedsListHtml = (spec.inputDataFeeds || [])
-      .map(f => `<li style="margin-bottom:3px;color:#d1dced;">${f}</li>`)
+      .map(f => `<li style="margin-bottom:3px;color:#d1dced;direction:ltr;text-align:left;unicode-bidi:isolate;">${f}</li>`)
       .join('');
 
+    body.dir = isFa ? 'rtl' : 'ltr';
     body.innerHTML = `
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(40,60,95,0.5);">
         ${pillsHtml}
@@ -555,12 +588,12 @@
 
       <div style="background:rgba(14,23,42,0.92);border:1px solid ${badgeColor}66;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-          <span style="font-family:monospace;font-size:11px;color:#00e5ff;font-weight:800;">ID: ${spec.id}</span>
+          <span style="font-family:monospace;font-size:11px;color:#00e5ff;font-weight:800;direction:ltr;unicode-bidi:isolate;">ID: ${spec.id}</span>
           <span style="font-size:11px;font-weight:800;color:${badgeColor};background:${badgeBg};border:1px solid ${badgeColor}66;padding:3px 9px;border-radius:6px;">${badgeLabel}</span>
         </div>
-        <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;">${isFa ? spec.honestLabelFa : spec.honestLabelEn}</div>
+        <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;">${isFa ? normalizePersianTypography(spec.honestLabelFa) : spec.honestLabelEn}</div>
         <div style="font-size:11px;color:#7d8ba1;">
-          ${isFa ? 'برچسب قدیمی رابط کاربری:' : 'Legacy UI Metaphor Label:'} <span style="color:#9cb0cc;font-family:monospace;">${spec.uiCurrentLegacyLabelEn}</span>
+          ${isFa ? 'برچسب قدیمی رابط کاربری:' : 'Legacy UI Metaphor Label:'} <span style="color:#9cb0cc;font-family:monospace;direction:ltr;unicode-bidi:isolate;">${spec.uiCurrentLegacyLabelEn}</span>
         </div>
       </div>
 
@@ -569,18 +602,18 @@
           <div style="font-size:10px;font-weight:800;color:#00e5ff;text-transform:uppercase;margin-bottom:4px;">
             ${isFa ? '۱. کلاس دقیق ریاضی و اقتصادسنجی' : '1. Exact Mathematical Class'}
           </div>
-          <div style="font-size:11.5px;color:#e3ecfa;line-height:1.5;">${isFa ? spec.mathClassFa : spec.mathClassEn}</div>
-          <div style="margin-top:7px;padding:6px 8px;background:rgba(4,8,16,0.9);border:1px solid rgba(0,229,255,0.2);border-radius:5px;font-family:monospace;font-size:10.5px;color:#f5d76e;overflow-x:auto;direction:ltr;text-align:left;">
+          <div style="font-size:11.5px;color:#e3ecfa;line-height:1.5;">${isFa ? normalizePersianTypography(spec.mathClassFa) : spec.mathClassEn}</div>
+          <div style="margin-top:7px;padding:6px 8px;background:rgba(4,8,16,0.9);border:1px solid rgba(0,229,255,0.2);border-radius:5px;font-family:monospace;font-size:10.5px;color:#f5d76e;overflow-x:auto;direction:ltr;text-align:left;unicode-bidi:isolate;">
             ${spec.equationLatexOrAscii}
           </div>
         </div>
 
         <div style="background:rgba(10,16,28,0.85);border:1px solid rgba(40,60,95,0.55);border-radius:8px;padding:11px 13px;">
           <div style="font-size:10px;font-weight:800;color:#b388ff;text-transform:uppercase;margin-bottom:4px;">
-            ${isFa ? '۲. لایه استعاره بصری (هیدرودینامیک / مورس)' : '2. Explicit Visualization Layer Metaphor'}
+            ${isFa ? '۲. لایه بازنمایی بصری' : '2. Explicit Visualization Layer Metaphor'}
           </div>
           <div style="font-size:11.5px;color:#e3ecfa;line-height:1.5;margin-bottom:8px;">
-            ${isFa ? spec.visualizationLayerFa : spec.visualizationLayerEn}
+            ${isFa ? normalizePersianTypography(spec.visualizationLayerFa) : spec.visualizationLayerEn}
           </div>
           <div style="font-size:10px;font-weight:800;color:#00e676;text-transform:uppercase;margin-bottom:4px;">
             ${isFa ? '۳. جریان‌های داده واقعی ورودی' : '3. Verified Real Input Data Feeds'}
@@ -596,14 +629,14 @@
           <div style="font-size:10px;font-weight:800;color:#f5d76e;text-transform:uppercase;margin-bottom:4px;">
             ${isFa ? '۴. فرکانس نمونه‌برداری و افق بازنگری (Lookback)' : '4. Sampling Frequency & Lookback Window'}
           </div>
-          <div style="font-size:11.5px;color:#d1dced;line-height:1.5;">${isFa ? spec.samplingAndLookbackFa : spec.samplingAndLookbackEn}</div>
+          <div style="font-size:11.5px;color:#d1dced;line-height:1.5;">${isFa ? normalizePersianTypography(spec.samplingAndLookbackFa) : spec.samplingAndLookbackEn}</div>
         </div>
 
         <div style="background:rgba(10,16,28,0.85);border:1px solid rgba(40,60,95,0.55);border-radius:8px;padding:11px 13px;">
           <div style="font-size:10px;font-weight:800;color:#00e5ff;text-transform:uppercase;margin-bottom:4px;">
             ${isFa ? '۵. درجات آزادی و روش کالیبراسیون' : '5. Degrees of Freedom & Calibration Method'}
           </div>
-          <div style="font-size:11.5px;color:#d1dced;line-height:1.5;">${isFa ? spec.dofAndCalibrationFa : spec.dofAndCalibrationEn}</div>
+          <div style="font-size:11.5px;color:#d1dced;line-height:1.5;">${isFa ? normalizePersianTypography(spec.dofAndCalibrationFa) : spec.dofAndCalibrationEn}</div>
         </div>
       </div>
 
@@ -612,7 +645,7 @@
           ⚠️ ${isFa ? '۶. محدودیت‌های ساختاری و دامنه اعتبار مدل' : '6. Known Structural Limitations & Scope'}
         </div>
         <div style="font-size:11.5px;color:#ffe082;line-height:1.55;">
-          ${isFa ? spec.structuralLimitationsFa : spec.structuralLimitationsEn}
+          ${isFa ? normalizePersianTypography(spec.structuralLimitationsFa) : spec.structuralLimitationsEn}
         </div>
       </div>
     `;
@@ -658,6 +691,7 @@
   global.GDFClientCore = {
     TIMEFRAME_STEPS,
     MODEL_SPEC_REGISTRY,
+    normalizePersianTypography,
     validateForecastContract,
     renderCircuitBreakerBanner,
     sanitizeClientHaltMessage,

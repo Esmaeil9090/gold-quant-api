@@ -1,104 +1,60 @@
-# GDF — Gold Dynamic Flow (`gold-quant-api`)
+# GDF (Gold Dynamic Flow) — Quantitative Market-State & Forecasting Platform
 
-**Institutional Quantitative Decision Engine, Hydrodynamic Flow & 3D Morse Potential Manifold**
+An institutional-grade, bilingual (English / Persian فارسی) quantitative-finance and market-analysis platform for Gold (`PAXG/USD` Spot Token, `XAU/USD` Spot Proxies, and `GC=F` COMEX Futures).
 
-![GDF Banner](public/icons/icon-512.png)
-
-GDF (Gold Dynamic Flow) is a production-grade quantitative decision engine and telemetry terminal designed for **XAU/USD (Spot Gold / PAXG)**. Moving beyond static technical indicators, GDF bridges slow sovereign macroeconomic capital flows with high-frequency micro-structural auction mechanics across both a 2D hydrodynamic vector canvas and a WebGL **3D Spatial Morse Potential Globe Viewport**.
+GDF models market price as the observable footprint of a low-dimensional **Latent Market State** evolving on a **Volume-Synchronized Information Clock ($\Delta\tau$)**, observed across multiple noisy market venues, and continuously audited through **Out-of-Sample Forecast Residual Analysis** and an **Alternative Forecast Scenario (Parallel Universe Discovery Core)**.
 
 ---
 
-## 🌟 Key Features
+## 1. Core Quantitative & Econometric Architecture
 
-1. **Hybrid Volume-Clock Subordinator ($\tau$) & EKF Engine**:
-   - Normalizes informational entropy across quiet Asian sessions and volatile NY COMEX crosses by subordinatng wall-clock time ($t$) to Intrinsic Volume Time ($\tau$).
-   - Dynamically scales process noise covariance ($Q_\tau$) with a dead-zone heartbeat ceiling ($\Delta t_{\max}$) to prevent covariance starvation or explosion.
-2. **Bayesian Log-Odds Sweep Discriminator**:
-   - Distinguishes true structural macro breakouts from primary dealer inventory clearance sweeps (stop-runs) by fusing absorption volume, Hawkes self-exciting jump intensity, and cross-asset macro residuals.
-   - Protects macro-aligned positions from false VPIN toxicity exits during temporary stop-hunting excursions (`SWEEP SHIELD` state).
-3. **3D Spatial Morse Potential Manifold & Volumetric Globe World**:
-   - Interactive Three.js WebGL 3D world accessible directly from the chart header (`🌐` button next to Fullscreen).
-   - Visualizes the **Coupled Morse Potential Surface** combining the smooth Wicksellian Macro Gravity Bowl with rugged Dealer Inventory Gamma Walls & Liquidity Canyons.
-   - Real-time **Volumetric Bull vs. Bear Candle Clash** particle physics inside active candles, EKF Kalman Laser Telemetry beams, and 3D Monte Carlo trajectory tubes.
-4. **2D Hydrodynamic Streamline Vector Field**:
-   - Real-time 60 FPS vector field simulating fluid flow, turbulence fronts, and streamline momentum across 1m, 5m, 15m, 30m, 1h, 4h, and 1D scales.
-5. **Marine Dynamic Positioning (DP) Observer State-Space System**:
-   - Huber Jump-Gated Extended Kalman Filter (EKF) separating continuous unmeasured institutional drift ($b_t$) from jump dislocations.
-   - Volume-Synchronized Probability of Toxicity (VPIN) flow-toxicity metric and Empirical Bayes shrinkage ($\kappa_t$).
-6. **Merton Jump-Diffusion & GJR-GARCH Volatility Ensemble**:
-   - 100-path stochastic Monte Carlo simulation with continuous Gaussian diffusion and Poisson discrete jumps.
-   - Multi-layer confidence cones (90% outer plume, 50% core band, median trajectory).
-7. **Live Macro Stream Ingestion & PCA Vector Orthogonalization**:
-   - Ingestion of 10Y TIPS Real Yield (`DFII10`), DXY Dollar Index, and Breakeven Inflation.
-   - Principal Component Analysis (PCA) rotating 8 gold macro theories into 3 mutually orthogonal factors.
-8. **Institutional Chart Controls, Bilingual UI (EN/FA) & PWA**:
-   - Full touch & desktop mouse navigation, interactive drawing suite (Trendlines, Fibonacci, Horizontal Rays), 17 configurable indicators, English/Farsi RTL support, and installable offline-capable PWA.
+- **Volume-Synchronized Time / Information Clock ($\Delta\tau_t$)**: Replaces uniform wall-clock steps with an activity-driven clock combining relative bar volume, true-range expansion over ATR(14), and intrabar trade intensity.
+- **Adaptive Market-State Estimator (Scalar-Gain Kalman Observer & 6D Scientific Core)**: Tracks latent fair-value price level ($p_\tau$), drift velocity ($v_\tau$), curvature/acceleration ($a_\tau$), liquidity resilience ($l_\tau$), and empirical-Bayes shrunk drift ($b_t^*$) with a $3\sigma$ Mahalanobis jump gate.
+- **GARCH(1,1) Conditional Volatility & Volatility Regimes**: QML-calibrated Bollerslev GARCH(1,1) conditional variance governing horizon-expanding **Predictive Intervals / Forecast Uncertainty Bands ($\pm 1\sigma$ / 68% and $\pm 2\sigma$ / 95%)**.
+- **Exogenous Market Drivers & Cross-Asset Sensitivity**: Live macro ingestion of 10-Year US TIPS Real Yields (`DFII10`), 10-Year Nominal Treasury Yields (`US10Y`), US Dollar Index (`DXY`), and Breakeven Inflation (`T10YIE`), projected via a 3-factor macro alignment index (`MACRO_PCA_3FACTOR_PROXY`).
+- **Instrument Basis Adjustment**: Rolling EWMA spread and $Z$-score calibration (`BASIS_ZSCORE_PROXY`) between COMEX Gold Futures (`GC=F`) and spot gold proxies (`PAXG/USD`), explicitly respecting instrument provenance.
+- **Order-Flow Imbalance (OFI) & Liquidity-Sweep Versus Breakout Classifier**: Qualified OHLCV microstructure proxies (`BULK_VOLUME_VPIN_PROXY`, `SWEEP_LOG_ODDS_PROXY`, `ABSORPTION_INITIATION_FLOW_PROXY`) that distinguish resting-liquidity absorption and stop-loss sweeps from structural initiation breakouts.
+- **Forecast Residual Analysis & Adaptive Model Evaluation**: Real-time decomposition of realized-minus-predicted primary trajectory residuals ($e_t = P_t - \hat{P}_{t|t-1}$), Ljung-Box $Q(5)$ serial correlation testing, causal zero-lookahead walk-forward validation across horizons $h \in \{1, 5, 15, 60\}$, and an 8-gate Diebold-Mariano / CVaR-95 verifier governing promotion of the **Candidate Forecast Trajectory (Magenta Line)** to the **Primary Forecast Trajectory (Yellow Line)**.
 
 ---
 
-## 🚀 Quick Start
+## 2. Bilingual Financial Terminology & Epistemic Transparency (EN / FA)
 
-### Prerequisites
-- Node.js 18+ or 20+
-- npm or bun
+All user-facing concepts, estimator specifications, tooltips, and 3D Market Theatre layers are governed by a centralized **Bilingual Financial Terminology Dictionary** (`src/config/financialDictionary.ts`, exposed via `GET /api/terminology`) and **Model Specification Registry** (`src/config/modelSpecRegistry.ts`, exposed via `GET /api/model-specs`):
 
-### Installation
+- **Epistemic Badges**: Every metric is explicitly classified as `[RAW OBSERVATION]` / `[مشاهده خام]`, `[FILTERED ESTIMATE]` / `[تخمین فیلترشده]`, or `[HEURISTIC PROXY]` / `[پروکسی ابتکاری]`.
+- **Estimator Fidelity**: Every quantitative model is audited as either `VERIFIED_EXACT` or `QUALIFIED_PROXY` with explicit disclosure of equations, inputs, degrees of freedom, and structural limitations.
+- **Persian Typography & RTL Engineering**: Enforces standard Persian Yeh (`ی` U+06CC), Persian Kaf (`ک` U+06A9), proper Zero-Width Non-Joiners (`نیم‌فاصله` U+200C), and strict LTR bidirectional isolation (`dir="ltr"`, `unicode-bidi: isolate`) for mathematical formulas, prices, signed percentages, and ticker symbols.
+
+---
+
+## 3. Cinematic 2D & 3D Visualization Layers
+
+- **2D Scientific Chart (`#windyCanvas`)**: Continuous green↔red buy/sell pressure spectrum candles with relative-volume luminosity, Waiting-Money resting liquidity heat zones, Windy-style liquidity streamlines (with adaptive `Full / Lite / Off` performance modes), **Primary Forecast Trajectory** (solid yellow), **Candidate Forecast Trajectory** (dashed magenta), and $\pm 1\sigma / \pm 2\sigma$ uncertainty bands.
+- **3D Market Theatre (`#threeGlobeStage`)**: Synchronized 1-to-1 with the verified 2D state across six canonical cinematic layers:
+  1. **Arena** — Live spot execution ring and order-flow shockwaves.
+  2. **Bull and Bear Titans** — Opposing directional order-flow pressure sculptures driven by intrabar Close Location Value, wick rejection, and absorption Z-scores.
+  3. **Graveyard** — Spatial archive of historical bars, swept stop clusters, and invalidated support/resistance relics.
+  4. **Deep Terrain** — Multi-timeframe liquidity depth topography (`Monthly → 5m` POC, VAH, VAL, HVN bastions, and LVN channels).
+  5. **Macro Sky** — Exogenous cross-asset canopy driven by real yields, DXY, and GARCH volatility.
+  6. **Historical Replay** — Deterministic bar-by-bar time scrubbing synchronized between the 2D chart and 3D Market Theatre.
+
+---
+
+## 4. Strict Real-Data Governance & Verification Suites
+
+GDF enforces `STRICT_REAL_DATA_ONLY = true`. If all upstream market tiers degrade or fail quorum checks, the system enters `HALTED_DEGRADED` circuit-breaker stasis and freezes filter covariance rather than generating synthetic data.
+
+### Running Verification & Terminology Audits
+
 ```bash
-# Clone the repository
-git clone https://github.com/Esmaeil9090/gold-quant-api.git
-
-# Enter project directory
-cd gold-quant-api
-
-# Install dependencies
 npm install
-
-# Start local development server (runs on http://localhost:3000)
+npx tsx scripts/check-bilingual-terminology.ts
+npx tsx scripts/check-phase3-spec-parity.ts
+npx tsx scripts/check-phase4-confidence-metrics.ts
+npx tsx scripts/check-phase5-validation-and-html-guard.ts
+npx tsx scripts/check-phase6-cognitive-hierarchy.ts
+npx tsx scripts/check-parallel-universe-core.ts
+npx tsx scripts/check-scientific-core.ts
 npm run dev
 ```
-
-### Production Build & Deployment
-```bash
-# Build TypeScript / verify bundle
-npm run build
-
-# Start production server
-npm start
-```
-
----
-
-## 📁 Project Structure
-
-```
-├── server.ts              # Express server with Volume-Clock EKF, Sweep Discriminator & Macro/Micro engines
-├── index.html             # High-performance 2D Canvas + 3D Three.js Morse Manifold Globe UI & HUD
-├── public/
-│   ├── manifest.webmanifest # PWA Web App Manifest
-│   ├── sw.js              # Service Worker for offline caching
-│   └── icons/             # Multi-resolution GDF shield app icons (PNG & SVG)
-├── package.json           # Dependencies & build scripts
-├── tsconfig.json          # TypeScript compiler configuration
-└── metadata.json          # AI Studio platform configuration
-```
-
----
-
-## 📐 Core Mathematical Architecture
-
-### 1. Volume-Synchronized Clock Subordinator ($\tau$)
-$$\Delta \tau_k = \frac{V_k}{\bar{V}_{\text{bucket}}}, \qquad \Delta \tau_{\text{eff}} = \min\!\left(\max(\Delta \tau_k, \epsilon_\tau),\, \Delta \tau_{\max}\right)$$
-$$Q_k(\Delta \tau_{\text{eff}}) = Q_0 \cdot \Delta \tau_{\text{eff}} + Q_{\text{floor}} \cdot \min(\Delta t_k, \Delta t_{\max})$$
-
-### 2. Log-Odds Sweep vs. Breakout Discriminator ($L_k$)
-$$L_k = \lambda_0 L_{k-1} + w_{\text{abs}} Z_{\text{absorption},k} + w_{\text{div}} Z_{\text{macro\_div},k} - w_{\text{follow}} Z_{\text{follow\_through},k}$$
-$$P(\text{Sweep}_k) = \frac{1}{1 + e^{-L_k}}$$
-
-### 3. Coupled Morse Potential Manifold ($U(p, \tau)$)
-$$U(p, \tau) = D_e \left(1 - e^{-a(p - p_{\text{macro}}(\tau))}\right)^2 + \sum_{j} A_j \exp\!\left(-\frac{(p - L_j)^2}{2\sigma_j^2}\right)$$
-
----
-
-## 📄 License
-MIT License. Created for institutional quantitative research and algorithmic decision support.
-

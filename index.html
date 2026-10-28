@@ -13,16 +13,16 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
-<title>GDF — Gold Dynamic Flow · Quantitative Decision Engine</title>
-<meta name="description" content="GDF (Gold Dynamic Flow) — Institutional quantitative decision engine with hydrodynamic vector flow, Merton Jump-Diffusion, VPIN toxicity, and DP state-space observer.">
-<meta property="og:title" content="GDF — Gold Dynamic Flow · Quantitative Decision Engine">
-<meta property="og:description" content="GDF (Gold Dynamic Flow) — Hydrodynamic vector streamlines, GARCH turbulence fronts, VPIN order-flow toxicity, and Kalman state-space forecasting.">
+<title>GDF — Gold Dynamic Flow · Quantitative Market-State &amp; Forecasting Platform</title>
+<meta name="description" content="GDF (Gold Dynamic Flow) — Institutional quantitative-finance and market-analysis platform with Adaptive Market-State Estimation (Scalar-Gain Kalman Observer), GARCH(1,1) Conditional Volatility, Volume-Synchronized Information Clock, and Out-of-Sample Residual Analysis.">
+<meta property="og:title" content="GDF — Gold Dynamic Flow · Quantitative Market-State &amp; Forecasting Platform">
+<meta property="og:description" content="GDF (Gold Dynamic Flow) — Bilingual (EN/FA) quantitative market-state estimation, GARCH(1,1) volatility regimes, OHLCV order-flow imbalance proxies, and walk-forward forecast verification.">
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 <script src="/vendor-three.min.js?v=69.0"></script>
-<script src="/js/gdfClientCore.js?v=70.0"></script>
+<script src="/js/gdfClientCore.js?v=71.0"></script>
 <style>
 :root {
   --bg: #06090f;
@@ -49,8 +49,44 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
 }
-body[dir="rtl"] {
+body[dir="rtl"],
+html[dir="rtl"] body {
   font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, Tahoma, 'Segoe UI', sans-serif;
+  text-align: right;
+}
+/* Strict Bidirectional Isolation for Quantitative Telemetry, Tickers, Equations & Signed Numerals in RTL Mode */
+html[dir="rtl"] .stat-pill-val,
+html[dir="rtl"] .unc-band-readout,
+html[dir="rtl"] .bar-countdown-tag,
+html[dir="rtl"] .scrubber-horizon-tag,
+html[dir="rtl"] .timeline-labels,
+html[dir="rtl"] .mtf-table td:not(:first-child):not(:nth-child(3)):not(:last-child),
+html[dir="rtl"] #tier1ActiveTimeframeBadge,
+html[dir="rtl"] #tier1CircuitBreakerBadge,
+html[dir="rtl"] #dirPressureReadout,
+html[dir="rtl"] #t2Equilibrium,
+html[dir="rtl"] #t2DriftVelocity,
+html[dir="rtl"] #t2MacroProxy,
+html[dir="rtl"] #t2ValSummaryMetric,
+html[dir="rtl"] #puLiveArchBadge,
+html[dir="rtl"] #puCandArchBadge,
+html[dir="rtl"] #puGateStatusPill,
+html[dir="rtl"] code,
+html[dir="rtl"] .ltr-num,
+html[dir="rtl"] .math-formula {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+html[dir="rtl"] .mtf-table th,
+html[dir="rtl"] .mtf-table td {
+  text-align: right;
+}
+html[dir="rtl"] .legend-visual-row {
+  text-align: right;
+}
+html[dir="rtl"] .three-cinematic-left-nav {
+  direction: ltr;
 }
 
 .ambient-glow {
@@ -3424,22 +3460,22 @@ input:checked + .toggle-slider:before {
         <nav class="three-cinematic-left-nav" aria-label="3D Market Theatre Zones">
           <div class="three-brand-crest">
             <div class="three-brand-crest-gdf">GDF</div>
-            <div class="three-brand-crest-sub">GOLD DYNAMIC FLOW<br>3D MARKET THEATRE</div>
+            <div class="three-brand-crest-sub" data-i18n="threeCrestSub">GOLD DYNAMIC FLOW · 3D MARKET THEATRE</div>
           </div>
           <button type="button" class="three-zone-nav-btn active" data-cam="battle">
-            <span>⚔️</span><span>Arena</span>
+            <span>⚔️</span><span data-i18n="navArena">Arena</span>
           </button>
           <button type="button" class="three-zone-nav-btn" data-cam="graveyard">
-            <span>🏛️</span><span>Graveyard</span>
+            <span>🏛️</span><span data-i18n="navGraveyard">Graveyard</span>
           </button>
           <button type="button" class="three-zone-nav-btn" data-cam="manifold">
-            <span>⛰️</span><span>Deep Terrain</span>
+            <span>⛰️</span><span data-i18n="navDeepTerrain">Deep Terrain</span>
           </button>
           <button type="button" class="three-zone-nav-btn" data-cam="forecast">
-            <span>🌩️</span><span>Macro Sky</span>
+            <span>🌩️</span><span data-i18n="navMacroSky">Macro Sky</span>
           </button>
           <button type="button" class="three-zone-nav-btn" data-cam="replay">
-            <span>⏱️</span><span>Historical Replay</span>
+            <span>⏱️</span><span data-i18n="navHistoricalReplay">Historical Replay</span>
           </button>
         </nav>
 
@@ -3537,41 +3573,41 @@ input:checked + .toggle-slider:before {
             <!-- Reference-Matched 7-Chapter Cinematic Storyboard Strip -->
             <div class="three-storyboard-strip" id="threeStoryboardStrip">
               <button type="button" class="three-story-act-btn" data-story-act="opening" data-cam="overview">
-                <div class="three-story-act-title">Opening</div>
-                <div class="three-story-act-sub">The world of gold</div>
+                <div class="three-story-act-title" data-i18n="storyOpeningTitle">Opening</div>
+                <div class="three-story-act-sub" data-i18n="storyOpeningSub">The world of gold</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="tension" data-cam="manifold">
-                <div class="three-story-act-title">Rising Tension</div>
-                <div class="three-story-act-sub">Market forces build</div>
+                <div class="three-story-act-title" data-i18n="storyTensionTitle">Deep Terrain</div>
+                <div class="three-story-act-sub" data-i18n="storyTensionSub">Liquidity depth builds</div>
               </button>
               <button type="button" class="three-story-act-btn active" data-story-act="clash" data-cam="battle">
-                <div class="three-story-act-title">The Clash</div>
-                <div class="three-story-act-sub">Bull vs Bear</div>
+                <div class="three-story-act-title" data-i18n="storyClashTitle">Arena · Titans</div>
+                <div class="three-story-act-sub" data-i18n="storyClashSub">Bull and Bear Titans</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="macro" data-cam="forecast">
-                <div class="three-story-act-title">Macro Event</div>
-                <div class="three-story-act-sub">News shakes the market</div>
+                <div class="three-story-act-title" data-i18n="storyMacroTitle">Macro Sky</div>
+                <div class="three-story-act-sub" data-i18n="storyMacroSub">Exogenous macro drivers</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="aftermath" data-cam="aftermath">
-                <div class="three-story-act-title">Aftermath</div>
-                <div class="three-story-act-sub">New balance forms</div>
+                <div class="three-story-act-title" data-i18n="storyAftermathTitle">Aftermath</div>
+                <div class="three-story-act-sub" data-i18n="storyAftermathSub">Filtered equilibrium</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="graveyard" data-cam="graveyard">
-                <div class="three-story-act-title">The Graveyard</div>
-                <div class="three-story-act-sub">History remains</div>
+                <div class="three-story-act-title" data-i18n="storyGraveyardTitle">The Graveyard</div>
+                <div class="three-story-act-sub" data-i18n="storyGraveyardSub">Swept levels archive</div>
               </button>
               <button type="button" class="three-story-act-btn" data-story-act="ahead" data-cam="ahead">
-                <div class="three-story-act-title">Looking Ahead</div>
-                <div class="three-story-act-sub">Uncertainty continues</div>
+                <div class="three-story-act-title" data-i18n="storyAheadTitle">Looking Ahead</div>
+                <div class="three-story-act-sub" data-i18n="storyAheadSub">Uncertainty bands</div>
               </button>
             </div>
 
             <!-- Minimal Director Action Row -->
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
               <div class="three-dock-group">
-                <button class="three-dock-btn active" id="btn3dAutoCinema" title="Continuous Cinematic Camera Director">🎬 Auto-Director</button>
-                <button class="three-dock-btn" id="btn3dPureCinemaToggle" title="Hide All Overlays for Pure Unobstructed 3D Movie">👁️ Pure Movie</button>
-                <button class="three-dock-btn" id="btnLeftNavMathMap" title="Inspect Documented 2D-to-3D Mathematical Mapping">📐 Math Mapping</button>
+                <button class="three-dock-btn active" id="btn3dAutoCinema" title="Continuous Cinematic Camera Director" data-i18n="btnAutoDirector">🎬 Auto-Director</button>
+                <button class="three-dock-btn" id="btn3dPureCinemaToggle" title="Hide All Overlays for Pure Unobstructed 3D Movie" data-i18n="btnPureMovie">👁️ Pure Movie</button>
+                <button class="three-dock-btn" id="btnLeftNavMathMap" title="Inspect Documented 2D-to-3D Mathematical Mapping" data-i18n="btnMathMapping">📐 Math Mapping</button>
               </div>
               <div class="three-dock-group" style="display:none;">
                 <button class="three-dock-btn active" id="btn3dTerrain">MTF Terrain</button>
@@ -3711,18 +3747,18 @@ input:checked + .toggle-slider:before {
     <div class="chart-visual-legend-section" id="chartVisualLegendSection">
       <button type="button" class="chart-visual-legend-toggle" id="btnToggleChartLegend" aria-expanded="false" aria-controls="chartVisualLegendDrawer">
         <div class="chart-visual-legend-swatches">
-          <span style="color:#f5d76e;font-weight:800;">ⓘ Legend</span>
+          <span style="color:#f5d76e;font-weight:800;" data-i18n="legendToggleBtn">ⓘ Legend</span>
           <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#9cb0cc;">
-            <span style="width:16px;height:2.5px;background:#f5d76e;box-shadow:0 0 6px #f5d76e;display:inline-block;border-radius:2px;"></span>Forecast
+            <span style="width:16px;height:2.5px;background:#f5d76e;box-shadow:0 0 6px #f5d76e;display:inline-block;border-radius:2px;"></span><span data-i18n="legendSwatchForecast">Primary Forecast</span>
           </span>
           <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#9cb0cc;">
-            <span style="width:16px;height:0;border-top:2px dashed #e040fb;display:inline-block;"></span>Candidate
+            <span style="width:16px;height:0;border-top:2px dashed #e040fb;display:inline-block;"></span><span data-i18n="legendSwatchCandidate">Candidate</span>
           </span>
           <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#9cb0cc;">
-            <span style="width:16px;height:2.5px;background:linear-gradient(90deg,#00e5ff,#f5d76e);display:inline-block;border-radius:2px;"></span>Streamlines
+            <span style="width:16px;height:2.5px;background:linear-gradient(90deg,#00e5ff,#f5d76e);display:inline-block;border-radius:2px;"></span><span data-i18n="legendSwatchStream">Streamlines</span>
           </span>
           <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#9cb0cc;">
-            <span style="width:14px;height:6px;background:linear-gradient(90deg,#ff1744,#00e676);display:inline-block;border-radius:2px;"></span>Green↔Red Candles
+            <span style="width:14px;height:6px;background:linear-gradient(90deg,#ff1744,#00e676);display:inline-block;border-radius:2px;"></span><span data-i18n="legendSwatchCandles">Spectrum Candles</span>
           </span>
         </div>
         <span class="chart-visual-legend-arrow" id="chartLegendToggleArrow">▾</span>
@@ -3730,8 +3766,8 @@ input:checked + .toggle-slider:before {
 
       <div class="chart-visual-legend-drawer" id="chartVisualLegendDrawer" role="region" aria-label="GDF Chart Visual Language Legend">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <span style="font-size:10.5px;font-weight:800;letter-spacing:1.2px;color:var(--gold);text-transform:uppercase;">GDF Scientific Chart Visual Language</span>
-          <button type="button" id="btnCloseChartLegend" style="background:rgba(255,255,255,0.06);border:1px solid rgba(60,85,125,0.5);border-radius:6px;color:#cbd5e1;font-size:11px;cursor:pointer;padding:2px 8px;">✕ Close</button>
+          <span style="font-size:10.5px;font-weight:800;letter-spacing:1.2px;color:var(--gold);text-transform:uppercase;" data-i18n="legendHeaderTitle">GDF Scientific Chart Visual Language</span>
+          <button type="button" id="btnCloseChartLegend" style="background:rgba(255,255,255,0.06);border:1px solid rgba(60,85,125,0.5);border-radius:6px;color:#cbd5e1;font-size:11px;cursor:pointer;padding:2px 8px;" data-i18n="btnCloseLegend">✕ Close</button>
         </div>
 
         <div class="legend-visual-list">
@@ -3742,8 +3778,8 @@ input:checked + .toggle-slider:before {
               </span>
             </div>
             <div>
-              <div class="legend-visual-title">LIVE FORECAST</div>
-              <div class="legend-visual-desc">Primary dynamic projection — conditional expectation of the 6D latent state on the information clock (with 68% ±1σ P75 &amp; 95% ±2σ P95 confidence band).</div>
+              <div class="legend-visual-title" data-i18n="legendLiveForecastTitle">PRIMARY FORECAST TRAJECTORY</div>
+              <div class="legend-visual-desc" data-i18n="legendLiveForecastDesc">Primary dynamic projection — conditional expectation of the 6D latent state on the volume-synchronized information clock (with 68% ±1σ P75 &amp; 95% ±2σ P95 predictive interval).</div>
             </div>
           </div>
 
@@ -3752,8 +3788,8 @@ input:checked + .toggle-slider:before {
               <span style="width:52px;height:0;border-top:2.5px dashed #e040fb;filter:drop-shadow(0 0 6px #e040fb);display:inline-block;"></span>
             </div>
             <div>
-              <div class="legend-visual-title">CANDIDATE TRAJECTORY</div>
-              <div class="legend-visual-desc">Parallel Universe alternative scenario evaluated in real time before 8-gate promotion.</div>
+              <div class="legend-visual-title" data-i18n="legendCandTrajectoryTitle">CANDIDATE FORECAST TRAJECTORY</div>
+              <div class="legend-visual-desc" data-i18n="legendCandTrajectoryDesc">Alternative forecast scenario (Parallel Universe) evaluated out-of-sample in real time before 8-gate promotion.</div>
             </div>
           </div>
 
@@ -3764,8 +3800,8 @@ input:checked + .toggle-slider:before {
               </span>
             </div>
             <div>
-              <div class="legend-visual-title">LIQUIDITY STREAMLINES</div>
-              <div class="legend-visual-desc">Windy-style flow born from waiting-money zones · Hue encodes direction (green/cyan = buy-side flow, red/orange = sell-side flow) · Glow encodes flow magnitude · Speed &amp; density respond to information-clock activity.</div>
+              <div class="legend-visual-title" data-i18n="legendStreamlinesTitle">LIQUIDITY STREAMLINES</div>
+              <div class="legend-visual-desc" data-i18n="legendStreamlinesDesc">Market flow streamlines born from resting liquidity zones · Hue encodes direction (green/cyan = buy-side order flow, red/orange = sell-side order flow) · Glow encodes flow magnitude · Speed responds to information-clock activity.</div>
             </div>
           </div>
 
@@ -3778,8 +3814,8 @@ input:checked + .toggle-slider:before {
               </span>
             </div>
             <div>
-              <div class="legend-visual-title">PULSE FLASH</div>
-              <div class="legend-visual-desc">Momentum ignition &amp; Pulse–Echo sonar impulse event on the active price trajectory.</div>
+              <div class="legend-visual-title" data-i18n="legendPulseFlashTitle">PRICE-IMPACT IMPULSE (PULSE FLASH)</div>
+              <div class="legend-visual-desc" data-i18n="legendPulseFlashDesc">Momentum ignition &amp; price-impact response (Pulse–Echo) impulse event on the active price trajectory.</div>
             </div>
           </div>
 
@@ -3788,8 +3824,8 @@ input:checked + .toggle-slider:before {
               <span style="width:48px;height:10px;border-radius:3px;background:linear-gradient(90deg,#ff1744 0%,#d52b47 38%,#1db968 62%,#00e676 100%);box-shadow:0 0 10px rgba(0,230,118,0.45);display:inline-block;"></span>
             </div>
             <div>
-              <div class="legend-visual-title">SPECTRUM CANDLES &amp; VOLUME GLOW</div>
-              <div class="legend-visual-desc">Continuous green↔red hue encodes intrabar buy/sell power balance (pure green = full buy pressure, pure red = full sell pressure) · Luminosity &amp; glow intensity encode relative bar volume only.</div>
+              <div class="legend-visual-title" data-i18n="legendSpectrumCandlesTitle">SPECTRUM CANDLES &amp; VOLUME GLOW</div>
+              <div class="legend-visual-desc" data-i18n="legendSpectrumCandlesDesc">Continuous green↔red hue encodes intrabar order-flow imbalance (pure green = full buyer dominance, pure red = full seller dominance) · Luminosity &amp; glow intensity encode relative bar volume only.</div>
             </div>
           </div>
 
@@ -3798,8 +3834,8 @@ input:checked + .toggle-slider:before {
               <span style="width:52px;height:8px;border-radius:4px;background:radial-gradient(ellipse at center,rgba(245,180,65,0.85) 0%,rgba(245,155,45,0.28) 65%,transparent 100%);display:inline-block;"></span>
             </div>
             <div>
-              <div class="legend-visual-title">WAITING-MONEY LAYER</div>
-              <div class="legend-visual-desc">Soft horizontal heat bands at price levels where resting liquidity accumulates (origin points where waiting money converts into flowing streamlines).</div>
+              <div class="legend-visual-title" data-i18n="legendWaitingMoneyTitle">RESTING LIQUIDITY DEPTH (WAITING MONEY)</div>
+              <div class="legend-visual-desc" data-i18n="legendWaitingMoneyDesc">Horizontal heat bands at price levels where multi-timeframe resting liquidity accumulates (origin nodes where resting depth converts into active order flow).</div>
             </div>
           </div>
         </div>
@@ -4259,22 +4295,22 @@ input:checked + .toggle-slider:before {
         <div class="recharts-card">
           <div class="recharts-header">
             <div class="recharts-title-box">
-              <span class="recharts-badge" data-i18n="rechartsBadge">Recharts Dynamic Positioning Observer Analytics</span>
-              <h3 class="recharts-title" data-i18n="rechartsTitle">State-Space Feedback Loop Convergence</h3>
+              <span class="recharts-badge" data-i18n="rechartsBadge">Recharts Scalar-Gain Kalman State-Space Analytics</span>
+              <h3 class="recharts-title" data-i18n="rechartsTitle">Kalman State-Space Innovation Convergence</h3>
             </div>
             <div class="recharts-legend-pills">
               <div class="legend-pill pill-cyan">
                 <span class="legend-dot dot-cyan"></span>
-                <span data-i18n="legendBias">Unmeasured Bias (b_t)</span>
+                <span data-i18n="legendBias">Unmeasured Drift (b_t)</span>
               </div>
               <div class="legend-pill pill-gold">
                 <span class="legend-dot dot-gold"></span>
-                <span data-i18n="legendVelocity">State Velocity (v_t)</span>
+                <span data-i18n="legendVelocity">Filtered Drift Velocity (v_t)</span>
               </div>
             </div>
           </div>
           <div class="recharts-desc" data-i18n="rechartsDesc">
-            Real-time historical convergence of the Extended Kalman Filter innovation loop over trailing intervals. As the observer feedback stabilizes, unmeasured institutional bias converges into steady-state equilibrium while state velocity reflects underlying hydrodynamic momentum.
+            Real-time historical convergence of the Scalar-Gain Kalman Filter innovation loop over trailing 25 bars. Unmeasured drift is regularized via empirical-Bayes shrinkage while filtered velocity tracks local price momentum.
           </div>
           <div id="recharts-convergence-root"></div>
         </div>
@@ -5129,7 +5165,7 @@ input:checked + .toggle-slider:before {
 <div class="modal-overlay hidden" id="diagOverlay">
   <div class="modal-box">
     <div class="modal-header">
-      <div class="modal-title" data-i18n="modalTitle">Offshore DP Observer & Macro Wind Diagnostics</div>
+      <div class="modal-title" data-i18n="modalTitle">Scalar-Gain Kalman Observer &amp; Macro Factor Diagnostics</div>
       <button class="modal-close" id="modalClose">✕</button>
     </div>
     <div class="modal-body" id="modalContent" style="font-family: monospace; white-space: pre-wrap; font-size: 11px;">Loading diagnostic matrices...</div>
@@ -5197,29 +5233,31 @@ input:checked + .toggle-slider:before {
 </div>
 
 <script>
-// Multilingual Translation Dictionary (English / Farsi فارسی) — Phase 3 & Phase 6 Audited & Neutralized Econometric Language
+// Authoritative Bilingual Financial Terminology Dictionary (English / Farsi فارسی) — 100% Key Parity & Quantitative Standardization
 const i18n = {
   en: {
     title: 'GDF',
     badge: 'Gold Dynamic Flow',
-    subtitle: 'Scalar-Gain Kalman & GARCH Quant Engine [Viz: Hydrodynamic / Marine DP]',
+    subtitle: 'Adaptive Market-State Estimator (Scalar-Gain Kalman) & GARCH(1,1) Volatility Engine',
+    btnBugReport: 'System Report',
+    btnUpdateApp: 'Update App',
     btnModelSpecs: 'Model Specs',
-    btnTelemetry: '⚡ DP Telemetry',
+    btnTelemetry: '⚡ State Telemetry',
     btnRecalibrate: '⟳ Re-Calibrate',
     btnIndicators: 'Indicators',
     txtIndicators: 'Indicators',
     btnSettings: 'Settings',
     txtSettings: 'Settings',
     spotGold: 'Spot Gold (PAXG)',
-    macroDrift: 'Linear Macro Drift [Viz: Lift]',
+    macroDrift: 'Exogenous Macro Drift [Viz: Lift]',
     garchTurbulence: 'GARCH(1,1) Vol [Viz: Turbulence]',
     bearDom: 'P5 Sell Tail (-2σ)',
     bullDom: 'P95 Buy Tail (+2σ)',
     volLuminosity: 'Candle Luminosity & Glow = Relative Bar Volume Intensity',
     layerStream: 'Streamlines',
-    layerIsobars: 'Isobars',
-    layerPlumes: 'Plumes',
-    layerBattle: 'Volumetric Candles',
+    layerIsobars: 'Waiting Money',
+    layerPlumes: 'Uncertainty (68%·95%)',
+    layerBattle: 'Spectrum Candles',
     axisDragHint: 'Drag Right/Bottom Axis to Scale · Double Click to Reset',
     newsTitle: 'Macro Events Timeline · Gold Econometric Impact',
     filterAll: 'All Catalysts',
@@ -5231,14 +5269,14 @@ const i18n = {
     cardEquilibriumTitle: '40-Bar OU Rolling Equilibrium [Viz: Anchor]',
     cardEquilibriumSub: '✓ Exact',
     cardEquilibriumDesc: '40-bar rolling sample mean anchor with OLS AR(1) mean-reversion rate [Viz: Geopotential restoring attractor].',
-    cardWindTitle: 'Linear Macro Factor Drift [Viz: Wind Velocity]',
+    cardWindTitle: 'Exogenous Macro Factor Drift [Viz: Wind Velocity]',
     cardWindSub: '⚡ Proxy',
-    cardWindDesc: 'Affine macro factor proxy combining 10Y TIPS real yield, DXY index, and central bank baseline [Viz: Synoptic wind lift].',
+    cardWindDesc: 'Affine exogenous macro driver proxy combining 10Y TIPS real yield, DXY index, and central bank baseline [Viz: Synoptic lift].',
     cardGarchTitle: 'GARCH(1,1) Conditional Vol [Viz: Turbulence]',
     cardGarchSub: '✓ Exact',
-    cardGarchDesc: 'QML-calibrated Bollerslev GARCH(1,1) conditional standard deviation governing forecast cone width [Viz: Turbulence].',
-    dpTitle: 'Scalar-Gain State-Space Kalman Observer [Viz: Marine DP Observer]',
-    dpSub: 'Bar-Volume Clock Proxy (Δτ) · Bulk-Volume VPIN Proxy · Mahalanobis 3σ Gate',
+    cardGarchDesc: 'QML-calibrated Bollerslev GARCH(1,1) conditional standard deviation governing predictive uncertainty band width.',
+    dpTitle: 'Adaptive Market-State Estimator (Scalar-Gain Kalman Observer)',
+    dpSub: 'Volume-Synchronized Clock (Δτ) · Bulk-Volume VPIN Proxy · Mahalanobis 3σ Gate',
     dpBias: 'Raw Unmeasured Drift (b_t)',
     dpVelocity: 'Filtered Drift Velocity (v_t) ⓘ',
     dpInnovationConsistency: 'Filter Innovation Consistency (NIS) ⓘ',
@@ -5255,7 +5293,7 @@ const i18n = {
     setSessions: 'Market Sessions & Open/Close Breaks',
     setSessionsSub: 'Highlight London (08:00 UTC), NY (13:30 UTC), Tokyo opens on timeline',
     setCountdown: 'Countdown to Bar Close',
-    setCountdownSub: 'Show real-time countdown timer to 15m candle completion',
+    setCountdownSub: 'Show real-time countdown timer to candle completion',
     setChartStyle: 'Candlestick Representation',
     setChartStyleSub: 'Choose visual representation format',
     setWatermark: 'GDF Symbol Watermark',
@@ -5266,12 +5304,12 @@ const i18n = {
     steadyState: 'Steady State (0.0)',
     nowTag: 'NOW (Real-Time Current)',
     forecastTag: 'FORECAST',
-    calcStream: 'CALCULATING STREAMLINES...',
-    awaitingFlow: 'Awaiting real-time hydrodynamic vector field',
-    stateLaminar: 'LAMINAR UPWARD FLOW',
-    stateSquall: 'SQUALL / HIGH TURBULENCE FRONT',
-    stateCalm: 'DEAD CALM (RANGE OSCILLATION)',
-    stateCyclonic: 'CYCLONIC DOWNWARD DRAFT',
+    calcStream: 'ESTIMATING MARKET FLOW & STATE...',
+    awaitingFlow: 'Synchronizing volume-clock latent state & order-flow streamlines',
+    stateLaminar: 'ORDERED UPWARD DRIFT REGIME',
+    stateSquall: 'HIGH-VOLATILITY TAIL SHOCK REGIME',
+    stateCalm: 'LOW-VOLATILITY RANGE COMPRESSION',
+    stateCyclonic: 'ORDERED DOWNWARD DRIFT REGIME',
     btnFullscreenText: 'FULL SCREEN',
     exitFullscreen: 'Exit Full Screen',
     fsBannerTitle: 'GDF · QUANT STATE-SPACE MONITOR',
@@ -5279,9 +5317,9 @@ const i18n = {
     toolbarPanels: 'Tier 3 · Progressive Disclosure: Deep Diagnostic & Econometric Panels (Collapsed by Default)',
     btnExpandAll: 'Expand All ▾',
     btnCollapseAll: 'Collapse All ▴',
-    panel1Title: 'Econometric & Proxy Telemetry Matrix [Viz: Atmospheric Field]',
+    panel1Title: 'Econometric & Proxy Telemetry Matrix [Viz: Market Flow Field]',
     panel1Status: 'OU · Macro · GARCH · Proxies',
-    panel2Title: 'Scalar-Gain Kalman State Observer & Volume/Toxicity Proxies [Viz: Marine DP]',
+    panel2Title: 'Adaptive Market-State Estimator (Kalman) & Order-Flow Imbalance Proxies',
     panel2Status: 'Recursive State Tracking',
     panel3Title: 'Kalman State-Space Innovation Convergence (Recharts)',
     panel3Status: 'Innovation vs Velocity',
@@ -5301,12 +5339,12 @@ const i18n = {
     btnResetDefault: 'Reset Defaults',
     btnCancel: 'Cancel',
     btnApply: 'OK / Apply',
-    lblTipsYield: '10Y TIPS Yield',
+    lblTipsYield: '10Y TIPS Real Yield',
     cardMacroYieldTitle: 'US Treasury / TIPS / DXY Macro Feed',
-    panelMtfTitle: 'Multi-Horizon Drift-to-Volatility Signal Matrix [Viz: Atmospheric Regime]',
+    panelMtfTitle: 'Multi-Horizon Drift-to-Volatility Signal Matrix [Viz: Volatility Regime]',
     colTf: 'Timeframe',
     colHorizon: 'Horizon',
-    colRegime: 'Regime [Viz: Flow]',
+    colRegime: 'Volatility Regime',
     colReynolds: 'Signal Ratio [Viz: Re]',
     colTurbulence: 'GARCH(1,1) Vol',
     colVelocity: 'Net Drift',
@@ -5319,7 +5357,7 @@ const i18n = {
     tipRay: 'Horizontal Ray: Click any price level on chart',
     cardPcaTitle: '3-Factor Macro Projection Proxy [Viz: PCA]',
     cardPcaDesc: 'Fixed-weight orthogonal linear projection of 8 normalized macro/market Z-scores onto 3 composite axes (F1, F2, F3).',
-    cardBasisTitle: 'Cross-Venue Basis Z-Score Proxy [Viz: Basis]',
+    cardBasisTitle: 'Instrument Basis Adjustment Z-Score Proxy [Viz: Basis]',
     dpRawBias: 'Raw Unmeasured Drift (b_t) ⓘ',
     dpShrunkBias: 'Empirical-Bayes Shrunk Drift (b_t^*) ⓘ',
     dpVpin: 'Bulk-Volume VPIN Proxy ⓘ',
@@ -5327,11 +5365,11 @@ const i18n = {
     dpStudentized: 'Studentized Innovation (|ẽ|) ⓘ',
     dpGate: 'Mahalanobis 3σ Jump Gate ⓘ',
     btnInstall: 'Install App',
-    btnReliability: 'Feed Integrity',
-    relModalTitle: 'Objective Feed Integrity & Provider Quorum Matrix',
+    btnReliability: 'Market-Data Feed Integrity',
+    relModalTitle: 'Market-Data Feed Integrity & Data-Provider Quorum Matrix',
     relModalSub: 'Live operational quorum ratio, cross-venue dispersion (bps), bar staleness & sequence completeness',
     txtReverifyFeeds: 'Re-Verify All Input Streams',
-    lblCompositeScore: 'Provider Quorum & Feed Integrity State',
+    lblCompositeScore: 'Data-Provider Quorum & Feed Integrity State',
     lblHealthyFeeds: 'Active Streams',
     lblAvgLatency: 'Cross-Venue Dispersion',
     installTitle: 'Install GDF on Your Phone',
@@ -5346,28 +5384,70 @@ const i18n = {
     androidStep2: 'Tap "Install App" or "Add to Home screen".',
     btnNativeInstall: '📲 Install Directly Now',
     btn3dWorld: '3D THEATRE',
-    threeWorldTitle: '3D Market Theatre: Arena · Graveyard · MTF Liquidity Terrain',
-    threeHideControls: '▾ Hide Controls',
-    threeShowControls: '▴ Show Controls',
+    threeWorldTitle: '3D Market Theatre: Arena · Graveyard · Deep Terrain · Macro Sky',
+    threeCrestSub: 'GOLD DYNAMIC FLOW · 3D MARKET THEATRE',
+    threeHideControls: '▾ Hide Storyboard',
+    threeShowControls: '▴ Show Storyboard',
+    navArena: 'Arena',
+    navGraveyard: 'Graveyard',
+    navDeepTerrain: 'Deep Terrain',
+    navMacroSky: 'Macro Sky',
+    navHistoricalReplay: 'Historical Replay',
+    storyOpeningTitle: 'Opening',
+    storyOpeningSub: 'The world of gold',
+    storyTensionTitle: 'Deep Terrain',
+    storyTensionSub: 'Liquidity depth builds',
+    storyClashTitle: 'Arena · Titans',
+    storyClashSub: 'Bull and Bear Titans',
+    storyMacroTitle: 'Macro Sky',
+    storyMacroSub: 'Exogenous macro drivers',
+    storyAftermathTitle: 'Aftermath',
+    storyAftermathSub: 'Filtered equilibrium',
+    storyGraveyardTitle: 'The Graveyard',
+    storyGraveyardSub: 'Swept levels archive',
+    storyAheadTitle: 'Looking Ahead',
+    storyAheadSub: 'Uncertainty bands',
+    btnAutoDirector: '🎬 Auto-Director',
+    btnPureMovie: '👁️ Pure Movie',
+    btnMathMapping: '📐 Math Mapping',
     camOverview: 'Establishing Shot',
     camBattle: '1. The Arena',
     camGraveyard: '2. The Graveyard',
     camManifold: '3. Deep Terrain',
     camForecast: '4. Macro Sky',
-    layer3dTerrain: 'MTF Terrain',
+    layer3dTerrain: 'Deep Terrain',
     layer3dCandles: 'Arena & Graveyard',
     layer3dPlume: 'Macro Sky & Plume',
-    layer3dFlow: 'Atmospheric Wind',
-    btnReturn2d: '↩ 2D Chart',
-    cardSweepTitle: 'OHLCV Wick-Volume Sweep & Morse Proxy',
-    dpDeltaTau: 'Bar-Volume Clock Proxy (Δτ_k) ⓘ',
+    layer3dFlow: 'Exogenous Flow',
+    btnReturn2d: '↩ Return to 2D Chart',
+    legendToggleBtn: 'ⓘ Legend',
+    legendSwatchForecast: 'Primary Forecast',
+    legendSwatchCandidate: 'Candidate',
+    legendSwatchStream: 'Streamlines',
+    legendSwatchCandles: 'Spectrum Candles',
+    legendHeaderTitle: 'GDF Scientific Chart Visual Language',
+    btnCloseLegend: '✕ Close',
+    legendLiveForecastTitle: 'PRIMARY FORECAST TRAJECTORY',
+    legendLiveForecastDesc: 'Primary dynamic projection — conditional expectation of the 6D latent state on the volume-synchronized information clock (with 68% ±1σ P75 & 95% ±2σ P95 predictive interval).',
+    legendCandTrajectoryTitle: 'CANDIDATE FORECAST TRAJECTORY',
+    legendCandTrajectoryDesc: 'Alternative forecast scenario (Parallel Universe) evaluated out-of-sample in real time before 8-gate promotion.',
+    legendStreamlinesTitle: 'LIQUIDITY STREAMLINES',
+    legendStreamlinesDesc: 'Market flow streamlines born from resting liquidity zones · Hue encodes direction (green/cyan = buy-side order flow, red/orange = sell-side order flow) · Glow encodes flow magnitude · Speed responds to information-clock activity.',
+    legendPulseFlashTitle: 'PRICE-IMPACT IMPULSE (PULSE FLASH)',
+    legendPulseFlashDesc: 'Momentum ignition & price-impact response (Pulse–Echo) impulse event on the active price trajectory.',
+    legendSpectrumCandlesTitle: 'SPECTRUM CANDLES & VOLUME GLOW',
+    legendSpectrumCandlesDesc: 'Continuous green↔red hue encodes intrabar order-flow imbalance (pure green = full buyer dominance, pure red = full seller dominance) · Luminosity & glow intensity encode relative bar volume only.',
+    legendWaitingMoneyTitle: 'RESTING LIQUIDITY DEPTH (WAITING MONEY)',
+    legendWaitingMoneyDesc: 'Horizontal heat bands at price levels where multi-timeframe resting liquidity accumulates (origin nodes where resting depth converts into active order flow).',
+    cardSweepTitle: 'Liquidity-Sweep Versus Breakout Classifier & Morse Proxy',
+    dpDeltaTau: 'Volume-Synchronized Clock (Δτ_k) ⓘ',
     dpKalmanGain: 'Scalar Kalman Gain (K_k) ⓘ',
-    dpSweepScore: 'Wick-Volume Sweep Log-Odds (L_t) ⓘ',
-    dpSweepAction: 'Sweep Proxy Regime State ⓘ',
-    panelValidationTitle: 'Causal Walk-Forward Validation & Attribution Scorecard (OOS)',
+    dpSweepScore: 'Liquidity-Sweep Log-Odds (L_t) ⓘ',
+    dpSweepAction: 'Sweep vs. Breakout Regime State ⓘ',
+    panelValidationTitle: 'Adaptive Model Evaluation & Causal Walk-Forward Validation (OOS)',
     valScorecardBadge: 'Phase 5 · Strictly Causal Walk-Forward Out-of-Sample Evaluation Engine',
     valScorecardTitle: 'Validation & Attribution Scorecard (Horizons h = 1, 5, 15, 60 Bars)',
-    valScorecardDesc: 'At every historical origin bar t, all state estimates (Scalar-Gain Kalman filter, GARCH(1,1) conditional variance, 40-bar OU anchor, and Wick-Volume Sweep log-odds) are computed strictly on prefix bars 0..t before scoring against realized forward returns r_{t→t+h}.',
+    valScorecardDesc: 'At every historical origin bar t, all state estimates (Scalar-Gain Kalman filter, GARCH(1,1) conditional variance, 40-bar OU anchor, and Liquidity-Sweep log-odds) are computed strictly on prefix bars 0..t before scoring against realized forward returns r_{t→t+h}.',
     valActiveVolRegimeLbl: 'Current GARCH Volatility Regime',
     valActiveMacroRegimeLbl: 'Current Real-Yield / Dollar Macro Regime',
     valColHorizon: 'Horizon (h)',
@@ -5382,36 +5462,38 @@ const i18n = {
     valMacroRegimeTitle: 'Regime Partition B · Real-Yield & Dollar Macro Pressure (h=5)',
     tier1Tag: 'TIER 1 · PRIMARY RIBBON',
     tier1CbLbl: 'Circuit Breaker:',
-    tier1QuorumLbl: 'Feed Integrity (Quorum):',
+    tier1QuorumLbl: 'Market-Data Feed Integrity (Quorum):',
     tier1TfLbl: 'Active Timeframe:',
     tier1VolRegimeLbl: 'Volatility Regime:',
     tier1MacroRegimeLbl: 'Macro Regime:',
     t2EqTitle: 'OU Rolling Equilibrium',
     t2VelTitle: 'Kalman Drift & GARCH Vol',
-    t2SweepTitle: 'Macro & Wick-Sweep Proxy',
-    t2ValTitle: 'Out-of-Sample Walk-Forward',
+    t2SweepTitle: 'Sweep vs. Breakout & Macro Proxy',
+    t2ValTitle: 'Adaptive Model Validation (OOS)',
   },
   fa: {
     title: 'سامانه پویای جریان طلا (GDF)',
     badge: 'جریان دینامیک طلا (GDF)',
-    subtitle: 'موتور کوانت کالمن اسکالر و GARCH [لایه بصری: هیدرودینامیک و ناظر دریایی DP]',
+    subtitle: 'برآوردگر تطبیقی وضعیت بازار (فیلتر کالمن اسکالر) و موتور نوسان GARCH(1,1)',
+    btnBugReport: 'گزارش وضعیت سیستم',
+    btnUpdateApp: 'به‌روزرسانی برنامه',
     btnModelSpecs: 'مشخصات مدل‌ها',
-    btnTelemetry: '⚡ تله‌متری فیلتر کالمن',
+    btnTelemetry: '⚡ تله‌متری وضعیت بازار',
     btnRecalibrate: '⟳ کالیبراسیون مجدد',
     btnIndicators: 'اندیکاتورها',
     txtIndicators: 'اندیکاتورها',
     btnSettings: 'تنظیمات',
     txtSettings: 'تنظیمات',
-    spotGold: 'انس نقدی طلا (PAXG)',
-    macroDrift: 'پروکسی خطی رانش کلان [لایه بصری: باد]',
+    spotGold: 'طلای نقدی (PAXG)',
+    macroDrift: 'رانش محرک‌های کلان برون‌زا [لایه بصری: برآیند]',
     garchTurbulence: 'نوسان شرطی GARCH(1,1) [لایه بصری: تلاطم]',
     bearDom: 'صدک P5 فشار فروش (-2σ)',
     bullDom: 'صدک P95 فشار خرید (+2σ)',
-    volLuminosity: 'روشنایی و درخشش کندل = شدت نسبی حجم کندل',
-    layerStream: 'جریان‌های باد',
-    layerIsobars: 'خطوط هم‌فشار',
-    layerPlumes: 'شبیه‌سازی توفان',
-    layerBattle: 'کندل‌های حجمی',
+    volLuminosity: 'روشنایی و درخشش کندل = شدت نسبی حجم معاملات کندل',
+    layerStream: 'خطوط جریان نقدینگی',
+    layerIsobars: 'نقدینگی در انتظار',
+    layerPlumes: 'باند عدم‌قطعیت (۶۸٪·۹۵٪)',
+    layerBattle: 'کندل‌های طیفی حجمی',
     axisDragHint: 'محور قیمت یا زمان را بکشید تا مقیاس تغییر کند · دابل کلیک برای بازنشانی',
     newsTitle: 'خط زمانی رویدادهای کلان · تأثیر اقتصادسنجی بر قیمت طلا',
     filterAll: 'همه محرک‌ها',
@@ -5422,67 +5504,67 @@ const i18n = {
     timeHorizon: '+۶ ساعت آینده',
     cardEquilibriumTitle: 'تعادل میانگین متحرک ۴۰ دوره‌ای OU [لایه بصری: لنگر]',
     cardEquilibriumSub: '✓ دقیق',
-    cardEquilibriumDesc: 'میانگین متحرک ۴۰ کندلی با نرخ بازگشت به میانگین AR(1) [لایه بصری: جاذب گرانشی ژئوپتانسیل].',
-    cardWindTitle: 'پروکسی خطی رانش فاکتورهای کلان [لایه بصری: سرعت باد]',
+    cardEquilibriumDesc: 'میانگین متحرک ۴۰ کندلی با نرخ بازگشت به میانگین AR(1) [لایه بصری: جاذب بازگرداننده تعادل].',
+    cardWindTitle: 'رانش محرک‌های کلان برون‌زا [لایه بصری: سرعت باد]',
     cardWindSub: '⚡ پروکسی',
-    cardWindDesc: 'پروکسی خطی ترکیبی از بازده واقعی TIPS ده‌ساله، شاخص دلار DXY و پایه نقدینگی بانک مرکزی.',
+    cardWindDesc: 'پروکسی خطی محرک‌های برون‌زای کلان شامل بازده حقیقی TIPS ده‌ساله، شاخص دلار DXY و پایه نقدینگی بانک مرکزی.',
     cardGarchTitle: 'نوسان‌پذیری شرطی GARCH(1,1) [لایه بصری: تلاطم]',
     cardGarchSub: '✓ دقیق',
-    cardGarchDesc: 'انحراف معیار شرطی GARCH(1,1) کالیبره‌شده با QML که پهنای مخروط پیش‌بینی را تعیین می‌کند.',
-    dpTitle: 'ناظر فضای حالت کالمن با بهره اسکالر [لایه بصری: ناظر دریایی DP]',
-    dpSub: 'پروکسی ساعت حجمی کندل (Δτ) · پروکسی حجم تجمعی VPIN · گیت ۳ سیگمای ماهالانوبیس',
-    dpBias: 'رانش خام نامشهود (b_t)',
+    cardGarchDesc: 'انحراف معیار شرطی GARCH(1,1) کالیبره‌شده با QML که پهنای باند عدم‌قطعیت پیش‌بینی را تعیین می‌کند.',
+    dpTitle: 'برآوردگر تطبیقی وضعیت بازار (ناظر فضای حالت کالمن اسکالر)',
+    dpSub: 'زمان همگام‌شده با حجم معاملات (Δτ) · پروکسی ناترازی حجم VPIN · دروازه ۳ سیگمای ماهالانوبیس',
+    dpBias: 'رانش خام اندازه‌گیری‌نشده (b_t)',
     dpVelocity: 'سرعت رانش فیلترشده (v_t) ⓘ',
     dpInnovationConsistency: 'سازگاری نوآوری فیلتر (NIS) ⓘ',
     dpEmpiricalCalibration: 'کالیبراسیون تجربی (خارج از نمونه) ⓘ',
-    dpInnovation: 'پسماند نوآوری',
-    rechartsBadge: 'آنالیز نموداری فضای حالت فیلتر کالمن اسکالر',
+    dpInnovation: 'باقیمانده نوآوری پیش‌بینی',
+    rechartsBadge: 'تحلیل نموداری فضای حالت فیلتر کالمن اسکالر',
     rechartsTitle: 'همگرایی حلقه نوآوری فضای حالت کالمن',
-    legendBias: 'رانش نامشهود (b_t)',
+    legendBias: 'رانش اندازه‌گیری‌نشده (b_t)',
     legendVelocity: 'سرعت رانش فیلترشده (v_t)',
-    rechartsDesc: 'همگرایی تاریخی حلقه نوآوری فیلتر کالمن اسکالر در ۲۵ کندل اخیر. رانش نامشهود با انقباض بیزی تجربی منظم شده و سرعت فیلترشده مومنتوم موضعی قیمت را دنبال می‌کند.',
-    modalTitle: 'تشخیص ناظر کالمن اسکالر و فاکتورهای کلان',
+    rechartsDesc: 'همگرایی تاریخی حلقه نوآوری فیلتر کالمن اسکالر در ۲۵ کندل اخیر. رانش اندازه‌گیری‌نشده با انقباض بیزی تجربی منظم‌سازی شده و سرعت فیلترشده مومنتوم موضعی قیمت را دنبال می‌کند.',
+    modalTitle: 'تشخیص ناظر کالمن اسکالر و محرک‌های برون‌زای کلان',
     modalIndTitle: 'اندیکاتورهای تکنیکال و کمّی (ƒx)',
-    modalSetTitle: 'تنظیمات چارت و سشن‌های معاملاتی (⚙️)',
-    setSessions: 'سشن‌های بازار و خطوط شروع/پایان',
-    setSessionsSub: 'نمایش خطوط سشن لندن (۰۸:۰۰ UTC)، نیویورک (۱۳:۳۰ UTC) و توکیو',
+    modalSetTitle: 'تنظیمات نمودار و نشست‌های معاملاتی (⚙️)',
+    setSessions: 'نشست‌های معاملاتی بازار و خطوط شروع/پایان',
+    setSessionsSub: 'نمایش خطوط نشست لندن (۰۸:۰۰ UTC)، نیویورک (۱۳:۳۰ UTC) و توکیو',
     setCountdown: 'شمارش معکوس بسته شدن کندل',
-    setCountdownSub: 'شمارش معکوس لحظه‌ای تا اتمام کندل',
+    setCountdownSub: 'نمایش شمارش معکوس لحظه‌ای تا تکمیل کندل جاری',
     setChartStyle: 'سبک نمایش کندل‌ها',
-    setChartStyleSub: 'انتخاب نوع نمایش قیمت',
+    setChartStyleSub: 'انتخاب قالب نمایش بصری قیمت',
     setWatermark: 'واترمارک نماد GDF',
-    setWatermarkSub: 'نمایش کم‌رنگ نماد GDF و تایم‌فریم در پس‌زمینه چارت',
+    setWatermarkSub: 'نمایش کم‌رنگ نماد GDF و تایم‌فریم در پس‌زمینه نمودار',
     setGrid: 'خطوط شبکه مختصات',
     setGridSub: 'نمایش خطوط افقی و عمودی شبکه قیمت و زمان',
     setUpdateTitle: 'موتور به‌روزرسانی خودکار',
-    steadyState: 'وضعیت پایدار (۰.۰)',
+    steadyState: 'وضعیت پایدار (0.0)',
     nowTag: 'اکنون (زمان زنده)',
     forecastTag: 'پیش‌بینی',
-    calcStream: 'در حال محاسبه جریان‌های برداری...',
-    awaitingFlow: 'در انتظار دریافت میدان هیدرودینامیکی زنده',
-    stateLaminar: 'جریان صعودی آرام و پایدار',
-    stateSquall: 'جبهه توفان و تلاطم شدید',
-    stateCalm: 'آرامش راکد (نوسان فشرده)',
-    stateCyclonic: 'گردباد نزولی پرفشار',
-    btnFullscreenText: 'تمام صفحه',
-    exitFullscreen: 'خروج از تمام صفحه',
-    fsBannerTitle: 'پایشگر فضای حالت کوانت GDF',
+    calcStream: 'در حال برآورد جریان بازار و وضعیت پنهان...',
+    awaitingFlow: 'در حال همگام‌سازی وضعیت پنهان ساعت اطلاعاتی و خطوط جریان نقدینگی',
+    stateLaminar: 'رژیم رانش صعودی منظم و پایدار',
+    stateSquall: 'رژیم شوک نوسانی و دنباله پرنوسان',
+    stateCalm: 'فشردگی کم‌نوسان (نوسان محدود)',
+    stateCyclonic: 'رژیم رانش نزولی منظم و پرفشار',
+    btnFullscreenText: 'تمام‌صفحه',
+    exitFullscreen: 'خروج از تمام‌صفحه',
+    fsBannerTitle: 'پایشگر فضای حالت کمّی GDF',
     layersLabel: 'لایه‌ها:',
     toolbarPanels: 'سطح ۳ · افشای تدریجی: پنل‌های تشخیصی عمیق و اقتصادسنجی (به‌صورت پیش‌فرض بسته)',
     btnExpandAll: 'باز کردن همه ▾',
     btnCollapseAll: 'بستن همه ▴',
-    panel1Title: 'ماتریس تله‌متری اقتصادسنجی و پروکسی‌ها [لایه بصری: میدان اتمسفری]',
+    panel1Title: 'ماتریس تله‌متری اقتصادسنجی و پروکسی‌ها [لایه بصری: میدان جریان بازار]',
     panel1Status: 'OU · کلان · GARCH · پروکسی‌ها',
-    panel2Title: 'ناظر حالت کالمن اسکالر و پروکسی‌های حجم و سمیت [لایه بصری: ناظر DP]',
-    panel2Status: 'ردیابی بازگشتی حالت',
+    panel2Title: 'برآوردگر تطبیقی وضعیت بازار (کالمن) و پروکسی‌های ناترازی جریان سفارش',
+    panel2Status: 'ردیابی بازگشتی وضعیت بازار',
     panel3Title: 'همگرایی نوآوری فضای حالت کالمن (Recharts)',
-    panel3Status: 'خطای نوآوری در برابر سرعت',
-    panel4Title: 'خط زمانی رویدادهای کلان و تأثیر طلا',
-    panel4Status: 'محرک‌ها و انتقال اقتصادسنجی',
+    panel3Status: 'باقیمانده نوآوری در برابر سرعت',
+    panel4Title: 'خط زمانی رویدادهای کلان · تأثیر اقتصادسنجی بر قیمت طلا',
+    panel4Status: 'محرک‌ها و سازوکار انتقال',
     panel5Title: 'شبیه‌سازی افق زمانی پیش‌بینی',
-    panel5Status: 'اکنون تا ۶ ساعت آینده',
+    panel5Status: 'اکنون تا +۶ ساعت آینده',
     searchIndicators: 'جستجوی اندیکاتور...',
-    catAll: 'تمام اندیکاتورها (۱۷)',
+    catAll: 'تمام اندیکاتورها (17)',
     catMA: 'میانگین‌های متحرک',
     catChannels: 'کانال‌ها و نوسان‌پذیری',
     catTrend: 'سامانه‌های روند',
@@ -5490,98 +5572,140 @@ const i18n = {
     catOscillators: 'اسیلاتورها و مومنتوم',
     tabInputs: 'ورودی‌ها',
     tabStyle: 'ظاهر و رنگ',
-    btnResetDefault: 'تنظیمات پیش‌فرض',
+    btnResetDefault: 'بازنشانی پیش‌فرض',
     btnCancel: 'انصراف',
     btnApply: 'تأیید و اعمال',
-    lblTipsYield: 'بازدهی واقعی TIPS ۱۰ ساله',
+    lblTipsYield: 'بازده حقیقی TIPS ده‌ساله',
     cardMacroYieldTitle: 'جریان زنده خزانه‌داری آمریکا / TIPS / DXY',
-    panelMtfTitle: 'ماتریس نسبت سیگنال رانش به نوسان چندافقی [لایه بصری: رژیم اتمسفری]',
+    panelMtfTitle: 'ماتریس نسبت سیگنال رانش به نوسان چندافقی [لایه بصری: رژیم نوسان]',
     colTf: 'تایم‌فریم',
     colHorizon: 'افق پیش‌بینی',
-    colRegime: 'رژیم [لایه بصری: جریان]',
+    colRegime: 'رژیم نوسان',
     colReynolds: 'نسبت سیگنال [لایه بصری: Re]',
     colTurbulence: 'نوسان GARCH(1,1)',
     colVelocity: 'رانش خالص',
     colEnsemble: 'نمره Z تجربی / صدک P5–P95 (±1 SE)',
     colAction: 'وضعیت رژیم آماری',
     tipTrendline1: 'خط روند: نقطه شروع نوسان را کلیک کنید',
-    tipTrendline2: 'خط روند: نقطه پایان را کلیک کنید',
+    tipTrendline2: 'خط روند: نقطه پایان را برای تثبیت کلیک کنید',
     tipFib1: 'فیبوناچی: نقطه سقف یا کف اول را کلیک کنید',
     tipFib2: 'فیبوناچی: نقطه دوم را برای تکمیل کلیک کنید',
-    tipRay: 'اشعه افقی: سطح قیمت مورد نظر را کلیک کنید',
+    tipRay: 'پرتو افقی: سطح قیمت مورد نظر را کلیک کنید',
     cardPcaTitle: 'پروکسی تصویر متعامد ۳ عاملی کلان [لایه بصری: PCA]',
     cardPcaDesc: 'تصویر خطی با وزن‌های ثابت از ۸ نمره استاندارد کلان و بازار بر روی ۳ محور ترکیبی (F1، F2، F3).',
-    cardBasisTitle: 'پروکسی نمره Z اسپرد غلتان بین‌بازاری [لایه بصری: بیسیس]',
-    dpRawBias: 'رانش خام نامشهود (b_t) ⓘ',
+    cardBasisTitle: 'پروکسی نمره Z تعدیل اختلاف قیمت ابزارها (Basis)',
+    dpRawBias: 'رانش خام اندازه‌گیری‌نشده (b_t) ⓘ',
     dpShrunkBias: 'رانش منقبض‌شده بیزی تجربی (b_t^*) ⓘ',
-    dpVpin: 'پروکسی سمیت حجم تجمعی VPIN ⓘ',
+    dpVpin: 'پروکسی ناترازی حجم تجمعی VPIN ⓘ',
     dpShrinkage: 'انقباض بیزی تجربی (κ_t) ⓘ',
     dpStudentized: 'خطای نوآوری استانداردشده (|ẽ|) ⓘ',
     dpGate: 'دروازه پرش ۳ سیگمای ماهالانوبیس ⓘ',
-    btnInstall: 'نصب روی گوشی',
-    btnReliability: 'یکپارچگی جریان داده',
-    relModalTitle: 'ماتریس عینی یکپارچگی داده و حدنصاب منابع زنده',
-    relModalSub: 'حدنصاب منابع مستقل، پراکندگی بین‌بازاری (bps)، تازگی زمانی و پیوستگی کندل‌ها',
-    txtReverifyFeeds: 'راستی‌آزمایی مجدد جریان‌های داده',
-    lblCompositeScore: 'حدنصاب منابع و وضعیت یکپارچگی داده',
+    btnInstall: 'نصب برنامه',
+    btnReliability: 'یکپارچگی جریان داده‌های بازار',
+    relModalTitle: 'ماتریس یکپارچگی جریان داده‌های بازار و حدنصاب تأمین‌کنندگان داده',
+    relModalSub: 'نسبت حدنصاب منابع مستقل، پراکندگی بین‌بازاره (bps)، تازگی زمانی و پیوستگی کندل‌ها',
+    txtReverifyFeeds: 'راستی‌آزمایی مجدد جریان‌های داده ورودی',
+    lblCompositeScore: 'حدنصاب تأمین‌کنندگان داده و وضعیت یکپارچگی فید',
     lblHealthyFeeds: 'جریان‌های فعال',
-    lblAvgLatency: 'پراکندگی بین‌بازاری',
+    lblAvgLatency: 'پراکندگی بین‌بازاره',
     installTitle: 'نصب GDF روی تلفن همراه',
-    installPwaSub: 'ترمینال مستقل تحلیل کمّی و فضای حالت',
-    iosStepsTitle: 'راهنمای آیفون و آی‌پد (سافاری):',
+    installPwaSub: 'ترمینال مستقل تحلیل کمّی و برآورد وضعیت بازار',
+    iosStepsTitle: 'راهنمای آیفون و آی‌پد (Safari):',
     iosStep1: 'این لینک را در مرورگر Safari باز کنید.',
-    iosStep2: 'دکمه Share (مربع با فلش رو به بالا ⎋) را در پایین صفحه لمس کنید.',
+    iosStep2: 'دکمه Share (مربع با فلش رو به بالا ⎋) را در نوار پایین لمس کنید.',
     iosStep3: 'کمی پایین آمده و گزینه "Add to Home Screen" (افزودن به صفحه اصلی ⊞) را بزنید.',
-    iosStep4: 'گزینه "Add" در بالا را بزنید تا برنامه بدون نوار مرورگر تمام‌صفحه باز شود!',
-    androidStepsTitle: 'راهنمای اندروید (کروم و سامسونگ):',
-    androidStep1: 'منوی سه‌نقطه (⋮) مرورگر را لمس کنید.',
-    androidStep2: 'گزینه "نصب برنامه" (Install App) یا "افزودن به صفحه اصلی" را بزنید.',
+    iosStep4: 'گزینه "Add" در بالا را بزنید تا برنامه بدون نوار مرورگر به‌صورت مستقل باز شود!',
+    androidStepsTitle: 'راهنمای اندروید (Chrome / Samsung / Edge):',
+    androidStep1: 'منوی سه‌نقطه (⋮) در گوشه بالای مرورگر را لمس کنید.',
+    androidStep2: 'گزینه "Install App" (نصب برنامه) یا "Add to Home screen" را بزنید.',
     btnNativeInstall: '📲 نصب مستقیم برنامه',
-    btn3dWorld: 'تئاتر ۳بعدی',
-    threeWorldTitle: 'تئاتر ۳بعدی بازار: آرنا · قبرستان · زمین نقدینگی چندافقی',
-    threeHideControls: '▾ پنهان کردن پنل',
-    threeShowControls: '▴ نمایش پنل کنترل',
-    camOverview: 'نمای سینمایی کل',
-    camBattle: '۱. آرنا (نبرد زنده)',
-    camGraveyard: '۲. قبرستان (گذشته نزدیک)',
-    camManifold: '۳. زمین نقدینگی (تاریخ عمیق)',
-    camForecast: '۴. آسمان کلان و مسیر آینده',
-    layer3dTerrain: 'زمین نقدینگی MTF',
-    layer3dCandles: 'آرنا و قبرستان',
-    layer3dPlume: 'آسمان کلان و کالمن',
-    layer3dFlow: 'بادهای اتمسفری',
-    btnReturn2d: '↩ چارت ۲بعدی',
-    cardSweepTitle: 'پروکسی شدو-حجم استاپ‌هانت و پتانسیل مورس',
-    dpDeltaTau: 'پروکسی گام ساعت حجمی کندل (Δτ_k) ⓘ',
+    btn3dWorld: 'تئاتر سه‌بعدی بازار',
+    threeWorldTitle: 'تئاتر سه‌بعدی بازار: Arena · Graveyard · Deep Terrain · Macro Sky',
+    threeCrestSub: 'جریان دینامیک طلا · تئاتر سه‌بعدی بازار',
+    threeHideControls: '▾ پنهان کردن نوار صحنه',
+    threeShowControls: '▴ نمایش نوار صحنه',
+    navArena: 'Arena (صحنه اصلی)',
+    navGraveyard: 'Graveyard (گورستان سطوح)',
+    navDeepTerrain: 'Deep Terrain (عمق نقدینگی)',
+    navMacroSky: 'Macro Sky (آسمان کلان)',
+    navHistoricalReplay: 'Historical Replay (بازپخش)',
+    storyOpeningTitle: 'نمای آغازین',
+    storyOpeningSub: 'جهان جریان دینامیک طلا',
+    storyTensionTitle: 'Deep Terrain',
+    storyTensionSub: 'انباشت عمق نقدینگی',
+    storyClashTitle: 'Arena · Titans',
+    storyClashSub: 'تایتان‌های گاو و خرس',
+    storyMacroTitle: 'Macro Sky',
+    storyMacroSub: 'محرک‌های برون‌زای کلان',
+    storyAftermathTitle: 'پسایند تعادل',
+    storyAftermathSub: 'همگرایی وضعیت فیلترشده',
+    storyGraveyardTitle: 'The Graveyard',
+    storyGraveyardSub: 'بایگانی سطوح جاروب‌شده',
+    storyAheadTitle: 'چشم‌انداز پیش‌رو',
+    storyAheadSub: 'باندهای عدم‌قطعیت پیش‌بینی',
+    btnAutoDirector: '🎬 کارگردان خودکار',
+    btnPureMovie: '👁️ نمای سینمایی خالص',
+    btnMathMapping: '📐 نگاشت ریاضی به سه‌بعدی',
+    camOverview: 'نمای کلان آغازین',
+    camBattle: '۱. Arena (صحنه نبرد)',
+    camGraveyard: '۲. Graveyard (گورستان سطوح)',
+    camManifold: '۳. Deep Terrain (عمق نقدینگی)',
+    camForecast: '۴. Macro Sky (آسمان کلان)',
+    layer3dTerrain: 'Deep Terrain (عمق نقدینگی)',
+    layer3dCandles: 'Arena & Graveyard',
+    layer3dPlume: 'Macro Sky & Plume',
+    layer3dFlow: 'جریان محرک‌های برون‌زا',
+    btnReturn2d: '↩ بازگشت به نمودار دوبعدی',
+    legendToggleBtn: 'ⓘ راهنمای نمودار',
+    legendSwatchForecast: 'مسیر پیش‌بینی اصلی',
+    legendSwatchCandidate: 'مسیر نامزد',
+    legendSwatchStream: 'خطوط جریان نقدینگی',
+    legendSwatchCandles: 'کندل‌های طیفی',
+    legendHeaderTitle: 'زبان بصری علمی نمودار GDF',
+    btnCloseLegend: '✕ بستن',
+    legendLiveForecastTitle: 'مسیر پیش‌بینی اصلی (PRIMARY FORECAST TRAJECTORY)',
+    legendLiveForecastDesc: 'برآورد پویا از امید ریاضی شرطی وضعیت پنهان ۶بعدی روی ساعت اطلاعاتی همگام با حجم معاملات (همراه با باند عدم‌قطعیت ۶۸٪ ±1σ و ۹۵٪ ±2σ).',
+    legendCandTrajectoryTitle: 'مسیر پیش‌بینی نامزد (CANDIDATE FORECAST TRAJECTORY)',
+    legendCandTrajectoryDesc: 'سناریوی جایگزین پیش‌بینی (محیط موازی اکتشافی) که پیش از ارتقای ۸ مرحله‌ای به‌صورت زنده و خارج از نمونه ارزیابی می‌شود.',
+    legendStreamlinesTitle: 'خطوط جریان نقدینگی (LIQUIDITY STREAMLINES)',
+    legendStreamlinesDesc: 'خطوط جریان بازار که از مناطق تمرکز نقدینگی در انتظار متولد می‌شوند · فام رنگ نشان‌دهنده جهت جریان سفارش (سبز/فیروزه‌ای = جریان خرید، قرمز/نارنجی = جریان فروش) · درخشش نشان‌دهنده شدت جریان · سرعت متناسب با ساعت اطلاعاتی بازار است.',
+    legendPulseFlashTitle: 'تکانه پاسخ اثر قیمتی (PULSE FLASH)',
+    legendPulseFlashDesc: 'رخداد آغازگر مومنتوم و پاسخ اثر قیمتی (پالس-پژواک) بر روی مسیر فعال قیمت.',
+    legendSpectrumCandlesTitle: 'کندل‌های طیفی و درخشش حجم (SPECTRUM CANDLES)',
+    legendSpectrumCandlesDesc: 'طیف پیوسته رنگ سبز تا قرمز نشان‌دهنده ناترازی جریان سفارش درون‌کندلی است (سبز خالص = تسلط کامل خریداران، قرمز خالص = تسلط کامل فروشندگان) · شدت روشنایی و هاله صرفاً حجم نسبی معاملات کندل را نشان می‌دهد.',
+    legendWaitingMoneyTitle: 'لایه عمق نقدینگی در انتظار (WAITING MONEY)',
+    legendWaitingMoneyDesc: 'نوارهای حرارتی افقی در سطوح قیمتی دارای تمرکز نقدینگی چندزمانه (نقاط مبدأ که در آن‌ها نقدینگی در انتظار به جریان سفارش فعال تبدیل می‌شود).',
+    cardSweepTitle: 'طبقه‌بند جاروب نقدینگی در برابر شکست واقعی و پتانسیل مورس',
+    dpDeltaTau: 'ساعت اطلاعاتی همگام با حجم (Δτ_k) ⓘ',
     dpKalmanGain: 'بهره کالمن اسکالر (K_k) ⓘ',
-    dpSweepScore: 'لگاریتم شانس شدو-حجم (L_t) ⓘ',
-    dpSweepAction: 'وضعیت رژیم پروکسی جاروب ⓘ',
-    panelValidationTitle: 'کارت امتیازی اعتبارسنجی علّی گام‌به‌گام (خارج از نمونه OOS)',
+    dpSweepScore: 'لگاریتم شانس جاروب نقدینگی (L_t) ⓘ',
+    dpSweepAction: 'وضعیت طبقه‌بند جاروب یا شکست ⓘ',
+    panelValidationTitle: 'ارزیابی و اعتبارسنجی تطبیقی مدل · آزمون علّی گام‌به‌گام (خارج از نمونه OOS)',
     valScorecardBadge: 'فاز ۵ · موتور ارزیابی علّی بدون آینده‌نگری (Zero-Lookahead Walk-Forward)',
     valScorecardTitle: 'کارت امتیازی اعتبارسنجی و تفکیک رژیم (افق‌های h = 1, 5, 15, 60 کندل)',
-    valScorecardDesc: 'در هر کندل مبدأ تاریخی t، تمامی تخمین‌های حالت (فیلتر کالمن اسکالر، واریانس شرطی GARCH(1,1)، تعادل ۴۰ کندلی OU و لگاریتم شانس جاروب نقدینگی) صرفاً با داده‌های تا زمان t محاسبه شده و سپس با بازده تحقق‌یافته آینده مقایسه می‌شوند.',
+    valScorecardDesc: 'در هر کندل مبدأ تاریخی t، تمامی برآوردهای وضعیت (فیلتر کالمن اسکالر، واریانس شرطی GARCH(1,1)، تعادل ۴۰ کندلی OU و لگاریتم شانس جاروب نقدینگی) صرفاً با داده‌های تا زمان t محاسبه شده و سپس با بازده تحقق‌یافته آینده مقایسه می‌شوند.',
     valActiveVolRegimeLbl: 'رژیم جاری نوسان شرطی GARCH',
-    valActiveMacroRegimeLbl: 'رژیم جاری فشار کلان (بازده واقعی و دلار)',
+    valActiveMacroRegimeLbl: 'رژیم جاری فشار کلان (بازده حقیقی و دلار)',
     valColHorizon: 'افق پیش‌بینی (h)',
-    valColSampleN: 'حجم نمونه (N)',
+    valColSampleN: 'حجم نمونه مؤثر (N)',
     valColRankIc: 'ضریب اطلاعات رتبه‌ای اسپیرمن (آماره t)',
     valColIcIr: 'نسبت اطلاعاتی (ICIR)',
     valColHitRate: 'نرخ اصابت جهتی',
-    valColPayoff: 'عدم تقارن بازده (برد/باخت)',
+    valColPayoff: 'عدم‌تقارن بازده (برد/باخت)',
     valColSweepPrRcF1: 'عملکرد طبقه‌بند جاروب (دقت / بازیابی / F1)',
-    valColBrier: 'امتیاز برایر (Brier)',
+    valColBrier: 'امتیاز بریر (Brier)',
     valVolRegimeTitle: 'تفکیک رژیم الف · نوسان‌پذیری شرطی GARCH(1,1) (در افق h=5)',
-    valMacroRegimeTitle: 'تفکیک رژیم ب · فشار کلان بازده واقعی و دلار (در افق h=5)',
+    valMacroRegimeTitle: 'تفکیک رژیم ب · فشار کلان بازده حقیقی و دلار (در افق h=5)',
     tier1Tag: 'سطح ۱ · نوار وضعیت اصلی',
-    tier1CbLbl: 'مدارشکن:',
-    tier1QuorumLbl: 'یکپارچگی داده (حدنصاب):',
+    tier1CbLbl: 'مدارشکن ایمنی:',
+    tier1QuorumLbl: 'یکپارچگی جریان داده‌های بازار (حدنصاب):',
     tier1TfLbl: 'تایم‌فریم فعال:',
     tier1VolRegimeLbl: 'رژیم نوسان:',
     tier1MacroRegimeLbl: 'رژیم کلان:',
     t2EqTitle: 'تعادل میانگین متحرک OU',
     t2VelTitle: 'رانش کالمن و نوسان GARCH',
-    t2SweepTitle: 'پروکسی کلان و جاروب شدو',
-    t2ValTitle: 'اعتبارسنجی خارج از نمونه',
+    t2SweepTitle: 'طبقه‌بند جاروب نقدینگی و پروکسی کلان',
+    t2ValTitle: 'اعتبارسنجی تطبیقی خارج از نمونه (OOS)',
   }
 };
 
@@ -5605,6 +5729,9 @@ function applyLanguage(lang) {
   localStorage.setItem('masterpiece_lang', lang);
   document.documentElement.lang = lang;
   document.documentElement.dir = (lang === 'fa') ? 'rtl' : 'ltr';
+  if (document.body) {
+    document.body.setAttribute('dir', (lang === 'fa') ? 'rtl' : 'ltr');
+  }
 
   const flag = document.getElementById('langFlag');
   const label = document.getElementById('langLabel');
@@ -5635,6 +5762,11 @@ function applyLanguage(lang) {
   const searchInput = document.getElementById('indSearchInput');
   if (searchInput) {
     searchInput.placeholder = i18n[lang]?.searchIndicators || 'Search indicators...';
+  }
+
+  // Synchronize 3D Market Theatre active chapter overlay copy in real time
+  if (typeof syncThreeTheatreChapterOverlayLang === 'function') {
+    syncThreeTheatreChapterOverlayLang(lang);
   }
 
   if (forecastData) {
@@ -15895,49 +16027,85 @@ if (threeDockToggleBtn) {
   });
 }
 
-// Cinematic Camera Director Presets (Shared across Bottom Dock, Left Zone Stack & 7-Chapter Storyboard)
+// Cinematic Camera Director Presets (Shared across Bottom Dock, Left Zone Stack & 7-Chapter Storyboard — Bilingual EN/FA with Preserved Layer Names)
 const ZONE_CHAPTER_COPY = {
   overview: {
     mainTitle: 'GOLD DYNAMIC FLOW',
     subTitle: 'THE WORLD OF GOLD · 3D MARKET THEATRE',
-    caption: 'A cinematic visualization of the real forces moving gold across Arena, Graveyard, Deep Terrain & Macro Sky',
+    caption: 'Cinematic visualization of verified market forces across Arena, Bull and Bear Titans, Graveyard, Deep Terrain, Macro Sky & Historical Replay.',
+    mainTitleFa: 'GOLD DYNAMIC FLOW · جریان دینامیک طلا',
+    subTitleFa: 'تئاتر سه‌بعدی بازار طلا · 3D MARKET THEATRE',
+    captionFa: 'تصویرسازی سینمایی نیروهای واقعی بازار در لایه‌های Arena، Bull and Bear Titans، Graveyard، Deep Terrain، Macro Sky و Historical Replay.',
   },
   battle: {
-    mainTitle: 'THE ARENA',
-    subTitle: 'THE BATTLE OF BULLS AND BEARS',
-    caption: 'Visualizes real market forces: buying and selling pressure, liquidity, volatility and momentum.',
+    mainTitle: 'THE ARENA · BULL AND BEAR TITANS',
+    subTitle: 'DIRECTIONAL ORDER-FLOW FORCES & LIVE SPOT RING',
+    caption: 'Visualizes real market forces: intrabar order-flow imbalance, resting liquidity absorption, GARCH volatility, and Kalman drift.',
+    mainTitleFa: 'THE ARENA · BULL AND BEAR TITANS',
+    subTitleFa: 'صحنه نبرد بازار و تایتان‌های گاو و خرس (فشار خرید و فروش)',
+    captionFa: 'نمایش نیروهای واقعی بازار: ناترازی جریان سفارش درون‌کندلی، جذب نقدینگی، نوسان شرطی GARCH و سرعت رانش فیلتر کالمن.',
   },
   graveyard: {
     mainTitle: 'THE GRAVEYARD',
-    subTitle: 'MEMORY OF PAST BATTLES',
-    caption: 'Fallen Titans and historical events show how gold has reacted to major moments.',
+    subTitle: 'INVALIDATED LEVELS & SWEPT STOP CLUSTERS',
+    caption: 'Historical relics and swept liquidity levels show how gold reacted to prior stop-runs and structural breakouts.',
+    mainTitleFa: 'THE GRAVEYARD · گورستان سطوح شکسته',
+    subTitleFa: 'سطوح بی‌اعتبارشده و خوشه‌های حدضرر جاروب‌شده تاریخی',
+    captionFa: 'یادمان‌های کندل‌های گذشته و سطوح جاروب‌شده نشان می‌دهند قیمت طلا چگونه به جاروب نقدینگی و شکست‌های ساختاری واکنش نشان داده است.',
   },
   manifold: {
     mainTitle: 'DEEP TERRAIN',
-    subTitle: 'LIQUIDITY · VOLUME · MARKET STRUCTURE',
-    caption: 'A living landscape of liquidity, order flow, key levels and market activity.',
+    subTitle: 'MULTI-TIMEFRAME LIQUIDITY DEPTH TOPOGRAPHY',
+    caption: 'Topographic landscape of resting liquidity depth (Monthly→5M POC, VAH/VAL, HVN bastions, and LVN channels).',
+    mainTitleFa: 'DEEP TERRAIN · بستر عمق نقدینگی',
+    subTitleFa: 'توپوگرافی عمق نقدینگی چندزمانه و گره‌های حجم معاملات',
+    captionFa: 'توپوگرافی زنده از عمق نقدینگی در انتظار، نقاط کنترل حجم (POC)، دیوارهای پرحجم (HVN) و دالان‌های کم‌حجم (LVN).',
   },
   forecast: {
     mainTitle: 'MACRO SKY',
-    subTitle: 'GLOBAL FORCES',
-    caption: 'Economic data, geopolitical events and central bank actions shape the environment.',
+    subTitle: 'EXOGENOUS CROSS-ASSET MACRO DRIVERS',
+    caption: '10Y TIPS real yields, US Dollar Index (DXY), breakeven inflation, and GARCH volatility shape the exogenous canopy.',
+    mainTitleFa: 'MACRO SKY · آسمان محرک‌های کلان',
+    subTitleFa: 'چتر محرک‌های برون‌زای کلان بین‌دارایی (TIPS · DXY · US10Y)',
+    captionFa: 'بازده حقیقی اوراق خزانه‌داری (TIPS)، شاخص دلار آمریکا (DXY)، تورم سر‌به‌سر و نوسان GARCH فضای کلان بازار را شکل می‌دهند.',
   },
   aftermath: {
     mainTitle: 'AFTERMATH',
-    subTitle: 'NEW BALANCE FORMS',
-    caption: 'Kalman-filtered state trajectories and residual struts reveal where market equilibrium settles.',
+    subTitle: 'KALMAN STATE EQUILIBRIUM & RESIDUAL ANALYSIS',
+    caption: 'Kalman-filtered state trajectories and forecast residual struts reveal where market equilibrium settles.',
+    mainTitleFa: 'AFTERMATH · پسایند تعادل فضای حالت',
+    subTitleFa: 'همگرایی وضعیت فیلترشده کالمن و تحلیل خطای پیش‌بینی و باقیمانده‌ها',
+    captionFa: 'مسیرهای فیلترشده کالمن و ستون‌های باقیمانده پیش‌بینی نشان می‌دهند تعادل جدید بازار در چه سطحی شکل می‌گیرد.',
   },
   ahead: {
     mainTitle: 'LOOKING AHEAD',
-    subTitle: 'UNCERTAINTY CONTINUES',
-    caption: 'Live yellow and Parallel Universe magenta trajectories branch into P5–P95 uncertainty fans.',
+    subTitle: 'PRIMARY & CANDIDATE TRAJECTORIES · UNCERTAINTY BANDS',
+    caption: 'Primary Forecast (yellow) and Candidate Trajectory (magenta) branch into ±1σ (68%) and ±2σ (95%) predictive intervals.',
+    mainTitleFa: 'LOOKING AHEAD · چشم‌انداز پیش‌بینی',
+    subTitleFa: 'مسیر پیش‌بینی اصلی (زرد)، مسیر نامزد (سرخابی) و باند عدم‌قطعیت',
+    captionFa: 'مسیر پیش‌بینی اصلی (خط زرد) و مسیر پیش‌بینی نامزد (خط سرخابی) در مخروط‌های عدم‌قطعیت ±1σ (۶۸٪) و ±2σ (۹۵٪) پیش می‌روند.',
   },
   replay: {
     mainTitle: 'HISTORICAL REPLAY',
-    subTitle: 'RELIVE THE MARKET’S STORY',
-    caption: 'Cinematic reconstruction of key periods synchronized bar-by-bar with the 2D analytical chart.',
+    subTitle: 'TIME-INDEXED CAUSAL MARKET STATE RECONSTRUCTION',
+    caption: 'Cinematic bar-by-bar reconstruction of historical market states synchronized 1-to-1 with the 2D analytical chart.',
+    mainTitleFa: 'HISTORICAL REPLAY · بازپخش تاریخی بازار',
+    subTitleFa: 'بازسازی علّی و کندل‌به‌کندل وضعیت‌های گذشته بازار',
+    captionFa: 'بازسازی سینمایی و گام‌به‌گام تاریخچه بازار که به‌صورت یک‌به‌یک با نمودار تحلیلی دوبعدی همگام است.',
   },
 };
+
+function syncThreeTheatreChapterOverlayLang(lang) {
+  const preset = (typeof threeWorldState !== 'undefined' && threeWorldState.activeCameraPreset) ? threeWorldState.activeCameraPreset : 'battle';
+  const chapMeta = ZONE_CHAPTER_COPY[preset] || ZONE_CHAPTER_COPY.battle;
+  const isFa = (lang || currentLang) === 'fa';
+  const mainTitleEl = document.getElementById('threeMovieMainTitle');
+  const subTitleEl = document.getElementById('threeMovieSubTitle');
+  const captionEl = document.getElementById('threeMovieCaption');
+  if (mainTitleEl) mainTitleEl.textContent = isFa ? (chapMeta.mainTitleFa || chapMeta.mainTitle) : chapMeta.mainTitle;
+  if (subTitleEl) subTitleEl.textContent = isFa ? (chapMeta.subTitleFa || chapMeta.subTitle) : chapMeta.subTitle;
+  if (captionEl) captionEl.textContent = isFa ? (chapMeta.captionFa || chapMeta.caption) : chapMeta.caption;
+}
 
 function applyThreeCameraPreset(preset) {
   if (!threeWorldState.isInitialized) return;
@@ -15950,13 +16118,7 @@ function applyThreeCameraPreset(preset) {
   const ax = threeWorldState.arenaLiveState ? threeWorldState.arenaLiveState.arenaX : 9.2;
   const ay = threeWorldState.arenaLiveState ? threeWorldState.arenaLiveState.arenaBaseY + 1.8 : 3.6;
 
-  const chapMeta = ZONE_CHAPTER_COPY[preset] || ZONE_CHAPTER_COPY.battle;
-  const mainTitleEl = document.getElementById('threeMovieMainTitle');
-  const subTitleEl = document.getElementById('threeMovieSubTitle');
-  const captionEl = document.getElementById('threeMovieCaption');
-  if (mainTitleEl) mainTitleEl.textContent = chapMeta.mainTitle;
-  if (subTitleEl) subTitleEl.textContent = chapMeta.subTitle;
-  if (captionEl) captionEl.textContent = chapMeta.caption;
+  syncThreeTheatreChapterOverlayLang(currentLang);
 
   const repBar = document.getElementById('threeReplayTimelineBar');
   if (repBar) {

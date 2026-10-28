@@ -1,5 +1,71 @@
 [
   {
+    "auditId": "audit-1793185092194-0uhnz",
+    "timestampIso": "2026-10-28T10:58:12.194Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen32",
+    "targetArchitectureId": "arch-live-gen32",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v32.0-ParallelCandidate-G31) to Live Yellow-Line Architecture (v32.0-LivePromoted (MMI)) via MMI [Gates: 8/8] · Note: Scientific core promotion parity test.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v32.0-ParallelCandidate-G31) را به معماری خط زرد زنده (v32.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 8/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=8/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen31"
+  },
+  {
+    "auditId": "audit-1793185091783-rgu1v",
+    "timestampIso": "2026-10-28T10:58:11.783Z",
+    "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen32",
+    "targetArchitectureId": "arch-live-gen31",
+    "summaryEn": "Validated Parallel Universe mathematics from v32.0-ParallelCandidate-G31 written back into 6D Latent State & Observation Model (Gen #17: φ=0.95, κ=0.167, β_echo=0.476, γ_res=0.56, η_macro=0.2691, pruned=4) · Note: Verification test of direct mathematical write-back to 6D Latent State model.",
+    "summaryFa": "ریاضیات تاییدشده جهان موازی (v32.0-ParallelCandidate-G31) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #17: φ=0.95، κ=0.167، β=0.476، γ=0.56).",
+    "verifiableMetrics": "WriteBackGen=17 | phi=0.95 | kappa=0.167 | beta=0.476 | gamma=0.56 | eta=0.2691 | obsPrecMult=1.28"
+  },
+  {
+    "auditId": "audit-1793185086327-deya5",
+    "timestampIso": "2026-10-28T10:58:06.327Z",
+    "eventType": "LEVEL_B_MODEL_INVENTED",
+    "actor": "INTELLIGENCE_AWARENESS_CORE",
+    "sourceArchitectureId": "arch-live-gen31",
+    "targetArchitectureId": "arch-cand-gen32",
+    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration (5/8 symbolic equations active in v32.0-ParallelCandidate-G31): Verification test synthesis.",
+    "summaryFa": "هسته هوشمندی و آگاهی کشف نمادین معادلات سطح B چندتایم‌فریمی و کالیبراسیون ریج را در جهان موازی اجرا کرد (5 معادله نمادین فعال).",
+    "verifiableMetrics": "Candidate=v32.0-ParallelCandidate-G31 | ActiveSymbolic=VOLUME_CLOCK_HAWKMOTH_RESTORING(w=8.7%), REAL_YIELD_CONVEXITY_ASYMMETRY(w=10.7%), LAGGED_RESIDUAL_SELF_CORRECTION(w=7.9%), BASIS_ACCELERATION_SECOND_ORDER(w=14.5%), ASYMMETRIC_TAIL_VOL_SHOCK_SHIELD(w=10.7%)"
+  },
+  {
+    "auditId": "audit-1793185086321-dr2pq",
+    "timestampIso": "2026-10-28T10:58:06.321Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen32",
+    "targetArchitectureId": "arch-live-gen31",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=false"
+  },
+  {
+    "auditId": "audit-1793185086235-85o4r",
+    "timestampIso": "2026-10-28T10:58:06.235Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen31",
+    "targetArchitectureId": "arch-live-gen31",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v31.0-ParallelCandidate-G30) to Live Yellow-Line Architecture (v31.0-LivePromoted (MMI)) via MMI [Gates: 7/8] · Note: Automated test verification of MMI promotion path.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v31.0-ParallelCandidate-G30) را به معماری خط زرد زنده (v31.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 7/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=7/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen30"
+  },
+  {
+    "auditId": "audit-1793185086080-0phaz",
+    "timestampIso": "2026-10-28T10:58:06.080Z",
+    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen31",
+    "targetArchitectureId": "arch-live-gen30",
+    "summaryEn": "Automatic promotion blocked: Candidate has passed 0/8 gates (status: HALTED_FROZEN). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION).",
+    "summaryFa": "ارتقای خودکار متوقف شد: کاندیدا 0/8 گیت را گذرانده است. ارتقای خودکار نیازمند عبور از هر ۸ گیت راستی‌آزمایی است.",
+    "verifiableMetrics": "Status=HALTED_FROZEN | PassedGates=0/8"
+  },
+  {
     "auditId": "audit-1793165153608-4og1h",
     "timestampIso": "2026-10-28T05:25:53.608Z",
     "eventType": "PROMOTED_MANUAL_MMI",
@@ -812,60 +878,5 @@
     "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to ENABLED.",
     "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به فعال تغییر داد.",
     "verifiableMetrics": "autoPromotionEnabled=true"
-  },
-  {
-    "auditId": "audit-1792954571979-xpslw",
-    "timestampIso": "2026-10-25T18:56:11.979Z",
-    "eventType": "LEVEL_B_MODEL_INVENTED",
-    "actor": "INTELLIGENCE_AWARENESS_CORE",
-    "sourceArchitectureId": "arch-live-gen2",
-    "targetArchitectureId": "arch-cand-gen3",
-    "summaryEn": "Intelligence & Awareness Core executed Level-B Symbolic Equation synthesis & ridge calibration (4 symbolic equations active in v3.0-ParallelCandidate-G2): Verification test synthesis.",
-    "summaryFa": "هسته هوشمندی و آگاهی کشف نمادین معادلات سطح B و کالیبراسیون ریج را در جهان موازی اجرا کرد (4 معادله نمادین فعال).",
-    "verifiableMetrics": "Candidate=v3.0-ParallelCandidate-G2 | ActiveSymbolic=VOL_REGIME_NONLINEAR_INTERACTION(w=0.0%), BASIS_VELOCITY_COUPLING(w=0.0%), VOLUME_CLOCK_HAWKMOTH_RESTORING(w=14.6%), REAL_YIELD_CONVEXITY_ASYMMETRY(w=18.1%)"
-  },
-  {
-    "auditId": "audit-1792954571979-xz6a2",
-    "timestampIso": "2026-10-25T18:56:11.979Z",
-    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
-    "actor": "OPERATOR_MMI",
-    "sourceArchitectureId": "arch-cand-gen3",
-    "targetArchitectureId": "arch-live-gen2",
-    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
-    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
-    "verifiableMetrics": "autoPromotionEnabled=false"
-  },
-  {
-    "auditId": "audit-1792954571978-95x2m",
-    "timestampIso": "2026-10-25T18:56:11.978Z",
-    "eventType": "PROMOTED_MANUAL_MMI",
-    "actor": "OPERATOR_MMI",
-    "sourceArchitectureId": "arch-cand-gen1",
-    "targetArchitectureId": "arch-live-gen2",
-    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v2.0-ParallelCandidate-G1) to Live Yellow-Line Architecture (v2.0-LivePromoted (MMI)) via MMI [Gates: 7/8] · Note: Automated test verification of MMI promotion path.",
-    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v2.0-ParallelCandidate-G1) را به معماری خط زرد زنده (v2.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 7/8].",
-    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=7/8 | ActiveModels=6 | Discovered=2 | Archived=arch-live-gen1"
-  },
-  {
-    "auditId": "audit-1792954571978-4m4qo",
-    "timestampIso": "2026-10-25T18:56:11.978Z",
-    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
-    "actor": "CLOSED_LOOP_VERIFIER",
-    "sourceArchitectureId": "arch-cand-gen1",
-    "targetArchitectureId": "arch-live-gen1",
-    "summaryEn": "Automatic promotion blocked: Candidate has passed 7/8 gates (status: OBSERVING_CONFIRMATION_WINDOW). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION).",
-    "summaryFa": "ارتقای خودکار متوقف شد: کاندیدا 7/8 گیت را گذرانده است. ارتقای خودکار نیازمند عبور از هر ۸ گیت راستی‌آزمایی است.",
-    "verifiableMetrics": "Status=OBSERVING_CONFIRMATION_WINDOW | PassedGates=7/8"
-  },
-  {
-    "auditId": "audit-init-1792954571925",
-    "timestampIso": "2026-10-25T18:56:11.925Z",
-    "eventType": "LEVEL_B_MODEL_INVENTED",
-    "actor": "INTELLIGENCE_AWARENESS_CORE",
-    "sourceArchitectureId": "arch-live-gen1",
-    "targetArchitectureId": "arch-cand-gen1",
-    "summaryEn": "Initialized Parallel Universe Candidate Architecture (Gen-1) with 4 Level-B symbolic non-linear interaction equations and online inverse-variance precision weights.",
-    "summaryFa": "معماری کاندیدای جهان موازی (نسل ۱) با ۴ معادله نمادین غیرخطی سطح B و وزن‌دهی پویا بر اساس معکوس واریانس خطای خارج از نمونه مقداردهی شد.",
-    "verifiableMetrics": "ActiveCandidateModels=9 | DiscoveredSymbolicTerms=4 | SumWeights=1.0000"
   }
 ]

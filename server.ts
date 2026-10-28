@@ -14,6 +14,11 @@ import {
   getModelSpecList,
 } from './src/config/modelSpecRegistry.js';
 import {
+  BILINGUAL_STYLE_POLICY,
+  FINANCIAL_TERMINOLOGY_DICTIONARY,
+  getAllConcepts,
+} from './src/config/financialDictionary.js';
+import {
   assertVerifiedProvenance,
   bootstrapMultiTimeframeWaterfallCache,
   fetchVerifiedMacroNews,
@@ -260,8 +265,20 @@ app.get('/api/model-specs', (req: Request, res: Response) => {
   res.json({
     status: 'SUCCESS',
     version: APP_VERSION,
+    terminologyVersion: BILINGUAL_STYLE_POLICY.version,
     totalSpecs: getModelSpecList().length,
     registry: MODEL_SPEC_REGISTRY,
+  });
+});
+
+app.get('/api/terminology', (req: Request, res: Response) => {
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    terminologyVersion: BILINGUAL_STYLE_POLICY.version,
+    stylePolicy: BILINGUAL_STYLE_POLICY,
+    totalConcepts: getAllConcepts().length,
+    dictionary: FINANCIAL_TERMINOLOGY_DICTIONARY,
   });
 });
 
