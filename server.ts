@@ -1,30 +1,55 @@
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { ZipArchive } from 'archiver';
-import { getFeatureFlags } from './src/config/featureFlags.js';
-import {
-  buildEmpiricalCalibrationBundle,
-  EmpiricalCalibrationBundle,
-} from './src/config/parameterRegistry.js';
-import {
-  MODEL_SPEC_REGISTRY,
-  getModelSpecList,
-} from './src/config/modelSpecRegistry.js';
-import {
-  BILINGUAL_STYLE_POLICY,
-  FINANCIAL_TERMINOLOGY_DICTIONARY,
-  getAllConcepts,
-} from './src/config/financialDictionary.js';
-import {
+import type { EmpiricalCalibrationBundle } from './src/config/parameterRegistry.js';
+import type { ProviderTier } from './src/services/realDataWaterfall.js';
+
+export type * from './src/contracts/quantContracts.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const rawDirname = path.dirname(__filename);
+const __dirname =
+  path.basename(rawDirname) === 'dist' && fs.existsSync(path.join(path.dirname(rawDirname), 'index.html'))
+    ? path.dirname(rawDirname)
+    : rawDirname;
+
+if (!process.execArgv.some((arg) => arg.includes('tsx'))) {
+  try {
+    await import('tsx/esm');
+  } catch {
+    const nodeModule = (await import('node:module')) as any;
+    if (typeof nodeModule.registerHooks === 'function') {
+      nodeModule.registerHooks({
+        resolve(specifier: string, context: any, nextResolve: any) {
+          if (specifier.startsWith('./src/') && specifier.endsWith('.js')) {
+            const distCandidate = path.join(__dirname, 'dist', specifier.slice(2));
+            if (fs.existsSync(distCandidate)) {
+              return nextResolve(pathToFileURL(distCandidate).href, context);
+            }
+          }
+          return nextResolve(specifier, context);
+        },
+      });
+    }
+  }
+}
+
+const { getFeatureFlags } = await import('./src/config/featureFlags.js');
+const { buildEmpiricalCalibrationBundle } = await import('./src/config/parameterRegistry.js');
+const { MODEL_SPEC_REGISTRY, getModelSpecList } = await import('./src/config/modelSpecRegistry.js');
+const { BILINGUAL_STYLE_POLICY, FINANCIAL_TERMINOLOGY_DICTIONARY, getAllConcepts } = await import(
+  './src/config/financialDictionary.js'
+);
+const {
   AUTHORITATIVE_API_CONTRACT_VERSION,
   AUTHORITATIVE_CLIENT_VERSION,
   AUTHORITATIVE_SERVER_VERSION,
   buildAuthoritativeClientReleaseManifest,
-} from './src/config/clientReleaseManifest.js';
-import {
+} = await import('./src/config/clientReleaseManifest.js');
+const {
   assertVerifiedProvenance,
   bootstrapMultiTimeframeWaterfallCache,
   fetchVerifiedMacroNews,
@@ -34,27 +59,27 @@ import {
   getMultiTimeframeBootstrapState,
   getProviderHttpDiagnostics,
   getSystemWarningErrorLog,
-  ProviderTier,
   sanitizeUserFacingHaltReason,
   triggerNonBlockingMultiTimeframeBootstrap,
-} from './src/services/realDataWaterfall.js';
-import {
+} = await import('./src/services/realDataWaterfall.js');
+const {
   AdaptiveDPObserver,
   computeCointegrationBasis,
   computeOrthogonalMacroFactors,
   evaluatePureQuantPipeline,
-} from './src/engine/quantEngine.js';
-import {
+} = await import('./src/engine/quantEngine.js');
+const {
   buildDiagnosisReport,
   buildHaltedDegradedForecastPayload,
   computeDataReliability,
-} from './src/services/telemetryService.js';
-import {
+} = await import('./src/services/telemetryService.js');
+const {
   evaluateCausalWalkForwardValidation,
   getLatestValidationScorecard,
-} from './src/services/walkForwardValidationService.js';
-import {
+} = await import('./src/services/walkForwardValidationService.js');
+const {
   evaluateParallelUniverseAndAwarenessCore,
+  executeSymbolicDiscoveryStep,
   getArchitecturePersistenceHealth,
   getIntelligenceCoreStateSnapshot,
   promoteCandidateArchitecture,
@@ -62,12 +87,7 @@ import {
   setAutoPromotionRuntimeMode,
   triggerSymbolicDiscoveryAuditStep,
   writeBackValidatedMathToLatentModel,
-} from './src/services/intelligenceAwarenessCore.js';
-
-export * from './src/contracts/quantContracts.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+} = await import('./src/services/intelligenceAwarenessCore.js');
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -776,13 +796,33 @@ app.post('/api/intelligence-core/writeback-math', (req: Request, res: Response) 
   const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
     modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
   const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+  const dryRun = Boolean(req.body?.dryRun);
+  const requireFullGateVerification = Boolean(req.body?.requireFullGateVerification);
+  const confirmedByOperator = Boolean(req.body?.confirmedByOperator);
 
-  const result = writeBackValidatedMathToLatentModel({ mode, operatorNote });
+  const result = writeBackValidatedMathToLatentModel({
+    mode,
+    operatorNote,
+    dryRun,
+    requireFullGateVerification,
+    confirmedByOperator,
+  });
+
   if (result.writtenBack) {
     forecastCache.clear();
   }
-  res.status(result.writtenBack ? 200 : 409).json({
-    status: result.writtenBack ? 'SUCCESS' : 'WRITEBACK_REJECTED',
+
+  const httpStatus = dryRun ? (result.eligible ? 200 : 409) : result.writtenBack ? 200 : 409;
+  const responseStatus = dryRun
+    ? result.eligible
+      ? 'DRY_RUN_ELIGIBLE'
+      : 'WRITEBACK_REJECTED'
+    : result.writtenBack
+      ? 'SUCCESS'
+      : 'WRITEBACK_REJECTED';
+
+  res.status(httpStatus).json({
+    status: responseStatus,
     ...result,
     ...getIntelligenceCoreStateSnapshot(),
   });
@@ -800,11 +840,15 @@ app.post('/api/intelligence-core/auto-promote-mode', (req: Request, res: Respons
 
 app.post('/api/intelligence-core/discover-step', (req: Request, res: Response) => {
   const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
-  const auditEntry = triggerSymbolicDiscoveryAuditStep(note);
-  forecastCache.clear();
-  res.json({
-    status: 'SUCCESS',
-    auditEntry,
+  const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
+  const result = executeSymbolicDiscoveryStep({ note, timeframe });
+  if (result.synthesisExecuted) {
+    forecastCache.clear();
+  }
+  const httpStatus = result.synthesisExecuted ? 200 : 409;
+  res.status(httpStatus).json({
+    status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
+    ...result,
     ...getIntelligenceCoreStateSnapshot(),
   });
 });

@@ -1918,6 +1918,10 @@ body[dir="rtl"] .telemetry-card::before {
   display: flex;
   align-items: baseline;
   gap: 6px;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  border-radius: 6px;
+  transition: color 0.28s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .card-metric-unit {
   font-size: 11px;
@@ -1928,6 +1932,127 @@ body[dir="rtl"] .telemetry-card::before {
   font-size: 11px;
   color: #9eb0cc;
   line-height: 1.45;
+}
+
+/* Telemetry Metric Refresh Value Animation & Increase/Decrease Highlighting */
+@keyframes gdfMetricFlashUp {
+  0% {
+    color: #00e676;
+    text-shadow: 0 0 16px rgba(0, 230, 118, 0.78);
+    background-color: rgba(0, 230, 118, 0.18);
+    transform: translateY(-2px) scale(1.025);
+  }
+  45% {
+    color: #00e676;
+    text-shadow: 0 0 10px rgba(0, 230, 118, 0.45);
+    background-color: rgba(0, 230, 118, 0.08);
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    text-shadow: none;
+    background-color: transparent;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gdfMetricFlashDown {
+  0% {
+    color: #ff3d5a;
+    text-shadow: 0 0 16px rgba(255, 61, 90, 0.78);
+    background-color: rgba(255, 61, 90, 0.18);
+    transform: translateY(2px) scale(1.025);
+  }
+  45% {
+    color: #ff3d5a;
+    text-shadow: 0 0 10px rgba(255, 61, 90, 0.45);
+    background-color: rgba(255, 61, 90, 0.08);
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    text-shadow: none;
+    background-color: transparent;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gdfTelemetryCardUp {
+  0% {
+    border-color: rgba(0, 230, 118, 0.85);
+    box-shadow: 0 0 22px rgba(0, 230, 118, 0.22), inset 0 0 18px rgba(0, 230, 118, 0.1);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+@keyframes gdfTelemetryCardDown {
+  0% {
+    border-color: rgba(255, 61, 90, 0.85);
+    box-shadow: 0 0 22px rgba(255, 61, 90, 0.22), inset 0 0 18px rgba(255, 61, 90, 0.1);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+.metric-flash-up {
+  color: #00e676 !important;
+  animation: gdfMetricFlashUp 1.05s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.metric-flash-down {
+  color: #ff3d5a !important;
+  animation: gdfMetricFlashDown 1.05s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-flash-up {
+  animation: gdfTelemetryCardUp 1.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-flash-down {
+  animation: gdfTelemetryCardDown 1.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-delta-badge]::after {
+  content: attr(data-delta-badge);
+  display: inline-flex;
+  align-items: center;
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-inline-start: 6px;
+  letter-spacing: 0.2px;
+  vertical-align: middle;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-delta-dir="up"][data-delta-badge]::after {
+  color: #00e676;
+  background: rgba(0, 230, 118, 0.14);
+  border: 1px solid rgba(0, 230, 118, 0.42);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.2);
+}
+
+[data-delta-dir="down"][data-delta-badge]::after {
+  color: #ff3d5a;
+  background: rgba(255, 61, 90, 0.14);
+  border: 1px solid rgba(255, 61, 90, 0.42);
+  box-shadow: 0 0 8px rgba(255, 61, 90, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metric-flash-up,
+  .metric-flash-down,
+  .card-flash-up,
+  .card-flash-down {
+    animation-duration: 0.01ms !important;
+    transform: none !important;
+  }
 }
 
 /* Marine DP State Matrix */
@@ -4506,13 +4631,13 @@ input:checked + .toggle-slider:before {
               <h3 class="recharts-title">Scientific Forecasting Core &amp; Parallel Universe Discovery (Yellow Line vs. Magenta Line)</h3>
             </div>
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <button type="button" id="btnManualMmiPromote" title="Operator Manual MMI Override: Explicitly promote the Candidate Architecture to become the new Live Yellow Line immediately (writes immutable audit log)" style="background: linear-gradient(135deg, rgba(245, 215, 110, 0.28), rgba(224, 64, 251, 0.24)); border: 1.5px solid #f5d76e; color: #f5d76e; font-size: 11px; font-weight: 800; padding: 7px 13px; border-radius: 7px; cursor: pointer;">⚡ Promote Candidate to Live (Manual MMI)</button>
-              <button type="button" id="btnWriteBackLatentMath" title="Direct Mathematical Write-Back: Write validated Parallel Universe mathematical parameters (φ, κ, β_echo, γ_res, η_macro, and pruned components) directly into the 6D Latent State & Observation Model" style="background: rgba(0, 230, 118, 0.16); border: 1.5px solid rgba(0, 230, 118, 0.6); color: #00e676; font-size: 11px; font-weight: 800; padding: 7px 12px; border-radius: 7px; cursor: pointer;">🔬 Write Back Validated Math to Latent Model</button>
-              <button type="button" id="btnTriggerSymbolicDiscovery" title="Run an immediate Level-B Symbolic Equation synthesis and ridge calibration step" style="background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.45); color: var(--cyan); font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🧬 Synthesize Symbolic Step</button>
-              <button type="button" id="btnBootstrapMtfNow" title="Proactively bootstrap all 5 required discovery timeframes (5m, 15m, 1h, 4h, 1d) into the real-data waterfall cache" style="background: rgba(224, 64, 251, 0.14); border: 1px solid rgba(224, 64, 251, 0.45); color: #f381ff; font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🔄 Bootstrap 5-TF Cache</button>
+              <button type="button" id="btnManualMmiPromote" data-i18n="btnManualMmiPromote" title="Operator Manual MMI Override: Explicitly promote the Candidate Architecture to become the new Live Yellow Line immediately (writes immutable audit log)" style="background: linear-gradient(135deg, rgba(245, 215, 110, 0.28), rgba(224, 64, 251, 0.24)); border: 1.5px solid #f5d76e; color: #f5d76e; font-size: 11px; font-weight: 800; padding: 7px 13px; border-radius: 7px; cursor: pointer;">⚡ Promote Candidate to Live (Manual MMI)</button>
+              <button type="button" id="btnWriteBackLatentMath" data-i18n="btnWriteBackLatentMath" title="Direct Mathematical Write-Back: Inspect candidate validation gates & write validated Parallel Universe mathematical parameters (φ, κ, β_echo, γ_res, η_macro, π_obs, and pruned components) directly into the 6D Latent State & Observation Model" style="background: rgba(0, 230, 118, 0.16); border: 1.5px solid rgba(0, 230, 118, 0.6); color: #00e676; font-size: 11px; font-weight: 800; padding: 7px 12px; border-radius: 7px; cursor: pointer;">🔬 Write Back Validated Math to Latent Model</button>
+              <button type="button" id="btnTriggerSymbolicDiscovery" data-i18n="btnTriggerSymbolicDiscovery" title="Run an immediate Level-B Symbolic Equation synthesis, causal ridge calibration, split-half stability check, and precision re-weighting step" style="background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.45); color: var(--cyan); font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🧬 Synthesize Symbolic Step</button>
+              <button type="button" id="btnBootstrapMtfNow" data-i18n="btnBootstrapMtfNow" title="Proactively bootstrap all 5 required discovery timeframes (5m, 15m, 1h, 4h, 1d) into the real-data waterfall cache" style="background: rgba(224, 64, 251, 0.14); border: 1px solid rgba(224, 64, 251, 0.45); color: #f381ff; font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🔄 Bootstrap 5-TF Cache</button>
               <label style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-family: monospace; color: #e2e8f0; background: rgba(10, 16, 28, 0.95); border: 1px solid rgba(0, 230, 118, 0.5); padding: 6px 11px; border-radius: 7px; cursor: pointer;" title="Automatic Promotion Path: Strictly blocked unless all 8/8 closed-loop verification gates pass (VERIFIED_FOR_PROMOTION)">
                 <input type="checkbox" id="chkAutoPromoteVerified" style="accent-color: #00e676; cursor: pointer;">
-                <span><b>Auto-Promote Toggle</b> (Strictly Requires 8/8 Gates)</span>
+                <span data-i18n="lblAutoPromoteToggle"><b>Auto-Promote Toggle</b> (Strictly Requires 8/8 Gates)</span>
               </label>
             </div>
           </div>
@@ -4523,6 +4648,26 @@ input:checked + .toggle-slider:before {
           </div>
 
           <div id="puPromotionStatusBanner" style="display: none; margin-bottom: 12px; padding: 9px 13px; border-radius: 8px; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676; font-size: 11.5px; font-family: monospace; font-weight: 700;"></div>
+
+          <!-- Shared MMI Operation-Feedback & Persistent Report Console Panel (Synthesize Symbolic Step & Mathematical Write-Back) -->
+          <div id="mmiOperationFeedbackPanel" data-mmi-state="IDLE" aria-live="polite" style="display: none; margin-bottom: 14px; background: rgba(6, 12, 24, 0.97); border: 1.5px solid rgba(0, 229, 255, 0.55); border-radius: 10px; padding: 12px 14px; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);">
+            <div id="mmiOperationFeedbackHeader" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-bottom: 9px; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span id="mmiOperationStatusBadge" style="font-family: monospace; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px; background: rgba(0, 229, 255, 0.16); border: 1px solid rgba(0, 229, 255, 0.5); color: #00e5ff;">IDLE</span>
+                <span id="mmiOperationTitleText" style="font-size: 12px; font-weight: 800; color: #f8fafc;">MMI Console Operation Report</span>
+                <span id="mmiOperationEpistemicBadge" style="display: none; font-family: monospace; font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 4px; background: rgba(224, 64, 251, 0.16); border: 1px solid rgba(224, 64, 251, 0.45); color: #f381ff;"></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span id="mmiOperationTimestampText" dir="ltr" style="font-family: monospace; font-size: 10px; color: #9cb0cc; unicode-bidi: isolate;">—</span>
+                <button type="button" id="btnMmiOperationRetry" style="display: none; background: rgba(255, 171, 0, 0.18); border: 1px solid rgba(255, 171, 0, 0.65); color: #ffd54f; font-size: 10.5px; font-weight: 800; padding: 4px 10px; border-radius: 6px; cursor: pointer;">↻ Retry</button>
+                <button type="button" id="btnMmiOperationToggleCollapse" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.18); color: #cbd5e1; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px; cursor: pointer;">Collapse ▴</button>
+              </div>
+            </div>
+            <div id="mmiOperationBodyWrap">
+              <div id="mmiOperationActiveContent" style="font-size: 11px; color: #e2e8f0; line-height: 1.45;"></div>
+              <div id="mmiPreviousSuccessReportContainer" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(148, 163, 184, 0.3);"></div>
+            </div>
+          </div>
 
           <!-- Scientific Core Section A: 6D Latent State X(τ) on Information Clock τ, Pulse-Echo Sonar, and Residual Oracle -->
           <div style="background: rgba(7, 13, 24, 0.94); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
@@ -5477,6 +5622,11 @@ const i18n = {
     btnRetryUpdate: 'Retry',
     lblFooterStatusPrefix: 'Status:',
     btnCloseUpdateModal: 'Close',
+    btnManualMmiPromote: '⚡ Promote Candidate to Live (Manual MMI)',
+    btnWriteBackLatentMath: '🔬 Write Back Validated Math to Latent Model',
+    btnTriggerSymbolicDiscovery: '🧬 Synthesize Symbolic Step',
+    btnBootstrapMtfNow: '🔄 Bootstrap 5-TF Cache',
+    lblAutoPromoteToggle: 'Auto-Promote Toggle (Strictly Requires 8/8 Gates)',
   },
   fa: {
     title: 'سامانه پویای جریان طلا (GDF)',
@@ -5725,6 +5875,11 @@ const i18n = {
     btnRetryUpdate: 'تلاش مجدد',
     lblFooterStatusPrefix: 'وضعیت:',
     btnCloseUpdateModal: 'بستن',
+    btnManualMmiPromote: '⚡ ارتقای کاندیدا به خط زرد زنده (کنترل دستی MMI)',
+    btnWriteBackLatentMath: '🔬 بازنویسی ریاضیات تاییدشده در مدل حالت پنهان',
+    btnTriggerSymbolicDiscovery: '🧬 ترکیب و کالیبراسیون گام نمادین',
+    btnBootstrapMtfNow: '🔄 پیش‌بارگذاری کش ۵ تایم‌فریم',
+    lblAutoPromoteToggle: 'کلید ارتقای خودکار (نیازمند عبور از هر ۸/۸ گیت)',
   }
 };
 
@@ -5801,6 +5956,9 @@ function applyLanguage(lang) {
   }
   if (typeof syncUpdateUiLanguage === 'function') {
     syncUpdateUiLanguage();
+  }
+  if (window.GDFMmiConsoleController && typeof window.GDFMmiConsoleController.syncLanguage === 'function') {
+    window.GDFMmiConsoleController.syncLanguage(lang);
   }
   renderIndicatorsList(activeIndCategory, searchInput ? searchInput.value : '');
 }
@@ -9377,6 +9535,7 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
       }
       if (data.dataReliability) updateDataReliabilityUI(data.dataReliability);
       if (data.validationScorecard) renderValidationScorecard(data.validationScorecard);
+      if (data.parallelUniverse) renderParallelUniverseTelemetry(data.parallelUniverse);
       if (typeof updateThreeWorldData === 'function' && threeWorldState && threeWorldState.isInitialized) {
         updateThreeWorldData(data);
       }
@@ -10092,7 +10251,452 @@ function renderHUD(d) {
   if (d.parallelUniverse) {
     renderParallelUniverseTelemetry(d.parallelUniverse);
   }
+
+  if (window.GDFTelemetryAnimator && typeof window.GDFTelemetryAnimator.processSnapshot === 'function') {
+    window.GDFTelemetryAnimator.processSnapshot(d);
+  }
 }
+
+// Telemetry Card Metric Value Refresh Animator (Green on Increase, Red on Decrease + Smooth Tabular Tween)
+window.GDFTelemetryAnimator = (function () {
+  const prevValues = new Map();
+  const activeRafs = new Map();
+  const activeTimers = new Map();
+  let snapshotCount = 0;
+
+  function prefersReducedMotion() {
+    return Boolean(
+      typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+
+  function extractInitialNumber(el) {
+    if (!el) return null;
+    const rawText = (el.childNodes[0] && el.childNodes[0].nodeType === 3)
+      ? el.childNodes[0].textContent
+      : el.textContent;
+    if (!rawText || rawText.includes('—') || rawText.includes('--')) return null;
+    const m = String(rawText).replace(/,/g, '').match(/[-+]?\d+(?:\.\d+)?/);
+    if (!m) return null;
+    const parsed = parseFloat(m[0]);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function triggerMetricDelta(elOrId, prevVal, nextVal, options) {
+    const opts = options || {};
+    const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+    if (!el || !Number.isFinite(prevVal) || !Number.isFinite(nextVal)) return null;
+
+    const decimals = typeof opts.decimals === 'number' ? opts.decimals : 2;
+    const epsilon = typeof opts.epsilon === 'number' ? opts.epsilon : Math.pow(10, -(decimals + 1));
+    const delta = nextVal - prevVal;
+    if (Math.abs(delta) <= epsilon) return 'unchanged';
+
+    const dir = delta > 0 ? 'up' : 'down';
+    const key = el.id || opts.key || 'anon';
+
+    if (activeRafs.has(key)) {
+      cancelAnimationFrame(activeRafs.get(key));
+      activeRafs.delete(key);
+    }
+    if (activeTimers.has(key)) {
+      clearTimeout(activeTimers.get(key));
+      activeTimers.delete(key);
+    }
+
+    el.classList.remove('metric-flash-up', 'metric-flash-down');
+    const cardEl = el.closest('.telemetry-card, .dp-item, .tier2-core-card, .stat-pill');
+    if (cardEl) {
+      cardEl.classList.remove('card-flash-up', 'card-flash-down');
+    }
+
+    // Force reflow so rapid consecutive refreshes re-trigger keyframe animation cleanly
+    void el.offsetWidth;
+
+    const flashClass = dir === 'up' ? 'metric-flash-up' : 'metric-flash-down';
+    const cardFlashClass = dir === 'up' ? 'card-flash-up' : 'card-flash-down';
+    el.classList.add(flashClass);
+    if (cardEl) {
+      cardEl.classList.add(cardFlashClass);
+    }
+
+    const prefix = opts.prefix || '';
+    const suffix = opts.suffix || '';
+    const signStr = delta > 0 ? '+' : '-';
+    const absDeltaStr = Math.abs(delta).toFixed(decimals);
+    const arrow = dir === 'up' ? '▲' : '▼';
+    el.setAttribute('data-delta-dir', dir);
+    el.setAttribute('data-delta-badge', `${arrow} ${signStr}${prefix}${absDeltaStr}${suffix}`);
+
+    if (typeof opts.renderValue === 'function' && !prefersReducedMotion() && document.visibilityState !== 'hidden') {
+      const durationMs = typeof opts.durationMs === 'number' ? opts.durationMs : 380;
+      const startTime = performance.now();
+      const step = function (now) {
+        const t = Math.min(1, Math.max(0, (now - startTime) / durationMs));
+        const eased = 1 - Math.pow(1 - t, 3);
+        const currentVal = prevVal + delta * eased;
+        opts.renderValue(el, t < 1 ? currentVal : nextVal, t >= 1);
+        if (t < 1) {
+          activeRafs.set(key, requestAnimationFrame(step));
+        } else {
+          activeRafs.delete(key);
+        }
+      };
+      activeRafs.set(key, requestAnimationFrame(step));
+    } else if (typeof opts.renderValue === 'function') {
+      opts.renderValue(el, nextVal, true);
+    }
+
+    const cleanupTimer = setTimeout(function () {
+      el.classList.remove('metric-flash-up', 'metric-flash-down');
+      if (cardEl) {
+        cardEl.classList.remove('card-flash-up', 'card-flash-down');
+      }
+      activeTimers.delete(key);
+    }, 1800);
+    activeTimers.set(key, cleanupTimer);
+
+    return dir;
+  }
+
+  function observeMetric(spec) {
+    const el = document.getElementById(spec.id);
+    if (!el || !Number.isFinite(spec.value)) return;
+    let prev = prevValues.get(spec.id);
+    if (prev === undefined && spec.useInitialDomBaseline !== false) {
+      const domInit = extractInitialNumber(el);
+      if (domInit !== null && !(domInit === 0 && snapshotCount === 0 && spec.skipZeroBaseline)) {
+        prev = domInit;
+      }
+    }
+    prevValues.set(spec.id, spec.value);
+    if (prev !== undefined) {
+      triggerMetricDelta(el, prev, spec.value, spec);
+    }
+  }
+
+  function processSnapshot(d) {
+    if (!d) return;
+    const obs = d.observerTelemetry || {};
+    const vClock = d.volumeClockTelemetry || obs;
+    const netLift = d.macroWindVector ? Number(d.macroWindVector.totalNetVelocity) : NaN;
+    const rawB = obs.biasEstimate !== undefined ? Number(obs.biasEstimate) : Number(d.macroWindVector?.rawBias || 0);
+    const shrunkB = obs.shrunkBias !== undefined ? Number(obs.shrunkBias) : rawB;
+    const studentizedVal = obs.studentizedInnovation !== undefined ? Math.abs(Number(obs.studentizedInnovation)) : NaN;
+    const h5Row = Array.isArray(d.validationScorecard?.horizons)
+      ? (d.validationScorecard.horizons.find(function (r) { return r.horizonBars === 5; }) || d.validationScorecard.horizons[0])
+      : null;
+    const sci = d.parallelUniverse?.scientificCore || d.scientificCore;
+
+    const specs = [
+      // Atmosphere Summary Bar Stat Pills
+      {
+        id: 'headPrice',
+        value: Number(d.currentPrice),
+        decimals: 2,
+        prefix: '$',
+        renderValue: function (el, val) { el.textContent = '$' + val.toFixed(2); },
+      },
+      {
+        id: 'headTipsYield',
+        value: Number(d.macroYieldFeed?.tipsRealYield10Y),
+        decimals: 2,
+        suffix: '%',
+        renderValue: function (el, val) { el.textContent = val.toFixed(2) + '%'; },
+      },
+      {
+        id: 'headDrift',
+        value: netLift,
+        decimals: 2,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr'; },
+      },
+      {
+        id: 'headVol',
+        value: Number(d.garchVolatility?.currentVolPct),
+        decimals: 2,
+        suffix: '%',
+        renderValue: function (el, val) { el.textContent = val.toFixed(2) + '%'; },
+      },
+
+      // Tier 2 Core Filtered State Summary Strip Cards
+      {
+        id: 't2Equilibrium',
+        value: Number(d.equilibriumPrice),
+        decimals: 2,
+        prefix: '$',
+        renderValue: function (el, val) { el.textContent = '$' + val.toFixed(2); },
+      },
+      {
+        id: 't2DriftVelocity',
+        value: Number(obs.driftVelocity),
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) {
+          const volPct = Number(d.garchVolatility?.currentVolPct || 0).toFixed(2);
+          el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr · σ_t=' + volPct + '%';
+        },
+      },
+      {
+        id: 't2MacroProxy',
+        value: netLift,
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) {
+          const swScore = d.sweepDiscriminator ? Number(d.sweepDiscriminator.logOddsScore) : 0;
+          el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr · L_t=' + (swScore >= 0 ? '+' : '') + swScore.toFixed(2);
+        },
+      },
+      {
+        id: 't2ValSummaryMetric',
+        value: h5Row && h5Row.spearmanRankIc !== null ? Number(h5Row.spearmanRankIc) : NaN,
+        decimals: 3,
+        useInitialDomBaseline: false,
+      },
+
+      // Panel 7: Econometric & Proxy Telemetry Matrix Cards
+      {
+        id: 'cardEquilibrium',
+        value: Number(d.equilibriumPrice),
+        decimals: 2,
+        prefix: '$',
+        renderValue: function (el, val) { el.textContent = '$' + val.toFixed(2); },
+      },
+      {
+        id: 'cardWind',
+        value: netLift,
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) {
+          el.innerHTML = (val >= 0 ? '+' : '') + val.toFixed(2) + ' <span class="card-metric-unit">$/hr</span>';
+        },
+      },
+      {
+        id: 'cardTipsYield',
+        value: Number(d.macroYieldFeed?.tipsRealYield10Y),
+        decimals: 2,
+        suffix: '%',
+        renderValue: function (el, val) {
+          el.innerHTML = val.toFixed(2) + '% <span class="card-metric-unit">10Y TIPS</span>';
+        },
+      },
+      {
+        id: 'cardGarch',
+        value: Number(d.garchVolatility?.currentVolPct),
+        decimals: 3,
+        suffix: '%',
+        skipZeroBaseline: true,
+        renderValue: function (el, val) {
+          el.textContent = val.toFixed(3) + '%';
+        },
+      },
+      {
+        id: 'cardPcaLift',
+        value: Number(d.pcaMacroFactors?.netOrthogonalLift),
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) {
+          el.innerHTML = (val >= 0 ? '+' : '') + val.toFixed(2) + ' <span class="card-metric-unit">$/hr net</span>';
+        },
+      },
+      {
+        id: 'pcaF1Val',
+        value: Number(d.pcaMacroFactors?.f1RealGeopotential),
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr'; },
+      },
+      {
+        id: 'pcaF2Val',
+        value: Number(d.pcaMacroFactors?.f2MonetaryLiquidity),
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr'; },
+      },
+      {
+        id: 'pcaF3Val',
+        value: Number(d.pcaMacroFactors?.f3TailConvexity),
+        decimals: 2,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr'; },
+      },
+      {
+        id: 'cardBasisSpread',
+        value: Number(d.cointegrationBasis?.basisSpread),
+        decimals: 2,
+        prefix: '$',
+        skipZeroBaseline: true,
+        renderValue: function (el, val) {
+          el.innerHTML = '$' + val.toFixed(2) + ' <span class="card-metric-unit">δ_t spread</span>';
+        },
+      },
+      {
+        id: 'cardPurgedSpot',
+        value: Number(d.cointegrationBasis?.purgedPrice),
+        decimals: 2,
+        prefix: '$',
+        renderValue: function (el, val) { el.textContent = '$' + val.toFixed(2); },
+      },
+      {
+        id: 'cardBasisZ',
+        value: Number(d.cointegrationBasis?.zScore),
+        decimals: 2,
+        suffix: 'σ',
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + 'σ'; },
+      },
+      {
+        id: 'cardSweepLogOdds',
+        value: Number(d.sweepDiscriminator?.logOddsScore),
+        decimals: 2,
+        renderValue: function (el, val) {
+          el.innerHTML = (val >= 0 ? '+' : '') + val.toFixed(2) + ' <span class="card-metric-unit">L_t log-odds</span>';
+        },
+      },
+      {
+        id: 'cardAbsorption',
+        value: Number(d.sweepDiscriminator?.absorptionRatio),
+        decimals: 2,
+        renderValue: function (el, val) { el.textContent = val.toFixed(2); },
+      },
+      {
+        id: 'cardHawkes',
+        value: Number(d.sweepDiscriminator?.hawkesIntensity),
+        decimals: 2,
+        renderValue: function (el, val) { el.textContent = val.toFixed(2); },
+      },
+      {
+        id: 'cardMorseForce',
+        value: Number(d.morseManifold?.restoringForce),
+        decimals: 2,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr'; },
+      },
+
+      // Panel 8: Scalar-Gain State-Space Kalman Observer Cards
+      {
+        id: 'dpRawBias',
+        value: rawB,
+        decimals: 3,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(3) + ' $/hr'; },
+      },
+      {
+        id: 'dpBias',
+        value: shrunkB,
+        decimals: 3,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(3) + ' $/hr'; },
+      },
+      {
+        id: 'dpVpin',
+        value: Number(d.vpinTelemetry?.vpinScore),
+        decimals: 2,
+        renderValue: function (el, val) {
+          if (el.childNodes[0] && el.childNodes[0].nodeType === 3) {
+            el.childNodes[0].textContent = val.toFixed(2) + ' ';
+          }
+        },
+      },
+      {
+        id: 'dpShrinkage',
+        value: Number(d.vpinTelemetry?.shrinkageRatio),
+        decimals: 3,
+        renderValue: function (el, val) { el.textContent = val.toFixed(3); },
+      },
+      {
+        id: 'dpVelocity',
+        value: Number(obs.driftVelocity),
+        decimals: 3,
+        skipZeroBaseline: true,
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(3) + ' $/hr'; },
+      },
+      {
+        id: 'dpStudentized',
+        value: studentizedVal,
+        decimals: 2,
+         suffix: 'σ',
+        renderValue: function (el, val) {
+          el.innerHTML = val.toFixed(2) + ' <span class="card-metric-unit" style="font-size: 10px;">' + (val > 3.0 ? '⚠ >3.0σ JUMP' : 'σ') + '</span>';
+        },
+      },
+      {
+        id: 'dpDeltaTau',
+        value: Number(vClock?.intrinsicDeltaTau),
+        decimals: 3,
+        suffix: ' τ',
+        renderValue: function (el, val) { el.textContent = val.toFixed(3) + ' τ'; },
+      },
+      {
+        id: 'dpKalmanGain',
+        value: Number(vClock?.kalmanGainDynamic),
+        decimals: 3,
+        renderValue: function (el, val) { el.textContent = val.toFixed(3); },
+      },
+      {
+        id: 'dpSweepScore',
+        value: Number(d.sweepDiscriminator?.logOddsScore),
+        decimals: 2,
+        useInitialDomBaseline: false,
+      },
+
+      // Scientific Core 6D Latent State Telemetry Cards
+      {
+        id: 'sciX1LogPrice',
+        value: Number(sci?.impliedLatentPriceUsd),
+        decimals: 2,
+        prefix: '$',
+        useInitialDomBaseline: false,
+      },
+      {
+        id: 'sciX2LocalDrift',
+        value: Number(sci?.impliedDriftUsdPerTau),
+        decimals: 3,
+        useInitialDomBaseline: false,
+      },
+      {
+        id: 'sciX3LocalVol',
+        value: sci?.latentState ? Number(sci.latentState.localVolatility) * 100 : NaN,
+        decimals: 3,
+        suffix: '%',
+        useInitialDomBaseline: false,
+      },
+      {
+        id: 'sciX4Toxicity',
+        value: Number(sci?.latentState?.pressureToxicity),
+        decimals: 3,
+        useInitialDomBaseline: false,
+      },
+      {
+        id: 'sciX5Resilience',
+        value: sci?.latentState ? Number(sci.latentState.liquidityResilience) * 100 : NaN,
+        decimals: 1,
+        suffix: '%',
+        useInitialDomBaseline: false,
+      },
+      {
+        id: 'sciX6MacroForce',
+        value: sci?.latentState
+          ? Number(sci.latentState.macroResidualForce) * Number(sci.impliedLatentPriceUsd || 2600)
+          : NaN,
+        decimals: 3,
+        useInitialDomBaseline: false,
+      },
+    ];
+
+    for (let i = 0; i < specs.length; i++) {
+      observeMetric(specs[i]);
+    }
+    snapshotCount++;
+  }
+
+  return {
+    processSnapshot: processSnapshot,
+    triggerMetricDelta: triggerMetricDelta,
+    getTrackedSnapshotValues: function () {
+      return Object.fromEntries(prevValues.entries());
+    },
+  };
+})();
 
 // Intelligence & Awareness Core + Parallel Universe Renderer
 function renderParallelUniverseTelemetry(pu) {
@@ -17135,52 +17739,977 @@ if (btnManualMmiPromote) {
   });
 }
 
-const btnWriteBackLatentMath = document.getElementById('btnWriteBackLatentMath');
-if (btnWriteBackLatentMath) {
-  btnWriteBackLatentMath.addEventListener('click', async () => {
-    btnWriteBackLatentMath.disabled = true;
-    try {
-      const res = await fetch(buildApiUrl('/api/intelligence-core/writeback-math'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'MANUAL_MMI',
-          operatorNote: 'Operator triggered Direct Mathematical Write-Back into 6D Latent State & Observation Model',
-        }),
-      });
-      const json = await res.json();
-      const bannerEl = document.getElementById('puPromotionStatusBanner');
-      if (bannerEl && json) {
-        bannerEl.style.display = 'block';
-        bannerEl.textContent = `🔬 ${currentLang === 'fa' ? json.reasonFa : json.reasonEn}`;
-      }
-      await fetchQuantData(currentTimeframe, true);
-    } catch (e) {
-      console.warn('Latent math write-back error:', e);
-    } finally {
-      btnWriteBackLatentMath.disabled = false;
-    }
-  });
-}
+// ==========================================================
+// Shared MMI Operation-Feedback Controller & Button Workflows
+// (1) 🧬 Synthesize Symbolic Step (#btnTriggerSymbolicDiscovery)
+// (2) 🔬 Write Back Validated Math to Latent Model (#btnWriteBackLatentMath)
+// ==========================================================
+window.GDFMmiConsoleController = (function () {
+  const state = {
+    status: 'IDLE', // IDLE | PROCESSING | SUCCESS | REJECTED | FAILED | UNKNOWN
+    activeAction: null, // 'SYNTHESIZE_SYMBOLIC_STEP' | 'WRITEBACK_LATENT_MATH' | null
+    subStage: null, // 'INSPECTING' | 'AWAITING_CONFIRMATION' | 'COMMITTING' | 'COMPLETED' | null
+    timestampIso: null,
+    currentPayload: null,
+    pendingWriteBackPreview: null,
+    lastSuccessfulReport: null,
+    lastErrorTextEn: null,
+    lastErrorTextFa: null,
+    isLocked: false,
+    isCollapsed: false,
+    retryCallback: null,
+  };
 
-const btnTriggerSymbolicDiscovery = document.getElementById('btnTriggerSymbolicDiscovery');
-if (btnTriggerSymbolicDiscovery) {
-  btnTriggerSymbolicDiscovery.addEventListener('click', async () => {
-    btnTriggerSymbolicDiscovery.disabled = true;
-    try {
-      await fetch(buildApiUrl('/api/intelligence-core/discover-step'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ note: 'Operator-triggered Level-B symbolic synthesis step' }),
-      });
-      await fetchQuantData(currentTimeframe, true);
-    } catch (e) {
-      console.warn('Symbolic discovery trigger error:', e);
-    } finally {
-      btnTriggerSymbolicDiscovery.disabled = false;
+  function escHtml(val) {
+    return String(val == null ? '' : val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatTimeShort(isoStr) {
+    if (!isoStr) return new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    return String(isoStr).replace('T', ' ').slice(0, 19) + ' UTC';
+  }
+
+  function getStatusStyle(status, subStage) {
+    if (status === 'PROCESSING') {
+      return {
+        badgeBg: 'rgba(0, 229, 255, 0.2)',
+        badgeBorder: 'rgba(0, 229, 255, 0.7)',
+        badgeColor: '#00e5ff',
+        panelBorder: 'rgba(0, 229, 255, 0.65)',
+        labelEn: '⏳ PROCESSING',
+        labelFa: '⏳ در حال پردازش',
+      };
     }
-  });
-}
+    if (status === 'SUCCESS' && subStage === 'AWAITING_CONFIRMATION') {
+      return {
+        badgeBg: 'rgba(245, 215, 110, 0.2)',
+        badgeBorder: 'rgba(245, 215, 110, 0.75)',
+        badgeColor: '#f5d76e',
+        panelBorder: 'rgba(245, 215, 110, 0.65)',
+        labelEn: '🔍 PRE-WRITE CONFIRMATION REQUIRED',
+        labelFa: '🔍 نیازمند تایید پیش از بازنویسی',
+      };
+    }
+    if (status === 'SUCCESS') {
+      return {
+        badgeBg: 'rgba(0, 230, 118, 0.2)',
+        badgeBorder: 'rgba(0, 230, 118, 0.75)',
+        badgeColor: '#00e676',
+        panelBorder: 'rgba(0, 230, 118, 0.65)',
+        labelEn: '✓ SUCCESS',
+        labelFa: '✓ موفقیت‌آمیز (SUCCESS)',
+      };
+    }
+    if (status === 'REJECTED') {
+      return {
+        badgeBg: 'rgba(255, 171, 0, 0.2)',
+        badgeBorder: 'rgba(255, 171, 0, 0.75)',
+        badgeColor: '#ffd54f',
+        panelBorder: 'rgba(255, 171, 0, 0.65)',
+        labelEn: '🛡️ REJECTED BY VALIDATION GATE',
+        labelFa: '🛡️ ردشده توسط گیت اعتبارسنجی (REJECTED)',
+      };
+    }
+    if (status === 'UNKNOWN') {
+      return {
+        badgeBg: 'rgba(224, 64, 251, 0.2)',
+        badgeBorder: 'rgba(224, 64, 251, 0.75)',
+        badgeColor: '#f381ff',
+        panelBorder: 'rgba(224, 64, 251, 0.65)',
+        labelEn: '❓ OUTCOME UNCONFIRMED (UNKNOWN)',
+        labelFa: '❓ نتیجه تاییدنشده (UNKNOWN)',
+      };
+    }
+    if (status === 'FAILED') {
+      return {
+        badgeBg: 'rgba(255, 23, 68, 0.2)',
+        badgeBorder: 'rgba(255, 23, 68, 0.75)',
+        badgeColor: '#ff5252',
+        panelBorder: 'rgba(255, 23, 68, 0.65)',
+        labelEn: '✕ FAILED',
+        labelFa: '✕ خطای اجرا (FAILED)',
+      };
+    }
+    return {
+      badgeBg: 'rgba(148, 163, 184, 0.16)',
+      badgeBorder: 'rgba(148, 163, 184, 0.45)',
+      badgeColor: '#cbd5e1',
+      panelBorder: 'rgba(0, 229, 255, 0.4)',
+      labelEn: 'IDLE',
+      labelFa: 'آماده به کار (IDLE)',
+    };
+  }
+
+  function renderSymbolicSynthesisReportHtml(report, auditEntry, isFa, isCompactPrevious) {
+    if (!report) return '';
+    const src = report.inputSourceSummary || {};
+    const val = report.validationSummary || {};
+    const primary = report.primarySynthesizedEquation;
+    const eqList = Array.isArray(report.synthesizedEquations) ? report.synthesizedEquations : [];
+    const assumptions = isFa
+      ? (report.assumptionsAndConstraintsFa || report.assumptionsAndConstraintsEn || [])
+      : (report.assumptionsAndConstraintsEn || []);
+    const failedChecks = isFa
+      ? (val.failedChecksFa || val.failedChecksEn || [])
+      : (val.failedChecksEn || []);
+
+    const sectionTitle = isFa
+      ? (report.synthesisExecuted ? 'گزارش ترکیب و کالیبراسیون ریج معادلات نمادین سطح B' : 'گزارش توقف ترکیب معادله نمادین (عدم دسترسی به داده واقعی)')
+      : (report.synthesisExecuted ? 'Level-B Symbolic Equation Synthesis & Causal Ridge Calibration Report' : 'Symbolic Synthesis Blocked Report (Real Source Data Unavailable)');
+
+    const mtfStr = Array.isArray(src.mtfParticipatingHorizons) && src.mtfParticipatingHorizons.length > 0
+      ? src.mtfParticipatingHorizons.join(' → ')
+      : 'NONE';
+
+    let eqRowsHtml = '';
+    eqList.forEach(eq => {
+      const stBadge = eq.isEnabled
+        ? `<span style="color:#00e676;font-weight:800;">● ${isFa ? 'فعال' : 'ACTIVE'}</span>`
+        : `<span style="color:#ff5252;font-weight:800;" title="${escHtml(eq.disabledReasonEn || '')}">✕ ${isFa ? 'حذف‌شده' : 'PRUNED'}</span>`;
+      const dCoeffSign = eq.coefficientDelta >= 0 ? '+' : '';
+      const dWSign = eq.weightDelta >= 0 ? '+' : '';
+      const icSign = eq.rollingRankIc >= 0 ? '+' : '';
+      const stepSign = eq.currentStepContributionUsd >= 0 ? '+' : '';
+      eqRowsHtml += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <td style="padding: 5px 7px; font-family: monospace; font-weight: 800; color: #f8fafc;">
+            <span dir="ltr" style="unicode-bidi:isolate;">${escHtml(eq.modelId)}</span>
+            <div style="font-size: 9.5px; color: #9cb0cc; font-weight: 400;">${escHtml(isFa ? eq.nameFa : eq.nameEn)}</div>
+          </td>
+          <td style="padding: 5px 7px; font-family: monospace; font-size: 10px; color: #00e5ff;" dir="ltr">${escHtml(eq.equationAscii)}</td>
+          <td style="padding: 5px 7px; font-family: monospace; font-size: 10px;">${stBadge}</td>
+          <td style="padding: 5px 7px; font-family: monospace; font-size: 10px; color: #e2e8f0;" dir="ltr">
+            ${Number(eq.previousCoefficient || 0).toFixed(4)} → <b>${Number(eq.fittedCoefficient || 0).toFixed(4)}</b>
+            <span style="color:${eq.coefficientDelta >= 0 ? '#00e676' : '#ffab00'};font-size:9px;">(${dCoeffSign}${Number(eq.coefficientDelta || 0).toFixed(4)})</span>
+          </td>
+          <td style="padding: 5px 7px; font-family: monospace; font-size: 10px; color: #e2e8f0;" dir="ltr">
+            S=${Number(eq.stabilityRatio || 0).toFixed(2)} · IC=${icSign}${Number(eq.rollingRankIc || 0).toFixed(3)} · R²=${Number(eq.oosRSquared || 0).toFixed(3)}
+          </td>
+          <td style="padding: 5px 7px; font-family: monospace; font-size: 10px; color: #f5d76e; font-weight: 800;" dir="ltr">
+            ${(Number(eq.dynamicWeight || 0) * 100).toFixed(2)}%
+            <span style="color:#9cb0cc;font-weight:400;font-size:9px;">(${dWSign}${(Number(eq.weightDelta || 0) * 100).toFixed(2)}%)</span>
+          </td>
+          <td style="padding: 5px 7px; font-family: monospace; font-size: 10px; color: ${eq.currentStepContributionUsd >= 0 ? '#00e676' : '#ff5252'}; font-weight: 700;" dir="ltr">
+            ${stepSign}$${Number(eq.currentStepContributionUsd || 0).toFixed(4)}
+          </td>
+        </tr>
+      `;
+    });
+
+    const primaryHighlightHtml = primary
+      ? `
+        <div style="background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 7px; padding: 8px 10px; margin-bottom: 9px;">
+          <div style="font-size: 10px; font-weight: 800; color: #00e5ff; margin-bottom: 3px;">
+            ${isFa ? '⭐ معادله نمادین پیشرو پس از کالیبراسیون ریج:' : '⭐ Top-Weighted Synthesized Symbolic Term:'}
+            <span dir="ltr" style="color: #f8fafc; font-family: monospace; unicode-bidi: isolate;">${escHtml(primary.modelId)}</span>
+            <span style="color: #f5d76e; font-family: monospace;" dir="ltr">(θ̂ = ${Number(primary.fittedCoefficient).toFixed(4)}, w = ${(Number(primary.dynamicWeight) * 100).toFixed(2)}%, S = ${Number(primary.stabilityRatio).toFixed(2)}, IC = ${Number(primary.rollingRankIc).toFixed(3)})</span>
+          </div>
+          <div dir="ltr" style="font-family: monospace; font-size: 11px; color: #f8fafc; background: rgba(4, 9, 18, 0.85); padding: 5px 8px; border-radius: 5px; border: 1px solid rgba(0, 229, 255, 0.25); unicode-bidi: isolate;">
+            ${escHtml(primary.equationAscii)}
+          </div>
+        </div>
+      `
+      : '';
+
+    const assumptionsHtml = assumptions.map(a => `<li style="margin-bottom:2px;">${escHtml(a)}</li>`).join('');
+    const failedChecksHtml = failedChecks.length > 0
+      ? failedChecks.map(f => `<li style="margin-bottom:2px;color:#ffd54f;">${escHtml(f)}</li>`).join('')
+      : `<li style="color:#00e676;">${isFa ? 'تمامی گیت‌ها و شروط پایداری معادلات نمادین بدون خطا پاس شدند.' : 'All 8 verification gates and symbolic stability checks passed.'}</li>`;
+
+    return `
+      <div>
+        <div style="font-weight: 800; color: #00e5ff; font-size: 11.5px; margin-bottom: 6px;">
+          🧬 ${escHtml(sectionTitle)}
+          ${auditEntry?.auditId ? `<span dir="ltr" style="font-family:monospace;font-size:9.5px;color:#9cb0cc;margin-inline-start:8px;unicode-bidi:isolate;">[Audit ID: ${escHtml(auditEntry.auditId)}]</span>` : ''}
+        </div>
+        <div style="margin-bottom: 8px; color: #e2e8f0; font-size: 11px;">
+          ${escHtml(isFa ? report.reasonFa : report.reasonEn)}
+        </div>
+
+        <!-- Input State & Source Data Provenance Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 7px; margin-bottom: 9px; font-family: monospace; font-size: 10px;">
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'منبع داده واقعی و تایم‌فریم' : 'INPUT SOURCE & TIMEFRAME'}</div>
+            <div dir="ltr" style="color: #f8fafc; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              TF=${escHtml(src.timeframe)} · N_bars=${Number(src.barsEvaluated || 0)} · ${escHtml(src.provider)} (${escHtml(src.instrumentIdentity)})
+            </div>
+          </div>
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'پنجره برازش ریج و جریمه λ_t' : 'CAUSAL RIDGE FIT & OOS WINDOW'}</div>
+            <div dir="ltr" style="color: #00e5ff; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              N_fit=${Number(src.fitWindowBars || 0)} · N_eval=${Number(src.oosEvalBars || 0)} · λ_ridge=${Number(src.ridgeLambdaPenalty || 0).toFixed(4)}
+            </div>
+          </div>
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'افق‌های چندتایم‌فریمی و کانال اوراکل پسماند' : 'MTF HORIZONS & RESIDUAL ORACLE CHANNEL'}</div>
+            <div dir="ltr" style="color: #f381ff; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              [${escHtml(mtfStr)}] · Oracle: ${escHtml(src.dominantResidualBlindspot || 'N/A')}
+            </div>
+          </div>
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'امتیاز ۸ گیت و خطای خارج از نمونه' : '8-GATE STATUS & OOS METRICS'}</div>
+            <div dir="ltr" style="color: ${val.passedGatesCount === val.totalGatesCount ? '#00e676' : '#ffd54f'}; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              ${Number(val.passedGatesCount || 0)}/${Number(val.totalGatesCount || 8)} Gates · RMSE $${Number(val.candidateRmseUsd || 0).toFixed(3)} vs $${Number(val.liveRmseUsd || 0).toFixed(3)} · DM t=${Number(val.dieboldMarianoTStat || 0).toFixed(2)}
+            </div>
+          </div>
+        </div>
+
+        ${primaryHighlightHtml}
+
+        ${!isCompactPrevious ? `
+        <!-- Synthesized Symbolic Equations Table -->
+        <div style="overflow-x: auto; margin-bottom: 9px; border: 1px solid rgba(255,255,255,0.1); border-radius: 7px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: start;">
+            <thead>
+              <tr style="background: rgba(15, 23, 42, 0.95); color: #9cb0cc; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.12);">
+                <th style="padding: 5px 7px;">${isFa ? 'شناسه و عنوان معادله نمادین' : 'Symbolic Term ID'}</th>
+                <th style="padding: 5px 7px;">${isFa ? 'فرمول ریاضی بسته (ASCII)' : 'Closed-Form Symbolic Expression'}</th>
+                <th style="padding: 5px 7px;">${isFa ? 'وضعیت' : 'Status'}</th>
+                <th style="padding: 5px 7px;">${isFa ? 'ضریب ریج θ̂ (قبل ← بعد)' : 'Ridge θ̂ (Before → After)'}</th>
+                <th style="padding: 5px 7px;">${isFa ? 'پایداری S · Rank-IC · R²' : 'Stability S · IC · R²_OOS'}</th>
+                <th style="padding: 5px 7px;">${isFa ? 'وزن دقت w_j' : 'Precision Weight w_j'}</th>
+                <th style="padding: 5px 7px;">${isFa ? 'سهم گام جاری' : 'Step Drift'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${eqRowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Derivation, Assumptions & Validation Checks -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px; font-size: 10px;">
+          <div style="background: rgba(10, 18, 32, 0.9); border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 7px; padding: 7px 9px;">
+            <div style="font-weight: 800; color: #00e5ff; margin-bottom: 3px;">${isFa ? '📐 استنتاج ریاضی و منطق کالیبراسیون:' : '📐 Mathematical Derivation & Calibration Logic:'}</div>
+            <div style="color: #cbd5e1; line-height: 1.4;">${escHtml(isFa ? report.derivationAndReasoningFa : report.derivationAndReasoningEn)}</div>
+            <div style="font-weight: 800; color: #f5d76e; margin-top: 6px; margin-bottom: 2px;">${isFa ? '🔒 فروض و قیود ریاضی:' : '🔒 Assumptions & Mathematical Constraints:'}</div>
+            <ul style="margin: 0; padding-inline-start: 16px; color: #9cb0cc;">${assumptionsHtml}</ul>
+          </div>
+          <div style="background: rgba(10, 18, 32, 0.9); border: 1px solid rgba(255, 171, 0, 0.28); border-radius: 7px; padding: 7px 9px;">
+            <div style="font-weight: 800; color: #ffd54f; margin-bottom: 3px;">
+              ${isFa ? '🧪 نتایج اعتبارسنجی و بررسی گیت‌های ردشده/در انتظار:' : '🧪 Validation Results, Pruned Terms & Pending Gate Checks:'}
+            </div>
+            <div style="color: #cbd5e1; margin-bottom: 4px;">
+              ${isFa
+                ? `وضعیت معرفتی: <b>${escHtml(report.epistemicLabelFa)}</b>`
+                : `Epistemic Status: <b>${escHtml(report.epistemicLabelEn)}</b>`}
+            </div>
+            <ul style="margin: 0; padding-inline-start: 16px;">${failedChecksHtml}</ul>
+          </div>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function renderWriteBackParameterTableHtml(diffs, isFa) {
+    if (!Array.isArray(diffs) || diffs.length === 0) return '';
+    let rows = '';
+    diffs.forEach(d => {
+      const sign = d.deltaValue >= 0 ? '+' : '';
+      const deltaColor = !d.changed ? '#9cb0cc' : (d.deltaValue >= 0 ? '#00e676' : '#00e5ff');
+      rows += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <td style="padding: 5px 8px; font-family: monospace; font-weight: 800; color: #f8fafc;" dir="ltr">${escHtml(d.symbol)}</td>
+          <td style="padding: 5px 8px; color: #cbd5e1;">${escHtml(isFa ? d.labelFa : d.labelEn)}</td>
+          <td style="padding: 5px 8px; font-family: monospace; color: #00e5ff; font-size: 9.5px;" dir="ltr">${escHtml(d.targetEquation)}</td>
+          <td style="padding: 5px 8px; font-family: monospace; color: #9cb0cc;" dir="ltr">${Number(d.beforeValue).toFixed(4)}</td>
+          <td style="padding: 5px 8px; font-family: monospace; font-weight: 800; color: #00e676;" dir="ltr">${Number(d.afterValue).toFixed(4)}</td>
+          <td style="padding: 5px 8px; font-family: monospace; font-weight: 700; color: ${deltaColor};" dir="ltr">${sign}${Number(d.deltaValue).toFixed(4)}</td>
+        </tr>
+      `;
+    });
+
+    return `
+      <div style="overflow-x: auto; margin-top: 7px; margin-bottom: 9px; border: 1px solid rgba(0, 230, 118, 0.28); border-radius: 7px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: start;">
+          <thead>
+            <tr style="background: rgba(12, 24, 38, 0.95); color: #9cb0cc; font-family: monospace; border-bottom: 1px solid rgba(255,255,255,0.12);">
+              <th style="padding: 5px 8px;">${isFa ? 'پارامتر' : 'Parameter'}</th>
+              <th style="padding: 5px 8px;">${isFa ? 'نقش در مدل حالت پنهان ۶بعدی و مشاهده' : 'Target 6D Latent State / Camera Role'}</th>
+              <th style="padding: 5px 8px;">${isFa ? 'معادله هدف' : 'Target State Equation'}</th>
+              <th style="padding: 5px 8px;">${isFa ? 'مقدار قبلی (Before)' : 'Before'}</th>
+              <th style="padding: 5px 8px;">${isFa ? 'مقدار جدید (After)' : 'After'}</th>
+              <th style="padding: 5px 8px;">${isFa ? 'تغییر (Δ)' : 'Delta (Δ)'}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderWriteBackReportHtml(payload, isFa, isPreWriteConfirmation, isCompactPrevious) {
+    if (!payload) return '';
+    const vc = payload.validationCheck || {};
+    const prevWb = payload.previousWriteBack || {};
+    const propWb = payload.proposedWriteBack || payload.latentMathWriteBack || {};
+    const diffs = payload.parameterDiffs || [];
+    const ph = payload.persistenceHealth || {};
+    const audit = payload.auditEntry || {};
+    const unmet = isFa ? (vc.unmetRequirementsFa || vc.unmetRequirementsEn || []) : (vc.unmetRequirementsEn || []);
+    const pendingGates = isFa ? (vc.pendingPromotionGatesFa || vc.pendingPromotionGatesEn || []) : (vc.pendingPromotionGatesEn || []);
+    const activeSym = Array.isArray(propWb.activeSymbolicTermsWrittenBack) ? propWb.activeSymbolicTermsWrittenBack : [];
+    const prunedTerms = Array.isArray(propWb.prunedFaultyComponents) ? propWb.prunedFaultyComponents : [];
+
+    if (!payload.eligible && !payload.writtenBack) {
+      const unmetHtml = unmet.map(u => `<li style="margin-bottom:3px;color:#ff8a80;">${escHtml(u)}</li>`).join('');
+      return `
+        <div>
+          <div style="font-weight: 800; color: #ffd54f; font-size: 11.5px; margin-bottom: 6px;">
+            🛡️ ${isFa ? 'بازنویسی ریاضی در مدل حالت پنهان ۶بعدی رد شد (عدم احراز شروط اعتبارسنجی ریاضی)' : 'Mathematical Write-Back Rejected — Validation Requirements Unmet'}
+          </div>
+          <div style="margin-bottom: 8px; color: #e2e8f0;">
+            ${escHtml(isFa ? payload.reasonFa : payload.reasonEn)}
+          </div>
+          <div style="background: rgba(255, 23, 68, 0.1); border: 1px solid rgba(255, 23, 68, 0.45); border-radius: 7px; padding: 8px 11px; margin-bottom: 8px;">
+            <div style="font-weight: 800; color: #ff8a80; font-size: 10.5px; margin-bottom: 4px;">
+              ${isFa ? '✕ شروط ریاضی و گیت‌های برآورده‌نشده:' : '✕ Unmet Mathematical Validation Requirements:'}
+            </div>
+            <ul style="margin: 0; padding-inline-start: 18px; font-size: 10.5px;">${unmetHtml}</ul>
+          </div>
+          <div style="font-family: monospace; font-size: 10px; color: #9cb0cc;" dir="ltr">
+            Candidate=${escHtml(payload.candidateVersionTag || 'N/A')} (${escHtml(payload.candidateArchitectureId || 'N/A')}) · GateScore=${Number(vc.passedGatesCount || 0)}/${Number(vc.totalGatesCount || 8)} (${escHtml(vc.overallGateStatus || 'UNVERIFIED')}) · OOS_N=${Number(vc.realizedOosBarsEvaluated || 0)}/${Number(vc.requiredMinOosBars || 16)}
+          </div>
+        </div>
+      `;
+    }
+
+    if (isPreWriteConfirmation) {
+      const pendingNoticeHtml = pendingGates.length > 0
+        ? `
+          <div style="background: rgba(255, 171, 0, 0.11); border: 1px solid rgba(255, 171, 0, 0.45); border-radius: 6px; padding: 6px 9px; margin-bottom: 8px; font-size: 10px; color: #ffd54f;">
+            <b>${isFa ? 'ℹ️ تفکیک بازنویسی پارامتر پنهان از ارتقای کامل خط زرد زنده:' : 'ℹ️ Distinction Between Latent Parameter Write-Back & Live Yellow Line Promotion:'}</b>
+            ${isFa
+              ? `شروط پایداری ریاضی و داده واقعی تایید شدند (${vc.passedGatesCount}/${vc.totalGatesCount} گیت). این عملیات صرفاً پارامترهای فیلتر حالت پنهان ۶بعدی (φ, κ, β, γ, η, π_obs) را به‌روزرسانی می‌کند و معماری خط زرد زنده (${escHtml(payload.liveVersionTag)}) را بدون تغییر نگه می‌دارد.`
+              : `Mathematical stability & real-data provenance checks passed (${vc.passedGatesCount}/${vc.totalGatesCount} gates). Confirming this operation updates the 6D Latent State Filter & Camera parameters (φ, κ, β, γ, η, π_obs) while keeping the Live Yellow Line architecture (${escHtml(payload.liveVersionTag)}) distinct.`}
+          </div>
+        `
+        : '';
+
+      return `
+        <div>
+          <div style="font-weight: 800; color: #f5d76e; font-size: 11.5px; margin-bottom: 5px;">
+            🔍 ${isFa ? 'پیش‌نمایش و تایید بازنویسی ریاضیات تاییدشده در مدل حالت پنهان ۶بعدی' : 'Pre-Write Mathematical Inspection & Confirmation Dialog'}
+          </div>
+          <div style="color: #e2e8f0; margin-bottom: 7px;">
+            ${isFa
+              ? `کاندیدای مبدا: <b>${escHtml(payload.candidateVersionTag)}</b> (<span dir="ltr">${escHtml(payload.candidateArchitectureId)}</span>) ← هدف: <b>فیلتر حالت پنهان ۶بعدی X(τ) و مدل دوربین چندبازاری</b> (نسل بازنویسی #${prevWb.writeBackGeneration} به #${propWb.writeBackGeneration})`
+              : `Source Candidate: <b>${escHtml(payload.candidateVersionTag)}</b> (<code>${escHtml(payload.candidateArchitectureId)}</code>) → Target: <b>6D Latent State Filter X(τ) &amp; Multi-Venue Camera Model</b> (Write-Back Gen #${prevWb.writeBackGeneration} → #${propWb.writeBackGeneration})`}
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 7px; margin-bottom: 8px; font-family: monospace; font-size: 10px;">
+            <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 230, 118, 0.35); border-radius: 6px; padding: 6px 8px;">
+              <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'شواهد اعتبارسنجی خارج از نمونه' : 'SUPPORTING VALIDATION EVIDENCE'}</div>
+              <div dir="ltr" style="color: #00e676; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+                OOS N=${vc.realizedOosBarsEvaluated}/${vc.requiredMinOosBars} · Gates=${vc.passedGatesCount}/${vc.totalGatesCount} · RMSE=$${Number(vc.candidateRmseUsd || 0).toFixed(3)} · IC=${Number(vc.candidateRankIc || 0).toFixed(3)}
+              </div>
+            </div>
+            <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 6px; padding: 6px 8px;">
+              <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'معادلات نمادین فعال و اجزای حذف‌شده' : 'ACTIVE SYMBOLIC & PRUNED TERMS'}</div>
+              <div dir="ltr" style="color: #00e5ff; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+                Active Symbolic: ${activeSym.length}/8 · Pruned Faulty: ${prunedTerms.length}
+              </div>
+            </div>
+          </div>
+
+          ${renderWriteBackParameterTableHtml(diffs, isFa)}
+          ${pendingNoticeHtml}
+
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+            <button type="button" id="btnConfirmLatentWriteBack" style="background: linear-gradient(135deg, rgba(0, 230, 118, 0.32), rgba(0, 229, 255, 0.24)); border: 1.5px solid #00e676; color: #00e676; font-size: 11px; font-weight: 800; padding: 7px 14px; border-radius: 7px; cursor: pointer;">
+              ${isFa ? '✓ تایید و اجرای بازنویسی ریاضی در مدل پنهان' : '✓ Confirm & Apply Mathematical Write-Back'}
+            </button>
+            <button type="button" id="btnCancelLatentWriteBack" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.28); color: #e2e8f0; font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 7px; cursor: pointer;">
+              ${isFa ? '✕ انصراف' : '✕ Cancel'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Committed Write-Back Outcome Report
+    return `
+      <div>
+        <div style="font-weight: 800; color: #00e676; font-size: 11.5px; margin-bottom: 5px;">
+          🔬 ${isFa ? 'گزارش اجرای بازنویسی ریاضیات تاییدشده در مدل حالت پنهان ۶بعدی' : 'Validated Latent-Model Mathematical Write-Back Outcome Report'}
+          ${audit.auditId ? `<span dir="ltr" style="font-family:monospace;font-size:9.5px;color:#9cb0cc;margin-inline-start:8px;unicode-bidi:isolate;">[Audit ID: ${escHtml(audit.auditId)}]</span>` : ''}
+        </div>
+        <div style="margin-bottom: 8px; color: #e2e8f0;">
+          ${escHtml(isFa ? payload.reasonFa : payload.reasonEn)}
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 7px; margin-bottom: 8px; font-family: monospace; font-size: 10px;">
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 230, 118, 0.35); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'نسخه کاندیدا و نسل بازنویسی' : 'CANDIDATE & WRITE-BACK GENERATION'}</div>
+            <div dir="ltr" style="color: #00e676; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              Gen #${prevWb.writeBackGeneration} → #${propWb.writeBackGeneration} · Source: ${escHtml(payload.candidateVersionTag)} (${escHtml(payload.candidateArchitectureId)})
+            </div>
+          </div>
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'تایید ذخیره‌سازی پایدار (Persistence)' : 'PERSISTENCE CONFIRMATION'}</div>
+            <div dir="ltr" style="color: #00e5ff; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              ${escHtml(ph.statusLabel || 'PERSISTENT')} (${escHtml(ph.storageMode || 'LOCAL_DISK_PERSISTENT')})
+            </div>
+          </div>
+          <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(245, 215, 110, 0.35); border-radius: 6px; padding: 6px 8px;">
+            <div style="color: #9cb0cc; font-size: 9px;">${isFa ? 'وضعیت پارامترهای پیش‌بینی و تفکیک ارتقا' : 'FORECAST UPDATE & PROMOTION SEPARATION'}</div>
+            <div dir="ltr" style="color: #f5d76e; font-weight: 700; margin-top: 2px; unicode-bidi: isolate;">
+              6D Latent Filter Updated: ${payload.activeForecastParametersUpdated ? 'YES' : 'PENDING'} · Live Arch: ${escHtml(payload.liveVersionTag)} (Unchanged)
+            </div>
+          </div>
+        </div>
+
+        ${!isCompactPrevious ? renderWriteBackParameterTableHtml(diffs, isFa) : ''}
+
+        <div style="font-family: monospace; font-size: 9.5px; color: #9cb0cc;" dir="ltr">
+          Active Symbolic Written Back (${activeSym.length}): [${escHtml(activeSym.join(', ') || 'NONE')}] · Pruned Faulty Components (${prunedTerms.length}): [${escHtml(prunedTerms.join(', ') || 'NONE')}]
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPanel() {
+    const panel = document.getElementById('mmiOperationFeedbackPanel');
+    const statusBadge = document.getElementById('mmiOperationStatusBadge');
+    const titleEl = document.getElementById('mmiOperationTitleText');
+    const epBadge = document.getElementById('mmiOperationEpistemicBadge');
+    const tsEl = document.getElementById('mmiOperationTimestampText');
+    const retryBtn = document.getElementById('btnMmiOperationRetry');
+    const collapseBtn = document.getElementById('btnMmiOperationToggleCollapse');
+    const bodyWrap = document.getElementById('mmiOperationBodyWrap');
+    const activeBox = document.getElementById('mmiOperationActiveContent');
+    const prevBox = document.getElementById('mmiPreviousSuccessReportContainer');
+
+    if (!panel || !activeBox) return;
+    const isFa = currentLang === 'fa';
+    panel.setAttribute('dir', isFa ? 'rtl' : 'ltr');
+    panel.setAttribute('data-mmi-state', state.status);
+
+    if (state.status === 'IDLE' && !state.currentPayload && !state.lastSuccessfulReport) {
+      panel.style.display = 'none';
+      return;
+    }
+
+    panel.style.display = 'block';
+    const stStyle = getStatusStyle(state.status, state.subStage);
+    panel.style.borderColor = stStyle.panelBorder;
+
+    if (statusBadge) {
+      statusBadge.style.background = stStyle.badgeBg;
+      statusBadge.style.borderColor = stStyle.badgeBorder;
+      statusBadge.style.color = stStyle.badgeColor;
+      statusBadge.textContent = isFa ? stStyle.labelFa : stStyle.labelEn;
+    }
+
+    if (titleEl) {
+      if (state.activeAction === 'SYNTHESIZE_SYMBOLIC_STEP') {
+        titleEl.textContent = isFa
+          ? 'عملیات کنسول MMI: 🧬 ترکیب و کالیبراسیون گام نمادین سطح B'
+          : 'MMI Console Operation: 🧬 Synthesize Symbolic Step';
+      } else if (state.activeAction === 'WRITEBACK_LATENT_MATH') {
+        titleEl.textContent = isFa
+          ? 'عملیات کنسول MMI: 🔬 بازنویسی ریاضیات تاییدشده در مدل حالت پنهان ۶بعدی'
+          : 'MMI Console Operation: 🔬 Write Back Validated Math to Latent Model';
+      } else {
+        titleEl.textContent = isFa ? 'گزارش عملیات کنسول MMI' : 'MMI Console Operation Report';
+      }
+    }
+
+    if (epBadge) {
+      if (state.activeAction === 'SYNTHESIZE_SYMBOLIC_STEP' && state.currentPayload?.synthesisReport) {
+        const rep = state.currentPayload.synthesisReport;
+        epBadge.style.display = 'inline-block';
+        epBadge.textContent = isFa ? rep.epistemicLabelFa : rep.epistemicLabelEn;
+      } else if (state.activeAction === 'WRITEBACK_LATENT_MATH' && state.currentPayload?.validationCheck) {
+        const vc = state.currentPayload.validationCheck;
+        epBadge.style.display = 'inline-block';
+        epBadge.textContent = vc.isFullPromotionVerified
+          ? (isFa ? 'تایید کامل ۸/۸ گیت' : '8/8 GATES VERIFIED')
+          : (isFa ? `پارامترهای پنهان تاییدشده (${vc.passedGatesCount}/${vc.totalGatesCount} گیت)` : `LATENT PARAMS VALIDATED (${vc.passedGatesCount}/${vc.totalGatesCount} GATES)`);
+      } else {
+        epBadge.style.display = 'none';
+      }
+    }
+
+    if (tsEl) {
+      tsEl.textContent = formatTimeShort(state.timestampIso);
+    }
+
+    if (retryBtn) {
+      const showRetry = (state.status === 'FAILED' || state.status === 'UNKNOWN') && typeof state.retryCallback === 'function';
+      retryBtn.style.display = showRetry ? 'inline-block' : 'none';
+      retryBtn.textContent = isFa ? '↻ تلاش مجدد (Retry)' : '↻ Retry Operation';
+    }
+
+    if (collapseBtn) {
+      collapseBtn.textContent = state.isCollapsed
+        ? (isFa ? 'نمایش جزئیات ▾' : 'Expand Report ▾')
+        : (isFa ? 'جمع کردن ▴' : 'Collapse ▴');
+    }
+
+    if (bodyWrap) {
+      bodyWrap.style.display = state.isCollapsed ? 'none' : 'block';
+    }
+
+    // Render active content
+    if (state.status === 'PROCESSING') {
+      const msgEn = state.activeAction === 'SYNTHESIZE_SYMBOLIC_STEP'
+        ? 'Executing causal Level-B symbolic feature evaluation, ridge regression calibration θ̂_j = (X^T X + λ_t I)^(-1) X^T ΔP, split-half stability check, and inverse-variance precision weighting on verified real market bars...'
+        : (state.subStage === 'COMMITTING'
+          ? 'Writing validated mathematical parameters (φ, κ, β_echo, γ_res, η_macro, π_obs) into 6D Latent State & Multi-Venue Observation Model and persisting immutable audit record...'
+          : 'Inspecting Candidate Architecture, evaluating mathematical validation requirements, and computing before/after 6D Latent State parameter diffs...');
+      const msgFa = state.activeAction === 'SYNTHESIZE_SYMBOLIC_STEP'
+        ? 'در حال ارزیابی علی معادلات نمادین سطح B، کالیبراسیون رگرسیون ریج، آزمون پایداری دونیمه و محاسبه وزن‌های دقت معکوس واریانس روی کندل‌های واقعی تاییدشده...'
+        : (state.subStage === 'COMMITTING'
+          ? 'در حال بازنویسی پارامترهای ریاضی تاییدشده (φ, κ, β_echo, γ_res, η_macro, π_obs) در مدل حالت پنهان ۶بعدی و ثبت در مخزن پایدار حسابرسی...'
+          : 'در حال بررسی معماری کاندیدا، ارزیابی شروط اعتبارسنجی ریاضی و محاسبه تغییرات قبل و بعد پارامترهای حالت پنهان ۶بعدی...');
+      activeBox.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; color: #00e5ff; font-weight: 700; padding: 6px 2px;">
+          <span>⏳</span>
+          <span>${escHtml(isFa ? msgFa : msgEn)}</span>
+        </div>
+      `;
+    } else if (state.status === 'FAILED' || state.status === 'UNKNOWN') {
+      const errTxt = isFa ? (state.lastErrorTextFa || state.lastErrorTextEn) : (state.lastErrorTextEn || 'Operation failed');
+      activeBox.innerHTML = `
+        <div style="background: rgba(255, 23, 68, 0.12); border: 1px solid rgba(255, 23, 68, 0.5); border-radius: 7px; padding: 9px 12px; color: #ff8a80;">
+          <div style="font-weight: 800; margin-bottom: 3px;">
+            ${state.status === 'UNKNOWN'
+              ? (isFa ? '❓ وضعیت تاییدنشده (پاسخ سرور دریافت نشد یا منقضی شد):' : '❓ Outcome Unconfirmed (Request Timed Out or Indeterminate Response):')
+              : (isFa ? '✕ خطا در اجرای عملیات:' : '✕ Operation Failed:')}
+          </div>
+          <div style="font-family: monospace; font-size: 10.5px;">${escHtml(errTxt)}</div>
+        </div>
+      `;
+    } else if (state.activeAction === 'SYNTHESIZE_SYMBOLIC_STEP' && state.currentPayload?.synthesisReport) {
+      activeBox.innerHTML = renderSymbolicSynthesisReportHtml(
+        state.currentPayload.synthesisReport,
+        state.currentPayload.auditEntry,
+        isFa,
+        false
+      );
+    } else if (state.activeAction === 'WRITEBACK_LATENT_MATH' && state.currentPayload) {
+      const isConfirm = state.subStage === 'AWAITING_CONFIRMATION';
+      activeBox.innerHTML = renderWriteBackReportHtml(state.currentPayload, isFa, isConfirm, false);
+
+      if (isConfirm) {
+        const confirmBtn = document.getElementById('btnConfirmLatentWriteBack');
+        const cancelBtn = document.getElementById('btnCancelLatentWriteBack');
+        if (confirmBtn) {
+          confirmBtn.onclick = function () {
+            confirmPendingWriteBack();
+          };
+        }
+        if (cancelBtn) {
+          cancelBtn.onclick = function () {
+            cancelPendingWriteBack();
+          };
+        }
+      }
+    }
+
+    // Render preserved Last Successful Report when current state is not SUCCESS
+    if (prevBox) {
+      if (state.lastSuccessfulReport && state.status !== 'SUCCESS') {
+        prevBox.style.display = 'block';
+        const prev = state.lastSuccessfulReport;
+        const prevHeader = isFa
+          ? `📌 آخرین گزارش موفق ثبت‌شده قبلی (${formatTimeShort(prev.timestampIso)}) — حفظ‌شده جهت مقایسه:`
+          : `📌 Previous Verified Successful Report (${formatTimeShort(prev.timestampIso)}) — Preserved:`;
+        const innerHtml = prev.action === 'SYNTHESIZE_SYMBOLIC_STEP'
+          ? renderSymbolicSynthesisReportHtml(prev.payload.synthesisReport, prev.payload.auditEntry, isFa, true)
+          : renderWriteBackReportHtml(prev.payload, isFa, false, true);
+        prevBox.innerHTML = `
+          <div style="font-size: 10px; font-weight: 800; color: #9cb0cc; margin-bottom: 6px; font-family: monospace;">
+            ${escHtml(prevHeader)}
+          </div>
+          <div style="opacity: 0.92; background: rgba(10, 16, 28, 0.75); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 7px; padding: 8px 10px;">
+            ${innerHtml}
+          </div>
+        `;
+      } else {
+        prevBox.style.display = 'none';
+        prevBox.innerHTML = '';
+      }
+    }
+  }
+
+  function applySnapshotToConsoleDom(jsonSnapshot) {
+    if (!jsonSnapshot) return;
+    const puLike = {
+      enabled: true,
+      autoPromotionEnabled: jsonSnapshot.autoPromotionEnabled,
+      persistenceHealth: jsonSnapshot.persistenceHealth,
+      mtfDiscoveryContext: jsonSnapshot.mtfDiscoveryContext,
+      liveArchitecture: jsonSnapshot.liveArchitecture,
+      candidateArchitecture: jsonSnapshot.candidateArchitecture,
+      findings: jsonSnapshot.lastFindings || [],
+      verificationReport: jsonSnapshot.lastVerificationReport,
+      auditTrail: jsonSnapshot.auditTrail || [],
+      scientificCore: jsonSnapshot.scientificCore,
+      latentMathWriteBack: jsonSnapshot.latentMathWriteBack,
+    };
+    if (forecastData) {
+      forecastData.parallelUniverse = {
+        ...(forecastData.parallelUniverse || {}),
+        ...puLike,
+      };
+      if (jsonSnapshot.scientificCore) {
+        forecastData.scientificCore = jsonSnapshot.scientificCore;
+      }
+    }
+    renderParallelUniverseTelemetry(puLike);
+  }
+
+  async function fetchJsonWithTimeout(url, bodyObj, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      try { controller.abort('MMI operation timeout'); } catch (_) {}
+    }, timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+        body: JSON.stringify(bodyObj || {}),
+      });
+      clearTimeout(timer);
+      const cType = (res.headers.get('content-type') || '').toLowerCase();
+      const rawText = await res.text();
+      if (!cType.includes('application/json') && !cType.includes('text/json')) {
+        throw new Error(`Unexpected non-JSON response (HTTP ${res.status})`);
+      }
+      const parsed = JSON.parse(rawText);
+      return { res, parsed };
+    } catch (err) {
+      clearTimeout(timer);
+      const isTimeout =
+        (controller.signal && controller.signal.aborted) ||
+        String(err && err.message || err).toLowerCase().includes('timeout') ||
+        String(err && err.message || err).toLowerCase().includes('abort');
+      const wrapped = new Error(err && err.message ? err.message : String(err));
+      wrapped.isTimeoutOrUnconfirmed = isTimeout;
+      throw wrapped;
+    }
+  }
+
+  async function triggerSymbolicStepSynthesis(options) {
+    if (state.isLocked) return state;
+    const btn = document.getElementById('btnTriggerSymbolicDiscovery');
+    state.isLocked = true;
+    state.status = 'PROCESSING';
+    state.activeAction = 'SYNTHESIZE_SYMBOLIC_STEP';
+    state.subStage = 'EXECUTING';
+    state.timestampIso = new Date().toISOString();
+    state.isCollapsed = false;
+    state.retryCallback = function () {
+      return triggerSymbolicStepSynthesis(options);
+    };
+
+    const origBtnText = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = currentLang === 'fa' ? '⏳ در حال ترکیب گام نمادین...' : '⏳ Synthesizing Symbolic Step...';
+    }
+    renderPanel();
+
+    try {
+      const note = (options && options.note) || 'Operator-triggered Level-B symbolic synthesis & causal ridge calibration step';
+      const { res, parsed } = await fetchJsonWithTimeout(
+        buildApiUrl('/api/intelligence-core/discover-step'),
+        { note, timeframe: currentTimeframe }
+      );
+
+      state.timestampIso = parsed?.synthesisReport?.timestampIso || new Date().toISOString();
+      state.currentPayload = parsed;
+
+      if (res.ok && parsed && parsed.synthesisExecuted && parsed.synthesisReport) {
+        state.status = 'SUCCESS';
+        state.subStage = 'COMPLETED';
+        state.lastSuccessfulReport = {
+          action: 'SYNTHESIZE_SYMBOLIC_STEP',
+          timestampIso: state.timestampIso,
+          payload: parsed,
+        };
+      } else if (parsed && (parsed.operationStatus === 'REJECTED' || res.status === 409)) {
+        state.status = 'REJECTED';
+        state.subStage = 'COMPLETED';
+      } else {
+        state.status = 'FAILED';
+        state.lastErrorTextEn = parsed?.error || parsed?.reasonEn || `HTTP ${res.status} synthesis failure`;
+        state.lastErrorTextFa = parsed?.reasonFa || `خطای HTTP ${res.status} در ترکیب گام نمادین`;
+      }
+
+      applySnapshotToConsoleDom(parsed);
+      renderPanel();
+      await fetchQuantData(currentTimeframe, true);
+      return state;
+    } catch (err) {
+      const msg = err && err.message ? err.message : String(err);
+      state.status = err && err.isTimeoutOrUnconfirmed ? 'UNKNOWN' : 'FAILED';
+      state.timestampIso = new Date().toISOString();
+      state.lastErrorTextEn = `Symbolic synthesis request failed: ${msg}`;
+      state.lastErrorTextFa = `درخواست ترکیب گام نمادین با خطا مواجه شد: ${msg}`;
+      renderPanel();
+      return state;
+    } finally {
+      state.isLocked = false;
+      if (btn) {
+        btn.disabled = false;
+        const i18nLabel = i18n[currentLang]?.btnTriggerSymbolicDiscovery;
+        btn.textContent = i18nLabel || origBtnText || '🧬 Synthesize Symbolic Step';
+      }
+    }
+  }
+
+  async function triggerLatentMathWriteBack(options) {
+    if (state.isLocked) return state;
+    const skipConfirm = Boolean(options && options.skipConfirmationPrompt);
+    const requireFullGates = Boolean(options && options.requireFullGateVerification);
+    const btn = document.getElementById('btnWriteBackLatentMath');
+
+    state.isLocked = true;
+    state.status = 'PROCESSING';
+    state.activeAction = 'WRITEBACK_LATENT_MATH';
+    state.subStage = 'INSPECTING';
+    state.timestampIso = new Date().toISOString();
+    state.isCollapsed = false;
+    state.retryCallback = function () {
+      return triggerLatentMathWriteBack(options);
+    };
+
+    const origBtnText = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = currentLang === 'fa' ? '⏳ بررسی اعتبارسنجی ریاضی...' : '⏳ Inspecting Validation Gates...';
+    }
+    renderPanel();
+
+    try {
+      // Step 1: Pre-write dry-run inspection & validation gate check
+      const { res, parsed } = await fetchJsonWithTimeout(
+        buildApiUrl('/api/intelligence-core/writeback-math'),
+        {
+          mode: 'MANUAL_MMI',
+          dryRun: !skipConfirm,
+          requireFullGateVerification: requireFullGates,
+          operatorNote: 'Operator triggered Direct Mathematical Write-Back into 6D Latent State & Observation Model',
+        }
+      );
+
+      state.timestampIso = new Date().toISOString();
+      state.currentPayload = parsed;
+
+      if (!parsed || (!parsed.eligible && !parsed.writtenBack)) {
+        state.status = 'REJECTED';
+        state.subStage = 'COMPLETED';
+        state.pendingWriteBackPreview = null;
+        applySnapshotToConsoleDom(parsed);
+        renderPanel();
+        return state;
+      }
+
+      if (!skipConfirm && parsed.dryRun && parsed.eligible) {
+        state.status = 'SUCCESS';
+        state.subStage = 'AWAITING_CONFIRMATION';
+        state.pendingWriteBackPreview = parsed;
+        renderPanel();
+        return state;
+      }
+
+      // If skipConfirm was true and write-back already committed in one step
+      if (parsed.writtenBack && parsed.auditEntry?.auditId) {
+        state.status = 'SUCCESS';
+        state.subStage = 'COMPLETED';
+        state.pendingWriteBackPreview = null;
+        state.lastSuccessfulReport = {
+          action: 'WRITEBACK_LATENT_MATH',
+          timestampIso: parsed.auditEntry.timestampIso || state.timestampIso,
+          payload: parsed,
+        };
+        applySnapshotToConsoleDom(parsed);
+        renderPanel();
+        await fetchQuantData(currentTimeframe, true);
+        return state;
+      }
+
+      state.status = 'FAILED';
+      state.lastErrorTextEn = 'Write-back response did not confirm state persistence.';
+      state.lastErrorTextFa = 'پاسخ سرور ذخیره‌سازی بازنویسی ریاضی را تایید نکرد.';
+      renderPanel();
+      return state;
+    } catch (err) {
+      const msg = err && err.message ? err.message : String(err);
+      state.status = err && err.isTimeoutOrUnconfirmed ? 'UNKNOWN' : 'FAILED';
+      state.timestampIso = new Date().toISOString();
+      state.lastErrorTextEn = `Latent math write-back inspection failed: ${msg}`;
+      state.lastErrorTextFa = `بررسی بازنویسی ریاضی مدل پنهان با خطا مواجه شد: ${msg}`;
+      renderPanel();
+      return state;
+    } finally {
+      state.isLocked = false;
+      if (btn) {
+        btn.disabled = false;
+        const i18nLabel = i18n[currentLang]?.btnWriteBackLatentMath;
+        btn.textContent = i18nLabel || origBtnText || '🔬 Write Back Validated Math to Latent Model';
+      }
+    }
+  }
+
+  async function confirmPendingWriteBack() {
+    if (state.isLocked) return state;
+    const btn = document.getElementById('btnWriteBackLatentMath');
+    const confirmBtn = document.getElementById('btnConfirmLatentWriteBack');
+    const cancelBtn = document.getElementById('btnCancelLatentWriteBack');
+
+    state.isLocked = true;
+    state.status = 'PROCESSING';
+    state.activeAction = 'WRITEBACK_LATENT_MATH';
+    state.subStage = 'COMMITTING';
+    state.timestampIso = new Date().toISOString();
+    state.retryCallback = function () {
+      return confirmPendingWriteBack();
+    };
+
+    if (btn) btn.disabled = true;
+    if (confirmBtn) confirmBtn.disabled = true;
+    if (cancelBtn) cancelBtn.disabled = true;
+    renderPanel();
+
+    try {
+      const { res, parsed } = await fetchJsonWithTimeout(
+        buildApiUrl('/api/intelligence-core/writeback-math'),
+        {
+          mode: 'MANUAL_MMI',
+          dryRun: false,
+          confirmedByOperator: true,
+          operatorNote: 'Operator confirmed Direct Mathematical Write-Back after pre-write parameter inspection',
+        }
+      );
+
+      state.timestampIso = parsed?.auditEntry?.timestampIso || new Date().toISOString();
+      state.currentPayload = parsed;
+      state.pendingWriteBackPreview = null;
+
+      if (res.ok && parsed && parsed.writtenBack === true && parsed.auditEntry?.auditId) {
+        state.status = 'SUCCESS';
+        state.subStage = 'COMPLETED';
+        state.lastSuccessfulReport = {
+          action: 'WRITEBACK_LATENT_MATH',
+          timestampIso: state.timestampIso,
+          payload: parsed,
+        };
+      } else if (parsed && (!parsed.eligible || res.status === 409)) {
+        state.status = 'REJECTED';
+        state.subStage = 'COMPLETED';
+      } else {
+        state.status = 'FAILED';
+        state.lastErrorTextEn = parsed?.error || parsed?.reasonEn || `HTTP ${res.status} write-back commit failed`;
+        state.lastErrorTextFa = parsed?.reasonFa || `خطای HTTP ${res.status} در ثبت بازنویسی ریاضی`;
+      }
+
+      applySnapshotToConsoleDom(parsed);
+      renderPanel();
+      await fetchQuantData(currentTimeframe, true);
+      return state;
+    } catch (err) {
+      const msg = err && err.message ? err.message : String(err);
+      state.status = err && err.isTimeoutOrUnconfirmed ? 'UNKNOWN' : 'FAILED';
+      state.timestampIso = new Date().toISOString();
+      state.lastErrorTextEn = `Latent math write-back commit failed: ${msg}`;
+      state.lastErrorTextFa = `ثبت نهایی بازنویسی ریاضی مدل پنهان با خطا مواجه شد: ${msg}`;
+      renderPanel();
+      return state;
+    } finally {
+      state.isLocked = false;
+      if (btn) {
+        btn.disabled = false;
+        const i18nLabel = i18n[currentLang]?.btnWriteBackLatentMath;
+        if (i18nLabel) btn.textContent = i18nLabel;
+      }
+    }
+  }
+
+  function cancelPendingWriteBack() {
+    if (state.isLocked) return;
+    state.pendingWriteBackPreview = null;
+    state.subStage = null;
+    if (state.lastSuccessfulReport) {
+      state.status = 'SUCCESS';
+      state.activeAction = state.lastSuccessfulReport.action;
+      state.timestampIso = state.lastSuccessfulReport.timestampIso;
+      state.currentPayload = state.lastSuccessfulReport.payload;
+    } else {
+      state.status = 'IDLE';
+      state.activeAction = null;
+      state.currentPayload = null;
+    }
+    renderPanel();
+  }
+
+  function initDomBindings() {
+    const btnWriteBack = document.getElementById('btnWriteBackLatentMath');
+    if (btnWriteBack) {
+      btnWriteBack.addEventListener('click', () => {
+        triggerLatentMathWriteBack({ skipConfirmationPrompt: false });
+      });
+    }
+
+    const btnSymbolic = document.getElementById('btnTriggerSymbolicDiscovery');
+    if (btnSymbolic) {
+      btnSymbolic.addEventListener('click', () => {
+        triggerSymbolicStepSynthesis({});
+      });
+    }
+
+    const retryBtn = document.getElementById('btnMmiOperationRetry');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        if (typeof state.retryCallback === 'function' && !state.isLocked) {
+          state.retryCallback();
+        }
+      });
+    }
+
+    const collapseBtn = document.getElementById('btnMmiOperationToggleCollapse');
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', () => {
+        state.isCollapsed = !state.isCollapsed;
+        renderPanel();
+      });
+    }
+  }
+
+  initDomBindings();
+
+  return {
+    getState: function () {
+      return { ...state };
+    },
+    triggerSymbolicStepSynthesis: triggerSymbolicStepSynthesis,
+    triggerLatentMathWriteBack: triggerLatentMathWriteBack,
+    confirmPendingWriteBack: confirmPendingWriteBack,
+    cancelPendingWriteBack: cancelPendingWriteBack,
+    retryLastOperation: function () {
+      if (typeof state.retryCallback === 'function' && !state.isLocked) {
+        return state.retryCallback();
+      }
+      return Promise.resolve(state);
+    },
+    syncLanguage: function () {
+      renderPanel();
+    },
+  };
+})();
 
 const btnBootstrapMtfNow = document.getElementById('btnBootstrapMtfNow');
 if (btnBootstrapMtfNow) {

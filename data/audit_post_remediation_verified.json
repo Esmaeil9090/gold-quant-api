@@ -1,0 +1,314 @@
+{
+  "timestampIso": "2026-10-28T17:26:23.894Z",
+  "mode": "POST_REMEDIATION_VERIFICATION",
+  "sampleSizeCandles": 300,
+  "results": [
+    {
+      "testId": "AUDIT-01",
+      "category": "8. Time-Index & No-Lookahead",
+      "title": "Prefix-Invariance of Causal Information Clock Δτ_t (Truncated t≤t0 vs Full Sample)",
+      "status": "PASSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "max |Δτ_t(prefix 0..t0) - Δτ_t(full 0..N-1)| <= 1e-9 for t >= 15",
+      "measuredValue": "maxDiff = 0.0000e+0",
+      "evidenceSummary": "Information clock Δτ_t at historical bar t depends strictly on causal history [0..t]."
+    },
+    {
+      "testId": "AUDIT-02",
+      "category": "8. Time-Index & No-Lookahead",
+      "title": "Prefix-Invariance of Pulse–Echo Sonar Detection & Echo Updates",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "max |toxUpdate_t(prefix) - toxUpdate_t(full)| <= 1e-9 for completed echo windows t <= t0-4",
+      "measuredValue": "maxDiff = 0.0000e+0",
+      "evidenceSummary": "Pulse-Echo detection threshold and completed echo updates are strictly causal."
+    },
+    {
+      "testId": "AUDIT-03",
+      "category": "8. Time-Index & No-Lookahead",
+      "title": "Prefix-Invariance of 6D Latent Filter 1-Step-Ahead Historical Predictions",
+      "status": "PASSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "max |P_hat_{t|t-1}(prefix) - P_hat_{t|t-1}(full)| <= $1e-6 for t in [20, t0-4]",
+      "measuredValue": "maxPredDiffUsd = $0.000000",
+      "evidenceSummary": "1-step-ahead predictions P_hat_{t|t-1} are strictly causal and invariant to future candles."
+    },
+    {
+      "testId": "AUDIT-04",
+      "category": "2. Matrix & Covariance Invariants",
+      "title": "6x6 Latent State Covariance Symmetry and Positive Semidefiniteness (Joseph Form)",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "max |P_ij - P_ji| <= 1e-6 AND all Cholesky pivots > 0",
+      "measuredValue": "maxAsym=0.000e+0, minPivot=3.000e-8, minDiag=3.000e-8",
+      "evidenceSummary": "6x6 covariance matrix P is symmetric and positive definite."
+    },
+    {
+      "testId": "AUDIT-05",
+      "category": "1. Dimensional & Unit Consistency",
+      "title": "Dimensional Consistency of State Drift vs Diffusive Scaling in AdaptiveDPObserver",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "All observer states finite and dimensionally consistent ($/step)",
+      "measuredValue": "drift=1.1220, shrunkBias=-0.0260, historyLen=25",
+      "evidenceSummary": "AdaptiveDPObserver produced 25 finite trajectory points; f1=0.854, f2=undefined."
+    },
+    {
+      "testId": "AUDIT-06",
+      "category": "3. Analytic & Reference Cases",
+      "title": "Zero-Drift Equilibrium Fixed-Point Reference Case (P_t = $2900.00, Zero Macro Lift)",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "|E[P_{T+24}] - 2900.00| <= $1.00 under zero drift and equilibrium = spot",
+      "measuredValue": "E[P_{T+24}] = $2900.01, |diff| = $0.0100",
+      "evidenceSummary": "Under constant price and zero exogenous force, conditional expectation stays anchored at $2900.00."
+    },
+    {
+      "testId": "AUDIT-07",
+      "category": "4. Boundary & Extreme Inputs",
+      "title": "Extreme Volatility & 25x Volume Spike Stability and Plume Monotonicity",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "All states finite; lower05 <= lower25 <= median <= upper75 <= upper95 for all h=1..24",
+      "measuredValue": "impliedPrice=$4053.21, Δτ=undefined, finite=true",
+      "evidenceSummary": "Filter and 24-step quantile plume remain bounded and strictly monotonic under a $65 jump + 25x volume spike."
+    },
+    {
+      "testId": "AUDIT-08",
+      "category": "5. Missing, Stale & Duplicated Data",
+      "title": "Zero-Volume, Zero-Range, Duplicate Bar & Unavailable Macro Feed Resilience",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Zero NaN/Infinity when volume=0, high==low, duplicate bar, and MACRO_FEED_UNAVAILABLE",
+      "measuredValue": "finite=true, activeCameras=1",
+      "evidenceSummary": "Filter gracefully handles zero-volume/zero-range bars and missing macro feeds without division-by-zero."
+    },
+    {
+      "testId": "AUDIT-09",
+      "category": "6. Deterministic Replay",
+      "title": "Bitwise Deterministic Replay of Scientific Core Pipeline on Identical Inputs",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Exact JSON equality of latentState and yellowLineConditionalExpectation across runs",
+      "measuredValue": "identical=true",
+      "evidenceSummary": "Scientific Core is 100% deterministic with zero unseeded randomness."
+    },
+    {
+      "testId": "AUDIT-10",
+      "category": "8. Time-Index & No-Lookahead (Parallel Universe)",
+      "title": "Strict Disjoint Out-of-Sample Split (Fit vs Weight Selection vs Gate Evaluation) & Causal Features",
+      "status": "PASSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "Fit window, weight-selection window, and 8/8 gate evaluation window must be strictly disjoint AND historical bar k features must use causal prefix [0..k]",
+      "measuredValue": "fit=[0..21], weight=[21..34], oosEval=[34..48]",
+      "evidenceSummary": "Parallel Universe calibrates θ on chronological split 1, precision weights w on split 2, and evaluates 8/8 promotion gates strictly on untouched split 3 using causal prefix features."
+    },
+    {
+      "testId": "AUDIT-11",
+      "category": "10. Matched-Sample Multi-Horizon Forecast Evaluation",
+      "title": "Walk-Forward Multi-Horizon (h=1, 5, 15 Bars) Evaluation vs Random Walk & EMA Baselines",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "Matched-sample walk-forward evaluation across N >= 30 origins with DM t-stat and 90% interval coverage",
+      "measuredValue": "h=1: RMSE_Y=$6.1086 vs RMSE_RW=$4.8509 (DM t=-2.143, Cov90=91.3%)",
+      "evidenceSummary": "Evaluated 253 strictly causal origins across h=1,5,15."
+    },
+    {
+      "testId": "AUDIT-12",
+      "category": "11. Component Ablation Study",
+      "title": "Leave-One-Out Component Ablation on 6D Latent State Filter",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "Quantify exact OOS RMSE, Hit Rate, Rank IC, and ρ_1 contribution of each 6D filter term",
+      "measuredValue": "FULL_MODEL: RMSE=$5 | ABLATE_MEAN_REVERSION: RMSE=$5.0158 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8964 | ABLATE_MACRO_COUPLING: RMSE=$5.0031 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.878",
+      "evidenceSummary": "Completed 5-way component ablation across mean reversion, toxicity coupling, macro coupling, and drift persistence."
+    },
+    {
+      "testId": "AUDIT-13",
+      "category": "14. Awareness Core Critique & Ablation Capability",
+      "title": "Automated Component-Level Critique, Leave-One-Out Ablation & Action Verdicts (RETAIN/REVISE/REPLACE/DISABLE)",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Awareness Core must evaluate every active equation via empirical ablation and emit structured verdicts (RETAIN, REESTIMATE_PARAMETERS, REVISE_FUNCTIONAL_FORM, DISABLE_CONDITIONALLY, etc.)",
+      "measuredValue": "critiques=13 active equations audited",
+      "evidenceSummary": "Awareness Core audits each active equation with empirical ablation ΔRMSE, assumptions check, and explicit action verdict."
+    },
+    {
+      "testId": "AUDIT-14",
+      "category": "15. Creative Mathematical Discovery & Experiment Graveyard",
+      "title": "Residual-Driven Compositional Symbolic Hypothesis Generation, Complexity Penalty & Failed-Experiment Memory",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Must generate falsifiable compositional hypotheses from operator grammar with unit checks, BIC complexity penalty, and persistent failed-experiment graveyard",
+      "measuredValue": "hypotheses=3, graveyard=3, stage=8_SCIENTIFIC_REVIEW",
+      "evidenceSummary": "Parallel Universe synthesizes compositional symbolic hypotheses targeted at Residual Oracle blindspots, penalizes complexity (BIC), and archives rejected hypotheses in the Experiment Graveyard."
+    },
+    {
+      "testId": "AUDIT-15",
+      "category": "9. Yellow vs Magenta Structural Scope",
+      "title": "Full Candidate Symbolic Catalog Coupling into Candidate 6D Latent Trajectory",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "All active Level-B symbolic models and synthesized compositional terms must couple into the candidate 6D latent state filter",
+      "measuredValue": "coupledModels=8",
+      "evidenceSummary": "All active symbolic primitives and discovered compositional hypotheses couple into the candidate 6D latent state dynamics."
+    },
+    {
+      "testId": "AUDIT-16",
+      "category": "12. Promotion-Gate Fail-Closed Enforcement",
+      "title": "Fail-Closed Gate Blocking Under HALTED_DEGRADED and Insufficient Sample (<10 Bars)",
+      "status": "PASSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "overallStatus === HALTED_FROZEN AND writtenBack === false when HALTED_DEGRADED or N < 10",
+      "measuredValue": "overallStatus=HALTED_FROZEN, writtenBack=false",
+      "evidenceSummary": "8/8 promotion gate and write-back strictly fail closed under degraded/halted state or insufficient bars."
+    },
+    {
+      "testId": "AUDIT-17",
+      "category": "13. Controlled Write-Back Verification",
+      "title": "Controlled Before-and-After Write-Back Parameter & Yellow-Line Trajectory Verification",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "When eligible, write-back increments generation and mutates Yellow-Line trajectory; when ineligible, fails closed with zero mutation",
+      "measuredValue": "applied=true (8/8 gates), gen=36->37, ΔStep24=$-0.01",
+      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4061.51 to $4061.5 (Δ=$-0.01)."
+    },
+    {
+      "testId": "AUDIT-18",
+      "category": "16. Rollback & Versioned Governance",
+      "title": "Versioned Write-Back History & Deterministic Rollback Capability",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "Must maintain versioned snapshot stack of prior LatentModelMathWriteBackState states and support instant rollback",
+      "measuredValue": "historySnapshots=4",
+      "evidenceSummary": "Write-back state maintains versioned rollback history with one-step restoration."
+    }
+  ],
+  "forecastMetricsTable": {
+    "h=1": {
+      "sampleSizeN": 253,
+      "yellowRmseUsd": 6.1086,
+      "randomWalkRmseUsd": 4.8509,
+      "emaBaselineRmseUsd": 4.792,
+      "yellowMaeUsd": 3.9733,
+      "randomWalkMaeUsd": 3.3361,
+      "directionalHitRate": 0.4545,
+      "empirical90IntervalCoverage": 0.913,
+      "dieboldMarianoVsRwTStat": -2.143
+    },
+    "h=5": {
+      "sampleSizeN": 253,
+      "yellowRmseUsd": 11.5598,
+      "randomWalkRmseUsd": 8.571,
+      "emaBaselineRmseUsd": 8.517,
+      "yellowMaeUsd": 8.7458,
+      "randomWalkMaeUsd": 6.3169,
+      "directionalHitRate": 0.3755,
+      "empirical90IntervalCoverage": 0.9526,
+      "dieboldMarianoVsRwTStat": -6.69
+    },
+    "h=15": {
+      "sampleSizeN": 253,
+      "yellowRmseUsd": 21.3335,
+      "randomWalkRmseUsd": 13.2359,
+      "emaBaselineRmseUsd": 13.9937,
+      "yellowMaeUsd": 16.7813,
+      "randomWalkMaeUsd": 10.0054,
+      "directionalHitRate": 0.3715,
+      "empirical90IntervalCoverage": 0.9368,
+      "dieboldMarianoVsRwTStat": -10.023
+    }
+  },
+  "ablationTable": [
+    {
+      "id": "FULL_MODEL",
+      "label": "Full 6D Latent Filter (Baseline)",
+      "oosRmseUsd": 5,
+      "directionalHitRate": 0.4783,
+      "brierScore": 0.2497,
+      "rankIc": -0.0299,
+      "residualLag1Autocorr": -0.1744
+    },
+    {
+      "id": "ABLATE_MEAN_REVERSION",
+      "label": "No Equilibrium Mean Reversion (κ_rev = 0)",
+      "oosRmseUsd": 5.0158,
+      "directionalHitRate": 0.5017,
+      "brierScore": 0.2486,
+      "rankIc": -0.0015,
+      "residualLag1Autocorr": -0.1696
+    },
+    {
+      "id": "ABLATE_TOXICITY_COUPLING",
+      "label": "No Pulse-Echo Toxicity Coupling (β_tox = 0)",
+      "oosRmseUsd": 4.8964,
+      "directionalHitRate": 0.4849,
+      "brierScore": 0.2488,
+      "rankIc": -0.0095,
+      "residualLag1Autocorr": -0.1357
+    },
+    {
+      "id": "ABLATE_MACRO_COUPLING",
+      "label": "No Macro Force Coupling (η_macro = 0)",
+      "oosRmseUsd": 5.0031,
+      "directionalHitRate": 0.4682,
+      "brierScore": 0.2507,
+      "rankIc": -0.0317,
+      "residualLag1Autocorr": -0.1739
+    },
+    {
+      "id": "ABLATE_DRIFT_PERSISTENCE",
+      "label": "Low Drift Persistence (φ_drift = 0.20)",
+      "oosRmseUsd": 4.878,
+      "directionalHitRate": 0.5385,
+      "brierScore": 0.247,
+      "rankIc": 0.0828,
+      "residualLag1Autocorr": -0.1631
+    }
+  ],
+  "beforeAfterWriteBackDiff": {
+    "writeBackApplied": true,
+    "gatesPassedCount": 8,
+    "generationBefore": 36,
+    "generationAfter": 37,
+    "parametersBefore": {
+      "phi": 0.9252,
+      "kappa": 0.1692,
+      "beta": 0.437,
+      "gamma": 0.5344,
+      "eta": 0.25,
+      "precisionMult": 1.327
+    },
+    "parametersAfter": {
+      "phi": 0.9246,
+      "kappa": 0.169,
+      "beta": 0.437,
+      "gamma": 0.534,
+      "eta": 0.25,
+      "precisionMult": 1.327
+    },
+    "latentStateBefore": {
+      "logPriceLevel": 8.305272,
+      "localDrift": 0.000087,
+      "localVolatility": 0.00077,
+      "pressureToxicity": 0.1033,
+      "liquidityResilience": 0.6959,
+      "macroResidualForce": -0.000061
+    },
+    "latentStateAfter": {
+      "logPriceLevel": 8.305272,
+      "localDrift": 0.000085,
+      "localVolatility": 0.00077,
+      "pressureToxicity": 0.1033,
+      "liquidityResilience": 0.6959,
+      "macroResidualForce": -0.000061
+    },
+    "yellowLineStep1BeforeUsd": 4045.98,
+    "yellowLineStep1AfterUsd": 4045.98,
+    "yellowLineStep24BeforeUsd": 4061.51,
+    "yellowLineStep24AfterUsd": 4061.5,
+    "yellowLineStep24DeltaUsd": -0.01,
+    "oosRmseBeforeUsd": 5,
+    "oosRmseAfterUsd": 4.9992
+  }
+}

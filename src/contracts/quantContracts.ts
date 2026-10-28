@@ -961,6 +961,7 @@ export interface ScientificCoreTelemetry {
 export interface ParallelUniverseTelemetry {
   enabled: boolean;
   autoPromotionEnabled: boolean;
+  ReadyForPromotion?: boolean;
   snapshotId: string;
   instrumentIdentity: string;
   persistenceHealth: ArchitecturePersistenceHealth;
@@ -977,4 +978,20 @@ export interface ParallelUniverseTelemetry {
   lastPromotionBannerFa: string | null;
   scientificCore?: ScientificCoreTelemetry;
   latentMathWriteBack?: LatentModelMathWriteBackState;
+  strictOosSplitAudit?: {
+    isStrictlyDisjointOos: boolean;
+    causalFeatureEvaluation: boolean;
+    fitEndIdx: number;
+    weightEndIdx: number;
+    totalSteps: number;
+  };
+  scientificComponentCritiques?: any[];
+  compositionalDiscoveryLab?: any;
+  candidateStructuralCouplingAudit?: {
+    coupledSymbolicModelsCount: number;
+    coupledModelIds: string[];
+  };
+  canRollbackWriteBack?: boolean;
+  writeBackVersionHistory?: LatentModelMathWriteBackState[];
 }
+

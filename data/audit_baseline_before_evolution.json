@@ -1,0 +1,314 @@
+{
+  "timestampIso": "2026-10-28T17:08:01.557Z",
+  "mode": "BASELINE_BEFORE_CHANGES",
+  "sampleSizeCandles": 300,
+  "results": [
+    {
+      "testId": "AUDIT-01",
+      "category": "8. Time-Index & No-Lookahead",
+      "title": "Prefix-Invariance of Causal Information Clock Δτ_t (Truncated t≤t0 vs Full Sample)",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "max |Δτ_t(prefix 0..t0) - Δτ_t(full 0..N-1)| <= 1e-9 for t >= 15",
+      "measuredValue": "maxDiff = 8.7300e-2",
+      "evidenceSummary": "LOOKAHEAD DETECTED (Finding F-01): Δτ_t at historical bar t shifts by 0.0873 when future bars (t0+1..N-1) are appended due to full-sample dispersion/quantile normalization."
+    },
+    {
+      "testId": "AUDIT-02",
+      "category": "8. Time-Index & No-Lookahead",
+      "title": "Prefix-Invariance of Pulse–Echo Sonar Detection & Echo Updates",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "max |toxUpdate_t(prefix) - toxUpdate_t(full)| <= 1e-9 for completed echo windows t <= t0-4",
+      "measuredValue": "maxDiff = 7.5000e-1",
+      "evidenceSummary": "LOOKAHEAD DETECTED (Finding F-02): Historical pulse/echo updates shift by 0.7500 when future bars are added because adaptivePulseThresholdSigma uses full-sample quantiles."
+    },
+    {
+      "testId": "AUDIT-03",
+      "category": "8. Time-Index & No-Lookahead",
+      "title": "Prefix-Invariance of 6D Latent Filter 1-Step-Ahead Historical Predictions",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "max |P_hat_{t|t-1}(prefix) - P_hat_{t|t-1}(full)| <= $1e-6 for t in [20, t0-4]",
+      "measuredValue": "maxPredDiffUsd = $0.998647",
+      "evidenceSummary": "LOOKAHEAD DETECTED (Finding F-03): Historical 1-step predictions change by $0.9986 when future bars are present due to full-sample medVol, full-sample autocorrelations, and terminal refPrice."
+    },
+    {
+      "testId": "AUDIT-04",
+      "category": "2. Matrix & Covariance Invariants",
+      "title": "6x6 Latent State Covariance Symmetry and Positive Semidefiniteness (Joseph Form)",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "max |P_ij - P_ji| <= 1e-6 AND all Cholesky pivots > 0",
+      "measuredValue": "maxAsym=0.000e+0, minPivot=3.000e-8, minDiag=3.000e-8",
+      "evidenceSummary": "6x6 covariance matrix P is symmetric and positive definite."
+    },
+    {
+      "testId": "AUDIT-05",
+      "category": "1. Dimensional & Unit Consistency",
+      "title": "Dimensional Consistency of State Drift vs Diffusive Scaling in AdaptiveDPObserver",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "All observer states finite and dimensionally consistent ($/step)",
+      "measuredValue": "drift=1.1220, shrunkBias=-0.0260, historyLen=25",
+      "evidenceSummary": "AdaptiveDPObserver produced 25 finite trajectory points; f1=0.855, f2=undefined."
+    },
+    {
+      "testId": "AUDIT-06",
+      "category": "3. Analytic & Reference Cases",
+      "title": "Zero-Drift Equilibrium Fixed-Point Reference Case (P_t = $2900.00, Zero Macro Lift)",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "|E[P_{T+24}] - 2900.00| <= $1.00 under zero drift and equilibrium = spot",
+      "measuredValue": "E[P_{T+24}] = $2900.02, |diff| = $0.0200",
+      "evidenceSummary": "Under constant price and zero exogenous force, conditional expectation stays anchored at $2900.00."
+    },
+    {
+      "testId": "AUDIT-07",
+      "category": "4. Boundary & Extreme Inputs",
+      "title": "Extreme Volatility & 25x Volume Spike Stability and Plume Monotonicity",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "All states finite; lower05 <= lower25 <= median <= upper75 <= upper95 for all h=1..24",
+      "measuredValue": "impliedPrice=$4057.13, Δτ=undefined, finite=true",
+      "evidenceSummary": "Filter and 24-step quantile plume remain bounded and strictly monotonic under a $65 jump + 25x volume spike."
+    },
+    {
+      "testId": "AUDIT-08",
+      "category": "5. Missing, Stale & Duplicated Data",
+      "title": "Zero-Volume, Zero-Range, Duplicate Bar & Unavailable Macro Feed Resilience",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Zero NaN/Infinity when volume=0, high==low, duplicate bar, and MACRO_FEED_UNAVAILABLE",
+      "measuredValue": "finite=true, activeCameras=1",
+      "evidenceSummary": "Filter gracefully handles zero-volume/zero-range bars and missing macro feeds without division-by-zero."
+    },
+    {
+      "testId": "AUDIT-09",
+      "category": "6. Deterministic Replay",
+      "title": "Bitwise Deterministic Replay of Scientific Core Pipeline on Identical Inputs",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Exact JSON equality of latentState and yellowLineConditionalExpectation across runs",
+      "measuredValue": "identical=true",
+      "evidenceSummary": "Scientific Core is 100% deterministic with zero unseeded randomness."
+    },
+    {
+      "testId": "AUDIT-10",
+      "category": "8. Time-Index & No-Lookahead (Parallel Universe)",
+      "title": "Strict Disjoint Out-of-Sample Split (Fit vs Weight Selection vs Gate Evaluation) & Causal Features",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "Fit window, weight-selection window, and 8/8 gate evaluation window must be strictly disjoint AND historical bar k features must use causal prefix [0..k]",
+      "measuredValue": "Overlapping fit/weight/eval window & terminal-bar feature leakage (Findings F-09, F-10)",
+      "evidenceSummary": "LOOKAHEAD / IN-SAMPLE CONTAMINATION (Findings F-09 & F-10): Dynamic weights and 8/8 gates are evaluated on the same window where θ and weights were fit, and evaluateSymbolicPrimitiveFeature injects terminal bar N-1 equilibriumPrice/POC/ATR into historical bars k < N-1."
+    },
+    {
+      "testId": "AUDIT-11",
+      "category": "10. Matched-Sample Multi-Horizon Forecast Evaluation",
+      "title": "Walk-Forward Multi-Horizon (h=1, 5, 15 Bars) Evaluation vs Random Walk & EMA Baselines",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "Matched-sample walk-forward evaluation across N >= 30 origins with DM t-stat and 90% interval coverage",
+      "measuredValue": "h=1: RMSE_Y=$6.5998 vs RMSE_RW=$4.8509 (DM t=-2.04, Cov90=90.1%)",
+      "evidenceSummary": "Evaluated 253 strictly causal origins across h=1,5,15."
+    },
+    {
+      "testId": "AUDIT-12",
+      "category": "11. Component Ablation Study",
+      "title": "Leave-One-Out Component Ablation on 6D Latent State Filter",
+      "status": "PASSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "Quantify exact OOS RMSE, Hit Rate, Rank IC, and ρ_1 contribution of each 6D filter term",
+      "measuredValue": "FULL_MODEL: RMSE=$6.5535 | ABLATE_MEAN_REVERSION: RMSE=$6.5979 | ABLATE_TOXICITY_COUPLING: RMSE=$5.8016 | ABLATE_MACRO_COUPLING: RMSE=$6.5395 | ABLATE_DRIFT_PERSISTENCE: RMSE=$6.0482",
+      "evidenceSummary": "Completed 5-way component ablation across mean reversion, toxicity coupling, macro coupling, and drift persistence."
+    },
+    {
+      "testId": "AUDIT-13",
+      "category": "14. Awareness Core Critique & Ablation Capability",
+      "title": "Automated Component-Level Critique, Leave-One-Out Ablation & Action Verdicts (RETAIN/REVISE/REPLACE/DISABLE)",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Awareness Core must evaluate every active equation via empirical ablation and emit structured verdicts (RETAIN, REESTIMATE_PARAMETERS, REVISE_FUNCTIONAL_FORM, DISABLE_CONDITIONALLY, etc.)",
+      "measuredValue": "NOT IMPLEMENTED in baseline (only 4 hardcoded diagnostic alert templates exist)",
+      "evidenceSummary": "CAPABILITY GAP (Finding F-08a): Awareness Core only emits 4 static diagnostic templates and cannot critique or ablate active equations."
+    },
+    {
+      "testId": "AUDIT-14",
+      "category": "15. Creative Mathematical Discovery & Experiment Graveyard",
+      "title": "Residual-Driven Compositional Symbolic Hypothesis Generation, Complexity Penalty & Failed-Experiment Memory",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "Must generate falsifiable compositional hypotheses from operator grammar with unit checks, BIC complexity penalty, and persistent failed-experiment graveyard",
+      "measuredValue": "FIXED_CATALOG_ONLY (only re-shrinks 8 hardcoded primitives)",
+      "evidenceSummary": "CAPABILITY GAP (Finding F-08b): Synthesize Symbolic Step only re-runs ridge shrinkage on 8 hardcoded primitives and has no failed-experiment memory."
+    },
+    {
+      "testId": "AUDIT-15",
+      "category": "9. Yellow vs Magenta Structural Scope",
+      "title": "Full Candidate Symbolic Catalog Coupling into Candidate 6D Latent Trajectory",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "All active Level-B symbolic models and synthesized compositional terms must couple into the candidate 6D latent state filter",
+      "measuredValue": "Only 3 of 8 symbolic primitives coupled to 6D filter parameters (Finding F-08c)",
+      "evidenceSummary": "PARTIAL COUPLING (Finding F-08c): buildCandidateLatentTuningOverrides only mapped 3 of the 8 symbolic primitives into 6D filter parameters."
+    },
+    {
+      "testId": "AUDIT-16",
+      "category": "12. Promotion-Gate Fail-Closed Enforcement",
+      "title": "Fail-Closed Gate Blocking Under HALTED_DEGRADED and Insufficient Sample (<10 Bars)",
+      "status": "PASSED",
+      "severityIfFailed": "CRITICAL",
+      "toleranceOrCriterion": "overallStatus === HALTED_FROZEN AND writtenBack === false when HALTED_DEGRADED or N < 10",
+      "measuredValue": "overallStatus=HALTED_FROZEN, writtenBack=false",
+      "evidenceSummary": "8/8 promotion gate and write-back strictly fail closed under degraded/halted state or insufficient bars."
+    },
+    {
+      "testId": "AUDIT-17",
+      "category": "13. Controlled Write-Back Verification",
+      "title": "Controlled Before-and-After Write-Back Parameter & Yellow-Line Trajectory Verification",
+      "status": "PASSED",
+      "severityIfFailed": "HIGH",
+      "toleranceOrCriterion": "When eligible, write-back increments generation and mutates Yellow-Line trajectory; when ineligible, fails closed with zero mutation",
+      "measuredValue": "applied=true (7/8 gates), gen=32->33, ΔStep24=$-0.01",
+      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4062.98 to $4062.97 (Δ=$-0.01)."
+    },
+    {
+      "testId": "AUDIT-18",
+      "category": "16. Rollback & Versioned Governance",
+      "title": "Versioned Write-Back History & Deterministic Rollback Capability",
+      "status": "FAILED_DEFECT_EXPOSED",
+      "severityIfFailed": "MEDIUM",
+      "toleranceOrCriterion": "Must maintain versioned snapshot stack of prior LatentModelMathWriteBackState states and support instant rollback",
+      "measuredValue": "NO_ROLLBACK_STACK in baseline",
+      "evidenceSummary": "CAPABILITY GAP (Finding F-11): Persisted write-back state overwrites the state without maintaining a versioned rollback stack."
+    }
+  ],
+  "forecastMetricsTable": {
+    "h=1": {
+      "sampleSizeN": 253,
+      "yellowRmseUsd": 6.5998,
+      "randomWalkRmseUsd": 4.8509,
+      "emaBaselineRmseUsd": 4.792,
+      "yellowMaeUsd": 4.0561,
+      "randomWalkMaeUsd": 3.3361,
+      "directionalHitRate": 0.4783,
+      "empirical90IntervalCoverage": 0.9012,
+      "dieboldMarianoVsRwTStat": -2.04
+    },
+    "h=5": {
+      "sampleSizeN": 253,
+      "yellowRmseUsd": 11.2699,
+      "randomWalkRmseUsd": 8.571,
+      "emaBaselineRmseUsd": 8.517,
+      "yellowMaeUsd": 8.4489,
+      "randomWalkMaeUsd": 6.3169,
+      "directionalHitRate": 0.4071,
+      "empirical90IntervalCoverage": 0.9328,
+      "dieboldMarianoVsRwTStat": -5.992
+    },
+    "h=15": {
+      "sampleSizeN": 253,
+      "yellowRmseUsd": 20.5167,
+      "randomWalkRmseUsd": 13.2359,
+      "emaBaselineRmseUsd": 13.9937,
+      "yellowMaeUsd": 16.2016,
+      "randomWalkMaeUsd": 10.0054,
+      "directionalHitRate": 0.3083,
+      "empirical90IntervalCoverage": 0.9644,
+      "dieboldMarianoVsRwTStat": -9.821
+    }
+  },
+  "ablationTable": [
+    {
+      "id": "FULL_MODEL",
+      "label": "Full 6D Latent Filter (Baseline)",
+      "oosRmseUsd": 6.5535,
+      "directionalHitRate": 0.4448,
+      "brierScore": 0.2728,
+      "rankIc": -0.1131,
+      "residualLag1Autocorr": -0.4437
+    },
+    {
+      "id": "ABLATE_MEAN_REVERSION",
+      "label": "No Equilibrium Mean Reversion (κ_rev = 0)",
+      "oosRmseUsd": 6.5979,
+      "directionalHitRate": 0.4482,
+      "brierScore": 0.2721,
+      "rankIc": -0.1028,
+      "residualLag1Autocorr": -0.428
+    },
+    {
+      "id": "ABLATE_TOXICITY_COUPLING",
+      "label": "No Pulse-Echo Toxicity Coupling (β_tox = 0)",
+      "oosRmseUsd": 5.8016,
+      "directionalHitRate": 0.4582,
+      "brierScore": 0.266,
+      "rankIc": -0.1053,
+      "residualLag1Autocorr": -0.3741
+    },
+    {
+      "id": "ABLATE_MACRO_COUPLING",
+      "label": "No Macro Force Coupling (η_macro = 0)",
+      "oosRmseUsd": 6.5395,
+      "directionalHitRate": 0.4448,
+      "brierScore": 0.2738,
+      "rankIc": -0.113,
+      "residualLag1Autocorr": -0.4455
+    },
+    {
+      "id": "ABLATE_DRIFT_PERSISTENCE",
+      "label": "Low Drift Persistence (φ_drift = 0.20)",
+      "oosRmseUsd": 6.0482,
+      "directionalHitRate": 0.4916,
+      "brierScore": 0.263,
+      "rankIc": -0.097,
+      "residualLag1Autocorr": -0.4252
+    }
+  ],
+  "beforeAfterWriteBackDiff": {
+    "writeBackApplied": true,
+    "gatesPassedCount": 7,
+    "generationBefore": 32,
+    "generationAfter": 33,
+    "parametersBefore": {
+      "phi": 0.95,
+      "kappa": 0.167,
+      "beta": 0.476,
+      "gamma": 0.56,
+      "eta": 0.2667,
+      "precisionMult": 1.28
+    },
+    "parametersAfter": {
+      "phi": 0.95,
+      "kappa": 0.167,
+      "beta": 0.476,
+      "gamma": 0.56,
+      "eta": 0.271,
+      "precisionMult": 1.28
+    },
+    "latentStateBefore": {
+      "logPriceLevel": 8.305264,
+      "localDrift": 0.000242,
+      "localVolatility": 0.000737,
+      "pressureToxicity": 0.1687,
+      "liquidityResilience": 0.6532,
+      "macroResidualForce": -0.000084
+    },
+    "latentStateAfter": {
+      "logPriceLevel": 8.305264,
+      "localDrift": 0.000242,
+      "localVolatility": 0.000737,
+      "pressureToxicity": 0.1687,
+      "liquidityResilience": 0.6532,
+      "macroResidualForce": -0.000085
+    },
+    "yellowLineStep1BeforeUsd": 4046.3,
+    "yellowLineStep1AfterUsd": 4046.3,
+    "yellowLineStep24BeforeUsd": 4062.98,
+    "yellowLineStep24AfterUsd": 4062.97,
+    "yellowLineStep24DeltaUsd": -0.01,
+    "oosRmseBeforeUsd": 6.5535,
+    "oosRmseAfterUsd": 6.5538
+  }
+}

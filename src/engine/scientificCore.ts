@@ -215,32 +215,43 @@ export function computeCausalInformationClock(params: {
     crossActivitySeries.push(crossAct);
   }
 
-  const dispV = Math.max(0.05, mad(volRatioSeries) / Math.max(0.1, median(volRatioSeries)));
-  const dispR = Math.max(0.05, mad(rangeRatioSeries) / Math.max(0.1, median(rangeRatioSeries)));
-  const dispC = Math.max(0.05, mad(crossActivitySeries) / Math.max(0.1, median(crossActivitySeries)));
-
-  const pV = 1 / dispV;
-  const pR = 1 / dispR;
-  const pC = 1 / dispC;
-  const pSum = pV + pR + pC;
-
-  const wV = parseFloat((pV / pSum).toFixed(4));
-  const wR = parseFloat((pR / pSum).toFixed(4));
-  const wC = parseFloat(Math.max(0.01, 1 - wV - wR).toFixed(4));
-
-  const rawCompositeSeries = volRatioSeries.map(
-    (_, i) => wV * volRatioSeries[i] + wR * rangeRatioSeries[i] + wC * crossActivitySeries[i]
-  );
-
-  const tauMinEmpirical = parseFloat(Math.max(0.12, Math.min(0.45, quantile(rawCompositeSeries, 0.05))).toFixed(4));
-  const tauMaxEmpirical = parseFloat(Math.max(1.8, Math.min(4.2, quantile(rawCompositeSeries, 0.95) * 1.15)).toFixed(4));
-
   const deltaTauSeries: number[] = [];
   const cumulativeTauSeries: number[] = [];
   let cumTau = 0;
 
+  let wV = 0.34;
+  let wR = 0.33;
+  let wC = 0.33;
+  let tauMinEmpirical = 0.25;
+  let tauMaxEmpirical = 2.8;
+
   for (let i = 0; i < n; i++) {
-    const dt = parseFloat(Math.max(tauMinEmpirical, Math.min(tauMaxEmpirical, rawCompositeSeries[i])).toFixed(4));
+    const cStart = Math.max(0, i - 48);
+    const vSub = volRatioSeries.slice(cStart, i + 1);
+    const rSub = rangeRatioSeries.slice(cStart, i + 1);
+    const xSub = crossActivitySeries.slice(cStart, i + 1);
+
+    if (vSub.length >= 6) {
+      const dispV = Math.max(0.05, mad(vSub) / Math.max(0.1, median(vSub)));
+      const dispR = Math.max(0.05, mad(rSub) / Math.max(0.1, median(rSub)));
+      const dispC = Math.max(0.05, mad(xSub) / Math.max(0.1, median(xSub)));
+
+      const pV = 1 / dispV;
+      const pR = 1 / dispR;
+      const pC = 1 / dispC;
+      const pSum = pV + pR + pC;
+
+      wV = parseFloat((pV / pSum).toFixed(4));
+      wR = parseFloat((pR / pSum).toFixed(4));
+      wC = parseFloat(Math.max(0.01, 1 - wV - wR).toFixed(4));
+
+      const rawSub = vSub.map((_, idx) => wV * vSub[idx] + wR * rSub[idx] + wC * xSub[idx]);
+      tauMinEmpirical = parseFloat(Math.max(0.12, Math.min(0.45, quantile(rawSub, 0.05))).toFixed(4));
+      tauMaxEmpirical = parseFloat(Math.max(1.8, Math.min(4.2, quantile(rawSub, 0.95) * 1.15)).toFixed(4));
+    }
+
+    const rawCur = wV * volRatioSeries[i] + wR * rangeRatioSeries[i] + wC * crossActivitySeries[i];
+    const dt = parseFloat(Math.max(tauMinEmpirical, Math.min(tauMaxEmpirical, rawCur)).toFixed(4));
     deltaTauSeries.push(dt);
     cumTau = parseFloat((cumTau + dt).toFixed(4));
     cumulativeTauSeries.push(cumTau);
@@ -285,7 +296,7 @@ export function computeCausalInformationClock(params: {
 /**
  * 2. Pulse–Echo (Sonar) Sensing Layer
  * Detects measurable real-data impulses (pulses) and measures the subsequent market response (echoes)
- * on the causal information clock τ.
+ * on the causal information clock τ. Strictly prefix-invariant (zero lookahead).
  */
 export function runPulseEchoSonarLayer(params: {
   candles: Candle[];
@@ -347,16 +358,18 @@ export function runPulseEchoSonarLayer(params: {
     };
   }
 
-  const medTau = median(deltaTauSeries);
-  const madTau = Math.max(0.08, mad(deltaTauSeries, medTau));
-  const p85TauZ = (quantile(deltaTauSeries, 0.85) - medTau) / madTau;
-  const adaptivePulseThresholdSigma = parseFloat(Math.max(1.15, Math.min(2.4, p85TauZ)).toFixed(3));
-
+  let adaptivePulseThresholdSigma = 1.5;
   const detectedPulses: DetectedPulseEvent[] = [];
   const measuredEchoes: MeasuredPulseEcho[] = [];
 
   for (let i = 4; i < n; i++) {
     const c = candles[i];
+    const causalTauSlice = deltaTauSeries.slice(Math.max(0, i - 48), i + 1);
+    const medTau = median(causalTauSlice);
+    const madTau = Math.max(0.08, mad(causalTauSlice, medTau));
+    const p85TauZ = (quantile(causalTauSlice, 0.85) - medTau) / madTau;
+    adaptivePulseThresholdSigma = parseFloat(Math.max(1.15, Math.min(2.4, p85TauZ)).toFixed(3));
+
     const winSlice = candles.slice(Math.max(0, i - 20), i);
     const winRanges = winSlice.map(b => Math.max(0.05, b.high - b.low));
     const medRange = Math.max(0.1, median(winRanges));
@@ -646,15 +659,28 @@ function applySequentialMeasurementUpdate6D(params: {
     X[i] += K[i] * boundedInnov;
   }
 
+  // Joseph stabilized covariance update: P^+ = (I - K H) P^- (I - K H)^T + K R K^T
+  const IminusKH: number[][] = Array.from({ length: 6 }, (_, i) =>
+    Array.from({ length: 6 }, (__, m) => (i === m ? 1 : 0) - K[i] * H[m])
+  );
+  const tempP: number[][] = Array.from({ length: 6 }, () => new Array<number>(6).fill(0));
+  for (let i = 0; i < 6; i++) {
+    for (let j = 0; j < 6; j++) {
+      let s = 0;
+      for (let m = 0; m < 6; m++) {
+        s += IminusKH[i][m] * P[m][j];
+      }
+      tempP[i][j] = s;
+    }
+  }
   const nextP: number[][] = Array.from({ length: 6 }, () => new Array<number>(6).fill(0));
   for (let i = 0; i < 6; i++) {
     for (let j = 0; j < 6; j++) {
-      let khP = 0;
+      let s = 0;
       for (let m = 0; m < 6; m++) {
-        const ikh = (i === m ? 1 : 0) - K[i] * H[m];
-        khP += ikh * P[m][j];
+        s += tempP[i][m] * IminusKH[j][m];
       }
-      nextP[i][j] = khP;
+      nextP[i][j] = s + K[i] * safeR * K[j];
     }
   }
   for (let i = 0; i < 6; i++) {
@@ -674,6 +700,7 @@ function applySequentialMeasurementUpdate6D(params: {
 /**
  * 3. Structured 6D Bayesian / Extended Kalman Filter on the Information Clock τ
  *    + Multi-Venue Observation Equations + Conditional Expectation Trajectory Propagation
+ *    Strictly causal (prefix-invariant): at bar t, all statistics use only bars [0..t].
  */
 export function evaluateLatentStateFilterOnInformationClock(params: {
   candles: Candle[];
@@ -737,7 +764,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   } = params;
 
   const n = candles.length;
-  const logReturns: number[] = [];
+  const logReturns: number[] = [0];
   const parkinsonVols: number[] = [];
   const barSignedImbalances: number[] = [];
 
@@ -755,18 +782,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     barSignedImbalances.push(signedBody);
   }
 
-  const medVol = Math.max(0.0005, median(parkinsonVols));
-  const retAutocorr1 = Math.abs(pearsonCorrelation(logReturns.slice(0, -1), logReturns.slice(1)));
-  const volAutocorr1 = Math.abs(pearsonCorrelation(parkinsonVols.slice(0, -1), parkinsonVols.slice(1)));
-  const imbAutocorr1 = Math.abs(pearsonCorrelation(barSignedImbalances.slice(0, -1), barSignedImbalances.slice(1)));
-
-  const phiDrift =
-    tuningOverrides?.driftPersistencePhi ??
-    Math.max(0.55, Math.min(0.92, 0.65 + 0.25 * retAutocorr1));
-  const kappaDrift = Math.max(0.05, Math.min(0.65, -Math.log(Math.max(0.2, Math.min(0.95, phiDrift)))));
   const kappaMeanRev = tuningOverrides?.meanReversionKappa ?? 0.12;
-  const kappaVol = Math.max(0.06, Math.min(0.45, -Math.log(Math.max(0.25, Math.min(0.92, volAutocorr1 + 0.45)))));
-  const kappaTox = Math.max(0.12, Math.min(0.6, -Math.log(Math.max(0.15, Math.min(0.85, imbAutocorr1 + 0.3)))));
   const kappaRes = 0.18;
   const kappaMacro = 0.08;
 
@@ -775,22 +791,23 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   const etaMacro = tuningOverrides?.macroResidualCouplingEta ?? 0.25;
   const obsPrecMult = Math.max(0.5, Math.min(2.5, tuningOverrides?.crossVenueObservationPrecisionMult ?? 1.0));
 
-  const refPrice = Math.max(100, candles[n - 1].close);
-  const macroLogForce =
+  const initRefPrice = Math.max(100, candles[0].close);
+  const initMacroLogForce =
     liveMacro.status === 'MACRO_FEED_UNAVAILABLE'
       ? 0
-      : (liveMacro.netMacroLift / refPrice) * etaMacro;
+      : (liveMacro.netMacroLift / initRefPrice) * etaMacro;
+  const initMedVol = Math.max(0.0005, parkinsonVols[0] || 0.0015);
 
   const X = [
-    Math.log(Math.max(100, candles[0].close)), // x1: logPriceLevel
+    Math.log(initRefPrice), // x1: logPriceLevel
     0.0, // x2: localDrift
-    parkinsonVols[0] || medVol, // x3: localVolatility
+    initMedVol, // x3: localVolatility
     barSignedImbalances[0] * 0.25, // x4: pressureToxicity
     0.72, // x5: liquidityResilience in [0.05, 0.99]
-    macroLogForce, // x6: macroResidualForce
+    initMacroLogForce, // x6: macroResidualForce
   ];
 
-  const initVarLogP = medVol * medVol;
+  const initVarLogP = initMedVol * initMedVol;
   const P: number[][] = [
     [initVarLogP, 0, 0, 0, 0, 0],
     [0, initVarLogP * 0.25, 0, 0, 0, 0],
@@ -809,10 +826,49 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   let venueObservations: VenueObservationEquationRecord[] = [];
   let prevLogResidual = 0;
 
+  let causalMedVol = initMedVol;
+  let kappaDrift = 0.24;
+  let kappaVol = 0.22;
+  let kappaTox = 0.35;
+
   for (let t = 0; t < n; t++) {
     const c = candles[t];
     const dt = deltaTauSeries[t] || 1.0;
     const cumTau = cumulativeTauSeries[t] || t + 1;
+
+    // Strictly causal prefix statistics up to bar max(0, t-1) for prediction at bar t
+    const statEnd = Math.max(1, t);
+    const statStart = Math.max(0, statEnd - 48);
+    const causalVolSlice = parkinsonVols.slice(statStart, statEnd);
+    causalMedVol = Math.max(0.0005, median(causalVolSlice));
+
+    const causalRetSlice = logReturns.slice(Math.max(1, statStart), statEnd);
+    const causalImbSlice = barSignedImbalances.slice(statStart, statEnd);
+    const retAutocorr1 =
+      causalRetSlice.length >= 6
+        ? Math.abs(pearsonCorrelation(causalRetSlice.slice(0, -1), causalRetSlice.slice(1)))
+        : 0.1;
+    const volAutocorr1 =
+      causalVolSlice.length >= 6
+        ? Math.abs(pearsonCorrelation(causalVolSlice.slice(0, -1), causalVolSlice.slice(1)))
+        : 0.2;
+    const imbAutocorr1 =
+      causalImbSlice.length >= 6
+        ? Math.abs(pearsonCorrelation(causalImbSlice.slice(0, -1), causalImbSlice.slice(1)))
+        : 0.15;
+
+    const phiDrift =
+      tuningOverrides?.driftPersistencePhi ??
+      Math.max(0.55, Math.min(0.92, 0.65 + 0.25 * retAutocorr1));
+    kappaDrift = Math.max(0.05, Math.min(0.65, -Math.log(Math.max(0.2, Math.min(0.95, phiDrift)))));
+    kappaVol = Math.max(0.06, Math.min(0.45, -Math.log(Math.max(0.25, Math.min(0.92, volAutocorr1 + 0.45)))));
+    kappaTox = Math.max(0.12, Math.min(0.6, -Math.log(Math.max(0.15, Math.min(0.85, imbAutocorr1 + 0.3)))));
+
+    const causalRefPrice = Math.max(100, candles[Math.max(0, t - 1)].close);
+    const causalMacroLogForce =
+      liveMacro.status === 'MACRO_FEED_UNAVAILABLE'
+        ? 0
+        : (liveMacro.netMacroLift / causalRefPrice) * etaMacro;
 
     const eqStart = Math.max(0, t - 24);
     let eqSum = 0;
@@ -833,19 +889,28 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
 
       const safeRes = Math.max(0.15, X[4]);
       const toxRatio = X[3] / safeRes;
+      // Innovation-shrunk 1-step drift prevents high-frequency bar noise over-extrapolation
+      const driftShrinkage = 0.28;
       const effectiveStepLogDrift =
-        (X[1] + betaTox * toxRatio * X[2] + X[5] + 0.14 * prevLogResidual) * dt;
+        driftShrinkage * (X[1] + betaTox * toxRatio * X[2] + X[5] + 0.14 * prevLogResidual) * dt;
 
       const nextX0 = X[0] + effectiveStepLogDrift;
       const eqRestoringDrift = kappaMeanRev * (causalLogEq - X[0]);
       const nextX1 = eDrift * X[1] + (1 - eDrift) * (eqRestoringDrift + X[5]);
-      const nextX2 = Math.max(0.0002, Math.min(0.035, eVol * X[2] + (1 - eVol) * medVol));
+      const nextX2 = Math.max(0.0002, Math.min(0.035, eVol * X[2] + (1 - eVol) * causalMedVol));
       const nextX3 = Math.max(-1.0, Math.min(1.0, eTox * X[3]));
       const nextX4 = Math.max(0.05, Math.min(0.99, eRes * X[4] + (1 - eRes) * 0.72));
-      const nextX5 = eMac * X[5] + (1 - eMac) * macroLogForce;
+      const nextX5 = eMac * X[5] + (1 - eMac) * causalMacroLogForce;
 
       const F: number[][] = [
-        [1, dt, betaTox * toxRatio * dt, (betaTox * X[2] * dt) / safeRes, (-betaTox * X[3] * X[2] * dt) / (safeRes * safeRes), dt],
+        [
+          1,
+          driftShrinkage * dt,
+          driftShrinkage * betaTox * toxRatio * dt,
+          (driftShrinkage * betaTox * X[2] * dt) / safeRes,
+          (-driftShrinkage * betaTox * X[3] * X[2] * dt) / (safeRes * safeRes),
+          driftShrinkage * dt,
+        ],
         [-(1 - eDrift) * kappaMeanRev, eDrift, 0, 0, 0, 1 - eDrift],
         [0, 0, eVol, 0, 0, 0],
         [0, 0, 0, eTox, 0, 0],
@@ -922,7 +987,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     const obsLogP = Math.log(Math.max(100, c.close));
     const microNoiseVarPrimary = Math.max(
       1e-8,
-      (parkinsonVols[t] * parkinsonVols[t] * 0.35) / (Math.max(0.25, dt) * obsPrecMult)
+      (parkinsonVols[t] * parkinsonVols[t] * 0.14) / (Math.max(0.25, dt) * obsPrecMult)
     );
 
     // Camera 1: Primary Spot Venue
@@ -954,14 +1019,12 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       });
     }
 
-    // Additional Verified Multi-Venue Cameras in Waterfall
+    // Additional Verified Multi-Venue Cameras in Waterfall (strictly causal bar lookup at bar t)
     if (verifiedVenueCameras && verifiedVenueCameras.length > 0) {
       for (let camIdx = 0; camIdx < verifiedVenueCameras.length; camIdx++) {
         const cam = verifiedVenueCameras[camIdx];
         if (cam.providerName === activeProvider && cam.symbol === activeSymbol) continue;
-        const alignedBar =
-          cam.candles.find(b => Math.abs(b.time - c.time) <= intervalStepSeconds * 2) ||
-          (t === n - 1 ? cam.candles[cam.candles.length - 1] : null);
+        const alignedBar = cam.candles.find(b => Math.abs(b.time - c.time) <= intervalStepSeconds * 2);
         if (!alignedBar || alignedBar.close <= 100) continue;
 
         const isFuturesCamera = cam.instrumentIdentity === 'COMEX_GOLD_FUTURES' || cam.symbol === 'GC=F';
@@ -1007,9 +1070,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
         }
       }
     } else if (secondaryBenchmark && secondaryBenchmark.candles.length > 0) {
-      const bBar =
-        secondaryBenchmark.candles.find(b => Math.abs(b.time - c.time) <= intervalStepSeconds * 2) ||
-        (t === n - 1 ? secondaryBenchmark.candles[secondaryBenchmark.candles.length - 1] : null);
+      const bBar = secondaryBenchmark.candles.find(b => Math.abs(b.time - c.time) <= intervalStepSeconds * 2);
       if (bBar && bBar.close > 100) {
         const bLogP = Math.log(bBar.close);
         const basisUsd = -cointegrationBasisMeanUsd;
@@ -1054,7 +1115,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       H: [0, 0, 1, 0, 0, 0],
       observedY: parkinsonVols[t],
       basisOffset: 0,
-      R: Math.max(1e-8, medVol * medVol * 0.25),
+      R: Math.max(1e-8, causalMedVol * causalMedVol * 0.25),
     });
     X[2] = Math.max(0.0002, Math.min(0.035, X[2]));
 
@@ -1102,9 +1163,9 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
         X,
         P,
         H: [0, 0.22, 0, 0, 0, 1],
-        observedY: macroLogForce,
+        observedY: causalMacroLogForce,
         basisOffset: 0,
-        R: Math.max(1e-8, medVol * medVol * 0.3),
+        R: Math.max(1e-8, causalMedVol * causalMedVol * 0.3),
       });
     }
 
@@ -1119,6 +1180,8 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       latentPriceUsd: parseFloat(Math.exp(X[0]).toFixed(2)),
     });
   }
+
+  const medVol = causalMedVol;
 
   // Normalize camera observation weights for display clarity while preserving positive values
   const wSum = venueObservations.reduce((a, b) => a + b.kalmanObservationWeight, 0);

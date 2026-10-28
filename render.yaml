@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: gdf-quant-terminal
+    name: gold-quant-api
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: npm start
     # Optional Render Persistent Disk: mount a disk at /var/data and set GDF_PERSISTENT_DATA_DIR=/var/data
     # so liveArchitecture, candidateArchitecture, generationCounter, and auditTrail survive container redeploys.
