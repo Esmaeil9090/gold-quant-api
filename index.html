@@ -17,12 +17,14 @@
 <meta name="description" content="GDF (Gold Dynamic Flow) — Institutional quantitative-finance and market-analysis platform with Adaptive Market-State Estimation (Scalar-Gain Kalman Observer), GARCH(1,1) Conditional Volatility, Volume-Synchronized Information Clock, and Out-of-Sample Residual Analysis.">
 <meta property="og:title" content="GDF — Gold Dynamic Flow · Quantitative Market-State &amp; Forecasting Platform">
 <meta property="og:description" content="GDF (Gold Dynamic Flow) — Bilingual (EN/FA) quantitative market-state estimation, GARCH(1,1) volatility regimes, OHLCV order-flow imbalance proxies, and walk-forward forecast verification.">
+<meta name="gdf-client-version" content="2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar">
+<meta name="gdf-client-build-id" content="gdf-client-20261027-v80.0">
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 <script src="/vendor-three.min.js?v=69.0"></script>
-<script src="/js/gdfClientCore.js?v=71.0"></script>
+<script src="/js/gdfClientCore.js?v=80.0"></script>
 <style>
 :root {
   --bg: #06090f;
@@ -4926,11 +4928,11 @@ input:checked + .toggle-slider:before {
       <div class="setting-row" style="border-top: 1px solid rgba(40, 60, 95, 0.4); padding-top: 14px; margin-top: 6px;">
         <div class="setting-info">
           <span class="setting-label" style="color: #f5d76e;">⚡ <span data-i18n="setUpdateTitle">Self-Updating Engine</span></span>
-          <span class="setting-sub" id="pwaVersionLabel">Build: 2026.10.24-v74.0 · Auto-sync active</span>
+          <span class="setting-sub" id="pwaVersionLabel">Client: 2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar · Status: CHECKING</span>
         </div>
         <button class="deck-btn deck-btn-gold" id="btnManualUpdateCheck" style="padding: 6px 12px; font-size: 11px;">
           <span>🔄</span>
-          <span id="txtUpdateBtn">Check Updates</span>
+          <span id="txtUpdateBtn" data-i18n="btnCheckForUpdates">Check for Updates</span>
         </button>
       </div>
     </div>
@@ -5033,7 +5035,7 @@ input:checked + .toggle-slider:before {
         </div>
         <div style="background: rgba(12, 20, 36, 0.9); border: 1px solid rgba(245, 215, 110, 0.35); border-radius: 10px; padding: 10px 12px;">
           <div style="font-size: 9px; color: #7d8ba1; text-transform: uppercase; font-weight: 800;">Build &amp; App Version</div>
-          <div style="font-size: 11.5px; font-weight: 800; color: var(--gold); font-family: monospace; margin-top: 3px;" id="bugRepVersion">2026.10.24-v75.0</div>
+          <div style="font-size: 11.5px; font-weight: 800; color: var(--gold); font-family: monospace; margin-top: 3px;" id="bugRepVersion">2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar</div>
           <div style="font-size: 10px; color: #9cb0cc; margin-top: 2px; font-family: monospace;" id="bugRepActiveVenue">Active Provider: —</div>
         </div>
       </div>
@@ -5049,7 +5051,7 @@ input:checked + .toggle-slider:before {
 </div>
 
 <!-- =========================================================================
-     Persistent Application Update & Distribution Hub Modal
+     Persistent In-Place HTML Client Self-Update Modal
      ========================================================================= -->
 <div class="modal-overlay hidden" id="appUpdateModalOverlay" role="dialog" aria-modal="true" aria-labelledby="appUpdateModalTitle" style="z-index: 200000; background: rgba(3, 6, 12, 0.94); backdrop-filter: blur(12px);">
   <div class="modal-box app-update-modal-box" style="max-width: 660px; border-color: rgba(0, 229, 255, 0.45); box-shadow: 0 0 60px rgba(0, 229, 255, 0.22); border-radius: 16px;">
@@ -5057,11 +5059,11 @@ input:checked + .toggle-slider:before {
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 22px;">🔄</span>
         <div>
-          <div class="modal-title" id="appUpdateModalTitle" style="color: var(--cyan); letter-spacing: 1.2px; font-size: 13.5px;">
-            Application Release &amp; Source Distribution Hub
+          <div class="modal-title" id="appUpdateModalTitle" data-i18n="updateModalTitle" style="color: var(--cyan); letter-spacing: 1.2px; font-size: 13.5px;">
+            HTML Client Release &amp; Self-Update Engine
           </div>
-          <div style="font-size: 10.5px; color: var(--muted); font-family: monospace;" id="appUpdateModalSubtitle">
-            GDF Quantitative State-Space Architecture Distribution
+          <div style="font-size: 10.5px; color: var(--muted); font-family: monospace;" id="appUpdateModalSubtitle" data-i18n="updateModalSub">
+            In-Place Browser Client Verification &amp; Atomic Cache Activation
           </div>
         </div>
       </div>
@@ -5073,75 +5075,68 @@ input:checked + .toggle-slider:before {
       <!-- Version & Status Comparison Strip -->
       <div class="update-version-strip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: rgba(5, 10, 18, 0.85); padding: 12px; border-radius: 10px; border: 1px solid rgba(40, 60, 95, 0.7);">
         <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
-          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblClientVer">Installed Client Build</span>
-          <span id="updateClientVersionLabel" style="font-family: monospace; font-size: 11px; font-weight: 700; color: #cbd5e1; word-break: break-all;">2026.10.25-v75.1-ResponsiveArchitectureAndReleaseEngine</span>
+          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblClientVer" data-i18n="lblClientVer">Installed Client Release</span>
+          <span id="updateClientVersionLabel" style="font-family: monospace; font-size: 11px; font-weight: 700; color: #cbd5e1; word-break: break-all; direction: ltr; unicode-bidi: isolate;">2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar</span>
+          <span id="updateClientBuildIdLabel" style="font-family: monospace; font-size: 9.5px; color: #7d8ba1; direction: ltr; unicode-bidi: isolate;">Build: gdf-client-20261027-v80.0</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
-          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblServerVer">Server Release Build</span>
-          <span id="updateServerVersionLabel" style="font-family: monospace; font-size: 11px; font-weight: 700; color: var(--gold); word-break: break-all;">Checking server...</span>
+          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblServerVer" data-i18n="lblServerVer">Published Client Manifest</span>
+          <span id="updateServerVersionLabel" style="font-family: monospace; font-size: 11px; font-weight: 700; color: var(--gold); word-break: break-all; direction: ltr; unicode-bidi: isolate;">UNKNOWN</span>
+          <span id="updateServerRuntimeSubLabel" style="font-family: monospace; font-size: 9.5px; color: #7d8ba1; direction: ltr; unicode-bidi: isolate;">Server Runtime: UNKNOWN · Integrity: UNVERIFIED</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 3px; justify-content: center; min-width: 0;">
-          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblReleaseStatus">Release Status</span>
+          <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);" id="lblReleaseStatus" data-i18n="lblReleaseStatus">Update Status</span>
           <div>
-            <span id="updateStatusBadge" style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 10.5px; font-weight: 800; background: rgba(0, 229, 255, 0.15); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.4);">
+            <span id="updateStatusBadge" data-update-state="CHECKING" style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-family: monospace; font-size: 10.5px; font-weight: 800; background: rgba(255, 179, 0, 0.15); color: #ffb300; border: 1px solid rgba(255, 179, 0, 0.4);">
               CHECKING...
             </span>
           </div>
         </div>
       </div>
 
-      <!-- Live Download / Status Notification Box -->
-      <div id="updateDownloadStatusBox" class="hidden" style="padding: 10px 14px; border-radius: 8px; font-size: 11px; line-height: 1.5; font-family: monospace; border: 1px solid rgba(0, 230, 118, 0.5); background: rgba(0, 230, 118, 0.1); color: #00e676;">
-        <span id="updateDownloadStatusMsg">Download initiated. Your browser is downloading the archive.</span>
+      <!-- Live In-Place Update Progress / Integrity Verification Box -->
+      <div id="updateDownloadStatusBox" class="hidden" style="padding: 10px 14px; border-radius: 8px; font-size: 11px; line-height: 1.5; font-family: monospace; border: 1px solid rgba(0, 229, 255, 0.5); background: rgba(0, 229, 255, 0.1); color: #00e5ff;">
+        <span id="updateDownloadStatusMsg">Checking client release manifest...</span>
       </div>
 
-      <!-- Release Notes Card -->
+      <!-- Release Notes & Integrity Manifest Card -->
       <div class="update-notes-card" style="background: rgba(8, 14, 26, 0.85); border: 1px solid rgba(40, 60, 95, 0.65); border-radius: 10px; padding: 12px 14px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-          <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--cyan);" id="lblReleaseNotes">
-            📋 Release Notes &amp; Engineering Manifest
+          <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--cyan);" id="lblReleaseNotes" data-i18n="lblReleaseNotes">
+            📋 Release Notes &amp; Integrity Manifest
           </span>
-          <span id="updateReleaseDateTag" style="font-family: monospace; font-size: 9.5px; color: var(--muted); background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">
-            2026-10-25
+          <span id="updateReleaseDateTag" style="font-family: monospace; font-size: 9.5px; color: var(--muted); background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; direction: ltr; unicode-bidi: isolate;">
+            2026-10-27
           </span>
         </div>
         <ul id="updateReleaseNotesList" style="margin: 0; padding-left: 18px; font-size: 11px; line-height: 1.6; color: #d1dced;">
-          <li>Full Mobile Responsiveness Overhaul across 320px–430px smartphone viewports.</li>
-          <li>Zero-Horizontal-Overflow architecture for multi-timeframe tables, DP cards, and Kalman telemetry.</li>
-          <li>Streaming ZIP Source &amp; Release Bundle downloads without external dependencies.</li>
-          <li>Persistent, manually closable Update Dialog with state machine and Esc/backdrop dismiss.</li>
-          <li>Client API Transport fault isolation — background checks never interrupt live market forecasting.</li>
+          <li>Authoritative HTML client release manifest with per-asset SHA-256 integrity verification.</li>
+          <li>Atomic in-place browser client self-update engine with staging cache rollback protection.</li>
+          <li>Strict separation of installed HTML client version, published client release, and server runtime version.</li>
+          <li>Deterministic 9-state update machine (CHECKING, UPDATE_AVAILABLE, UP_TO_DATE, DOWNLOADING, VERIFYING, INSTALLING, RELOADING, FAILED, UNKNOWN).</li>
         </ul>
       </div>
 
-      <!-- Download & Update Actions Grid -->
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);" id="lblDistributionActions">
-          Application Distribution &amp; Sync Actions
+      <!-- End-User In-Place Update Actions (Strictly Check for Updates, Update Now when available, Retry on failure, Close) -->
+      <div id="updateMenuActionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);" id="lblDistributionActions" data-i18n="lblDistributionActions">
+          In-Place Browser Client Update Actions
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
-          <!-- Primary: Genuine Full Source ZIP Download -->
-          <a id="btnDownloadSourceZip" href="/api/download/source" download="gdf-gold-quant-source-v75.1.zip" class="btn btn-gold" style="padding: 10px 14px; font-size: 12px; font-weight: 800; text-decoration: none; justify-content: center; text-align: center; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(245, 215, 110, 0.25);">
-            <span>📦</span>
-            <span id="txtDownloadSource">Download Full Source (ZIP)</span>
-          </a>
-          <!-- Secondary: Release Bundle Download -->
-          <a id="btnDownloadReleaseBundle" href="/api/download/release-bundle" download="gdf-release-bundle-v75.1.zip" class="btn" style="border-color: rgba(0, 229, 255, 0.6); color: var(--cyan); background: rgba(0, 229, 255, 0.1); padding: 10px 14px; font-size: 12px; font-weight: 800; text-decoration: none; justify-content: center; text-align: center; display: inline-flex; align-items: center; gap: 8px;">
-            <span>🚀</span>
-            <span id="txtDownloadRelease">Download Release Bundle</span>
-          </a>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-top: 4px;">
-          <!-- Check for Updates Now -->
-          <button class="btn" id="btnCheckUpdatesNow" style="padding: 8px 12px; font-size: 11px; justify-content: center;">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+          <!-- Check for Updates -->
+          <button type="button" class="btn" id="btnCheckUpdatesNow" style="padding: 9px 16px; font-size: 11.5px; font-weight: 700; justify-content: center;">
             <span>🔄</span>
-            <span id="txtCheckUpdatesNow">Check for Updates</span>
+            <span id="txtCheckUpdatesNow" data-i18n="btnCheckForUpdates">Check for Updates</span>
           </button>
-          <!-- In-App PWA Cache Refresh -->
-          <button class="btn" id="btnRefreshPwaCache" style="border-color: rgba(255, 171, 0, 0.5); color: #ffd740; background: rgba(255, 171, 0, 0.08); padding: 8px 12px; font-size: 11px; justify-content: center;">
+          <!-- Update Now (Visible ONLY when state === UPDATE_AVAILABLE) -->
+          <button type="button" class="btn btn-gold hidden" id="btnUpdateNow" style="display: none; padding: 9px 18px; font-size: 12px; font-weight: 800; justify-content: center; box-shadow: 0 0 16px rgba(245, 215, 110, 0.28);">
             <span>⚡</span>
-            <span id="txtRefreshPwaCache">Purge Cache &amp; Reload</span>
+            <span id="txtUpdateNow" data-i18n="btnUpdateNow">Update Now</span>
+          </button>
+          <!-- Retry (Visible ONLY when state === FAILED or UNKNOWN) -->
+          <button type="button" class="btn hidden" id="btnRetryUpdate" style="display: none; border-color: rgba(255, 171, 0, 0.6); color: #ffd740; background: rgba(255, 171, 0, 0.1); padding: 9px 16px; font-size: 11.5px; font-weight: 700; justify-content: center;">
+            <span>↻</span>
+            <span id="txtRetryUpdate" data-i18n="btnRetryUpdate">Retry</span>
           </button>
         </div>
       </div>
@@ -5150,9 +5145,9 @@ input:checked + .toggle-slider:before {
 
     <div class="modal-footer" style="padding: 12px 20px; border-top: 1px solid rgba(40, 60, 95, 0.5); display: flex; justify-content: space-between; align-items: center; background: rgba(6, 12, 22, 0.75); flex-wrap: wrap; gap: 8px;">
       <span style="font-size: 10px; color: var(--muted); font-family: monospace;">
-        Status: <span id="updateFooterStatusMsg" style="color: #cbd5e1;">Persistent dialog. Will remain open until dismissed.</span>
+        <span data-i18n="lblFooterStatusPrefix">Status:</span> <span id="updateFooterStatusMsg" style="color: #cbd5e1;">Checking release manifest...</span>
       </span>
-      <button class="btn" id="btnDismissUpdateModal" style="padding: 6px 16px; font-size: 11px;">
+      <button type="button" class="btn" id="btnDismissUpdateModal" style="padding: 6px 16px; font-size: 11px;" data-i18n="btnCloseUpdateModal">
         Close
       </button>
     </div>
@@ -5470,6 +5465,18 @@ const i18n = {
     t2VelTitle: 'Kalman Drift & GARCH Vol',
     t2SweepTitle: 'Sweep vs. Breakout & Macro Proxy',
     t2ValTitle: 'Adaptive Model Validation (OOS)',
+    updateModalTitle: 'HTML Client Release & Self-Update Engine',
+    updateModalSub: 'In-Place Browser Client Verification & Atomic Cache Activation',
+    lblClientVer: 'Installed Client Release',
+    lblServerVer: 'Published Client Manifest',
+    lblReleaseStatus: 'Update Status',
+    lblReleaseNotes: '📋 Release Notes & Integrity Manifest',
+    lblDistributionActions: 'In-Place Browser Client Update Actions',
+    btnCheckForUpdates: 'Check for Updates',
+    btnUpdateNow: 'Update Now',
+    btnRetryUpdate: 'Retry',
+    lblFooterStatusPrefix: 'Status:',
+    btnCloseUpdateModal: 'Close',
   },
   fa: {
     title: 'سامانه پویای جریان طلا (GDF)',
@@ -5706,6 +5713,18 @@ const i18n = {
     t2VelTitle: 'رانش کالمن و نوسان GARCH',
     t2SweepTitle: 'طبقه‌بند جاروب نقدینگی و پروکسی کلان',
     t2ValTitle: 'اعتبارسنجی تطبیقی خارج از نمونه (OOS)',
+    updateModalTitle: 'موتور بررسی انتشار و به‌روزرسانی خودکار کلاینت',
+    updateModalSub: 'راستی‌آزمایی یکپارچگی SHA-256 و فعال‌سازی درجا در مرورگر',
+    lblClientVer: 'نسخه کلاینت نصب‌شده',
+    lblServerVer: 'مانیفست انتشار کلاینت',
+    lblReleaseStatus: 'وضعیت به‌روزرسانی',
+    lblReleaseNotes: '📋 یادداشت‌های انتشار و مانیفست یکپارچگی',
+    lblDistributionActions: 'عملیات به‌روزرسانی درجا در مرورگر',
+    btnCheckForUpdates: 'بررسی به‌روزرسانی',
+    btnUpdateNow: 'به‌روزرسانی اکنون',
+    btnRetryUpdate: 'تلاش مجدد',
+    lblFooterStatusPrefix: 'وضعیت:',
+    btnCloseUpdateModal: 'بستن',
   }
 };
 
@@ -5780,6 +5799,9 @@ function applyLanguage(lang) {
   ) {
     window.GDFClientCore.openModelSpecDrawer(null, lang);
   }
+  if (typeof syncUpdateUiLanguage === 'function') {
+    syncUpdateUiLanguage();
+  }
   renderIndicatorsList(activeIndCategory, searchInput ? searchInput.value : '');
 }
 
@@ -5788,13 +5810,125 @@ document.getElementById('langBtn').addEventListener('click', () => {
 });
 
 // ==========================================================
-// Progressive Web App (PWA) Self-Updating Engine & ServiceWorker
+// Authoritative HTML Client Self-Update Engine & 9-State Machine
 // ==========================================================
-const CLIENT_APP_VERSION = '2026.10.25-v75.1-ResponsiveArchitectureAndReleaseEngine';
+const CLIENT_APP_VERSION = '2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar';
+const CLIENT_BUILD_ID = 'gdf-client-20261027-v80.0';
+const CLIENT_TAB_ID = `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const UPDATE_LOCK_STORAGE_KEY = 'gdf_client_update_lock';
+const UPDATE_LOCK_TTL_MS = 30000;
 let swRegistration = null;
 let isUpdating = false;
 let latestServerVersionInfo = null;
 const clientWarningErrorLog = [];
+
+let updateBroadcastChannel = null;
+try {
+  if (typeof BroadcastChannel !== 'undefined') {
+    updateBroadcastChannel = new BroadcastChannel('gdf_client_update_channel');
+  }
+} catch (_) {}
+
+function acquireCrossTabUpdateLock(targetVersion) {
+  try {
+    if (!window.localStorage) return true;
+    const now = Date.now();
+    const rawExisting = window.localStorage.getItem(UPDATE_LOCK_STORAGE_KEY);
+    if (rawExisting) {
+      const parsed = JSON.parse(rawExisting);
+      if (
+        parsed &&
+        parsed.tabId !== CLIENT_TAB_ID &&
+        typeof parsed.acquiredAtMs === 'number' &&
+        now - parsed.acquiredAtMs < UPDATE_LOCK_TTL_MS
+      ) {
+        return false;
+      }
+    }
+    window.localStorage.setItem(
+      UPDATE_LOCK_STORAGE_KEY,
+      JSON.stringify({
+        tabId: CLIENT_TAB_ID,
+        targetVersion,
+        acquiredAtMs: now,
+      })
+    );
+    return true;
+  } catch (_) {
+    return true;
+  }
+}
+
+function releaseCrossTabUpdateLock() {
+  try {
+    if (!window.localStorage) return;
+    const rawExisting = window.localStorage.getItem(UPDATE_LOCK_STORAGE_KEY);
+    if (!rawExisting) return;
+    const parsed = JSON.parse(rawExisting);
+    if (!parsed || parsed.tabId === CLIENT_TAB_ID) {
+      window.localStorage.removeItem(UPDATE_LOCK_STORAGE_KEY);
+    }
+  } catch (_) {}
+}
+
+function broadcastCrossTabUpdateEvent(eventType, payload = {}) {
+  const msg = {
+    type: eventType,
+    tabId: CLIENT_TAB_ID,
+    timestampIso: new Date().toISOString(),
+    ...payload,
+  };
+  try {
+    if (updateBroadcastChannel) {
+      updateBroadcastChannel.postMessage(msg);
+    }
+  } catch (_) {}
+}
+
+const clientUpdateStateMachine = {
+  state: 'UNKNOWN', // CHECKING | UPDATE_AVAILABLE | UP_TO_DATE | DOWNLOADING | VERIFYING | INSTALLING | RELOADING | FAILED | UNKNOWN
+  installedClientVersion: CLIENT_APP_VERSION,
+  installedClientBuildId: CLIENT_BUILD_ID,
+  publishedClientVersion: 'UNKNOWN',
+  publishedClientBuildId: 'UNKNOWN',
+  serverRuntimeVersion: 'UNKNOWN',
+  apiContractVersion: 'UNKNOWN',
+  isUpdateAvailable: false,
+  isCompatible: false,
+  isVerified: false,
+  inconsistencyWarning: null,
+  lastManifest: null,
+  lastEvaluation: null,
+  lastError: null,
+  lastCheckedIso: null,
+  inFlightCheckPromise: null,
+  inFlightUpdatePromise: null,
+  lastOperationType: null, // 'CHECK' | 'UPDATE'
+  postReloadGuardTriggered: false,
+  history: [],
+};
+
+if (updateBroadcastChannel) {
+  updateBroadcastChannel.onmessage = (ev) => {
+    const data = ev?.data;
+    if (!data || data.tabId === CLIENT_TAB_ID) return;
+    if (data.type === 'CROSS_TAB_UPDATE_INSTALLED' && data.targetVersion) {
+      checkReleaseManifest(false);
+    }
+  };
+}
+
+function recordUpdateStateTransition(nextState, detailMsg) {
+  clientUpdateStateMachine.state = nextState;
+  clientUpdateStateMachine.history.push({
+    state: nextState,
+    timestampIso: new Date().toISOString(),
+    detail: detailMsg || '',
+  });
+  if (clientUpdateStateMachine.history.length > 40) {
+    clientUpdateStateMachine.history.shift();
+  }
+}
 
 function logClientWarningOrError(level, subsystem, message) {
   clientWarningErrorLog.unshift({
@@ -5843,24 +5977,270 @@ function buildApiUrl(pathWithLeadingSlash) {
   return `${API_BASE}${cleanPath}`;
 }
 
-function showUpdateToast(msg = 'New quantitative build detected. Applying update...') {
+async function fetchWithClientTimeout(url, options = {}, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    try { controller.abort(new Error(`Request timeout after ${timeoutMs}ms`)); } catch (_) {}
+  }, timeoutMs);
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function showUpdateToast(msg, showAction = false) {
   const toast = document.getElementById('pwaUpdateToast');
   const toastMsg = document.getElementById('toastMsg');
-  if (toastMsg) toastMsg.textContent = msg;
+  const toastBtn = document.getElementById('toastReloadBtn');
+  if (toastMsg && msg) toastMsg.textContent = msg;
+  if (toastBtn) {
+    toastBtn.style.display = showAction ? 'inline-flex' : 'none';
+    toastBtn.textContent = currentLang === 'fa' ? 'به‌روزرسانی اکنون' : 'Update Now';
+  }
   if (toast) toast.classList.remove('hidden');
 }
 
-// -------------------------------------------------------------
-// Persistent Application Release & Update Hub State Machine
-// -------------------------------------------------------------
+function hideUpdateToast() {
+  const toast = document.getElementById('pwaUpdateToast');
+  if (toast) toast.classList.add('hidden');
+}
+
+function getBadgeStyleForState(state) {
+  switch (state) {
+    case 'UP_TO_DATE':
+      return {
+        color: '#00e676',
+        background: 'rgba(0, 230, 118, 0.15)',
+        borderColor: '#00e676',
+        boxShadow: 'none',
+      };
+    case 'UPDATE_AVAILABLE':
+      return {
+        color: '#00e5ff',
+        background: 'rgba(0, 229, 255, 0.2)',
+        borderColor: '#00e5ff',
+        boxShadow: '0 0 10px rgba(0, 229, 255, 0.35)',
+      };
+    case 'CHECKING':
+    case 'DOWNLOADING':
+    case 'VERIFYING':
+    case 'INSTALLING':
+    case 'RELOADING':
+      return {
+        color: '#ffb300',
+        background: 'rgba(255, 179, 0, 0.15)',
+        borderColor: 'rgba(255, 179, 0, 0.45)',
+        boxShadow: 'none',
+      };
+    case 'FAILED':
+      return {
+        color: '#ff5252',
+        background: 'rgba(255, 82, 82, 0.16)',
+        borderColor: 'rgba(255, 82, 82, 0.55)',
+        boxShadow: 'none',
+      };
+    case 'UNKNOWN':
+    default:
+      return {
+        color: '#ffd740',
+        background: 'rgba(255, 215, 64, 0.14)',
+        borderColor: 'rgba(255, 215, 64, 0.45)',
+        boxShadow: 'none',
+      };
+  }
+}
+
+function getLocalizedStateBadgeText(state, evaluation, isFa) {
+  if (state === 'CHECKING') return isFa ? 'در حال بررسی...' : 'CHECKING...';
+  if (state === 'DOWNLOADING') return isFa ? 'در حال دریافت فایل‌های کلاینت...' : 'DOWNLOADING...';
+  if (state === 'VERIFYING') return isFa ? 'در حال راستی‌آزمایی SHA-256...' : 'VERIFYING INTEGRITY...';
+  if (state === 'INSTALLING') return isFa ? 'در حال نصب در کش مرورگر...' : 'INSTALLING...';
+  if (state === 'RELOADING') return isFa ? 'در حال بارگذاری نسخه جدید...' : 'RELOADING...';
+  if (evaluation) {
+    return isFa ? evaluation.statusBadgeFa : evaluation.statusBadgeEn;
+  }
+  if (state === 'UP_TO_DATE') return isFa ? 'به‌روز است' : 'UP TO DATE';
+  if (state === 'UPDATE_AVAILABLE') return isFa ? 'نسخه جدید موجود است' : 'UPDATE AVAILABLE';
+  if (state === 'FAILED') return isFa ? 'خطا در به‌روزرسانی' : 'UPDATE FAILED';
+  return isFa ? 'وضعیت به‌روزرسانی نامشخص' : 'UPDATE STATUS UNKNOWN';
+}
+
+function renderUpdateEngineUI() {
+  const isFa = currentLang === 'fa';
+  const st = clientUpdateStateMachine.state;
+  const ev = clientUpdateStateMachine.lastEvaluation;
+  const manifest = clientUpdateStateMachine.lastManifest;
+  const isBusy =
+    st === 'CHECKING' ||
+    st === 'DOWNLOADING' ||
+    st === 'VERIFYING' ||
+    st === 'INSTALLING' ||
+    st === 'RELOADING';
+
+  const clientLbl = document.getElementById('updateClientVersionLabel');
+  const clientBuildLbl = document.getElementById('updateClientBuildIdLabel');
+  const serverLbl = document.getElementById('updateServerVersionLabel');
+  const serverSubLbl = document.getElementById('updateServerRuntimeSubLabel');
+  const statusBadge = document.getElementById('updateStatusBadge');
+  const footerMsg = document.getElementById('updateFooterStatusMsg');
+  const statusBox = document.getElementById('updateDownloadStatusBox');
+  const statusBoxMsg = document.getElementById('updateDownloadStatusMsg');
+  const notesList = document.getElementById('updateReleaseNotesList');
+  const dateTag = document.getElementById('updateReleaseDateTag');
+
+  const btnCheck = document.getElementById('btnCheckUpdatesNow');
+  const txtCheck = document.getElementById('txtCheckUpdatesNow');
+  const btnUpdateNow = document.getElementById('btnUpdateNow');
+  const txtUpdateNow = document.getElementById('txtUpdateNow');
+  const btnRetry = document.getElementById('btnRetryUpdate');
+  const txtRetry = document.getElementById('txtRetryUpdate');
+  const hdrTxt = document.getElementById('updateAppHeaderTxt');
+  const pwaVerLbl = document.getElementById('pwaVersionLabel');
+  const bugRepVerEl = document.getElementById('bugRepVersion');
+
+  if (clientLbl) clientLbl.textContent = clientUpdateStateMachine.installedClientVersion;
+  if (clientBuildLbl) clientBuildLbl.textContent = `Build: ${clientUpdateStateMachine.installedClientBuildId}`;
+
+  const pubVer = clientUpdateStateMachine.publishedClientVersion || 'UNKNOWN';
+  if (serverLbl) {
+    serverLbl.textContent = pubVer;
+    serverLbl.style.color = pubVer === 'UNKNOWN' ? '#ffab00' : 'var(--gold)';
+  }
+  if (serverSubLbl) {
+    const srvVer = clientUpdateStateMachine.serverRuntimeVersion || 'UNKNOWN';
+    const verifStr = clientUpdateStateMachine.isVerified ? 'SHA-256 VERIFIED' : 'UNVERIFIED';
+    serverSubLbl.textContent = `Server: ${srvVer} · ${verifStr}`;
+  }
+
+  if (statusBadge) {
+    const style = getBadgeStyleForState(st);
+    statusBadge.setAttribute('data-update-state', st);
+    statusBadge.textContent = getLocalizedStateBadgeText(st, ev, isFa);
+    statusBadge.style.color = style.color;
+    statusBadge.style.background = style.background;
+    statusBadge.style.borderColor = style.borderColor;
+    statusBadge.style.boxShadow = style.boxShadow;
+  }
+
+  if (dateTag && manifest?.releaseDate) {
+    dateTag.textContent = manifest.releaseDate;
+  }
+
+  if (notesList && manifest) {
+    const notesArr = isFa && Array.isArray(manifest.releaseNotesFa) && manifest.releaseNotesFa.length > 0
+      ? manifest.releaseNotesFa
+      : (Array.isArray(manifest.releaseNotes) ? manifest.releaseNotes : []);
+    if (notesArr.length > 0) {
+      notesList.innerHTML = notesArr.map(n => `<li>${n}</li>`).join('');
+    }
+  }
+
+  // Action buttons visibility & state rules:
+  // 1. Check for Updates: always visible, disabled while busy
+  if (btnCheck) {
+    btnCheck.disabled = isBusy;
+  }
+  if (txtCheck) {
+    txtCheck.textContent = st === 'CHECKING'
+      ? (isFa ? 'در حال بررسی...' : 'Checking...')
+      : (isFa ? 'بررسی به‌روزرسانی' : 'Check for Updates');
+  }
+
+  // 2. Update Now: strictly visible ONLY when state === 'UPDATE_AVAILABLE' and isUpdateAvailable === true
+  const showUpdateNow = st === 'UPDATE_AVAILABLE' && clientUpdateStateMachine.isUpdateAvailable === true;
+  if (btnUpdateNow) {
+    btnUpdateNow.classList.toggle('hidden', !showUpdateNow);
+    btnUpdateNow.style.display = showUpdateNow ? 'inline-flex' : 'none';
+    btnUpdateNow.disabled = !showUpdateNow || isBusy;
+  }
+  if (txtUpdateNow) {
+    txtUpdateNow.textContent = isFa ? 'به‌روزرسانی اکنون' : 'Update Now';
+  }
+
+  // 3. Retry: strictly visible ONLY when state === 'FAILED' or state === 'UNKNOWN'
+  const showRetry = st === 'FAILED' || st === 'UNKNOWN';
+  if (btnRetry) {
+    btnRetry.classList.toggle('hidden', !showRetry);
+    btnRetry.style.display = showRetry ? 'inline-flex' : 'none';
+    btnRetry.disabled = isBusy;
+  }
+  if (txtRetry) {
+    txtRetry.textContent = isFa ? 'تلاش مجدد' : 'Retry';
+  }
+
+  // Progress / diagnostic notification box
+  if (statusBox && statusBoxMsg) {
+    if (st === 'DOWNLOADING' || st === 'VERIFYING' || st === 'INSTALLING' || st === 'RELOADING') {
+      statusBox.classList.remove('hidden');
+      statusBox.style.borderColor = 'rgba(0, 229, 255, 0.5)';
+      statusBox.style.background = 'rgba(0, 229, 255, 0.1)';
+      statusBox.style.color = '#00e5ff';
+      statusBoxMsg.textContent = clientUpdateStateMachine.lastError || getLocalizedStateBadgeText(st, ev, isFa);
+    } else if (st === 'FAILED' || (st === 'UNKNOWN' && clientUpdateStateMachine.inconsistencyWarning)) {
+      statusBox.classList.remove('hidden');
+      statusBox.style.borderColor = 'rgba(255, 82, 82, 0.55)';
+      statusBox.style.background = 'rgba(255, 82, 82, 0.12)';
+      statusBox.style.color = '#ff8a80';
+      statusBoxMsg.textContent =
+        clientUpdateStateMachine.lastError ||
+        (ev ? (isFa ? ev.statusMessageFa : ev.statusMessageEn) : 'Update check or verification failed.');
+    } else {
+      statusBox.classList.add('hidden');
+    }
+  }
+
+  // Footer status message
+  if (footerMsg) {
+    if (isBusy) {
+      footerMsg.textContent = getLocalizedStateBadgeText(st, ev, isFa);
+    } else if (ev) {
+      footerMsg.textContent = isFa ? ev.statusMessageFa : ev.statusMessageEn;
+    } else if (clientUpdateStateMachine.lastError) {
+      footerMsg.textContent = clientUpdateStateMachine.lastError;
+    } else {
+      footerMsg.textContent = isFa
+        ? 'وضعیت به‌روزرسانی نامشخص است.'
+        : 'Update status is currently unknown.';
+    }
+  }
+
+  // Sync header button, settings label, and bug report modal version display
+  if (hdrTxt) {
+    if (st === 'UPDATE_AVAILABLE' && clientUpdateStateMachine.isUpdateAvailable) {
+      hdrTxt.textContent = isFa ? 'نسخه جدید ⚡' : 'Update Available ⚡';
+    } else if (st === 'UP_TO_DATE') {
+      hdrTxt.textContent = isFa ? 'به‌روزرسانی برنامه' : 'Update App';
+    } else if (st === 'FAILED' || st === 'UNKNOWN') {
+      hdrTxt.textContent = isFa ? 'وضعیت نسخه' : 'Update Status';
+    } else {
+      hdrTxt.textContent = isFa ? 'به‌روزرسانی برنامه' : 'Update App';
+    }
+  }
+
+  if (pwaVerLbl) {
+    const badgeStr = getLocalizedStateBadgeText(st, ev, false);
+    pwaVerLbl.textContent = `Client: ${clientUpdateStateMachine.installedClientVersion} · Published: ${pubVer} · ${badgeStr}`;
+  }
+
+  if (bugRepVerEl) {
+    bugRepVerEl.textContent = `Client: ${clientUpdateStateMachine.installedClientVersion} | Published: ${pubVer} (${st})`;
+  }
+}
+
+function syncUpdateUiLanguage() {
+  renderUpdateEngineUI();
+}
+
 function openAppUpdateModal(triggerCheck = true) {
   const overlay = document.getElementById('appUpdateModalOverlay');
   if (!overlay) return;
   overlay.classList.remove('hidden');
-  
-  const clientLbl = document.getElementById('updateClientVersionLabel');
-  if (clientLbl) clientLbl.textContent = CLIENT_APP_VERSION;
-  
+  renderUpdateEngineUI();
   if (triggerCheck) {
     checkReleaseManifest(true);
   }
@@ -5871,142 +6251,532 @@ function closeAppUpdateModal() {
   if (overlay) overlay.classList.add('hidden');
 }
 
-async function checkReleaseManifest(interactive = false) {
-  const statusBadge = document.getElementById('updateStatusBadge');
-  const serverLbl = document.getElementById('updateServerVersionLabel');
-  const footerMsg = document.getElementById('updateFooterStatusMsg');
-  const checkBtnTxt = document.getElementById('txtCheckUpdatesNow');
-  const notesList = document.getElementById('updateReleaseNotesList');
-  const dateTag = document.getElementById('updateReleaseDateTag');
-  
-  if (statusBadge) {
-    statusBadge.textContent = currentLang === 'fa' ? 'در حال بررسی...' : 'CHECKING...';
-    statusBadge.style.color = '#ffb300';
-    statusBadge.style.background = 'rgba(255, 179, 0, 0.15)';
-    statusBadge.style.borderColor = 'rgba(255, 179, 0, 0.4)';
+async function checkReleaseManifest(interactive = false, customManifestUrl = null) {
+  // Prevent concurrent conflicting update or check operations
+  if (clientUpdateStateMachine.inFlightUpdatePromise) {
+    return clientUpdateStateMachine.inFlightUpdatePromise;
   }
-  if (checkBtnTxt) {
-    checkBtnTxt.textContent = currentLang === 'fa' ? 'در حال بررسی...' : 'Checking...';
+  if (clientUpdateStateMachine.inFlightCheckPromise) {
+    return clientUpdateStateMachine.inFlightCheckPromise;
   }
+  if (!interactive && clientUpdateStateMachine.postReloadGuardTriggered) {
+    return clientUpdateStateMachine.lastEvaluation;
+  }
+  clientUpdateStateMachine.postReloadGuardTriggered = false;
 
-  try {
-    const res = await fetch(buildApiUrl(`/api/release-manifest?t=${Date.now()}`), { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const manifest = await res.json();
-    latestServerVersionInfo = manifest;
+  clientUpdateStateMachine.lastOperationType = 'CHECK';
+  clientUpdateStateMachine.lastError = null;
+  recordUpdateStateTransition('CHECKING', 'Checking authoritative client release manifest');
+  renderUpdateEngineUI();
 
-    const latestVer = manifest.latestVersion || manifest.version || 'UNKNOWN';
-    if (serverLbl) serverLbl.textContent = latestVer;
-    if (dateTag && manifest.releaseDate) dateTag.textContent = manifest.releaseDate;
+  const checkPromise = (async () => {
+    try {
+      const targetUrl =
+        customManifestUrl ||
+        buildApiUrl(
+          `/api/release-manifest?installedClientVersion=${encodeURIComponent(
+            clientUpdateStateMachine.installedClientVersion
+          )}&installedBuildId=${encodeURIComponent(
+            clientUpdateStateMachine.installedClientBuildId
+          )}&t=${Date.now()}`
+        );
 
-    // Render release notes
-    if (notesList && Array.isArray(manifest.releaseNotes) && manifest.releaseNotes.length > 0) {
-      notesList.innerHTML = manifest.releaseNotes.map(n => `<li>${n}</li>`).join('');
+      const res = await fetchWithClientTimeout(
+        targetUrl,
+        {
+          cache: 'no-store',
+          headers: {
+            Accept: 'application/json',
+            'Cache-Control': 'no-cache',
+          },
+        },
+        8000
+      );
+
+      if (!res.ok) {
+        throw new Error(`Manifest endpoint returned HTTP ${res.status}`);
+      }
+
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (!ct.includes('application/json') && !ct.includes('text/json')) {
+        throw new Error(`Manifest endpoint returned non-JSON content-type (${ct || 'none'})`);
+      }
+
+      const manifest = await res.json();
+      latestServerVersionInfo = manifest;
+      clientUpdateStateMachine.lastManifest = manifest;
+      clientUpdateStateMachine.lastCheckedIso = new Date().toISOString();
+
+      const evaluator = window.GDFClientCore?.evaluateClientUpdateStatus;
+      if (typeof evaluator !== 'function') {
+        throw new Error('GDFClientCore.evaluateClientUpdateStatus is unavailable');
+      }
+
+      const evaluation = evaluator({
+        installedClientVersion: clientUpdateStateMachine.installedClientVersion,
+        installedClientBuildId: clientUpdateStateMachine.installedClientBuildId,
+        manifest,
+        runningServerVersion: manifest.serverVersion,
+      });
+
+      clientUpdateStateMachine.lastEvaluation = evaluation;
+      clientUpdateStateMachine.publishedClientVersion = evaluation.publishedClientVersion;
+      clientUpdateStateMachine.publishedClientBuildId = evaluation.publishedClientBuildId;
+      clientUpdateStateMachine.serverRuntimeVersion = evaluation.serverRuntimeVersion;
+      clientUpdateStateMachine.apiContractVersion = evaluation.apiContractVersion;
+      clientUpdateStateMachine.isUpdateAvailable = evaluation.isUpdateAvailable;
+      clientUpdateStateMachine.isCompatible = evaluation.isCompatible;
+      clientUpdateStateMachine.isVerified = evaluation.isVerified;
+      clientUpdateStateMachine.inconsistencyWarning = evaluation.inconsistencyWarning;
+      clientUpdateStateMachine.lastError = evaluation.inconsistencyWarning || null;
+
+      recordUpdateStateTransition(evaluation.state, evaluation.statusMessageEn);
+      renderUpdateEngineUI();
+
+      if (evaluation.state === 'UPDATE_AVAILABLE' && evaluation.isUpdateAvailable) {
+        showUpdateToast(
+          currentLang === 'fa'
+            ? `نسخه جدید و تأییدشده کلاینت (${evaluation.publishedClientVersion}) آماده نصب درجا است.`
+            : `Verified HTML client release (${evaluation.publishedClientVersion}) is ready for in-place update.`,
+          true
+        );
+      } else {
+        hideUpdateToast();
+      }
+
+      return evaluation;
+    } catch (err) {
+      const errMsg = err?.message || 'Manifest fetch failed';
+      console.warn('[GDF Client Update Engine] Manifest check failed:', errMsg);
+      logClientWarningOrError('WARN', 'RELEASE_CHECK', errMsg);
+
+      const fallbackEval = window.GDFClientCore?.evaluateClientUpdateStatus
+        ? window.GDFClientCore.evaluateClientUpdateStatus({
+            installedClientVersion: clientUpdateStateMachine.installedClientVersion,
+            installedClientBuildId: clientUpdateStateMachine.installedClientBuildId,
+            manifest: null,
+          })
+        : {
+            state: 'UNKNOWN',
+            comparison: 'UNREACHABLE_MANIFEST',
+            isUpdateAvailable: false,
+            isCompatible: false,
+            isVerified: false,
+            installedClientVersion: clientUpdateStateMachine.installedClientVersion,
+            installedClientBuildId: clientUpdateStateMachine.installedClientBuildId,
+            publishedClientVersion: 'UNKNOWN',
+            publishedClientBuildId: 'UNKNOWN',
+            serverRuntimeVersion: 'UNKNOWN',
+            apiContractVersion: 'UNKNOWN',
+            bundleIntegritySha256: null,
+            inconsistencyWarning: errMsg,
+            statusBadgeEn: 'UPDATE STATUS UNKNOWN',
+            statusBadgeFa: 'وضعیت به‌روزرسانی نامشخص',
+            statusMessageEn: `Update status unknown: could not verify release manifest (${errMsg}).`,
+            statusMessageFa: `وضعیت به‌روزرسانی نامشخص است؛ امکان دریافت مانیفست انتشار وجود ندارد (${errMsg}).`,
+            allowedActions: ['CHECK_FOR_UPDATES', 'RETRY', 'CLOSE'],
+          };
+
+      clientUpdateStateMachine.lastEvaluation = fallbackEval;
+      clientUpdateStateMachine.publishedClientVersion = 'UNKNOWN';
+      clientUpdateStateMachine.publishedClientBuildId = 'UNKNOWN';
+      clientUpdateStateMachine.serverRuntimeVersion = 'UNKNOWN';
+      clientUpdateStateMachine.isUpdateAvailable = false;
+      clientUpdateStateMachine.isCompatible = false;
+      clientUpdateStateMachine.isVerified = false;
+      clientUpdateStateMachine.inconsistencyWarning = errMsg;
+      clientUpdateStateMachine.lastError = fallbackEval.statusMessageEn;
+
+      recordUpdateStateTransition('UNKNOWN', errMsg);
+      renderUpdateEngineUI();
+      return fallbackEval;
+    } finally {
+      clientUpdateStateMachine.inFlightCheckPromise = null;
     }
+  })();
 
-    const isDifferent = latestVer !== 'UNKNOWN' && latestVer !== CLIENT_APP_VERSION;
-    if (manifest.isUpdateAvailable || isDifferent) {
-      if (statusBadge) {
-        statusBadge.textContent = currentLang === 'fa' ? 'نسخه جدید موجود است' : 'UPDATE AVAILABLE';
-        statusBadge.style.color = '#00e5ff';
-        statusBadge.style.background = 'rgba(0, 229, 255, 0.2)';
-        statusBadge.style.borderColor = '#00e5ff';
-        statusBadge.style.boxShadow = '0 0 10px rgba(0, 229, 255, 0.35)';
+  clientUpdateStateMachine.inFlightCheckPromise = checkPromise;
+  return checkPromise;
+}
+
+/**
+ * Executes an atomic, integrity-verified in-place HTML client update in the browser:
+ * 1. DOWNLOADING: Fetches authoritative manifest and all required client assets (/index.html, /js/gdfClientCore.js, /sw.js).
+ * 2. VERIFYING: Computes SHA-256 hex digest of every downloaded asset and verifies version marker inside index.html.
+ *    If any asset fails download or SHA-256 verification, aborts without overwriting the active cache -> FAILED.
+ * 3. INSTALLING: Stages verified assets into a tab-isolated staging cache, promotes to target active cache while
+ *    preserving the previous working cache as a rollback fallback until post-reload boot verification succeeds.
+ * 4. RELOADING: Reloads browser client (or invokes test reload hook) and confirms active version.
+ */
+async function applyAppUpdate(options = {}) {
+  if (clientUpdateStateMachine.inFlightUpdatePromise) {
+    return clientUpdateStateMachine.inFlightUpdatePromise;
+  }
+  if (isUpdating) {
+    return null;
+  }
+
+  clientUpdateStateMachine.lastOperationType = 'UPDATE';
+  isUpdating = true;
+
+  const updatePromise = (async () => {
+    let stagingCacheName = null;
+    try {
+      // Ensure we have a verified compatible update manifest first
+      if (
+        !clientUpdateStateMachine.lastManifest ||
+        clientUpdateStateMachine.state !== 'UPDATE_AVAILABLE' ||
+        !clientUpdateStateMachine.isUpdateAvailable
+      ) {
+        const evalRes = await checkReleaseManifest(true, options.manifestUrl || null);
+        if (!evalRes || evalRes.state !== 'UPDATE_AVAILABLE' || !evalRes.isUpdateAvailable) {
+          throw new Error(
+            evalRes?.inconsistencyWarning ||
+              evalRes?.statusMessageEn ||
+              'No compatible verified client update is available to install.'
+          );
+        }
       }
-      if (footerMsg) {
-        footerMsg.textContent = currentLang === 'fa'
-          ? `نسخه جدید سرور (${latestVer}) در دسترس است. آرشیو کامل یا بسته انتشار را دانلود کنید.`
-          : `New server build (${latestVer}) available. You can download full source ZIP or release bundle.`;
+
+      const manifest = clientUpdateStateMachine.lastManifest;
+      const targetVersion = manifest.latestClientVersion;
+      const targetBuildId = manifest.latestClientBuildId;
+      const previousVersion = clientUpdateStateMachine.installedClientVersion;
+      const fallbackCacheName = `gdf-quant-${previousVersion}`;
+      const assets = Array.isArray(manifest.assets) ? manifest.assets : [];
+      if (!targetVersion || assets.length === 0) {
+        throw new Error('Release manifest is missing target client version or asset list.');
       }
-      const hdrTxt = document.getElementById('updateAppHeaderTxt');
-      if (hdrTxt) {
-        hdrTxt.textContent = currentLang === 'fa' ? 'نسخه جدید ⚡' : 'Update Available ⚡';
+
+      // Cross-tab concurrency lock so multiple tabs never corrupt caches simultaneously
+      if (!acquireCrossTabUpdateLock(targetVersion)) {
+        throw new Error(
+          currentLang === 'fa'
+            ? 'به‌روزرسانی در تب دیگری از مرورگر در حال انجام است.'
+            : 'An in-place client update is already in progress in another open tab.'
+        );
+      }
+
+      broadcastCrossTabUpdateEvent('CROSS_TAB_UPDATE_STARTED', { targetVersion });
+
+      // Step 1: DOWNLOADING
+      const dlMsg =
+        currentLang === 'fa'
+          ? `در حال دریافت فایل‌های نسخه ${targetVersion}...`
+          : `Downloading client release assets (${targetVersion})...`;
+      clientUpdateStateMachine.lastError = dlMsg;
+      recordUpdateStateTransition('DOWNLOADING', dlMsg);
+      renderUpdateEngineUI();
+      showUpdateToast(dlMsg, false);
+
+      const downloadedAssets = [];
+      for (const asset of assets) {
+        const assetFetchUrl = options.assetUrlResolver
+          ? options.assetUrlResolver(asset.path, targetVersion)
+          : buildApiUrl(`${asset.path}${asset.path.includes('?') ? '&' : '?'}_gdfClientUpdate=${encodeURIComponent(targetVersion)}&_t=${Date.now()}`);
+
+        const res = await fetchWithClientTimeout(
+          assetFetchUrl,
+          {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'X-GDF-Client-Update': targetVersion,
+            },
+          },
+          10000
+        );
+
+        if (!res.ok) {
+          if (asset.required !== false) {
+            throw new Error(`Failed to download required client asset ${asset.path} (HTTP ${res.status})`);
+          }
+          continue;
+        }
+        const textBody = await res.text();
+        if (!textBody || textBody.length === 0) {
+          throw new Error(`Downloaded empty payload for client asset ${asset.path}`);
+        }
+        downloadedAssets.push({
+          spec: asset,
+          textBody,
+          contentType: res.headers.get('content-type') || asset.contentType || 'text/plain',
+        });
+      }
+
+      // Step 2: VERIFYING (SHA-256 digest + embedded version marker check)
+      const verMsg =
+        currentLang === 'fa'
+          ? `در حال بررسی یکپارچگی SHA-256 برای ${downloadedAssets.length} فایل کلاینت...`
+          : `Verifying SHA-256 cryptographic integrity across ${downloadedAssets.length} client assets...`;
+      clientUpdateStateMachine.lastError = verMsg;
+      recordUpdateStateTransition('VERIFYING', verMsg);
+      renderUpdateEngineUI();
+
+      for (const item of downloadedAssets) {
+        const actualSha256 = await window.GDFClientCore.computeSha256Hex(item.textBody);
+        const expectedSha256 = String(item.spec.sha256 || '').trim().toLowerCase();
+        if (!expectedSha256 || actualSha256 !== expectedSha256) {
+          throw new Error(
+            `Integrity verification failed for ${item.spec.path}: expected SHA-256 ${expectedSha256.slice(0, 12)}..., got ${actualSha256.slice(0, 12)}...`
+          );
+        }
+        if (item.spec.path === '/index.html') {
+          if (!item.textBody.includes(targetVersion)) {
+            throw new Error(
+              `Downloaded /index.html does not contain expected release marker (${targetVersion}). Update aborted.`
+            );
+          }
+        }
+      }
+
+      // Step 3: INSTALLING (Tab-isolated staging cache -> verified active cache promotion, preserving fallback cache)
+      const instMsg =
+        currentLang === 'fa'
+          ? `در حال نصب اتمی نسخه ${targetVersion} در حافظه مرورگر...`
+          : `Installing verified client release (${targetVersion}) in place...`;
+      clientUpdateStateMachine.lastError = instMsg;
+      recordUpdateStateTransition('INSTALLING', instMsg);
+      renderUpdateEngineUI();
+
+      stagingCacheName = `gdf-client-stage-${targetVersion}-${CLIENT_TAB_ID}`;
+      const targetActiveCacheName = `gdf-quant-${targetVersion}`;
+
+      if ('caches' in window && window.caches) {
+        const stageCache = await caches.open(stagingCacheName);
+        for (const item of downloadedAssets) {
+          const headers = new Headers({
+            'Content-Type': item.contentType,
+            'X-GDF-Verified-Version': targetVersion,
+            'X-GDF-Verified-Sha256': item.spec.sha256,
+          });
+          await stageCache.put(item.spec.path, new Response(item.textBody, { status: 200, headers }));
+          if (item.spec.path === '/index.html') {
+            await stageCache.put('/', new Response(item.textBody, { status: 200, headers }));
+          }
+        }
+
+        // Verify staged cache completeness before promoting to targetActiveCacheName
+        const stagedIndex = await stageCache.match('/index.html');
+        const stagedCore = await stageCache.match('/js/gdfClientCore.js');
+        if (!stagedIndex || !stagedCore) {
+          throw new Error('Staging cache verification failed: missing required core client assets.');
+        }
+
+        // Promote staged verified responses into target active cache
+        const activeCache = await caches.open(targetActiveCacheName);
+        for (const item of downloadedAssets) {
+          const headers = new Headers({
+            'Content-Type': item.contentType,
+            'X-GDF-Verified-Version': targetVersion,
+            'X-GDF-Verified-Sha256': item.spec.sha256,
+          });
+          await activeCache.put(item.spec.path, new Response(item.textBody, { status: 200, headers }));
+          if (item.spec.path === '/index.html') {
+            await activeCache.put('/', new Response(item.textBody, { status: 200, headers }));
+          }
+        }
+
+        // Delete ONLY this tab's staging cache now; preserve fallbackCacheName until post-reload boot verification succeeds!
+        await caches.delete(stagingCacheName);
+        stagingCacheName = null;
+      }
+
+      if ('serviceWorker' in navigator) {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) {
+            if (r.active) {
+              r.active.postMessage({
+                type: 'ACTIVATE_VERIFIED_RELEASE',
+                version: targetVersion,
+                cacheName: targetActiveCacheName,
+                activeCacheName: targetActiveCacheName,
+                preserveFallbackCacheName: fallbackCacheName,
+                pruneObsolete: false,
+              });
+            }
+            if (r.waiting) {
+              r.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+            await r.update().catch(() => {});
+          }
+        } catch (_) {}
+      }
+
+      try {
+        if (window.sessionStorage) {
+          window.sessionStorage.setItem(
+            'gdf_pending_client_update',
+            JSON.stringify({
+              fromVersion: previousVersion,
+              fallbackCacheName,
+              targetVersion,
+              targetBuildId,
+              targetActiveCacheName,
+              installedAtIso: new Date().toISOString(),
+            })
+          );
+        }
+      } catch (_) {}
+
+      broadcastCrossTabUpdateEvent('CROSS_TAB_UPDATE_INSTALLED', { targetVersion, targetBuildId });
+
+      // Step 4: RELOADING
+      const relMsg =
+        currentLang === 'fa'
+          ? `نصب نسخه ${targetVersion} تکمیل شد. در حال بارگذاری مجدد...`
+          : `Verified release ${targetVersion} installed. Reloading client...`;
+      clientUpdateStateMachine.lastError = relMsg;
+      recordUpdateStateTransition('RELOADING', relMsg);
+      renderUpdateEngineUI();
+
+      // Update in-memory client version if running in non-navigating test harness or before reload completes
+      if (typeof options.onReload === 'function') {
+        await options.onReload({
+          targetVersion,
+          targetBuildId,
+          downloadedAssets,
+        });
+        clientUpdateStateMachine.installedClientVersion = targetVersion;
+        clientUpdateStateMachine.installedClientBuildId = targetBuildId;
+        await checkReleaseManifest(false, options.manifestUrl || null);
+        return {
+          updated: true,
+          activeClientVersion: clientUpdateStateMachine.installedClientVersion,
+          state: clientUpdateStateMachine.state,
+        };
+      }
+
+      setTimeout(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('_gdfUpdatedTo', targetVersion);
+        url.searchParams.set('_v', String(Date.now()));
+        window.location.replace(url.toString());
+      }, 250);
+
+      return {
+        updated: true,
+        activeClientVersion: targetVersion,
+        state: 'RELOADING',
+      };
+    } catch (err) {
+      const failMsg = err?.message || 'In-place client update failed';
+      console.warn('[GDF Client Update Engine] In-place update failed (previous client preserved):', failMsg);
+      logClientWarningOrError('ERROR', 'CLIENT_UPDATE', failMsg);
+
+      // Rollback: remove any partial staging cache while leaving active working client intact
+      if (stagingCacheName && 'caches' in window && window.caches) {
+        try {
+          await caches.delete(stagingCacheName);
+        } catch (_) {}
+      }
+
+      broadcastCrossTabUpdateEvent('CROSS_TAB_UPDATE_FAILED', { error: failMsg });
+      clientUpdateStateMachine.lastError = failMsg;
+      recordUpdateStateTransition('FAILED', failMsg);
+      renderUpdateEngineUI();
+      return {
+        updated: false,
+        error: failMsg,
+        activeClientVersion: clientUpdateStateMachine.installedClientVersion,
+        state: 'FAILED',
+      };
+    } finally {
+      releaseCrossTabUpdateLock();
+      isUpdating = false;
+      clientUpdateStateMachine.inFlightUpdatePromise = null;
+    }
+  })();
+
+  clientUpdateStateMachine.inFlightUpdatePromise = updatePromise;
+  return updatePromise;
+}
+
+async function retryLastUpdateOperation() {
+  clientUpdateStateMachine.postReloadGuardTriggered = false;
+  if (clientUpdateStateMachine.lastOperationType === 'UPDATE' && clientUpdateStateMachine.isUpdateAvailable) {
+    return applyAppUpdate();
+  }
+  return checkReleaseManifest(true);
+}
+
+async function verifyPostReloadUpdateCompletion() {
+  try {
+    if (!window.sessionStorage) return;
+    const rawPending = window.sessionStorage.getItem('gdf_pending_client_update');
+    if (!rawPending) return;
+    window.sessionStorage.removeItem('gdf_pending_client_update');
+    const pending = JSON.parse(rawPending);
+    if (!pending || !pending.targetVersion) return;
+
+    const coreHealthy = Boolean(
+      window.GDFClientCore && typeof window.GDFClientCore.evaluateClientUpdateStatus === 'function'
+    );
+
+    if (CLIENT_APP_VERSION === pending.targetVersion && coreHealthy) {
+      console.info(`[GDF Client Update Engine] Confirmed post-update client activation: ${CLIENT_APP_VERSION}`);
+      if (pending.targetBuildId) {
+        clientUpdateStateMachine.installedClientBuildId = pending.targetBuildId;
+      }
+      // Now that the new client has booted and passed health verification, prune obsolete gdf-quant-* caches
+      const activeCacheName = `gdf-quant-${CLIENT_APP_VERSION}`;
+      if ('caches' in window && window.caches) {
+        try {
+          const allKeys = await caches.keys();
+          await Promise.all(
+            allKeys
+              .filter(k => k.startsWith('gdf-quant-') && k !== activeCacheName)
+              .map(k => caches.delete(k))
+          );
+        } catch (_) {}
+      }
+      if ('serviceWorker' in navigator) {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) {
+            if (r.active) {
+              r.active.postMessage({
+                type: 'ACTIVATE_VERIFIED_RELEASE',
+                version: CLIENT_APP_VERSION,
+                cacheName: activeCacheName,
+                activeCacheName,
+                pruneObsolete: true,
+              });
+            }
+          }
+        } catch (_) {}
       }
     } else {
-      if (statusBadge) {
-        statusBadge.textContent = currentLang === 'fa' ? 'به‌روز است' : 'UP TO DATE';
-        statusBadge.style.color = '#00e676';
-        statusBadge.style.background = 'rgba(0, 230, 118, 0.15)';
-        statusBadge.style.borderColor = '#00e676';
-        statusBadge.style.boxShadow = 'none';
-      }
-      if (footerMsg) {
-        footerMsg.textContent = currentLang === 'fa'
-          ? 'نسخه نصب‌شده کاملاً منطبق بر آخرین نسخه تاییدشده سرور است.'
-          : 'Installed client matches the verified server release.';
-      }
-    }
-  } catch (err) {
-    console.warn('[GDF Release Hub] Manifest fetch failed:', err?.message);
-    logClientWarningOrError('WARN', 'RELEASE_CHECK', err?.message || 'Manifest fetch failed');
-    if (statusBadge) {
-      statusBadge.textContent = currentLang === 'fa' ? 'آفلاین / کش شده' : 'OFFLINE / CACHED';
-      statusBadge.style.color = '#7d8ba1';
-      statusBadge.style.background = 'rgba(125, 139, 161, 0.15)';
-      statusBadge.style.borderColor = '#7d8ba1';
-    }
-    if (footerMsg) {
-      footerMsg.textContent = currentLang === 'fa'
-        ? 'ارتباط با مانیفست سرور برقرار نشد؛ برنامه با کش محلی کار می‌کند.'
-        : 'Could not reach server release manifest; running in offline/cached mode.';
-    }
-  } finally {
-    if (checkBtnTxt) {
-      checkBtnTxt.textContent = currentLang === 'fa' ? 'بررسی مجدد' : 'Check for Updates';
-    }
-  }
-}
+      // Post-reload version mismatch or broken core startup: roll back broken target cache, preserve fallback cache, and block reload loop
+      const rollbackMsg = `Post-reload verification failed: booted client (${CLIENT_APP_VERSION}) did not match target (${pending.targetVersion}). Preserved working client and blocked reload loop.`;
+      logClientWarningOrError('WARN', 'CLIENT_UPDATE', rollbackMsg);
+      clientUpdateStateMachine.postReloadGuardTriggered = true;
+      clientUpdateStateMachine.lastError = rollbackMsg;
+      recordUpdateStateTransition('FAILED', rollbackMsg);
+      renderUpdateEngineUI();
 
-function showForcedUpdateBlockingModal(serverVersion) {
-  openAppUpdateModal(false);
-  const serverLbl = document.getElementById('updateServerVersionLabel');
-  if (serverLbl) serverLbl.textContent = serverVersion;
-  const statusBadge = document.getElementById('updateStatusBadge');
-  if (statusBadge) {
-    statusBadge.textContent = currentLang === 'fa' ? 'نسخه جدید موجود است' : 'UPDATE AVAILABLE';
-    statusBadge.style.color = '#00e5ff';
-    statusBadge.style.background = 'rgba(0, 229, 255, 0.2)';
-    statusBadge.style.borderColor = '#00e5ff';
-  }
-}
-
-async function applyAppUpdate() {
-  if (isUpdating) return;
-  if (window.location.protocol === 'file:' || window.location.origin.includes('capacitor://')) {
-    return;
-  }
-  isUpdating = true;
-  const forcedBtn = document.getElementById('btnForcedUpdateNow');
-  if (forcedBtn) {
-    forcedBtn.disabled = true;
-    forcedBtn.textContent = currentLang === 'fa' ? 'در حال پاکسازی کش و به‌روزرسانی...' : 'Purging Cache & Activating New Build...';
-  }
-  showUpdateToast(currentLang === 'fa' ? 'در حال اعمال آخرین نسخه موتور کوانت...' : 'Applying latest quantitative engine build...');
-
-  try {
-    if (swRegistration) {
-      if (swRegistration.waiting) swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      if (swRegistration.installing) swRegistration.installing.postMessage({ type: 'SKIP_WAITING' });
-      await swRegistration.update().catch(() => {});
-    }
-    if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      for (const r of regs) {
-        if (r.waiting) r.waiting.postMessage({ type: 'SKIP_WAITING' });
-        await r.update().catch(() => {});
+      if ('caches' in window && window.caches && pending.targetActiveCacheName && pending.targetActiveCacheName !== `gdf-quant-${CLIENT_APP_VERSION}`) {
+        try {
+          await caches.delete(pending.targetActiveCacheName);
+        } catch (_) {}
       }
-    }
-    if ('caches' in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
+      if ('serviceWorker' in navigator) {
+        try {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) {
+            if (r.active) {
+              r.active.postMessage({
+                type: 'ROLLBACK_BROKEN_RELEASE',
+                brokenCacheName: pending.targetActiveCacheName,
+                fallbackCacheName: pending.fallbackCacheName || `gdf-quant-${CLIENT_APP_VERSION}`,
+              });
+            }
+          }
+        } catch (_) {}
+      }
     }
   } catch (_) {}
-
-  setTimeout(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('_v', String(Date.now()));
-    window.location.replace(url.toString());
-  }, 350);
 }
 
 if ('serviceWorker' in navigator) {
@@ -6014,8 +6784,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
       .then((reg) => {
         swRegistration = reg;
-        console.log('[GDF PWA] ServiceWorker registered with scope:', reg.scope);
-
         reg.update().catch(() => {});
 
         reg.addEventListener('updatefound', () => {
@@ -6024,9 +6792,7 @@ if ('serviceWorker' in navigator) {
 
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[GDF PWA] New build installed in background. Triggering forced update...');
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
-              showForcedUpdateBlockingModal(latestServerVersionInfo?.version || 'NEW_SW_BUILD');
+              checkReleaseManifest(false);
             }
           });
         });
@@ -6034,12 +6800,6 @@ if ('serviceWorker' in navigator) {
       .catch((err) => {
         console.warn('GDF ServiceWorker registration failed:', err);
       });
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log('[GDF PWA] ServiceWorker controller changed.');
-      const hdrTxt = document.getElementById('updateAppHeaderTxt');
-      if (hdrTxt) hdrTxt.textContent = currentLang === 'fa' ? 'نسخه جدید ⚡' : 'Update Available ⚡';
-    });
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -6053,10 +6813,12 @@ if ('serviceWorker' in navigator) {
       checkServerBuildVersion(false);
     });
 
+    // Bounded periodic release check every 60 seconds (never infinite rapid polling)
     setInterval(() => {
-      if (swRegistration) swRegistration.update().catch(() => {});
-      checkServerBuildVersion(false);
-    }, 20000);
+      if (document.visibilityState === 'visible') {
+        checkServerBuildVersion(false);
+      }
+    }, 60000);
   };
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -6066,35 +6828,34 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-// Server build version heartbeat
+// Unified authoritative release check entry point
 async function checkServerBuildVersion(interactive = false) {
-  const pwaVerLbl = document.getElementById('pwaVersionLabel');
-  if (pwaVerLbl) {
-    pwaVerLbl.textContent = `Build: ${CLIENT_APP_VERSION} · Auto-sync active`;
-  }
   if (interactive) {
     openAppUpdateModal(true);
     return;
   }
-  try {
-    const res = await fetch(buildApiUrl(`/api/app-version?t=${Date.now()}`), { cache: 'no-store' });
-    if (!res.ok) return;
-    const ct = (res.headers.get('content-type') || '').toLowerCase();
-    if (!ct.includes('application/json') && !ct.includes('text/json')) return;
-    const data = await res.json();
-    latestServerVersionInfo = data;
-    if (data && data.version && data.version !== CLIENT_APP_VERSION) {
-      console.log(`[GDF PWA] Server build (${data.version}) != Client (${CLIENT_APP_VERSION}). Update available.`);
-      const hdrTxt = document.getElementById('updateAppHeaderTxt');
-      if (hdrTxt) hdrTxt.textContent = currentLang === 'fa' ? 'نسخه جدید ⚡' : 'Update Available ⚡';
-    }
-  } catch (e) {
-    logClientWarningOrError('WARN', 'VERSION_CHECK', e?.message || 'Version check failed');
-  }
+  return checkReleaseManifest(false);
 }
 
-// Trigger initial version check immediately on app open!
-checkServerBuildVersion(false);
+window.GDFClientUpdateEngine = {
+  getState: () => ({ ...clientUpdateStateMachine, history: [...clientUpdateStateMachine.history] }),
+  setSimulatedInstalledVersion: (ver, buildId) => {
+    clientUpdateStateMachine.installedClientVersion = ver;
+    if (buildId) clientUpdateStateMachine.installedClientBuildId = buildId;
+    renderUpdateEngineUI();
+  },
+  checkReleaseManifest,
+  applyAppUpdate,
+  retryLastUpdateOperation,
+  verifyPostReloadUpdateCompletion,
+  openAppUpdateModal,
+  closeAppUpdateModal,
+  renderUpdateEngineUI,
+};
+
+verifyPostReloadUpdateCompletion().finally(() => {
+  checkServerBuildVersion(false);
+});
 
 let deferredInstallPrompt = null;
 const installAppBtn = document.getElementById('installAppBtn');
@@ -13134,7 +13895,7 @@ console.log(
 );
 
 // ==========================================================
-// Application Release Hub & Distribution Event Listeners
+// In-Place Client Self-Update Modal Event Listeners
 // ==========================================================
 const btnManualUpdateCheck = document.getElementById('btnManualUpdateCheck');
 if (btnManualUpdateCheck) {
@@ -13177,7 +13938,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Check Updates Now in Modal
+// 1. Check for Updates button
 const btnCheckUpdatesNow = document.getElementById('btnCheckUpdatesNow');
 if (btnCheckUpdatesNow) {
   btnCheckUpdatesNow.addEventListener('click', () => {
@@ -13185,54 +13946,29 @@ if (btnCheckUpdatesNow) {
   });
 }
 
-// Download feedback handlers
-const btnDownloadSourceZip = document.getElementById('btnDownloadSourceZip');
-if (btnDownloadSourceZip) {
-  btnDownloadSourceZip.addEventListener('click', () => {
-    const statusBox = document.getElementById('updateDownloadStatusBox');
-    const msg = document.getElementById('updateDownloadStatusMsg');
-    if (statusBox && msg) {
-      statusBox.classList.remove('hidden');
-      msg.textContent = currentLang === 'fa'
-        ? 'در حال آماده‌سازی و دانلود آرشیو کامل کد سورس (ZIP)... دریافت فایل در مرورگر آغاز شد.'
-        : 'Preparing and streaming Full Source Archive (ZIP)... Download initiated.';
-    }
-  });
-}
-
-const btnDownloadReleaseBundle = document.getElementById('btnDownloadReleaseBundle');
-if (btnDownloadReleaseBundle) {
-  btnDownloadReleaseBundle.addEventListener('click', () => {
-    const statusBox = document.getElementById('updateDownloadStatusBox');
-    const msg = document.getElementById('updateDownloadStatusMsg');
-    if (statusBox && msg) {
-      statusBox.classList.remove('hidden');
-      msg.textContent = currentLang === 'fa'
-        ? 'در حال آماده‌سازی و دانلود بسته انتشار (Release Bundle)... دریافت فایل در مرورگر آغاز شد.'
-        : 'Preparing and streaming Release Bundle... Download initiated.';
-    }
-  });
-}
-
-// In-App PWA Cache Purge & Reload
-const btnRefreshPwaCache = document.getElementById('btnRefreshPwaCache');
-if (btnRefreshPwaCache) {
-  btnRefreshPwaCache.addEventListener('click', () => {
+// 2. Update Now button (only visible when UPDATE_AVAILABLE)
+const btnUpdateNow = document.getElementById('btnUpdateNow');
+if (btnUpdateNow) {
+  btnUpdateNow.addEventListener('click', () => {
     applyAppUpdate();
   });
 }
 
-const btnForcedUpdateNow = document.getElementById('btnForcedUpdateNow');
-if (btnForcedUpdateNow) {
-  btnForcedUpdateNow.addEventListener('click', () => {
-    applyAppUpdate();
+// 3. Retry button (only visible when FAILED or UNKNOWN)
+const btnRetryUpdate = document.getElementById('btnRetryUpdate');
+if (btnRetryUpdate) {
+  btnRetryUpdate.addEventListener('click', () => {
+    retryLastUpdateOperation();
   });
 }
 
 const toastReloadBtn = document.getElementById('toastReloadBtn');
 if (toastReloadBtn) {
   toastReloadBtn.addEventListener('click', () => {
-    openAppUpdateModal(true);
+    openAppUpdateModal(false);
+    if (clientUpdateStateMachine.state === 'UPDATE_AVAILABLE' && clientUpdateStateMachine.isUpdateAvailable) {
+      applyAppUpdate();
+    }
   });
 }
 
@@ -13275,13 +14011,22 @@ function buildCleanBugReportText(diagPayload) {
     ? d.systemWarningsErrors
     : (Array.isArray(diagPayload?.systemWarningsErrors) ? diagPayload.systemWarningsErrors : []);
 
+  const publishedManifestVer = clientUpdateStateMachine.publishedClientVersion || 'UNKNOWN';
+  const serverRuntimeVer =
+    clientUpdateStateMachine.serverRuntimeVersion !== 'UNKNOWN'
+      ? clientUpdateStateMachine.serverRuntimeVersion
+      : (d.version || diagPayload?.version || 'UNKNOWN');
+  const updateEngineStatus = clientUpdateStateMachine.state || 'UNKNOWN';
+
   const lines = [
     '======================================================================',
     'GDF (GOLD DYNAMIC FLOW) — SYSTEM DIAGNOSTIC, WARNING & ERROR REPORT',
     '======================================================================',
     `Generated At (ISO):     ${new Date().toISOString()}`,
-    `Client App Version:     ${CLIENT_APP_VERSION}`,
-    `Server App Version:     ${d.version || diagPayload?.version || latestServerVersionInfo?.version || 'UNKNOWN'}`,
+    `Installed Client Ver:   ${clientUpdateStateMachine.installedClientVersion} (${clientUpdateStateMachine.installedClientBuildId})`,
+    `Published Client Rel:   ${publishedManifestVer}`,
+    `Server Runtime Version: ${serverRuntimeVer}`,
+    `Client Update Status:   ${updateEngineStatus}${clientUpdateStateMachine.isUpdateAvailable ? ' [UPDATE_AVAILABLE]' : ''}`,
     `Server Build Time:      ${(d.buildTime || diagPayload?.buildTime) ? new Date(d.buildTime || diagPayload.buildTime).toISOString() : 'N/A'}`,
     `Snapshot Correlation:   ${snapshotId}`,
     `Instrument Identity:    ${instIdentity} (${d.activeSymbol || wfSnap?.activeSymbol || 'PAXGUSDT'})`,

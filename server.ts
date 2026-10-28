@@ -19,6 +19,12 @@ import {
   getAllConcepts,
 } from './src/config/financialDictionary.js';
 import {
+  AUTHORITATIVE_API_CONTRACT_VERSION,
+  AUTHORITATIVE_CLIENT_VERSION,
+  AUTHORITATIVE_SERVER_VERSION,
+  buildAuthoritativeClientReleaseManifest,
+} from './src/config/clientReleaseManifest.js';
+import {
   assertVerifiedProvenance,
   bootstrapMultiTimeframeWaterfallCache,
   fetchVerifiedMacroNews,
@@ -69,8 +75,8 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 app.use(cors());
 app.use(express.json());
 
-// Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, and Live APIs are never served stale
-const APP_VERSION = '2026.10.27-v80.0-ScientificLatentCoreAndPulseEchoSonar';
+// Self-Updating PWA Mechanism: ensure ServiceWorker, Manifest, HTML, Client Core JS, and Live APIs are never served stale
+const APP_VERSION = AUTHORITATIVE_SERVER_VERSION;
 const BUILD_TIME = Date.now();
 
 app.use((req, res, next) => {
@@ -78,6 +84,7 @@ app.use((req, res, next) => {
   if (
     p === '/sw.js' ||
     p === '/index.html' ||
+    p === '/js/gdfClientCore.js' ||
     p === '/' ||
     p.startsWith('/api/') ||
     p.endsWith('.webmanifest') ||
@@ -92,9 +99,20 @@ app.use((req, res, next) => {
 
 app.get('/api/app-version', (req: Request, res: Response) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  const manifest = buildAuthoritativeClientReleaseManifest({
+    rootDir: __dirname,
+    serverVersion: APP_VERSION,
+    serverBuildTime: BUILD_TIME,
+  });
   res.json({
     appName: 'GDF',
-    version: APP_VERSION,
+    version: manifest.latestClientVersion || AUTHORITATIVE_CLIENT_VERSION,
+    clientVersion: manifest.latestClientVersion || AUTHORITATIVE_CLIENT_VERSION,
+    clientBuildId: manifest.latestClientBuildId,
+    serverVersion: APP_VERSION,
+    apiContractVersion: AUTHORITATIVE_API_CONTRACT_VERSION,
+    isVerified: manifest.isVerified,
+    bundleIntegritySha256: manifest.bundleIntegritySha256,
     buildTime: BUILD_TIME,
     timestamp: Date.now(),
     serverTime: new Date().toISOString(),
@@ -105,36 +123,35 @@ app.get('/api/app-version', (req: Request, res: Response) => {
 app.get('/api/release-manifest', (req: Request, res: Response) => {
   const ph = getArchitecturePersistenceHealth();
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  const installedClientVersion =
+    typeof req.query.installedClientVersion === 'string' && req.query.installedClientVersion.trim().length > 0
+      ? req.query.installedClientVersion.trim()
+      : undefined;
+  const installedClientBuildId =
+    typeof req.query.installedBuildId === 'string' && req.query.installedBuildId.trim().length > 0
+      ? req.query.installedBuildId.trim()
+      : undefined;
+
+  const manifest = buildAuthoritativeClientReleaseManifest({
+    rootDir: __dirname,
+    serverVersion: APP_VERSION,
+    serverBuildTime: BUILD_TIME,
+    installedClientVersion,
+    installedClientBuildId,
+  });
+
   res.json({
-    status: 'SUCCESS',
+    ...manifest,
     appName: 'GDF (Gold Dynamic Flow)',
-    installedVersion: APP_VERSION,
-    latestReleaseVersion: APP_VERSION,
     buildTime: BUILD_TIME,
     buildTimestampIso: new Date(BUILD_TIME).toISOString(),
-    isUpdateAvailable: false,
-    releaseNotes: [
-      'Scientific Core Upgrade: 6-Dimensional Latent State X evolving on a Causal Information Clock (τ)',
-      'Multi-Venue Observation Model: Sequential Bayesian updates across all verified exchange & futures cameras',
-      'Pulse–Echo (Sonar) Sensing Layer: Adaptive pulse detection and post-impulse market response measurement',
-      'Residual Oracle: Realized-minus-predicted Yellow Line residual structure analysis (Ljung-Box Q(5), serial memory, omitted-variable correlations)',
-      'Direct Mathematical Write-Back from Parallel Universe into the 6D Latent State & Observation Model',
-      'Permanent Out-of-Sample Scientific Scoreboard with 4 baseline comparisons and regime-conditioned breakdown',
-      'Preserved all safety invariants (STRICT_REAL_DATA_ONLY, explicit instrument identity, 8-gate verification, dual-line chart rendering)'
-    ],
-    downloadEndpoints: {
-      fullSourceZip: '/api/download/source',
-      releaseBuildZip: '/api/download/release-bundle',
-      versionEndpoint: '/api/app-version',
-      modelSpecsEndpoint: '/api/model-specs'
-    },
     environment: {
       platform: process.platform,
       nodeVersion: process.version,
       isRender: Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID),
       persistenceStatus: ph.statusLabel,
-      persistenceSource: ph.resolvedSource
-    }
+      persistenceSource: ph.resolvedSource,
+    },
   });
 });
 
@@ -370,6 +387,12 @@ app.use((req, res, next) => {
     });
   }
   next();
+});
+
+app.get('/sw.js', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
 app.use(express.static(path.join(__dirname, 'public')));

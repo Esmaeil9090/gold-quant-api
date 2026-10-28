@@ -682,6 +682,370 @@
     }
   }
 
+  const INVALID_VERSION_TOKENS = new Set([
+    '',
+    'unknown',
+    'null',
+    'undefined',
+    'n/a',
+    'none',
+    'checking',
+    'checking...',
+    'error',
+  ]);
+
+  function parseReleaseVersion(versionStr) {
+    if (typeof versionStr !== 'string') return null;
+    const trimmed = versionStr.trim();
+    if (!trimmed || INVALID_VERSION_TOKENS.has(trimmed.toLowerCase())) {
+      return null;
+    }
+
+    const gdfRegex = /^(\d{4})\.(\d{2})\.(\d{2})-v(\d+)\.(\d+)(?:\.(\d+))?(?:-([A-Za-z0-9_.-]+))?$/;
+    const gdfMatch = trimmed.match(gdfRegex);
+    if (gdfMatch) {
+      const year = Number(gdfMatch[1]);
+      const month = Number(gdfMatch[2]);
+      const day = Number(gdfMatch[3]);
+      const major = Number(gdfMatch[4]);
+      const minor = Number(gdfMatch[5]);
+      const patch = gdfMatch[6] !== undefined ? Number(gdfMatch[6]) : 0;
+      const buildTag = gdfMatch[7] || '';
+      if (
+        !Number.isFinite(year) ||
+        !Number.isFinite(month) ||
+        !Number.isFinite(day) ||
+        month < 1 ||
+        month > 12 ||
+        day < 1 ||
+        day > 31 ||
+        !Number.isFinite(major) ||
+        !Number.isFinite(minor) ||
+        !Number.isFinite(patch)
+      ) {
+        return null;
+      }
+      return {
+        raw: trimmed,
+        dateNumber: year * 10000 + month * 100 + day,
+        major,
+        minor,
+        patch,
+        buildTag,
+      };
+    }
+
+    const semverRegex = /^v?(\d+)\.(\d+)(?:\.(\d+))?(?:-([A-Za-z0-9_.-]+))?$/;
+    const semMatch = trimmed.match(semverRegex);
+    if (semMatch) {
+      const major = Number(semMatch[1]);
+      const minor = Number(semMatch[2]);
+      const patch = semMatch[3] !== undefined ? Number(semMatch[3]) : 0;
+      const buildTag = semMatch[4] || '';
+      if (!Number.isFinite(major) || !Number.isFinite(minor) || !Number.isFinite(patch)) {
+        return null;
+      }
+      return {
+        raw: trimmed,
+        dateNumber: 0,
+        major,
+        minor,
+        patch,
+        buildTag,
+      };
+    }
+
+    return null;
+  }
+
+  function compareReleaseVersions(versionA, versionB) {
+    const parsedA = parseReleaseVersion(versionA);
+    const parsedB = parseReleaseVersion(versionB);
+    if (!parsedA || !parsedB) return null;
+
+    if (parsedA.major !== parsedB.major) {
+      return parsedA.major < parsedB.major ? -1 : 1;
+    }
+    if (parsedA.minor !== parsedB.minor) {
+      return parsedA.minor < parsedB.minor ? -1 : 1;
+    }
+    if (parsedA.patch !== parsedB.patch) {
+      return parsedA.patch < parsedB.patch ? -1 : 1;
+    }
+    if (parsedA.dateNumber > 0 && parsedB.dateNumber > 0 && parsedA.dateNumber !== parsedB.dateNumber) {
+      return parsedA.dateNumber < parsedB.dateNumber ? -1 : 1;
+    }
+    return 0;
+  }
+
+  function evaluateClientUpdateStatus(params) {
+    const p = params || {};
+    const rawInstalledVer =
+      typeof p.installedClientVersion === 'string' && p.installedClientVersion.trim()
+        ? p.installedClientVersion.trim()
+        : 'UNKNOWN';
+    const rawInstalledBuildId =
+      typeof p.installedClientBuildId === 'string' && p.installedClientBuildId.trim()
+        ? p.installedClientBuildId.trim()
+        : 'UNKNOWN';
+
+    if (!p.manifest || typeof p.manifest !== 'object') {
+      return {
+        state: 'UNKNOWN',
+        comparison: 'UNREACHABLE_MANIFEST',
+        isUpdateAvailable: false,
+        isCompatible: false,
+        isVerified: false,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: 'UNKNOWN',
+        publishedClientBuildId: 'UNKNOWN',
+        serverRuntimeVersion: 'UNKNOWN',
+        apiContractVersion: 'UNKNOWN',
+        bundleIntegritySha256: null,
+        inconsistencyWarning: 'Release manifest is unreachable or returned no payload.',
+        statusBadgeEn: 'UPDATE STATUS UNKNOWN',
+        statusBadgeFa: 'وضعیت به‌روزرسانی نامشخص',
+        statusMessageEn: 'Could not verify client release status because the release manifest is unreachable.',
+        statusMessageFa: 'امکان بررسی وضعیت به‌روزرسانی وجود ندارد؛ مانیفست انتشار در دسترس نیست.',
+        allowedActions: ['CHECK_FOR_UPDATES', 'RETRY', 'CLOSE'],
+      };
+    }
+
+    const m = p.manifest;
+    const rawPublishedClientVer =
+      typeof m.latestClientVersion === 'string' && m.latestClientVersion.trim()
+        ? m.latestClientVersion.trim()
+        : '';
+    const rawPublishedBuildId =
+      typeof m.latestClientBuildId === 'string' && m.latestClientBuildId.trim()
+        ? m.latestClientBuildId.trim()
+        : 'UNKNOWN';
+    const rawServerVer =
+      typeof p.runningServerVersion === 'string' && p.runningServerVersion.trim()
+        ? p.runningServerVersion.trim()
+        : typeof m.serverVersion === 'string' && m.serverVersion.trim()
+        ? m.serverVersion.trim()
+        : 'UNKNOWN';
+    const apiContractVer =
+      typeof m.apiContractVersion === 'string' && m.apiContractVersion.trim()
+        ? m.apiContractVersion.trim()
+        : 'UNKNOWN';
+
+    const parsedInstalled = parseReleaseVersion(rawInstalledVer);
+    const parsedPublished = parseReleaseVersion(rawPublishedClientVer);
+
+    if (
+      !parsedPublished ||
+      !parsedInstalled ||
+      !Array.isArray(m.assets) ||
+      m.assets.length === 0 ||
+      !m.assets.every(
+        a => a && typeof a.path === 'string' && typeof a.sha256 === 'string' && /^[a-f0-9]{64}$/i.test(a.sha256)
+      )
+    ) {
+      return {
+        state: 'UNKNOWN',
+        comparison: 'MALFORMED_MANIFEST',
+        isUpdateAvailable: false,
+        isCompatible: false,
+        isVerified: false,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: parsedPublished ? rawPublishedClientVer : 'UNKNOWN',
+        publishedClientBuildId: rawPublishedBuildId,
+        serverRuntimeVersion: rawServerVer,
+        apiContractVersion: apiContractVer,
+        bundleIntegritySha256: typeof m.bundleIntegritySha256 === 'string' ? m.bundleIntegritySha256 : null,
+        inconsistencyWarning: 'Release manifest or version identifier is malformed or incomplete.',
+        statusBadgeEn: 'UPDATE STATUS UNKNOWN',
+        statusBadgeFa: 'وضعیت به‌روزرسانی نامشخص',
+        statusMessageEn: 'Update status is unknown because the release manifest or version metadata is incomplete.',
+        statusMessageFa: 'وضعیت به‌روزرسانی به دلیل ناقص یا نامعتبر بودن اطلاعات مانیفست نامشخص است.',
+        allowedActions: ['CHECK_FOR_UPDATES', 'RETRY', 'CLOSE'],
+      };
+    }
+
+    if (m.isVerified !== true) {
+      return {
+        state: 'FAILED',
+        comparison: 'UNVERIFIED_MANIFEST',
+        isUpdateAvailable: false,
+        isCompatible: false,
+        isVerified: false,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: rawPublishedClientVer,
+        publishedClientBuildId: rawPublishedBuildId,
+        serverRuntimeVersion: rawServerVer,
+        apiContractVersion: apiContractVer,
+        bundleIntegritySha256: m.bundleIntegritySha256 || null,
+        inconsistencyWarning: 'Published client release failed server-side asset integrity verification.',
+        statusBadgeEn: 'RELEASE UNVERIFIED',
+        statusBadgeFa: 'انتشار تأییدنشده',
+        statusMessageEn: 'Published client release is not verified. In-place client update is blocked for safety.',
+        statusMessageFa: 'نسخه منتشرشده کلاینت تأییدیه یکپارچگی ندارد؛ به‌روزرسانی برای حفظ ایمنی مسدود شد.',
+        allowedActions: ['CHECK_FOR_UPDATES', 'RETRY', 'CLOSE'],
+      };
+    }
+
+    const compat = m.compatibility;
+    let isServerCompatible = true;
+    if (compat) {
+      const minSrvCmp = compat.minCompatibleServerVersion
+        ? compareReleaseVersions(rawServerVer, compat.minCompatibleServerVersion)
+        : 0;
+      const maxSrvCmp = compat.maxCompatibleServerVersion
+        ? compareReleaseVersions(rawServerVer, compat.maxCompatibleServerVersion)
+        : 0;
+      if (minSrvCmp === null || maxSrvCmp === null || minSrvCmp < 0 || maxSrvCmp > 0) {
+        isServerCompatible = false;
+      }
+      if (
+        compat.requiredApiContractVersion &&
+        apiContractVer !== 'UNKNOWN' &&
+        compat.requiredApiContractVersion !== apiContractVer
+      ) {
+        isServerCompatible = false;
+      }
+    }
+
+    if (!isServerCompatible) {
+      return {
+        state: 'FAILED',
+        comparison: 'INCOMPATIBLE_SERVER',
+        isUpdateAvailable: false,
+        isCompatible: false,
+        isVerified: true,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: rawPublishedClientVer,
+        publishedClientBuildId: rawPublishedBuildId,
+        serverRuntimeVersion: rawServerVer,
+        apiContractVersion: apiContractVer,
+        bundleIntegritySha256: m.bundleIntegritySha256 || null,
+        inconsistencyWarning: `Published client (${rawPublishedClientVer}) is incompatible with running server (${rawServerVer}).`,
+        statusBadgeEn: 'INCOMPATIBLE RELEASE',
+        statusBadgeFa: 'عدم سازگاری نسخه با سرور',
+        statusMessageEn: `Published client release (${rawPublishedClientVer}) is incompatible with running server (${rawServerVer}).`,
+        statusMessageFa: `نسخه کلاینت منتشرشده (${rawPublishedClientVer}) با نسخه سرور فعلی (${rawServerVer}) سازگار نیست.`,
+        allowedActions: ['CHECK_FOR_UPDATES', 'RETRY', 'CLOSE'],
+      };
+    }
+
+    const cmp = compareReleaseVersions(rawInstalledVer, rawPublishedClientVer);
+    if (cmp > 0) {
+      return {
+        state: 'UNKNOWN',
+        comparison: 'INSTALLED_NEWER_INCONSISTENT',
+        isUpdateAvailable: false,
+        isCompatible: true,
+        isVerified: true,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: rawPublishedClientVer,
+        publishedClientBuildId: rawPublishedBuildId,
+        serverRuntimeVersion: rawServerVer,
+        apiContractVersion: apiContractVer,
+        bundleIntegritySha256: m.bundleIntegritySha256 || null,
+        inconsistencyWarning: `Installed client (${rawInstalledVer}) is newer than published manifest (${rawPublishedClientVer}). Automatic downgrade blocked.`,
+        statusBadgeEn: 'VERSION INCONSISTENCY',
+        statusBadgeFa: 'عدم تطابق نسخه (کلاینت جدیدتر)',
+        statusMessageEn: `Installed client (${rawInstalledVer}) is newer than the published manifest release (${rawPublishedClientVer}). Downgrade is blocked.`,
+        statusMessageFa: `نسخه کلاینت نصب‌شده (${rawInstalledVer}) جدیدتر از مانیفست انتشار (${rawPublishedClientVer}) است. بازگشت به نسخه قدیمی‌تر مسدود شد.`,
+        allowedActions: ['CHECK_FOR_UPDATES', 'RETRY', 'CLOSE'],
+      };
+    }
+
+    if (cmp < 0) {
+      return {
+        state: 'UPDATE_AVAILABLE',
+        comparison: 'INSTALLED_OLDER',
+        isUpdateAvailable: true,
+        isCompatible: true,
+        isVerified: true,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: rawPublishedClientVer,
+        publishedClientBuildId: rawPublishedBuildId,
+        serverRuntimeVersion: rawServerVer,
+        apiContractVersion: apiContractVer,
+        bundleIntegritySha256: m.bundleIntegritySha256 || null,
+        inconsistencyWarning: null,
+        statusBadgeEn: 'UPDATE AVAILABLE',
+        statusBadgeFa: 'نسخه جدید موجود است',
+        statusMessageEn: `Verified compatible HTML client release (${rawPublishedClientVer}) is ready for in-place browser update.`,
+        statusMessageFa: `نسخه جدید و تأییدشده کلاینت (${rawPublishedClientVer}) آماده به‌روزرسانی مستقیم در مرورگر است.`,
+        allowedActions: ['UPDATE_NOW', 'CHECK_FOR_UPDATES', 'CLOSE'],
+      };
+    }
+
+    const hasDistinctBuildId =
+      rawInstalledBuildId !== 'UNKNOWN' &&
+      rawPublishedBuildId !== 'UNKNOWN' &&
+      rawInstalledBuildId !== rawPublishedBuildId &&
+      !rawPublishedBuildId.startsWith(rawInstalledBuildId);
+
+    if (hasDistinctBuildId) {
+      return {
+        state: 'UPDATE_AVAILABLE',
+        comparison: 'INSTALLED_OLDER',
+        isUpdateAvailable: true,
+        isCompatible: true,
+        isVerified: true,
+        installedClientVersion: rawInstalledVer,
+        installedClientBuildId: rawInstalledBuildId,
+        publishedClientVersion: rawPublishedClientVer,
+        publishedClientBuildId: rawPublishedBuildId,
+        serverRuntimeVersion: rawServerVer,
+        apiContractVersion: apiContractVer,
+        bundleIntegritySha256: m.bundleIntegritySha256 || null,
+        inconsistencyWarning: null,
+        statusBadgeEn: 'UPDATE AVAILABLE',
+        statusBadgeFa: 'بیلد جدید موجود است',
+        statusMessageEn: `New verified client build (${rawPublishedBuildId}) for release ${rawPublishedClientVer} is ready for in-place update.`,
+        statusMessageFa: `بیلد جدید و تأییدشده کلاینت (${rawPublishedBuildId}) آماده به‌روزرسانی مستقیم در مرورگر است.`,
+        allowedActions: ['UPDATE_NOW', 'CHECK_FOR_UPDATES', 'CLOSE'],
+      };
+    }
+
+    return {
+      state: 'UP_TO_DATE',
+      comparison: 'EQUAL',
+      isUpdateAvailable: false,
+      isCompatible: true,
+      isVerified: true,
+      installedClientVersion: rawInstalledVer,
+      installedClientBuildId: rawInstalledBuildId,
+      publishedClientVersion: rawPublishedClientVer,
+      publishedClientBuildId: rawPublishedBuildId,
+      serverRuntimeVersion: rawServerVer,
+      apiContractVersion: apiContractVer,
+      bundleIntegritySha256: m.bundleIntegritySha256 || null,
+      inconsistencyWarning: null,
+      statusBadgeEn: 'UP TO DATE',
+      statusBadgeFa: 'به‌روز است',
+      statusMessageEn: `Installed HTML client (${rawInstalledVer}) matches the latest verified client release.`,
+      statusMessageFa: `کلاینت نصب‌شده (${rawInstalledVer}) کاملاً منطبق بر آخرین انتشار تأییدشده است.`,
+      allowedActions: ['CHECK_FOR_UPDATES', 'CLOSE'],
+    };
+  }
+
+  async function computeSha256Hex(textOrBytes) {
+    const bytes =
+      typeof textOrBytes === 'string'
+        ? new TextEncoder().encode(textOrBytes)
+        : textOrBytes instanceof Uint8Array
+        ? textOrBytes
+        : new Uint8Array(textOrBytes);
+    if (global.crypto && global.crypto.subtle && typeof global.crypto.subtle.digest === 'function') {
+      const hashBuffer = await global.crypto.subtle.digest('SHA-256', bytes);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    throw new Error('Web Crypto SHA-256 digest unavailable in this environment');
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initModelSpecTriggers);
   } else {
@@ -697,5 +1061,9 @@
     sanitizeClientHaltMessage,
     openModelSpecDrawer,
     syncModelSpecRegistry,
+    parseReleaseVersion,
+    compareReleaseVersions,
+    evaluateClientUpdateStatus,
+    computeSha256Hex,
   };
 })(window);
