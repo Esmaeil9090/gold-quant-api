@@ -1,6 +1,6 @@
 {
   "version": "v73.0-Phase5-WalkForward",
-  "updatedAtIso": "2026-10-27T23:15:19.555Z",
+  "updatedAtIso": "2026-10-28T05:25:59.880Z",
   "recordsByTimeframe": {
     "15m_causality_test_A": {
       "1792513800": {
@@ -29347,7 +29347,7 @@
       "zeroLookaheadVerified": true,
       "effectiveSampleSizeN": 31,
       "persistedSnapshotsCount": 1262,
-      "lastUpdatedIso": "2026-10-27T23:15:18.352Z",
+      "lastUpdatedIso": "2026-10-28T05:25:58.511Z",
       "currentVolatilityRegime": "LOW_VOL_GARCH",
       "currentVolatilityRegimeLabelEn": "LOW_VOL_GARCH (Below Median Conditional Vol)",
       "currentVolatilityRegimeLabelFa": "رژیم نوسان پایین (LOW_VOL_GARCH)",
@@ -29494,7 +29494,7 @@
       "zeroLookaheadVerified": true,
       "effectiveSampleSizeN": 31,
       "persistedSnapshotsCount": 1262,
-      "lastUpdatedIso": "2026-10-27T23:15:18.492Z",
+      "lastUpdatedIso": "2026-10-28T05:25:58.786Z",
       "currentVolatilityRegime": "LOW_VOL_GARCH",
       "currentVolatilityRegimeLabelEn": "LOW_VOL_GARCH (Below Median Conditional Vol)",
       "currentVolatilityRegimeLabelFa": "رژیم نوسان پایین (LOW_VOL_GARCH)",
@@ -29641,7 +29641,7 @@
       "zeroLookaheadVerified": true,
       "effectiveSampleSizeN": 240,
       "persistedSnapshotsCount": 1262,
-      "lastUpdatedIso": "2026-10-27T23:15:19.550Z",
+      "lastUpdatedIso": "2026-10-28T05:25:59.871Z",
       "currentVolatilityRegime": "LOW_VOL_GARCH",
       "currentVolatilityRegimeLabelEn": "LOW_VOL_GARCH (Below Median Conditional Vol)",
       "currentVolatilityRegimeLabelFa": "رژیم نوسان پایین (LOW_VOL_GARCH)",

@@ -1,5 +1,93 @@
 [
   {
+    "auditId": "audit-1793165153608-4og1h",
+    "timestampIso": "2026-10-28T05:25:53.608Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen30",
+    "targetArchitectureId": "arch-live-gen30",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v30.0-ParallelCandidate-G29) to Live Yellow-Line Architecture (v30.0-LivePromoted (MMI)) via MMI [Gates: 8/8] · Note: Scientific core promotion parity test.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v30.0-ParallelCandidate-G29) را به معماری خط زرد زنده (v30.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 8/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=8/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen29"
+  },
+  {
+    "auditId": "audit-1793165153191-izafl",
+    "timestampIso": "2026-10-28T05:25:53.192Z",
+    "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen30",
+    "targetArchitectureId": "arch-live-gen29",
+    "summaryEn": "Validated Parallel Universe mathematics from v30.0-ParallelCandidate-G29 written back into 6D Latent State & Observation Model (Gen #14: φ=0.95, κ=0.167, β_echo=0.476, γ_res=0.56, η_macro=0.2687, pruned=4) · Note: Verification test of direct mathematical write-back to 6D Latent State model.",
+    "summaryFa": "ریاضیات تاییدشده جهان موازی (v30.0-ParallelCandidate-G29) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #14: φ=0.95، κ=0.167، β=0.476، γ=0.56).",
+    "verifiableMetrics": "WriteBackGen=14 | phi=0.95 | kappa=0.167 | beta=0.476 | gamma=0.56 | eta=0.2687 | obsPrecMult=1.28"
+  },
+  {
+    "auditId": "audit-1793165150798-1mdc1",
+    "timestampIso": "2026-10-28T05:25:50.798Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen29",
+    "targetArchitectureId": "arch-live-gen29",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v29.0-ParallelCandidate-G28) to Live Yellow-Line Architecture (v29.0-LivePromoted (MMI)) via MMI [Gates: 8/8] · Note: Scientific core promotion parity test.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v29.0-ParallelCandidate-G28) را به معماری خط زرد زنده (v29.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 8/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=8/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen28"
+  },
+  {
+    "auditId": "audit-1793165150534-vwqw3",
+    "timestampIso": "2026-10-28T05:25:50.534Z",
+    "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen29",
+    "targetArchitectureId": "arch-live-gen28",
+    "summaryEn": "Validated Parallel Universe mathematics from v29.0-ParallelCandidate-G28 written back into 6D Latent State & Observation Model (Gen #12: φ=0.95, κ=0.167, β_echo=0.476, γ_res=0.56, η_macro=0.2684, pruned=4) · Note: Verification test of direct mathematical write-back to 6D Latent State model.",
+    "summaryFa": "ریاضیات تاییدشده جهان موازی (v29.0-ParallelCandidate-G28) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #12: φ=0.95، κ=0.167، β=0.476، γ=0.56).",
+    "verifiableMetrics": "WriteBackGen=12 | phi=0.95 | kappa=0.167 | beta=0.476 | gamma=0.56 | eta=0.2684 | obsPrecMult=1.28"
+  },
+  {
+    "auditId": "audit-1793165147429-7m9xf",
+    "timestampIso": "2026-10-28T05:25:47.429Z",
+    "eventType": "LEVEL_B_MODEL_INVENTED",
+    "actor": "INTELLIGENCE_AWARENESS_CORE",
+    "sourceArchitectureId": "arch-live-gen28",
+    "targetArchitectureId": "arch-cand-gen29",
+    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration (5/8 symbolic equations active in v29.0-ParallelCandidate-G28): Verification test synthesis.",
+    "summaryFa": "هسته هوشمندی و آگاهی کشف نمادین معادلات سطح B چندتایم‌فریمی و کالیبراسیون ریج را در جهان موازی اجرا کرد (5 معادله نمادین فعال).",
+    "verifiableMetrics": "Candidate=v29.0-ParallelCandidate-G28 | ActiveSymbolic=VOLUME_CLOCK_HAWKMOTH_RESTORING(w=8.7%), REAL_YIELD_CONVEXITY_ASYMMETRY(w=10.7%), LAGGED_RESIDUAL_SELF_CORRECTION(w=7.9%), BASIS_ACCELERATION_SECOND_ORDER(w=14.5%), ASYMMETRIC_TAIL_VOL_SHOCK_SHIELD(w=10.7%)"
+  },
+  {
+    "auditId": "audit-1793165147423-hl600",
+    "timestampIso": "2026-10-28T05:25:47.423Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen29",
+    "targetArchitectureId": "arch-live-gen28",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=false"
+  },
+  {
+    "auditId": "audit-1793165147300-st3ix",
+    "timestampIso": "2026-10-28T05:25:47.300Z",
+    "eventType": "PROMOTED_MANUAL_MMI",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen28",
+    "targetArchitectureId": "arch-live-gen28",
+    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v28.0-ParallelCandidate-G27) to Live Yellow-Line Architecture (v28.0-LivePromoted (MMI)) via MMI [Gates: 7/8] · Note: Automated test verification of MMI promotion path.",
+    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v28.0-ParallelCandidate-G27) را به معماری خط زرد زنده (v28.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 7/8].",
+    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=7/8 | ActiveModels=9 | Discovered=5 | Archived=arch-live-gen27"
+  },
+  {
+    "auditId": "audit-1793165147076-t0ozd",
+    "timestampIso": "2026-10-28T05:25:47.076Z",
+    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+    "actor": "CLOSED_LOOP_VERIFIER",
+    "sourceArchitectureId": "arch-cand-gen28",
+    "targetArchitectureId": "arch-live-gen27",
+    "summaryEn": "Automatic promotion blocked: Candidate has passed 0/8 gates (status: HALTED_FROZEN). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION).",
+    "summaryFa": "ارتقای خودکار متوقف شد: کاندیدا 0/8 گیت را گذرانده است. ارتقای خودکار نیازمند عبور از هر ۸ گیت راستی‌آزمایی است.",
+    "verifiableMetrics": "Status=HALTED_FROZEN | PassedGates=0/8"
+  },
+  {
     "auditId": "audit-1793142915638-np95d",
     "timestampIso": "2026-10-27T23:15:15.638Z",
     "eventType": "PROMOTED_MANUAL_MMI",

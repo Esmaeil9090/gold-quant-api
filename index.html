@@ -3666,6 +3666,14 @@ input:checked + .toggle-slider:before {
           <button class="deck-layer-btn active" id="btnEnsemble" data-i18n="layerPlumes">Confidence (68%·95%)</button>
           <button class="deck-layer-btn active" id="btnParallelCandidate" style="border-color: rgba(224, 64, 251, 0.55); color: #f381ff;" title="Toggle Parallel Universe Candidate Trajectory Line (#e040fb)">Candidate</button>
           <button class="deck-layer-btn active" id="btnCandles" data-i18n="layerBattle">Spectrum Candles</button>
+          <label for="flowQualitySelect" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#9cb0cc;margin-left:2px;white-space:nowrap;" title="Flow &amp; Heat Quality Mode (Persisted)">
+            <span>Flow:</span>
+            <select id="flowQualitySelect" aria-label="Flow Quality Mode" style="background:rgba(8,14,26,0.92);color:#f5d76e;border:1px solid rgba(245,215,110,0.45);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:800;cursor:pointer;">
+              <option value="full">Full</option>
+              <option value="lite">Lite</option>
+              <option value="off">Off</option>
+            </select>
+          </label>
         </div>
 
         <!-- Countdown Tag to Bar Close -->
@@ -4846,6 +4854,18 @@ input:checked + .toggle-slider:before {
 
       <div class="setting-row">
         <div class="setting-info">
+          <span class="setting-label">Flow Quality (Full / Lite / Off)</span>
+          <span class="setting-sub">Adaptive streamline &amp; waiting-money heat budget (Lite default on mobile)</span>
+        </div>
+        <select class="select-input" id="setFlowQualitySelect">
+          <option value="full">Full (Rich Glow &amp; Streamlines)</option>
+          <option value="lite">Lite (Fast Mobile · Low GPU)</option>
+          <option value="off">Off (Candles &amp; Trajectories Only)</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
           <span class="setting-label" data-i18n="setWatermark">GDF Symbol Watermark</span>
           <span class="setting-sub" data-i18n="setWatermarkSub">Display subtle background GDF asset &amp; timeframe watermark</span>
         </div>
@@ -6017,7 +6037,30 @@ window.addEventListener('appinstalled', () => {
 let forecastData = null;
 let animationFrameId = null;
 let particles = [];
-const NUM_PARTICLES = 220;
+// Strict hard cap on particle pool (<= 76 total, further capped per Flow Quality & device class)
+const NUM_PARTICLES = 76;
+const FLOW_QUALITY_STORAGE_KEY = 'gdf_flow_quality_mode';
+
+function isMobileChartDevice() {
+  return window.innerWidth <= 820 || (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+}
+
+function resolveInitialFlowQuality() {
+  try {
+    const saved = localStorage.getItem(FLOW_QUALITY_STORAGE_KEY);
+    if (saved === 'full' || saved === 'lite' || saved === 'off') {
+      return saved;
+    }
+  } catch (e) {}
+  return isMobileChartDevice() ? 'lite' : 'full';
+}
+
+let flowQualityMode = resolveInitialFlowQuality();
+let userExplicitlySelectedFlowQuality = false;
+try {
+  userExplicitlySelectedFlowQuality = !!localStorage.getItem(FLOW_QUALITY_STORAGE_KEY);
+} catch (e) {}
+
 let activeNewsFilter = 'all';
 let selectedNewsId = null;
 let activeIndCategory = 'all';
@@ -6025,8 +6068,8 @@ let currentEditingIndicator = null;
 
 // Layer Visibility Toggles
 const layers = {
-  particles: true,
-  isobars: true,
+  particles: flowQualityMode !== 'off',
+  isobars: flowQualityMode !== 'off',
   ensemble: true,
   candles: true,
 };
@@ -6582,13 +6625,72 @@ const threeWorldState = {
 const canvas = document.getElementById('windyCanvas');
 const ctx = canvas.getContext('2d');
 const radarStage = document.getElementById('radarStage');
-let dpr = window.devicePixelRatio || 1;
+let dpr = Math.min(2, window.devicePixelRatio || 1);
+
+// Offscreen Static Layer Cache Canvas (Decouples heavy structural chart redraws from 15-18fps flow animation)
+const staticChartCanvas = document.createElement('canvas');
+const staticChartCtx = staticChartCanvas.getContext('2d');
+let staticChartDirty = true;
+let lastStaticStateKey = '';
+let lastFlowTickMs = 0;
+let lastRafTimestampMs = 0;
+let rollingSlowFrameCount = 0;
+let cachedFlowFieldState = null;
+
+function markStaticChartDirty() {
+  staticChartDirty = true;
+}
+
+function setFlowQualityMode(mode, persistUserChoice = true) {
+  if (mode !== 'full' && mode !== 'lite' && mode !== 'off') return;
+  flowQualityMode = mode;
+  if (persistUserChoice) {
+    userExplicitlySelectedFlowQuality = true;
+    try {
+      localStorage.setItem(FLOW_QUALITY_STORAGE_KEY, mode);
+    } catch (e) {}
+  }
+  const selToolbar = document.getElementById('flowQualitySelect');
+  if (selToolbar && selToolbar.value !== mode) selToolbar.value = mode;
+  const selModal = document.getElementById('setFlowQualitySelect');
+  if (selModal && selModal.value !== mode) selModal.value = mode;
+
+  if (mode === 'off') {
+    layers.particles = false;
+    layers.isobars = false;
+  } else {
+    layers.particles = true;
+    layers.isobars = true;
+  }
+  const btnP = document.getElementById('btnParticles');
+  if (btnP) btnP.classList.toggle('active', layers.particles);
+  const btnI = document.getElementById('btnIsobars');
+  if (btnI) btnI.classList.toggle('active', layers.isobars);
+
+  const trailCap = mode === 'lite' ? 4 : 8;
+  for (let i = 0; i < particles.length; i++) {
+    particles[i].maxTrail = trailCap;
+    if (particles[i].history.length > trailCap) {
+      particles[i].history = particles[i].history.slice(-trailCap);
+    }
+  }
+  markStaticChartDirty();
+}
 
 function resizeCanvas() {
+  dpr = Math.min(isMobileChartDevice() ? 1.5 : 2, window.devicePixelRatio || 1);
   const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
+  const cw = Math.max(1, Math.round(rect.width * dpr));
+  const ch = Math.max(1, Math.round(rect.height * dpr));
+  canvas.width = cw;
+  canvas.height = ch;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  staticChartCanvas.width = cw;
+  staticChartCanvas.height = ch;
+  staticChartCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  markStaticChartDirty();
+
   if (typeof resizeThreeGlobeWorld === 'function') {
     resizeThreeGlobeWorld();
   }
@@ -7487,11 +7589,11 @@ document.querySelectorAll('#tfQuickPills .tf-pill-btn').forEach(btn => {
   });
 });
 
-// Windy-Style Liquidity Streamline Particle (Originates from Waiting-Money Zones)
+// Windy-Style Liquidity Streamline Particle (Originates from Waiting-Money Zones with Strict Trail & Budget Caps)
 class StreamlineParticle {
   constructor(w, h) {
     this.history = [];
-    this.maxTrail = 20;
+    this.maxTrail = flowQualityMode === 'lite' ? 4 : 8;
     this.flowDir = 1;
     this.flowMag = 0.7;
     this.laneOffset = (Math.random() - 0.5) * 18;
@@ -7499,9 +7601,10 @@ class StreamlineParticle {
   }
   reset(w, h, waitingZones) {
     this.age = 0;
-    this.maxAge = 75 + Math.random() * 75;
-    this.baseSpeed = 1.15 + Math.random() * 1.15;
+    this.maxAge = (flowQualityMode === 'lite' ? 46 : 64) + Math.random() * 44;
+    this.baseSpeed = 1.35 + Math.random() * 1.05;
     this.history = [];
+    this.maxTrail = flowQualityMode === 'lite' ? 4 : 8;
     this.laneOffset = (Math.random() - 0.5) * 20;
 
     if (Array.isArray(waitingZones) && waitingZones.length > 0) {
@@ -7551,10 +7654,14 @@ class StreamlineParticle {
       this.reset(w, h, waitingZones);
     }
   }
-  draw(ctx) {
+  draw(ctx, allowGlow = false, maxVisibleW = 2000, maxVisibleH = 2000) {
     if (this.history.length < 2) return;
+    const head = this.history[this.history.length - 1];
+    // Viewport culling: skip off-screen particles
+    if (head.x < 0 || head.x > maxVisibleW || head.y < 0 || head.y > maxVisibleH) return;
+
     const lifeRatio = Math.sin((this.age / this.maxAge) * Math.PI);
-    if (lifeRatio <= 0.04) return;
+    if (lifeRatio <= 0.05) return;
 
     // Streamline hue = direction of money flow (diverging scale: green/cyan for buy-side flow, red/orange for sell-side flow)
     // Streamline glow / brightness = magnitude of flow (same luminosity language as candles)
@@ -7566,27 +7673,27 @@ class StreamlineParticle {
     const lightness = Math.round(48 + Math.min(1.2, magNorm) * 24);
     const alpha = Math.min(0.88, lifeRatio * (0.28 + Math.min(1.0, magNorm) * 0.46));
 
-    ctx.save();
     ctx.beginPath();
     ctx.moveTo(this.history[0].x, this.history[0].y);
     for (let i = 1; i < this.history.length; i++) {
       ctx.lineTo(this.history[i].x, this.history[i].y);
     }
     ctx.strokeStyle = `hsla(${hue}, 94%, ${lightness}%, ${alpha.toFixed(3)})`;
-    ctx.lineWidth = 0.9 + Math.min(1.2, magNorm * 0.75);
-    if (magNorm > 0.85) {
-      ctx.shadowColor = `hsla(${hue}, 100%, ${Math.min(82, lightness + 12)}%, ${(alpha * 0.65).toFixed(3)})`;
-      ctx.shadowBlur = Math.round(4 + magNorm * 5);
+    ctx.lineWidth = 0.9 + Math.min(1.15, magNorm * 0.7);
+    if (allowGlow && magNorm > 0.92) {
+      ctx.shadowColor = `hsla(${hue}, 100%, ${Math.min(82, lightness + 12)}%, ${(alpha * 0.55).toFixed(3)})`;
+      ctx.shadowBlur = 4;
+    } else {
+      ctx.shadowBlur = 0;
     }
     ctx.stroke();
+    if (allowGlow) ctx.shadowBlur = 0;
 
     // Glowing streamline head
-    const head = this.history[this.history.length - 1];
     ctx.beginPath();
-    ctx.arc(head.x, head.y, 1.15 + Math.min(1.1, magNorm * 0.6), 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${hue}, 100%, ${Math.min(90, lightness + 18)}%, ${Math.min(0.95, alpha * 1.18).toFixed(3)})`;
+    ctx.arc(head.x, head.y, 1.1 + Math.min(1.0, magNorm * 0.55), 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${hue}, 100%, ${Math.min(90, lightness + 18)}%, ${Math.min(0.95, alpha * 1.15).toFixed(3)})`;
     ctx.fill();
-    ctx.restore();
   }
 }
 
@@ -10149,13 +10256,73 @@ function priceToY(price, minP, maxP, height) {
   return height - ((price - minP) / pRange) * height;
 }
 
-// Main 60 FPS Render Loop (Atmospheric Particles, Isobars, Chromatic Candles, Indicators, TradingView Scales)
-function renderLoop() {
-  const rect = canvas.getBoundingClientRect();
-  const w = rect.width;
-  const h = rect.height;
+// Compute lightweight dirty-check signature for the structural chart layer
+function computeStaticChartStateKey(w, h) {
+  if (!forecastData || !forecastData.candles || forecastData.candles.length === 0) {
+    return `empty_${Math.round(w)}x${Math.round(h)}`;
+  }
+  const cLen = forecastData.candles.length;
+  const lastC = forecastData.candles[cLen - 1];
+  const sliderEl = document.getElementById('timeSlider');
+  const sliderVal = sliderEl ? sliderEl.value : '0';
+  let indBits = '';
+  for (const k in indicatorConfigs) {
+    const cfg = indicatorConfigs[k];
+    if (cfg && cfg.enabled) {
+      indBits += `${k}:${cfg.period || ''}:${cfg.mult || ''}:${cfg.color || ''};`;
+    }
+  }
+  const candTrackLen = forecastData.parallelUniverse?.candidateEnsemble?.medianTrack?.length || 0;
+  const candLastVal = candTrackLen > 0
+    ? forecastData.parallelUniverse.candidateEnsemble.medianTrack[candTrackLen - 1].value.toFixed(2)
+    : 'none';
+  const liveTrackLen = forecastData.ensemble?.medianTrack?.length || 0;
+  const liveLastVal = liveTrackLen > 0
+    ? forecastData.ensemble.medianTrack[liveTrackLen - 1].value.toFixed(2)
+    : 'none';
+  const isInteracting = (
+    chartViewport.isDraggingPriceAxis ||
+    chartViewport.isDraggingTimeAxis ||
+    chartViewport.isPanningChart ||
+    touchPinch.isPinching
+  ) ? 1 : 0;
 
+  return [
+    Math.round(w),
+    Math.round(h),
+    forecastData.timestamp || 0,
+    (forecastData.currentPrice || 0).toFixed(2),
+    cLen,
+    lastC ? `${lastC.time}_${lastC.close.toFixed(2)}_${Math.round(lastC.volume || 0)}` : '0',
+    liveLastVal,
+    candLastVal,
+    currentTimeframe,
+    chartViewport.priceZoom.toFixed(3),
+    chartViewport.priceOffset.toFixed(2),
+    chartViewport.timeZoom.toFixed(3),
+    chartViewport.candleOffset,
+    sliderVal,
+    threeWorldState.replayBarOffset,
+    flowQualityMode,
+    layers.isobars ? 1 : 0,
+    layers.ensemble ? 1 : 0,
+    layers.parallelCandidate !== false ? 1 : 0,
+    layers.candles ? 1 : 0,
+    chartSettings.chartStyle,
+    chartSettings.showGrid ? 1 : 0,
+    chartSettings.showSessions ? 1 : 0,
+    chartSettings.showWatermark ? 1 : 0,
+    drawingsHidden ? 1 : 0,
+    userDrawings.length,
+    isInteracting,
+    indBits,
+  ].join('|');
+}
+
+// Render heavy structural chart layer onto offscreen staticChartCanvas (only called when data/viewport/settings change)
+function renderStaticChartLayer(ctx, w, h, allowGlow) {
   ctx.clearRect(0, 0, w, h);
+  cachedFlowFieldState = null;
 
   if (forecastData && forecastData.candles && forecastData.candles.length > 0) {
     // 1. Calculate candle counts and offsets based on timeZoom and candleOffset
@@ -10298,9 +10465,10 @@ function renderLoop() {
       ? Math.max(0.2, Math.min(1.8, sciLatent.liquidityResilience))
       : 1.0;
 
-    // Build Waiting-Money Accumulation Zones from real candles, topDownPools, and isobars
+    // Build Waiting-Money Accumulation Zones from real candles, topDownPools, and isobars (Hard Cap: top 6 in Full, top 4 in Lite, 0 in Off)
     const activeWaitingZones = [];
-    if (candles.length >= 6) {
+    const maxWaitingZones = flowQualityMode === 'off' ? 0 : (flowQualityMode === 'lite' ? 4 : 6);
+    if (maxWaitingZones > 0 && candles.length >= 6) {
       // 1) Local swing lows & highs weighted by resting volume accumulation
       const candidatePools = [];
       for (let i = 2; i < candles.length - 2; i++) {
@@ -10310,6 +10478,7 @@ function renderLoop() {
         const isSwingHigh = c.high >= candles[i - 1].high && c.high >= candles[i + 1].high;
         if (isSwingLow || isSwingHigh) {
           const poolPrice = isSwingLow ? c.low : c.high;
+          if (poolPrice < minP || poolPrice > maxP) continue; // Price window culling
           const xOrigin = Math.max(0, (i - 2) * candleStep);
           const xSpanEnd = Math.min(mainWidth * 0.86, Math.max(candleAreaWidth * 0.92, (i + 12) * candleStep));
           candidatePools.push({
@@ -10354,35 +10523,34 @@ function renderLoop() {
         }
       }
 
-      // Deduplicate nearby price levels so bands stay calm and uncluttered (max 6 bands)
+      // Deduplicate nearby price levels so bands stay calm and uncluttered (strictly capped to maxWaitingZones)
       candidatePools.sort((a, b) => b.strength - a.strength);
-      const minPriceSep = (maxP - minP) * 0.055;
+      const minPriceSep = (maxP - minP) * (flowQualityMode === 'lite' ? 0.075 : 0.055);
       for (const cp of candidatePools) {
-        if (activeWaitingZones.length >= 6) break;
+        if (activeWaitingZones.length >= maxWaitingZones) break;
         const y = priceToY(cp.price, minP, maxP, mainHeight);
         if (y < 18 || y > mainHeight - 16) continue;
         if (!activeWaitingZones.some(z => Math.abs(z.price - cp.price) < minPriceSep)) {
           activeWaitingZones.push({
             ...cp,
             y,
-            bandHeight: Math.round(12 + cp.strength * 14),
+            bandHeight: Math.round(11 + cp.strength * (flowQualityMode === 'lite' ? 11 : 14)),
           });
         }
       }
     }
 
     // 6. Draw Waiting-Money Layer (Soft Horizontal Resting Liquidity Heat Bands)
-    if (layers.isobars && activeWaitingZones.length > 0) {
+    if (flowQualityMode !== 'off' && layers.isobars && activeWaitingZones.length > 0) {
       ctx.save();
       for (const z of activeWaitingZones) {
         const y = z.y;
         const halfBand = z.bandHeight;
-        const x0 = z.xStart || 0;
-        const x1 = z.xEnd || mainWidth * 0.82;
-        const midX = x0 + (x1 - x0) * 0.48;
-        const alphaCore = Math.min(0.42, 0.12 + z.strength * 0.20);
-        const alphaInner = Math.min(0.68, 0.20 + z.strength * 0.30);
+        const x0 = Math.max(0, z.xStart || 0);
+        const x1 = Math.min(mainWidth, z.xEnd || mainWidth * 0.82);
+        if (x1 <= x0 || y + halfBand < 0 || y - halfBand > mainHeight) continue; // Viewport culling
 
+        const alphaCore = Math.min(0.42, 0.12 + z.strength * 0.20);
         // Vertical heat falloff
         const vGrad = ctx.createLinearGradient(0, y - halfBand, 0, y + halfBand);
         vGrad.addColorStop(0, 'rgba(245, 178, 58, 0)');
@@ -10394,26 +10562,27 @@ function renderLoop() {
         ctx.fillStyle = vGrad;
         ctx.fillRect(x0, y - halfBand, x1 - x0, halfBand * 2);
 
-        // Glowing core filament inside the waiting-money band
-        const hGrad = ctx.createLinearGradient(x0, y, x1, y);
-        hGrad.addColorStop(0, 'rgba(245, 195, 85, 0)');
-        hGrad.addColorStop(0.22, `rgba(245, 200, 92, ${(alphaInner * 0.65).toFixed(3)})`);
-        hGrad.addColorStop(0.52, `rgba(255, 226, 130, ${alphaInner.toFixed(3)})`);
-        hGrad.addColorStop(0.82, `rgba(245, 200, 92, ${(alphaInner * 0.45).toFixed(3)})`);
-        hGrad.addColorStop(1, 'rgba(245, 195, 85, 0)');
+        // In Full mode, add the secondary horizontal core filament gradient; Lite mode uses a fast single pass
+        if (flowQualityMode === 'full') {
+          const alphaInner = Math.min(0.68, 0.20 + z.strength * 0.30);
+          const hGrad = ctx.createLinearGradient(x0, y, x1, y);
+          hGrad.addColorStop(0, 'rgba(245, 195, 85, 0)');
+          hGrad.addColorStop(0.22, `rgba(245, 200, 92, ${(alphaInner * 0.65).toFixed(3)})`);
+          hGrad.addColorStop(0.52, `rgba(255, 226, 130, ${alphaInner.toFixed(3)})`);
+          hGrad.addColorStop(0.82, `rgba(245, 200, 92, ${(alphaInner * 0.45).toFixed(3)})`);
+          hGrad.addColorStop(1, 'rgba(245, 195, 85, 0)');
 
-        ctx.fillStyle = hGrad;
-        ctx.fillRect(x0, y - 2.2, x1 - x0, 4.4);
+          ctx.fillStyle = hGrad;
+          ctx.fillRect(x0, y - 2.2, x1 - x0, 4.4);
+        }
       }
       ctx.restore();
     }
 
-    // 7. Draw Windy-Style Liquidity Flow Field (Streamlines + Particle Trails Originating from Waiting-Money Zones)
-    if (layers.particles && candles.length >= 4) {
+    // 7. Precompute & Cache Flow Field Path Nodes for the Decoupled 16 FPS Flow Overlay
+    if (flowQualityMode !== 'off' && candles.length >= 4) {
       const netVelocity = (forecastData.macroWindVector?.totalNetVelocity || 0) + pressureTox * 0.8;
       const garchVol = forecastData.garchVolatility?.currentVolPct || 0.3;
-
-      // Smoothed price path target for streamlines so they flow organically along market structure
       const pathNodes = [];
       for (let i = 0; i < candles.length; i++) {
         const cx = i * candleStep + candleStep * 0.5;
@@ -10440,117 +10609,16 @@ function renderLoop() {
           });
         }
       }
-
-      function sampleFlowTarget(px) {
-        if (pathNodes.length === 0) return { y: mainHeight * 0.5, slopeY: -0.2, dir: 1, mag: 0.8 };
-        const clampedX = Math.max(0, Math.min(mainWidth, px));
-        let idx = 0;
-        for (let i = 0; i < pathNodes.length - 1; i++) {
-          if (clampedX >= pathNodes[i].x && clampedX <= pathNodes[i + 1].x) {
-            idx = i;
-            break;
-          }
-          if (clampedX > pathNodes[i].x) idx = i;
-        }
-        const n0 = pathNodes[idx];
-        const n1 = pathNodes[Math.min(pathNodes.length - 1, idx + 1)];
-        const span = Math.max(1, n1.x - n0.x);
-        const t = Math.max(0, Math.min(1, (clampedX - n0.x) / span));
-        const yInterp = n0.y + (n1.y - n0.y) * t;
-        const lookAhead = pathNodes[Math.min(pathNodes.length - 1, idx + 4)];
-        const dx = Math.max(8, lookAhead.x - n0.x);
-        const dy = lookAhead.y - n0.y;
-        const flowDir = dy <= 0 ? 1 : -1;
-        return {
-          y: yInterp,
-          slopeY: dy / dx,
-          dir: flowDir,
-          mag: Math.max(0.35, Math.min(1.45, (n0.volRatio * 0.65 + infoClockTau * 0.35))),
-        };
-      }
-
-      // A. Continuous Windy-style curved streamlines born from waiting-money zones
-      const timePhase = (performance.now() * 0.00085) * Math.max(0.6, Math.min(1.8, infoClockTau));
-      const streamLinesCount = Math.max(5, Math.min(12, Math.round(7 * Math.sqrt(infoClockTau))));
-      ctx.save();
-      for (let sIdx = 0; sIdx < streamLinesCount; sIdx++) {
-        const originZone = activeWaitingZones.length > 0
-          ? activeWaitingZones[sIdx % activeWaitingZones.length]
-          : { y: mainHeight * 0.72, strength: 0.75, flowDir: netVelocity >= 0 ? 1 : -1, xStart: 0 };
-        const laneSpread = ((sIdx / Math.max(1, streamLinesCount - 1)) - 0.5) * 34;
-        const startX = Math.max(0, (originZone.xStart || 0) * 0.35);
-        const startY = Math.max(16, Math.min(mainHeight - 16, originZone.y + laneSpread * 0.65));
-
-        const endX = mainWidth * (0.76 + (sIdx % 3) * 0.06);
-        const segs = 28;
-        const pts = [];
-        for (let k = 0; k <= segs; k++) {
-          const u = k / segs;
-          const x = startX + (endX - startX) * u;
-          const tgt = sampleFlowTarget(x);
-          // Blend smoothly from the waiting-money origin zone into the active market flow channel
-          const pull = Math.pow(u, 0.82);
-          const wave = Math.sin(u * 5.2 - timePhase + sIdx * 0.55) * (4.5 + garchVol * 4.0);
-          const y = startY * (1 - pull * 0.78) + (tgt.y + 22 + laneSpread) * (pull * 0.78) + wave;
-          pts.push({ x, y, dir: tgt.dir, mag: tgt.mag * (originZone.strength || 0.75) });
-        }
-
-        const avgMag = pts.reduce((a, p) => a + p.mag, 0) / pts.length;
-        const endSlopeUp = pts[pts.length - 1].y <= pts[0].y;
-        const streamGrad = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length - 1].x, pts[pts.length - 1].y);
-        const baseAlpha = Math.min(0.62, (0.14 + avgMag * 0.22) * (1 - Math.abs(laneSpread) / 48));
-        if (endSlopeUp) {
-          streamGrad.addColorStop(0, 'rgba(0, 210, 255, 0.02)');
-          streamGrad.addColorStop(0.28, `rgba(0, 224, 245, ${(baseAlpha * 0.95).toFixed(3)})`);
-          streamGrad.addColorStop(0.62, `rgba(72, 238, 182, ${(baseAlpha * 0.85).toFixed(3)})`);
-          streamGrad.addColorStop(1, 'rgba(245, 215, 110, 0.02)');
-        } else {
-          streamGrad.addColorStop(0, 'rgba(255, 90, 60, 0.02)');
-          streamGrad.addColorStop(0.32, `rgba(255, 105, 70, ${(baseAlpha * 0.92).toFixed(3)})`);
-          streamGrad.addColorStop(0.68, `rgba(255, 168, 76, ${(baseAlpha * 0.80).toFixed(3)})`);
-          streamGrad.addColorStop(1, 'rgba(245, 215, 110, 0.02)');
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (let k = 1; k < pts.length; k++) {
-          const prev = pts[k - 1];
-          const cur = pts[k];
-          const mx = (prev.x + cur.x) * 0.5;
-          const my = (prev.y + cur.y) * 0.5;
-          ctx.quadraticCurveTo(prev.x, prev.y, mx, my);
-        }
-        ctx.strokeStyle = streamGrad;
-        ctx.lineWidth = 1.0 + Math.min(1.4, avgMag * 0.7);
-        if (avgMag > 0.75) {
-          ctx.shadowColor = endSlopeUp ? 'rgba(0, 229, 255, 0.42)' : 'rgba(255, 95, 65, 0.42)';
-          ctx.shadowBlur = 6;
-        } else {
-          ctx.shadowBlur = 0;
-        }
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // B. Advect and draw glowing streamline particles born in waiting-money zones
-      const activeParticleLimit = Math.max(45, Math.min(particles.length, Math.round(105 * Math.min(1.8, Math.max(0.55, infoClockTau)))));
-      const fieldEvaluator = (px, py, laneOff, age) => {
-        const tgt = sampleFlowTarget(px);
-        const targetY = tgt.y + 18 + laneOff;
-        const pullVy = (targetY - py) * 0.038;
-        const slopeVy = tgt.slopeY * 1.45;
-        const waveVy = Math.sin(px * 0.024 + age * 0.07) * garchVol * 0.55;
-        const vy = Math.max(-2.4, Math.min(2.4, pullVy * 0.65 + slopeVy * 0.35 + waveVy));
-        const vx = 1.55 + Math.min(1.1, tgt.mag * 0.45);
-        const flowDir = vy <= 0.08 ? 1 : -1;
-        return { vx, vy, dir: flowDir, mag: tgt.mag };
+      cachedFlowFieldState = {
+        activeWaitingZones,
+        pathNodes,
+        infoClockTau,
+        garchVol,
+        netVelocity,
+        candleAreaWidth,
+        mainWidth,
+        mainHeight,
       };
-
-      for (let i = 0; i < activeParticleLimit; i++) {
-        const p = particles[i];
-        p.update(mainWidth * 0.90, mainHeight, fieldEvaluator, activeWaitingZones, Math.max(0.65, Math.min(1.65, infoClockTau)));
-        p.draw(ctx);
-      }
     }
 
     // 8. Draw Candlesticks (Green ↔ Red Continuous Spectrum + Luminosity Volume) & Pulse Flash
@@ -10587,6 +10655,8 @@ function renderLoop() {
         for (let i = 0; i < candles.length; i++) {
           const c = candles[i];
           const x = i * candleStep + candleStep * 0.5;
+          if (x + candleStep < 0 || x - candleStep > candleAreaWidth + 8) continue; // Horizontal culling
+
           const openY = priceToY(c.open, minP, maxP, mainHeight);
           const closeY = priceToY(c.close, minP, maxP, mainHeight);
           const highY = priceToY(c.high, minP, maxP, mainHeight);
@@ -10623,11 +10693,11 @@ function renderLoop() {
 
           const candleColor = `hsla(${hue}, ${sat}%, ${lightness}%, ${alpha})`;
 
-          // Luminosity / glow intensity encodes relative volume only
-          if (vRatio > 1.08) {
-            const glowAlpha = Math.min(0.85, 0.28 + (vRatio - 1.0) * 0.42);
+          // Luminosity / glow intensity encodes relative volume only (shadowBlur enabled in Full mode when not dragging)
+          if (allowGlow && vRatio > 1.15) {
+            const glowAlpha = Math.min(0.80, 0.25 + (vRatio - 1.0) * 0.38);
             ctx.shadowColor = `hsla(${hue}, 100%, ${Math.min(78, lightness + 14)}%, ${glowAlpha.toFixed(3)})`;
-            ctx.shadowBlur = Math.min(14, Math.round(4 + vRatio * 5));
+            ctx.shadowBlur = Math.min(10, Math.round(3 + vRatio * 4));
           } else {
             ctx.shadowBlur = 0;
           }
@@ -11690,27 +11760,6 @@ function renderLoop() {
       }
     }
 
-    // Active in-progress drawing preview line
-    if (drawingPendingPoint && drawingHoverPoint && activeDrawingTool !== 'select') {
-      const x1 = drawingPendingPoint.x;
-      const y1 = drawingPendingPoint.y;
-      const x2 = drawingHoverPoint.x;
-      const y2 = drawingHoverPoint.y;
-
-      ctx.strokeStyle = activeDrawingTool === 'trendline' ? '#00e5ff' : '#f5d76e';
-      ctx.lineWidth = 1.8;
-      ctx.setLineDash([5, 4]);
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      ctx.fillStyle = activeDrawingTool === 'trendline' ? '#00e5ff' : '#f5d76e';
-      ctx.beginPath(); ctx.arc(x1, y1, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x2, y2, 4, 0, Math.PI * 2); ctx.fill();
-    }
-
     // 10.7. Optional Classic Volume Histogram (FORBIDDEN by default; ONLY drawn if user explicitly enables 'volume' from Indicator Menu)
     if (indicatorConfigs.volume?.enabled && candles.length > 0) {
       const volPaneH = Math.min(64, Math.max(42, mainHeight * 0.14));
@@ -11913,12 +11962,259 @@ function renderLoop() {
     }
     ctx.restore();
   }
+}
+
+// Render lightweight Windy-style Liquidity Flow Field overlay (decoupled from heavy static chart layer)
+function renderFlowOverlay(ctx, nowMs, skipParticleAdvection, allowGlow) {
+  if (flowQualityMode === 'off' || !layers.particles || !cachedFlowFieldState) return;
+  const {
+    activeWaitingZones,
+    pathNodes,
+    infoClockTau,
+    garchVol,
+    netVelocity,
+    candleAreaWidth,
+    mainWidth,
+    mainHeight,
+  } = cachedFlowFieldState;
+  if (!pathNodes || pathNodes.length < 2) return;
+
+  function sampleFlowTarget(px) {
+    const clampedX = Math.max(0, Math.min(mainWidth, px));
+    let idx = 0;
+    for (let i = 0; i < pathNodes.length - 1; i++) {
+      if (clampedX >= pathNodes[i].x && clampedX <= pathNodes[i + 1].x) {
+        idx = i;
+        break;
+      }
+      if (clampedX > pathNodes[i].x) idx = i;
+    }
+    const n0 = pathNodes[idx];
+    const n1 = pathNodes[Math.min(pathNodes.length - 1, idx + 1)];
+    const span = Math.max(1, n1.x - n0.x);
+    const t = Math.max(0, Math.min(1, (clampedX - n0.x) / span));
+    const yInterp = n0.y + (n1.y - n0.y) * t;
+    const lookAhead = pathNodes[Math.min(pathNodes.length - 1, idx + 4)];
+    const dx = Math.max(8, lookAhead.x - n0.x);
+    const dy = lookAhead.y - n0.y;
+    const flowDir = dy <= 0 ? 1 : -1;
+    return {
+      y: yInterp,
+      slopeY: dy / dx,
+      dir: flowDir,
+      mag: Math.max(0.35, Math.min(1.45, (n0.volRatio * 0.65 + infoClockTau * 0.35))),
+    };
+  }
+
+  const isMobile = isMobileChartDevice();
+  const maxStreamlines = flowQualityMode === 'lite'
+    ? (isMobile ? 4 : 5)
+    : (isMobile ? 6 : 8);
+  const streamLinesCount = Math.max(3, Math.min(maxStreamlines, Math.round(maxStreamlines * Math.sqrt(Math.min(1.4, infoClockTau)))));
+  const timePhase = (nowMs * 0.00085) * Math.max(0.6, Math.min(1.8, infoClockTau));
+
+  // A. Continuous Windy-style curved streamlines born from waiting-money zones
+  ctx.save();
+  for (let sIdx = 0; sIdx < streamLinesCount; sIdx++) {
+    const originZone = activeWaitingZones.length > 0
+      ? activeWaitingZones[sIdx % activeWaitingZones.length]
+      : { y: mainHeight * 0.72, strength: 0.75, flowDir: netVelocity >= 0 ? 1 : -1, xStart: 0 };
+    const laneSpread = ((sIdx / Math.max(1, streamLinesCount - 1)) - 0.5) * 32;
+    const startX = Math.max(0, (originZone.xStart || 0) * 0.35);
+    const startY = Math.max(16, Math.min(mainHeight - 16, originZone.y + laneSpread * 0.65));
+
+    // Future-horizon streams are fewer and simpler than near-term streams
+    const reachesFuture = (sIdx % 2 === 0);
+    const endX = reachesFuture
+      ? mainWidth * (0.74 + (sIdx % 3) * 0.05)
+      : Math.min(mainWidth * 0.66, candleAreaWidth * 1.08);
+    if (endX <= startX + 16) continue;
+
+    const segs = flowQualityMode === 'lite' ? (reachesFuture ? 12 : 10) : (reachesFuture ? 18 : 14);
+    const pts = [];
+    let anyVisible = false;
+    for (let k = 0; k <= segs; k++) {
+      const u = k / segs;
+      const x = startX + (endX - startX) * u;
+      const tgt = sampleFlowTarget(x);
+      const pull = Math.pow(u, 0.82);
+      const wave = Math.sin(u * 5.0 - timePhase + sIdx * 0.55) * (4.0 + garchVol * 3.5);
+      const y = startY * (1 - pull * 0.78) + (tgt.y + 20 + laneSpread) * (pull * 0.78) + wave;
+      if (y >= 0 && y <= mainHeight && x >= 0 && x <= mainWidth) anyVisible = true;
+      pts.push({ x, y, dir: tgt.dir, mag: tgt.mag * (originZone.strength || 0.75) });
+    }
+    if (!anyVisible || pts.length < 2) continue; // Viewport culling
+
+    const avgMag = pts.reduce((a, p) => a + p.mag, 0) / pts.length;
+    const endSlopeUp = pts[pts.length - 1].y <= pts[0].y;
+    const streamGrad = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[pts.length - 1].x, pts[pts.length - 1].y);
+    const baseAlpha = Math.min(0.60, (0.14 + avgMag * 0.22) * (1 - Math.abs(laneSpread) / 48));
+    if (endSlopeUp) {
+      streamGrad.addColorStop(0, 'rgba(0, 210, 255, 0.02)');
+      streamGrad.addColorStop(0.28, `rgba(0, 224, 245, ${(baseAlpha * 0.95).toFixed(3)})`);
+      streamGrad.addColorStop(0.62, `rgba(72, 238, 182, ${(baseAlpha * 0.85).toFixed(3)})`);
+      streamGrad.addColorStop(1, 'rgba(245, 215, 110, 0.02)');
+    } else {
+      streamGrad.addColorStop(0, 'rgba(255, 90, 60, 0.02)');
+      streamGrad.addColorStop(0.32, `rgba(255, 105, 70, ${(baseAlpha * 0.92).toFixed(3)})`);
+      streamGrad.addColorStop(0.68, `rgba(255, 168, 76, ${(baseAlpha * 0.80).toFixed(3)})`);
+      streamGrad.addColorStop(1, 'rgba(245, 215, 110, 0.02)');
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let k = 1; k < pts.length; k++) {
+      const prev = pts[k - 1];
+      const cur = pts[k];
+      const mx = (prev.x + cur.x) * 0.5;
+      const my = (prev.y + cur.y) * 0.5;
+      ctx.quadraticCurveTo(prev.x, prev.y, mx, my);
+    }
+    ctx.strokeStyle = streamGrad;
+    ctx.lineWidth = 1.0 + Math.min(1.3, avgMag * 0.65);
+    if (allowGlow && avgMag > 0.82) {
+      ctx.shadowColor = endSlopeUp ? 'rgba(0, 229, 255, 0.38)' : 'rgba(255, 95, 65, 0.38)';
+      ctx.shadowBlur = 5;
+    } else {
+      ctx.shadowBlur = 0;
+    }
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+
+  // B. Advect and draw glowing streamline particles with strict hard caps (<= 54 mobile Full, <= 28 mobile Lite)
+  const hardParticleCap = flowQualityMode === 'lite'
+    ? (isMobile ? 28 : 36)
+    : (isMobile ? 54 : 72);
+  const activeParticleLimit = Math.min(
+    particles.length,
+    hardParticleCap,
+    Math.max(16, Math.round(hardParticleCap * Math.min(1.15, Math.max(0.6, infoClockTau))))
+  );
+
+  const fieldEvaluator = (px, py, laneOff, age) => {
+    const tgt = sampleFlowTarget(px);
+    const targetY = tgt.y + 18 + laneOff;
+    const pullVy = (targetY - py) * 0.038;
+    const slopeVy = tgt.slopeY * 1.45;
+    const waveVy = Math.sin(px * 0.024 + age * 0.07) * garchVol * 0.55;
+    const vy = Math.max(-2.4, Math.min(2.4, pullVy * 0.65 + slopeVy * 0.35 + waveVy));
+    // Future-horizon particles (> candleAreaWidth) move slightly calmer and recycle sooner
+    const horizonDamp = px > candleAreaWidth ? 0.85 : 1.0;
+    const vx = (1.65 + Math.min(1.1, tgt.mag * 0.45)) * horizonDamp;
+    const flowDir = vy <= 0.08 ? 1 : -1;
+    return { vx, vy, dir: flowDir, mag: tgt.mag * horizonDamp };
+  };
+
+  const speedScale = Math.max(0.7, Math.min(1.6, infoClockTau));
+  for (let i = 0; i < activeParticleLimit; i++) {
+    const p = particles[i];
+    if (!skipParticleAdvection) {
+      p.update(mainWidth * 0.88, mainHeight, fieldEvaluator, activeWaitingZones, speedScale);
+    }
+    p.draw(ctx, allowGlow, mainWidth, mainHeight);
+  }
+  ctx.restore();
+}
+
+// Decoupled Main Render Loop:
+// - Static structural layer redraws ONLY when data/viewport/scrubber/settings change
+// - Flow particle animation runs at ~15-18 fps (60ms Full / 74ms Lite) with adaptive frame-time guard
+function renderLoop(nowMs = performance.now()) {
+  const frameDeltaMs = lastRafTimestampMs > 0 ? (nowMs - lastRafTimestampMs) : 16.7;
+  lastRafTimestampMs = nowMs;
+
+  // Adaptive quality monitor: if in Full mode (and not manually locked) and frame time degrades > 42ms repeatedly, step down to Lite
+  if (flowQualityMode === 'full' && !userExplicitlySelectedFlowQuality) {
+    if (frameDeltaMs > 42 && frameDeltaMs < 400) {
+      rollingSlowFrameCount++;
+      if (rollingSlowFrameCount >= 18) {
+        setFlowQualityMode('lite', false);
+        rollingSlowFrameCount = 0;
+      }
+    } else if (frameDeltaMs < 26 && rollingSlowFrameCount > 0) {
+      rollingSlowFrameCount--;
+    }
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+
+  const isActivelyInteracting = Boolean(
+    chartViewport.isDraggingPriceAxis ||
+    chartViewport.isDraggingTimeAxis ||
+    chartViewport.isPanningChart ||
+    touchPinch.isPinching
+  );
+  const hasDrawingPreview = Boolean(drawingPendingPoint && drawingHoverPoint && activeDrawingTool !== 'select');
+
+  const currentKey = computeStaticChartStateKey(w, h);
+  const needsStaticRedraw = staticChartDirty || currentKey !== lastStaticStateKey;
+
+  const flowIntervalMs = flowQualityMode === 'lite' ? 74 : 60; // ~13.5 fps Lite, ~16.6 fps Full
+  const flowActive = flowQualityMode !== 'off' && layers.particles;
+  const flowTickDue = flowActive && ((nowMs - lastFlowTickMs) >= flowIntervalMs);
+
+  // Skip frame work completely if static chart is clean, no flow tick is due, and no interactive drag/preview is active
+  if (!needsStaticRedraw && !flowTickDue && !hasDrawingPreview && !isActivelyInteracting) {
+    animationFrameId = requestAnimationFrame(renderLoop);
+    return;
+  }
+
+  const allowGlow = (flowQualityMode === 'full') && !isActivelyInteracting;
+
+  if (needsStaticRedraw) {
+    renderStaticChartLayer(staticChartCtx, w, h, allowGlow);
+    lastStaticStateKey = currentKey;
+    staticChartDirty = false;
+  }
+
+  // Composite cached static structural chart onto main canvas in a single fast blit
+  ctx.clearRect(0, 0, w, h);
+  if (staticChartCanvas.width > 0 && staticChartCanvas.height > 0) {
+    ctx.drawImage(staticChartCanvas, 0, 0, w, h);
+  }
+
+  // Frame-time guard: if frame is late (> 55ms), skip non-essential particle advection work this tick
+  const skipParticleAdvection = !flowTickDue || (frameDeltaMs > 55 && !needsStaticRedraw);
+  if (flowTickDue) {
+    lastFlowTickMs = nowMs;
+  }
+
+  if (flowActive) {
+    renderFlowOverlay(ctx, nowMs, skipParticleAdvection, allowGlow);
+  }
+
+  // Active in-progress drawing preview line (drawn on top of composite)
+  if (hasDrawingPreview) {
+    const x1 = drawingPendingPoint.x;
+    const y1 = drawingPendingPoint.y;
+    const x2 = drawingHoverPoint.x;
+    const y2 = drawingHoverPoint.y;
+
+    ctx.save();
+    ctx.strokeStyle = activeDrawingTool === 'trendline' ? '#00e5ff' : '#f5d76e';
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = activeDrawingTool === 'trendline' ? '#00e5ff' : '#f5d76e';
+    ctx.beginPath(); ctx.arc(x1, y1, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x2, y2, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
 
   animationFrameId = requestAnimationFrame(renderLoop);
 }
 
 // Scrubber Horizon Slider Handling (Dynamic with Selected Timeframe)
 document.getElementById('timeSlider').addEventListener('input', (e) => {
+  markStaticChartDirty();
   const step = parseInt(e.target.value, 10);
   const stepSec = forecastData?.timeframeStepSeconds || TIMEFRAME_STEPS[currentTimeframe] || 900;
   const minutes = Math.round(step * (stepSec / 60));
@@ -11955,18 +12251,44 @@ document.getElementById('timeSlider').addEventListener('input', (e) => {
   }
 });
 
-// Layer Toggles
+// Layer Toggles & Flow Quality Control Wiring
 function setupToggle(btnId, layerKey) {
   const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.classList.toggle('active', !!layers[layerKey]);
   btn.addEventListener('click', () => {
     layers[layerKey] = !layers[layerKey];
     btn.classList.toggle('active', layers[layerKey]);
+    if ((layerKey === 'particles' || layerKey === 'isobars') && (layers.particles || layers.isobars) && flowQualityMode === 'off') {
+      flowQualityMode = isMobileChartDevice() ? 'lite' : 'full';
+      const selToolbar = document.getElementById('flowQualitySelect');
+      if (selToolbar) selToolbar.value = flowQualityMode;
+      const selModal = document.getElementById('setFlowQualitySelect');
+      if (selModal) selModal.value = flowQualityMode;
+    }
+    markStaticChartDirty();
   });
 }
 setupToggle('btnParticles', 'particles');
 setupToggle('btnIsobars', 'isobars');
 setupToggle('btnEnsemble', 'ensemble');
 setupToggle('btnCandles', 'candles');
+
+// Initialize & Wire Flow Quality Controls (Full / Lite / Off)
+const flowQualitySelectEl = document.getElementById('flowQualitySelect');
+const setFlowQualitySelectEl = document.getElementById('setFlowQualitySelect');
+if (flowQualitySelectEl) {
+  flowQualitySelectEl.value = flowQualityMode;
+  flowQualitySelectEl.addEventListener('change', (e) => {
+    setFlowQualityMode(e.target.value, true);
+  });
+}
+if (setFlowQualitySelectEl) {
+  setFlowQualitySelectEl.value = flowQualityMode;
+  setFlowQualitySelectEl.addEventListener('change', (e) => {
+    setFlowQualityMode(e.target.value, true);
+  });
+}
 
 // Expandable Chart Visual Language Legend (Collapsed by default, expands/collapses on tap/click)
 const chartVisualLegendSection = document.getElementById('chartVisualLegendSection');
