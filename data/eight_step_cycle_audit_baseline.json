@@ -1,0 +1,52 @@
+{
+  "recordedAtIso": "2026-10-29T18:58:11.834Z",
+  "nodeVersion": "v22.23.4",
+  "platform": "linux",
+  "gitPresent": false,
+  "fileHashesBeforeImplementation": {
+    "src/engine/quantEngine.ts": {
+      "sha256": "ae751f2c9dbc91090dca99018c6837705444c08cf7242d2b0c73903bf0710daa",
+      "bytes": 68225
+    },
+    "src/engine/scientificCore.ts": {
+      "sha256": "824634ebf6f06d1736f375b84b871b13850046d2e6c5737bba2a3fe0f6343a3d",
+      "bytes": 78329
+    },
+    "src/contracts/quantContracts.ts": {
+      "sha256": "f4c7e8b6f8816eb39a5f0151b9d80e11a3cbed6c49393bf8f90967da232eb249",
+      "bytes": 29020
+    },
+    "src/config/modelSpecRegistry.ts": {
+      "sha256": "16bae5d85e6dc028d343a65cef5542f9f9149e907216dda9ed321f8a4a1e3a15",
+      "bytes": 44395
+    },
+    "src/config/parameterRegistry.ts": {
+      "sha256": "ed5fca3fcd85a42991830d197e3f03d2416aae6a48c8d9462fc46b6878695ecb",
+      "bytes": 13443
+    },
+    "src/services/intelligenceAwarenessCore.ts": {
+      "sha256": "3a450918d6a9479d1be7558860e024cd0bd80ff5f991fa85a33c27840b953b95",
+      "bytes": 191146
+    },
+    "src/services/walkForwardValidationService.ts": {
+      "sha256": "2739eac33e9b9acd596a708122457cab52ec17e59db157734f970c2c304483d9",
+      "bytes": 26223
+    },
+    "server.ts": {
+      "sha256": "ee659ac41d2c8f7523014f4831be19908f675c374261ba53a4690cc80de614f0",
+      "bytes": 30270
+    },
+    "index.html": {
+      "sha256": "db21bf9adf991a430c046c1c831e9007fc0baabb5b04e347b9415ea073b97d8f",
+      "bytes": 816818
+    },
+    "public/js/gdfClientCore.js": {
+      "sha256": "9deb3fa774fdac076347c61e64568aaf2664c83f5a29a2a75792e051203e492f",
+      "bytes": 75398
+    },
+    "package.json": {
+      "sha256": "6082782b9bf88dd2ce3452385c039f3ab101d9c3675ae2e494bfc823b9ac89c3",
+      "bytes": 1990
+    }
+  }
+}

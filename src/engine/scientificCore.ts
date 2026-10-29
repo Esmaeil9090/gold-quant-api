@@ -1,4 +1,5 @@
 import type {
+  ActiveIntegratedStructuralTerm,
   BaselineModelComparisonItem,
   Candle,
   DetectedPulseEvent,
@@ -124,6 +125,76 @@ export interface LatentFilterTuningOverrides {
   crossVenueObservationPrecisionMult?: number;
   equilibriumAnchorOverride?: number;
   symbolicStepDriftUsd?: number;
+  activeIntegratedStructuralTerm?: ActiveIntegratedStructuralTerm | null;
+}
+
+/**
+ * Pure causal evaluator for an authorized integrated structural hypothesis term Δx_1^struct(τ_t).
+ * Returns strictly 0 when no structural term is integrated, preserving the exact incumbent Yellow-Line model.
+ */
+export function evaluateCausalStructuralHypothesisTermLogDrift(params: {
+  structuralTerm?: ActiveIntegratedStructuralTerm | null;
+  X: number[];
+  prevLogResidual: number;
+  causalMedVol: number;
+  causalLogEq: number;
+  cointegrationBasisLog: number;
+  causalMacroLogForce: number;
+  dt: number;
+}): number {
+  const {
+    structuralTerm,
+    X,
+    prevLogResidual,
+    causalMedVol,
+    causalLogEq,
+    cointegrationBasisLog,
+    causalMacroLogForce,
+    dt,
+  } = params;
+  if (!structuralTerm) return 0;
+
+  const theta = Number(structuralTerm.fittedTheta);
+  const alpha = Number(structuralTerm.secondaryParamAlpha);
+  if (!Number.isFinite(theta) || !Number.isFinite(alpha) || !Number.isFinite(dt) || dt <= 0) {
+    return 0;
+  }
+
+  const safeVol = Math.max(0.0004, Math.min(0.05, Number.isFinite(X[2]) ? X[2] : causalMedVol));
+  const safeMedVol = Math.max(0.0004, Math.min(0.05, Number.isFinite(causalMedVol) ? causalMedVol : 0.0015));
+  const safeRes = Math.max(0.15, Math.min(0.99, Number.isFinite(X[4]) ? X[4] : 0.72));
+  const safeAlpha = Math.max(0.15, Math.min(4.0, alpha));
+
+  switch (structuralTerm.structuralFormId) {
+    case 'AR1_RESIDUAL_ERROR_CORRECTION': {
+      const scaledRes = prevLogResidual / Math.max(1e-5, safeAlpha * safeVol);
+      return theta * Math.tanh(scaledRes) * safeVol * dt;
+    }
+    case 'REGIME_GATED_TOXICITY_DAMPING': {
+      const burstGate = 1 / (1 + Math.exp(-4.0 * (dt - safeAlpha)));
+      const toxRatio = (Number.isFinite(X[3]) ? X[3] : 0) / safeRes;
+      return theta * burstGate * Math.tanh(toxRatio) * safeVol * dt;
+    }
+    case 'NONLINEAR_BASIS_THRESHOLD_ATTRACTOR': {
+      const zBasis = cointegrationBasisLog / safeMedVol;
+      const deadband = Math.max(0, Math.abs(zBasis) - safeAlpha) * Math.sign(zBasis);
+      return theta * Math.tanh(deadband) * safeMedVol * dt;
+    }
+    case 'ASYMMETRIC_VOL_DRIFT_BRAKE': {
+      const volRatio = safeVol / safeMedVol;
+      const excessVol = Math.max(0, volRatio - safeAlpha);
+      return -Math.abs(theta) * Math.tanh(excessVol) * (Number.isFinite(X[1]) ? X[1] : 0) * dt;
+    }
+    case 'MACRO_YIELD_CONVEX_RESPONSE': {
+      const macroAmp = 1 + safeAlpha * Math.tanh(Math.abs(Number.isFinite(X[5]) ? X[5] : 0) / safeMedVol);
+      return theta * causalMacroLogForce * macroAmp * dt;
+    }
+    case 'PARAMETER_REFINEMENT_ONLY':
+    default: {
+      const eqGap = Math.max(-0.08, Math.min(0.08, causalLogEq - (Number.isFinite(X[0]) ? X[0] : causalLogEq)));
+      return theta * eqGap * 0.08 * dt;
+    }
+  }
 }
 
 /**
@@ -891,8 +962,22 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       const toxRatio = X[3] / safeRes;
       // Innovation-shrunk 1-step drift prevents high-frequency bar noise over-extrapolation
       const driftShrinkage = 0.28;
+      const cointBasisLogCausal = -cointegrationBasisMeanUsd / Math.max(100, causalRefPrice);
+      const structuralStepLogDrift = tuningOverrides?.activeIntegratedStructuralTerm
+        ? evaluateCausalStructuralHypothesisTermLogDrift({
+            structuralTerm: tuningOverrides.activeIntegratedStructuralTerm,
+            X,
+            prevLogResidual,
+            causalMedVol,
+            causalLogEq,
+            cointegrationBasisLog: cointBasisLogCausal,
+            causalMacroLogForce,
+            dt,
+          })
+        : 0;
       const effectiveStepLogDrift =
-        driftShrinkage * (X[1] + betaTox * toxRatio * X[2] + X[5] + 0.14 * prevLogResidual) * dt;
+        driftShrinkage * (X[1] + betaTox * toxRatio * X[2] + X[5] + 0.14 * prevLogResidual) * dt +
+        structuralStepLogDrift;
 
       const nextX0 = X[0] + effectiveStepLogDrift;
       const eqRestoringDrift = kappaMeanRev * (causalLogEq - X[0]);
@@ -1229,10 +1314,23 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     const toxRatio = simX[3] / safeRes;
     const eqRestoringLog = kappaMeanRev * (logEqTarget - simX[0]);
     const decayingSymbolicLog = symbolicLogDriftBase * Math.exp(-0.075 * (h - 1));
+    const forwardStructuralLog = tuningOverrides?.activeIntegratedStructuralTerm
+      ? evaluateCausalStructuralHypothesisTermLogDrift({
+          structuralTerm: tuningOverrides.activeIntegratedStructuralTerm,
+          X: simX,
+          prevLogResidual: prevLogResidual * Math.exp(-0.22 * (h - 1)),
+          causalMedVol: medVol,
+          causalLogEq: logEqTarget,
+          cointegrationBasisLog: -cointegrationBasisMeanUsd / Math.max(100, candles[n - 1].close),
+          causalMacroLogForce: simX[5],
+          dt: simDeltaTau,
+        }) * Math.exp(-0.06 * (h - 1))
+      : 0;
 
     const stepLogDrift =
       (simX[1] + betaTox * toxRatio * simX[2] + simX[5] + eqRestoringLog * 0.45 + decayingSymbolicLog) *
-      simDeltaTau;
+        simDeltaTau +
+      forwardStructuralLog;
 
     const nextX0 = simX[0] + stepLogDrift;
     const nextX1 = eDrift * simX[1] + (1 - eDrift) * (eqRestoringLog + simX[5]);
@@ -1977,6 +2075,7 @@ export function evaluateScientificCorePipeline(params: {
     crossVenueObservationPrecisionMult: liveTuning.crossVenueObservationPrecisionMult ?? 1.0,
     activeSymbolicTermsWrittenBack: liveTuning.activeSymbolicTermsWrittenBack ?? [],
     prunedFaultyComponents: liveTuning.prunedFaultyComponents ?? [],
+    activeIntegratedStructuralTerm: liveTuning.activeIntegratedStructuralTerm ?? null,
   };
 
   return {

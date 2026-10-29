@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "tsc",
-    "check:all": "tsx scripts/check-bilingual-terminology.ts && tsx scripts/check-client-update-engine.ts && tsx scripts/check-phase0-baseline-integrity.ts && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts && tsx scripts/check-phase6-cognitive-hierarchy.ts && tsx scripts/check-parallel-universe-core.ts && tsx scripts/check-scientific-core.ts && tsx scripts/check-mmi-buttons.ts && tsx scripts/check-independent-mathematical-audit.ts",
+    "check:all": "tsx scripts/check-bilingual-terminology.ts && tsx scripts/check-client-update-engine.ts && tsx scripts/check-phase0-baseline-integrity.ts && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts && tsx scripts/check-phase6-cognitive-hierarchy.ts && tsx scripts/check-parallel-universe-core.ts && tsx scripts/check-scientific-core.ts && tsx scripts/check-mmi-buttons.ts && tsx scripts/check-independent-mathematical-audit.ts && tsx scripts/check-eight-step-scientific-cycle.ts",
     "check:bilingual-terminology": "tsx scripts/check-bilingual-terminology.ts",
     "check:update-engine": "tsx scripts/check-client-update-engine.ts",
     "check:baseline-integrity": "tsx scripts/check-phase0-baseline-integrity.ts",
@@ -18,6 +18,7 @@
     "check:scientific-core": "tsx scripts/check-scientific-core.ts",
     "check:mmi-buttons": "tsx scripts/check-mmi-buttons.ts",
     "check:independent-math-audit": "tsx scripts/check-independent-mathematical-audit.ts",
+    "check:eight-step-cycle": "tsx scripts/check-eight-step-scientific-cycle.ts",
     "lint": "tsc --noEmit",
     "start": "node server.ts"
   },

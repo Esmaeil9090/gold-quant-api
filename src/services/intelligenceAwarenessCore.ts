@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getFeatureFlags } from '../config/featureFlags.js';
 import type {
+  ActiveIntegratedStructuralTerm,
   ArchitectureAuditLogEntry,
   ArchitecturePersistenceHealth,
   ArchitectureState,
@@ -216,6 +217,7 @@ function createDefaultLatentMathWriteBackState(): LatentModelMathWriteBackState 
     crossVenueObservationPrecisionMult: 1.0,
     activeSymbolicTermsWrittenBack: [],
     prunedFaultyComponents: [],
+    activeIntegratedStructuralTerm: null,
   };
 }
 
@@ -3324,6 +3326,14 @@ export function writeBackValidatedMathToLatentModel(params?: {
   dryRun?: boolean;
   requireFullGateVerification?: boolean;
   confirmedByOperator?: boolean;
+  activeIntegratedStructuralTerm?: ActiveIntegratedStructuralTerm | null;
+  scientificCycleGateVerified?: {
+    passedAllEightGates: boolean;
+    passedSafetyAndProvenanceGates: boolean;
+    passedTechnicalChecks: boolean;
+    realizedOosBarsEvaluated: number;
+    requiredMinOosBars: number;
+  };
 }): {
   writtenBack: boolean;
   dryRun: boolean;
@@ -3347,6 +3357,7 @@ export function writeBackValidatedMathToLatentModel(params?: {
   const operatorNote = params?.operatorNote;
   const dryRun = Boolean(params?.dryRun);
   const requireFullGates = mode === 'AUTOMATIC_VERIFIED' || Boolean(params?.requireFullGateVerification);
+  const sciCycleVer = params?.scientificCycleGateVerified;
 
   const report = coreStore.lastVerificationReport;
   const cand = coreStore.candidateArchitecture;
@@ -3355,6 +3366,9 @@ export function writeBackValidatedMathToLatentModel(params?: {
     ...coreStore.latentMathWriteBack,
     activeSymbolicTermsWrittenBack: [...(coreStore.latentMathWriteBack.activeSymbolicTermsWrittenBack || [])],
     prunedFaultyComponents: [...(coreStore.latentMathWriteBack.prunedFaultyComponents || [])],
+    activeIntegratedStructuralTerm: coreStore.latentMathWriteBack.activeIntegratedStructuralTerm
+      ? { ...coreStore.latentMathWriteBack.activeIntegratedStructuralTerm }
+      : null,
   };
 
   const candTuning =
@@ -3368,18 +3382,48 @@ export function writeBackValidatedMathToLatentModel(params?: {
   const activeSymbolicIds = activeSymbolicModels.map(m => m.modelId);
   const prunedIds = cand.models.filter(m => !m.isEnabled).map(m => m.modelId);
 
+  const isPureStructuralStep7Integration = Boolean(sciCycleVer && params?.activeIntegratedStructuralTerm);
+  const nextSymbolicTerms = isPureStructuralStep7Integration && params?.activeIntegratedStructuralTerm
+    ? Array.from(
+        new Set([
+          ...(previousWriteBack.activeSymbolicTermsWrittenBack || []),
+          params.activeIntegratedStructuralTerm.structuralFormId,
+        ])
+      )
+    : activeSymbolicIds;
+
   const proposedWriteBack: LatentModelMathWriteBackState = {
     writeBackGeneration: previousWriteBack.writeBackGeneration + 1,
     lastWriteBackIso: nowIso,
-    sourceCandidateArchId: cand.architectureId,
-    driftPersistencePhi: candTuning.driftPersistencePhi,
-    meanReversionKappa: candTuning.meanReversionKappa,
-    echoToxicityCouplingBeta: candTuning.echoToxicityCouplingBeta,
-    echoResilienceCouplingGamma: candTuning.echoResilienceCouplingGamma,
-    macroResidualCouplingEta: candTuning.macroResidualCouplingEta,
-    crossVenueObservationPrecisionMult: candTuning.crossVenueObservationPrecisionMult,
-    activeSymbolicTermsWrittenBack: activeSymbolicIds,
-    prunedFaultyComponents: prunedIds,
+    sourceCandidateArchId: isPureStructuralStep7Integration && params?.activeIntegratedStructuralTerm
+      ? params.activeIntegratedStructuralTerm.hypothesisId
+      : cand.architectureId,
+    driftPersistencePhi: isPureStructuralStep7Integration
+      ? previousWriteBack.driftPersistencePhi
+      : candTuning.driftPersistencePhi,
+    meanReversionKappa: isPureStructuralStep7Integration
+      ? previousWriteBack.meanReversionKappa
+      : candTuning.meanReversionKappa,
+    echoToxicityCouplingBeta: isPureStructuralStep7Integration
+      ? previousWriteBack.echoToxicityCouplingBeta
+      : candTuning.echoToxicityCouplingBeta,
+    echoResilienceCouplingGamma: isPureStructuralStep7Integration
+      ? previousWriteBack.echoResilienceCouplingGamma
+      : candTuning.echoResilienceCouplingGamma,
+    macroResidualCouplingEta: isPureStructuralStep7Integration
+      ? previousWriteBack.macroResidualCouplingEta
+      : candTuning.macroResidualCouplingEta,
+    crossVenueObservationPrecisionMult: isPureStructuralStep7Integration
+      ? previousWriteBack.crossVenueObservationPrecisionMult
+      : candTuning.crossVenueObservationPrecisionMult,
+    activeSymbolicTermsWrittenBack: nextSymbolicTerms,
+    prunedFaultyComponents: isPureStructuralStep7Integration
+      ? [...(previousWriteBack.prunedFaultyComponents || [])]
+      : prunedIds,
+    activeIntegratedStructuralTerm:
+      params?.activeIntegratedStructuralTerm !== undefined
+        ? params.activeIntegratedStructuralTerm
+        : previousWriteBack.activeIntegratedStructuralTerm ?? null,
   };
 
   const buildDiff = (
@@ -3465,35 +3509,46 @@ export function writeBackValidatedMathToLatentModel(params?: {
   ];
 
   // Evaluate mathematical validation requirements
-  const hasVerificationReport = Boolean(report);
-  const notHaltedFrozen = Boolean(report && report.overallStatus !== 'HALTED_FROZEN');
+  const hasVerificationReport = Boolean(report) || Boolean(sciCycleVer);
+  const notHaltedFrozen = sciCycleVer
+    ? Boolean(sciCycleVer.passedSafetyAndProvenanceGates)
+    : Boolean(report && report.overallStatus !== 'HALTED_FROZEN');
   const gate1 = report?.gates.find(g => g.gateId === 'GATE_1_DATA_DRIVEN_OOS_WINDOW');
   const gate5 = report?.gates.find(g => g.gateId === 'GATE_5_PROVENANCE_AND_INSTRUMENT_IDENTITY');
   const gate6 = report?.gates.find(g => g.gateId === 'GATE_6_SAFETY_INVARIANTS_INTACT');
 
-  const gate1MinOosWindowPassed = Boolean(gate1?.passed);
-  const gate5RealDataProvenancePassed = Boolean(gate5?.passed);
-  const gate6SafetyInvariantsPassed = Boolean(gate6?.passed);
+  const gate1MinOosWindowPassed = sciCycleVer
+    ? sciCycleVer.realizedOosBarsEvaluated >= sciCycleVer.requiredMinOosBars
+    : Boolean(gate1?.passed);
+  const gate5RealDataProvenancePassed = sciCycleVer
+    ? Boolean(sciCycleVer.passedSafetyAndProvenanceGates)
+    : Boolean(gate5?.passed);
+  const gate6SafetyInvariantsPassed = sciCycleVer
+    ? Boolean(sciCycleVer.passedSafetyAndProvenanceGates)
+    : Boolean(gate6?.passed);
 
   const totalWeightSum = cand.models
     .filter(m => m.isEnabled)
     .reduce((acc, m) => acc + (Number(m.dynamicWeight) || 0), 0);
-  const symbolicParameterStabilityPassed =
-    activeSymbolicModels.length >= 1 &&
-    activeSymbolicModels.every(
-      m =>
-        Number.isFinite(m.fittedCoefficient) &&
-        m.fittedCoefficient >= 0.08 &&
-        m.fittedCoefficient <= 1.5 &&
-        (m.stabilityRatio ?? 0.8) >= 0.45
-    ) &&
-    Math.abs(totalWeightSum - 1.0) <= 0.01;
+  const symbolicParameterStabilityPassed = sciCycleVer
+    ? Boolean(sciCycleVer.passedTechnicalChecks)
+    : activeSymbolicModels.length >= 1 &&
+      activeSymbolicModels.every(
+        m =>
+          Number.isFinite(m.fittedCoefficient) &&
+          m.fittedCoefficient >= 0.08 &&
+          m.fittedCoefficient <= 1.5 &&
+          (m.stabilityRatio ?? 0.8) >= 0.45
+      ) &&
+      Math.abs(totalWeightSum - 1.0) <= 0.01;
 
-  const fullEightGatePromotionPassed = Boolean(
-    report &&
-      report.overallStatus === 'VERIFIED_FOR_PROMOTION' &&
-      report.passedGatesCount === report.totalGatesCount
-  );
+  const fullEightGatePromotionPassed = sciCycleVer
+    ? Boolean(sciCycleVer.passedAllEightGates)
+    : Boolean(
+        report &&
+          report.overallStatus === 'VERIFIED_FOR_PROMOTION' &&
+          report.passedGatesCount === report.totalGatesCount
+      );
 
   const unmetRequirementsEn: string[] = [];
   const unmetRequirementsFa: string[] = [];
@@ -3675,6 +3730,9 @@ export function writeBackValidatedMathToLatentModel(params?: {
     ...previousWriteBack,
     activeSymbolicTermsWrittenBack: [...(previousWriteBack.activeSymbolicTermsWrittenBack || [])],
     prunedFaultyComponents: [...(previousWriteBack.prunedFaultyComponents || [])],
+    activeIntegratedStructuralTerm: previousWriteBack.activeIntegratedStructuralTerm
+      ? { ...previousWriteBack.activeIntegratedStructuralTerm }
+      : null,
   });
   if (coreStore.writeBackVersionHistory.length > 20) {
     coreStore.writeBackVersionHistory.length = 20;
@@ -3800,6 +3858,9 @@ export function rollbackLatentMathWriteBack(operatorNote?: string): {
     ...prev,
     activeSymbolicTermsWrittenBack: [...(prev.activeSymbolicTermsWrittenBack || [])],
     prunedFaultyComponents: [...(prev.prunedFaultyComponents || [])],
+    activeIntegratedStructuralTerm: prev.activeIntegratedStructuralTerm
+      ? { ...prev.activeIntegratedStructuralTerm }
+      : null,
   };
 
   const noteSuffix = operatorNote ? ` · Note: ${operatorNote}` : '';

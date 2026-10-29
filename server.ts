@@ -84,10 +84,17 @@ const {
   getIntelligenceCoreStateSnapshot,
   promoteCandidateArchitecture,
   reloadArchitectureStoreFromDisk,
+  rollbackLatentMathWriteBack,
   setAutoPromotionRuntimeMode,
   triggerSymbolicDiscoveryAuditStep,
   writeBackValidatedMathToLatentModel,
 } = await import('./src/services/intelligenceAwarenessCore.js');
+const {
+  executeEightStepScientificDiscoveryCycle,
+  getScientificDiscoveryCycleTelemetry,
+  reloadScientificCycleStoreFromDisk,
+  runMonitorStage,
+} = await import('./src/services/scientificDiscoveryCycleService.js');
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -587,6 +594,39 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       activeTier: waterfall.activeTier,
     });
 
+    // Ensure Eight-Step Scientific Discovery Cycle telemetry is populated on the active snapshot
+    let sciCycleTel = getScientificDiscoveryCycleTelemetry();
+    if (!sciCycleTel.activeCase && candles.length >= 25) {
+      try {
+        sciCycleTel = executeEightStepScientificDiscoveryCycle({
+          timeframe: interval,
+          candles,
+          liveMacro,
+          secondaryBenchmark: waterfall.secondaryBenchmark,
+          verifiedVenueCameras: waterfall.verifiedVenueCameras,
+          systemState: waterfall.systemState,
+          authorizeIntegrationMode: 'NONE',
+        }).telemetry;
+      } catch {
+        sciCycleTel = getScientificDiscoveryCycleTelemetry();
+      }
+    } else if (sciCycleTel.machineState === 'MONITORING' && candles.length >= 25) {
+      try {
+        runMonitorStage(sciCycleTel.activeCase, {
+          timeframe: interval,
+          candles,
+          liveMacro,
+          secondaryBenchmark: waterfall.secondaryBenchmark,
+          verifiedVenueCameras: waterfall.verifiedVenueCameras,
+          systemState: waterfall.systemState,
+        });
+        sciCycleTel = getScientificDiscoveryCycleTelemetry();
+      } catch {
+        // Keep current telemetry
+      }
+    }
+    parallelUniverse.scientificDiscoveryCycle = sciCycleTel;
+
     const activeLiveEnsemble =
       parallelUniverse.liveEnsemble && parallelUniverse.liveEnsemble.medianTrack.length > 0
         ? parallelUniverse.liveEnsemble
@@ -733,6 +773,7 @@ app.get('/api/intelligence-core', (req: Request, res: Response) => {
     buildTime: BUILD_TIME,
     timestampIso: new Date().toISOString(),
     ...getIntelligenceCoreStateSnapshot(),
+    scientificDiscoveryCycle: getScientificDiscoveryCycleTelemetry(),
   });
 });
 
@@ -842,7 +883,18 @@ app.post('/api/intelligence-core/discover-step', (req: Request, res: Response) =
   const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
   const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
   const result = executeSymbolicDiscoveryStep({ note, timeframe });
+  // Also advance the connected Eight-Step Scientific Discovery Cycle on the active timeframe
+  let cycleResult = null;
   if (result.synthesisExecuted) {
+    try {
+      cycleResult = executeEightStepScientificDiscoveryCycle({
+        timeframe,
+        operatorNote: note,
+        authorizeIntegrationMode: 'NONE',
+      });
+    } catch {
+      cycleResult = null;
+    }
     forecastCache.clear();
   }
   const httpStatus = result.synthesisExecuted ? 200 : 409;
@@ -850,6 +902,80 @@ app.post('/api/intelligence-core/discover-step', (req: Request, res: Response) =
     status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
     ...result,
     ...getIntelligenceCoreStateSnapshot(),
+    scientificDiscoveryCycle: cycleResult?.telemetry || getScientificDiscoveryCycleTelemetry(),
+  });
+});
+
+app.get('/api/intelligence-core/scientific-cycle', (req: Request, res: Response) => {
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    timestampIso: new Date().toISOString(),
+    scientificDiscoveryCycle: getScientificDiscoveryCycleTelemetry(),
+    ...getIntelligenceCoreStateSnapshot(),
+  });
+});
+
+app.post('/api/intelligence-core/scientific-cycle', (req: Request, res: Response) => {
+  const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
+  const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+  const authModeRaw = String(req.body?.authorizeIntegrationMode || 'NONE').toUpperCase();
+  const authorizeIntegrationMode:
+    | 'SCIENTIFICALLY_VERIFIED_PROMOTION'
+    | 'MANUAL_MMI_UNVALIDATED_OVERRIDE'
+    | 'NONE' =
+    authModeRaw === 'SCIENTIFICALLY_VERIFIED_PROMOTION'
+      ? 'SCIENTIFICALLY_VERIFIED_PROMOTION'
+      : authModeRaw === 'MANUAL_MMI_UNVALIDATED_OVERRIDE'
+      ? 'MANUAL_MMI_UNVALIDATED_OVERRIDE'
+      : 'NONE';
+
+  const out = executeEightStepScientificDiscoveryCycle({
+    timeframe,
+    operatorNote,
+    authorizeIntegrationMode,
+  });
+  if (out.executed) {
+    forecastCache.clear();
+  }
+  const httpStatus = out.concurrencyBlocked ? 429 : out.executed ? 200 : 409;
+  res.status(httpStatus).json({
+    status: out.concurrencyBlocked
+      ? 'CONCURRENT_EXECUTION_BLOCKED'
+      : out.executed
+      ? 'SUCCESS'
+      : 'CYCLE_BLOCKED',
+    ...out,
+    ...getIntelligenceCoreStateSnapshot(),
+    scientificDiscoveryCycle: out.telemetry,
+  });
+});
+
+app.post('/api/intelligence-core/scientific-cycle/monitor', (req: Request, res: Response) => {
+  const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
+  const monitorRecord = runMonitorStage(undefined, { timeframe });
+  if (monitorRecord.rollbackTriggered) {
+    forecastCache.clear();
+  }
+  res.json({
+    status: 'SUCCESS',
+    monitorRecord,
+    scientificDiscoveryCycle: getScientificDiscoveryCycleTelemetry(),
+    ...getIntelligenceCoreStateSnapshot(),
+  });
+});
+
+app.post('/api/intelligence-core/writeback-rollback', (req: Request, res: Response) => {
+  const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+  const rb = rollbackLatentMathWriteBack(operatorNote);
+  if (rb.rolledBack) {
+    forecastCache.clear();
+  }
+  res.status(rb.rolledBack ? 200 : 409).json({
+    status: rb.rolledBack ? 'SUCCESS' : 'ROLLBACK_SKIPPED',
+    ...rb,
+    ...getIntelligenceCoreStateSnapshot(),
+    scientificDiscoveryCycle: getScientificDiscoveryCycleTelemetry(),
   });
 });
 

@@ -1,0 +1,116 @@
+{
+  "verifiedAtIso": "2026-10-29T19:31:34.459Z",
+  "totalScenarios": 18,
+  "passedScenarios": 18,
+  "allPassed": true,
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Valid Observation Progression (Step 1 OBSERVE -> Step 2 Ready)",
+      "passed": true,
+      "details": "stagePassed=true, badge=OBSERVED, alignedPairs=71, noLookahead=true, state=OBSERVING"
+    },
+    {
+      "id": 2,
+      "name": "Stale / Halted Data Blocks Progression in Step 1 (OBSERVE)",
+      "passed": true,
+      "details": "haltedState=BLOCKED, staleState=BLOCKED, diagnoseThrewOnBlocked=true"
+    },
+    {
+      "id": 3,
+      "name": "Known Residual Anomaly Detection in Step 2 (DIAGNOSE)",
+      "passed": true,
+      "details": "outcome=WEAKNESS_IDENTIFIED, primaryCategory=RESIDUAL_SERIAL_AUTOCORRELATION, detectedCount=2, N=71"
+    },
+    {
+      "id": 4,
+      "name": "Hypothesis Generation Beyond Parameter Tuning & Clean-Residual Halt (Step 3 INVENT)",
+      "passed": true,
+      "details": "form=AR1_RESIDUAL_ERROR_CORRECTION, distinction=STRUCTURAL_FUNCTIONAL_FORM, vars=3, cleanOutcome=NO_DEFENSIBLE_HYPOTHESIS_GENERATED"
+    },
+    {
+      "id": 5,
+      "name": "Invalid Mathematical Candidate Rejection & Graveyard Archival in Step 4 (TEST)",
+      "passed": true,
+      "details": "allPassed=false, failedChecks=6, state=REJECTED, graveyardCount=1"
+    },
+    {
+      "id": 6,
+      "name": "Strict No-Lookahead Prefix-Invariance & Leakage Rejection in Step 4 (TEST)",
+      "passed": true,
+      "details": "maxPrefixDiff=$0.000000000, refDiscrepancy=$0.000e+0, leakRejected=true"
+    },
+    {
+      "id": 7,
+      "name": "Matched-Sample 6-Challenger Scoreboard & Multiple-Testing Accounting in Step 5 (CHALLENGE)",
+      "passed": true,
+      "details": "challengers=6, N_oos=20, K_search=3, candRmse=$1.365 vs incRmse=$3.132"
+    },
+    {
+      "id": 8,
+      "name": "Failing Candidate Rejection in Step 6 (DECIDE) & Integration Block",
+      "passed": true,
+      "details": "verdict=REJECT, badge=REJECTED, intExecuted=false, mode=BLOCKED_UNVERIFIED"
+    },
+    {
+      "id": 9,
+      "name": "Inconclusive Candidate Deferral (COLLECT_MORE_EVIDENCE) in Step 6 (DECIDE)",
+      "passed": true,
+      "details": "verdict=COLLECT_MORE_EVIDENCE, currentState=AWAITING_EVIDENCE, verified=false"
+    },
+    {
+      "id": 10,
+      "name": "Promotion Gate Non-Bypass (Rejected Blocked; Manual Override Never Labeled Verified)",
+      "passed": true,
+      "details": "rejectedManualBlocked=true, unverifiedAutoBlocked=true, manualOverrideMode=MANUAL_MMI_UNVALIDATED_OVERRIDE"
+    },
+    {
+      "id": 11,
+      "name": "Atomic Versioned Write-Back in Step 7 (INTEGRATE)",
+      "passed": true,
+      "details": "Gen #42 -> Gen #43, mode=MANUAL_MMI_UNVALIDATED_OVERRIDE, term=AR1_RESIDUAL_ERROR_CORRECTION, canRollback=true"
+    },
+    {
+      "id": 12,
+      "name": "Active Execution Path Verification (Yellow-Line Forecast Shifts Attributably)",
+      "passed": true,
+      "details": "terminalBefore=$2750.9700, terminalAfter=$2747.3800, attributableShift=$-3.5900, covPSD=true"
+    },
+    {
+      "id": 13,
+      "name": "Post-Integration Monitoring: Single-Bar Noise Tolerated vs. Multi-Bar Degradation Auto-Rollback",
+      "passed": true,
+      "details": "singleSpikeStatus=SINGLE_BAR_NOISE_TOLERATED (rollback=false), sustainedStatus=ROLLBACK_TRIGGERED after 4 degraded bars (rollback=true)"
+    },
+    {
+      "id": 14,
+      "name": "Rollback Restoration of Previous Write-Back Generation & Exact Yellow-Line Forecast",
+      "passed": true,
+      "details": "restoredGen=#42 (expected #42), activeTerm=null, forecastDiffFromBaseline=$0.000000000"
+    },
+    {
+      "id": 15,
+      "name": "Process Restart Persistence Across Disk Reloads",
+      "passed": true,
+      "details": "coldStartRestored=true, caseId=sci-case-1-32c8a8dc, searchCount=5, graveyard=4"
+    },
+    {
+      "id": 16,
+      "name": "Concurrency Protection (Mutex Lock Blocks Overlapping Cycle Runs)",
+      "passed": true,
+      "details": "executed=false, concurrencyBlocked=true, reason=\"CONCURRENT_EXECUTION_BLOCKED: Another Eight-Step Scientific Discovery Cycle operation is currently in progress. Overlapping cycle mutations and duplicate write-backs are locked.\""
+    },
+    {
+      "id": 17,
+      "name": "UI Feedback, Stage Strip, Epistemic Badges & HTTP API Wiring",
+      "passed": true,
+      "details": "panel=true, runBtn=true, monitorBtn=true, rollbackBtn=true, renderFn=true, apiRoutes=true"
+    },
+    {
+      "id": 18,
+      "name": "Deterministic Experiment Replay (Identical Inputs -> Identical Seed, Parameters & Metrics)",
+      "passed": true,
+      "details": "seed=32c8a8dc521eae2a, form=AR1_RESIDUAL_ERROR_CORRECTION, θ_A=0.85 === θ_B=0.85, RMSE_A=$1.365 === RMSE_B=$1.365"
+    }
+  ]
+}

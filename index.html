@@ -4669,6 +4669,43 @@ input:checked + .toggle-slider:before {
             </div>
           </div>
 
+          <!-- Eight-Step Scientific Discovery Cycle Laboratory & End-to-End Case View -->
+          <div id="eightStepScientificCyclePanel" style="background: rgba(8, 14, 28, 0.96); border: 1.5px solid rgba(224, 64, 251, 0.5); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 10.5px; font-weight: 800; color: #f381ff; text-transform: uppercase; letter-spacing: 0.7px;">
+                  00. Eight-Step Scientific Discovery Cycle (OBSERVE → DIAGNOSE → INVENT → TEST → CHALLENGE → DECIDE → INTEGRATE → MONITOR)
+                </span>
+                <div id="sciCycleCountersText" style="font-size: 10px; color: #9cb0cc; font-family: monospace; margin-top: 2px;">
+                  Cycle #0 · Cumulative Candidates Searched (M): 0 · Active Case: —
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span id="sciCycleMachineStateBadge" style="font-family: monospace; font-size: 10px; font-weight: 800; color: #00e5ff; background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.45); padding: 3px 8px; border-radius: 5px;">
+                  STATE: IDLE
+                </span>
+                <span id="sciCycleEpistemicBadge" style="font-family: monospace; font-size: 10px; font-weight: 800; color: #f5d76e; background: rgba(245, 215, 110, 0.14); border: 1px solid rgba(245, 215, 110, 0.45); padding: 3px 8px; border-radius: 5px;">
+                  [OBSERVED]
+                </span>
+                <button type="button" id="btnRunEightStepCycle" style="background: linear-gradient(135deg, rgba(224, 64, 251, 0.25), rgba(0, 229, 255, 0.2)); border: 1px solid #f381ff; color: #f381ff; font-size: 10.5px; font-weight: 800; padding: 5px 10px; border-radius: 6px; cursor: pointer;">
+                  🔭 Run 8-Step Discovery Cycle
+                </button>
+                <button type="button" id="btnRunPostIntegrationMonitor" style="background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676; font-size: 10.5px; font-weight: 700; padding: 5px 9px; border-radius: 6px; cursor: pointer;">
+                  🛡️ Check Monitor
+                </button>
+                <button type="button" id="btnRollbackLatentWriteBack" style="background: rgba(255, 171, 0, 0.14); border: 1px solid rgba(255, 171, 0, 0.48); color: #ffd54f; font-size: 10.5px; font-weight: 700; padding: 5px 9px; border-radius: 6px; cursor: pointer;">
+                  ↩ Rollback Write-Back
+                </button>
+              </div>
+            </div>
+
+            <!-- 8-Stage Pipeline Strip -->
+            <div id="sciCycleEightStagesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 7px; margin-bottom: 10px; font-family: monospace; font-size: 10px;"></div>
+
+            <!-- End-to-End Scientific Case View -->
+            <div id="sciCycleCaseChainBox" style="background: rgba(12, 20, 36, 0.92); border: 1px solid rgba(148, 163, 184, 0.28); border-radius: 8px; padding: 9px 11px; font-size: 10.5px; color: #e2e8f0; line-height: 1.45;"></div>
+          </div>
+
           <!-- Scientific Core Section A: 6D Latent State X(τ) on Information Clock τ, Pulse-Echo Sonar, and Residual Oracle -->
           <div style="background: rgba(7, 13, 24, 0.94); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
@@ -11149,6 +11186,220 @@ function renderParallelUniverseTelemetry(pu) {
       }
     }
   }
+
+  // Render Eight-Step Scientific Discovery Cycle & End-to-End Case View
+  renderEightStepScientificCyclePanel(pu.scientificDiscoveryCycle, isFa);
+}
+
+function renderEightStepScientificCyclePanel(cycleTel, isFa) {
+  const stateBadge = document.getElementById('sciCycleMachineStateBadge');
+  const epBadge = document.getElementById('sciCycleEpistemicBadge');
+  const countersEl = document.getElementById('sciCycleCountersText');
+  const gridEl = document.getElementById('sciCycleEightStagesGrid');
+  const chainBox = document.getElementById('sciCycleCaseChainBox');
+  if (!gridEl || !chainBox) return;
+
+  if (!cycleTel) {
+    chainBox.innerHTML = `<span style="color:#9cb0cc;font-family:monospace;">${isFa ? 'در حال بارگذاری تله‌متری چرخه ۸مرحله‌ای کشف علمی...' : 'Loading Eight-Step Scientific Discovery Cycle telemetry...'}</span>`;
+    return;
+  }
+
+  const ac = cycleTel.activeCase;
+  if (stateBadge) {
+    stateBadge.textContent = `STATE: ${cycleTel.machineState || 'IDLE'}`;
+  }
+  if (epBadge) {
+    epBadge.textContent = `[${ac?.epistemicBadge || 'OBSERVED'}]`;
+  }
+  if (countersEl) {
+    const graveCnt = Array.isArray(cycleTel.hypothesisGraveyard) ? cycleTel.hypothesisGraveyard.length : 0;
+    countersEl.textContent = isFa
+      ? `چرخه #${cycleTel.totalCyclesExecuted || 0} · کاندیداهای بررسی‌شده تجمعی (M): ${cycleTel.cumulativeCandidateSearchCount || 0} · بایگانی فرضیه‌های ردشده: ${graveCnt} · پرونده فعال: ${ac?.caseId || '—'}`
+      : `Cycle #${cycleTel.totalCyclesExecuted || 0} · Cumulative Candidates Searched (M): ${cycleTel.cumulativeCandidateSearchCount || 0} · Hypothesis Graveyard: ${graveCnt} · Active Case: ${ac?.caseId || '—'}`;
+  }
+
+  const obs = ac?.observeRecord;
+  const diag = ac?.diagnoseReport;
+  const inv = ac?.inventRecord;
+  const tst = ac?.testReport;
+  const chal = ac?.challengeReport;
+  const dec = ac?.decisionRecord;
+  const intg = ac?.integrationRecord;
+  const mon = ac?.monitorRecord || cycleTel.activeMonitoringState;
+
+  const stages = [
+    {
+      step: '1. OBSERVE',
+      stepFa: '۱. مشاهده (OBSERVE)',
+      badge: obs ? (obs.stagePassed ? 'OBSERVED' : 'BLOCKED') : 'PENDING',
+      ok: obs ? obs.stagePassed : null,
+      detail: obs
+        ? (obs.stagePassed
+            ? `N=${obs.dataProvenance.barCount} bars · NoLookahead=✓`
+            : (obs.blockingReasonEn || 'Blocked').slice(0, 42))
+        : '—',
+    },
+    {
+      step: '2. DIAGNOSE',
+      stepFa: '۲. تشخیص (DIAGNOSE)',
+      badge: diag ? 'INFERRED' : 'PENDING',
+      ok: diag ? diag.anomalies.length >= 0 : null,
+      detail: diag
+        ? (diag.primaryAnomaly
+            ? `${diag.primaryAnomaly.anomalyCategory} (N=${diag.residualSummary.sampleSizeN})`
+            : 'WHITE_NOISE_OK')
+        : '—',
+    },
+    {
+      step: '3. INVENT',
+      stepFa: '۳. ابداع فرضیه (INVENT)',
+      badge: inv ? inv.epistemicBadge : 'PENDING',
+      ok: inv ? inv.inventionOutcome === 'HYPOTHESIS_CONSTRUCTED' : null,
+      detail: inv
+        ? (inv.inventionOutcome === 'HYPOTHESIS_CONSTRUCTED'
+            ? `${inv.structuralFormId} (${inv.structuralDistinctionType})`
+            : 'NO_NEW_HYPOTHESIS')
+        : '—',
+    },
+    {
+      step: '4. TEST',
+      stepFa: '۴. آزمون فنی (TEST)',
+      badge: tst ? tst.epistemicBadge : 'PENDING',
+      ok: tst ? tst.allTechnicalChecksPassed : null,
+      detail: tst
+        ? `${tst.checks.filter(c => c.passed).length}/${tst.checks.length} Checks · RefDiff=$${Number(tst.independentReferenceAudit?.maxAbsDiscrepancyUsd || 0).toExponential(1)}`
+        : '—',
+    },
+    {
+      step: '5. CHALLENGE',
+      stepFa: '۵. چالش تجربی (CHALLENGE)',
+      badge: chal ? (chal.challengePassed ? 'VALIDATED' : 'HYPOTHESIZED') : 'PENDING',
+      ok: chal ? chal.challengePassed : null,
+      detail: chal
+        ? `OOS N=${chal.matchedSampleSpec.oosSampleCountN} · DM t=${Number(chal.statisticalComparison.dieboldMarianoTStatVsIncumbent).toFixed(2)} · M=${chal.multipleTestingAccount.cumulativeCandidatesSearched}`
+        : '—',
+    },
+    {
+      step: '6. DECIDE',
+      stepFa: '۶. تصمیم علمی (DECIDE)',
+      badge: dec ? dec.epistemicBadge : 'PENDING',
+      ok: dec ? dec.verdict !== 'REJECT' : null,
+      detail: dec
+        ? `${dec.verdict} (${dec.passedGatesCount}/${dec.totalGatesCount} Gates)`
+        : '—',
+    },
+    {
+      step: '7. INTEGRATE',
+      stepFa: '۷. ادغام اتمی (INTEGRATE)',
+      badge: intg ? intg.epistemicBadge : 'PENDING',
+      ok: intg ? intg.integrationExecuted : null,
+      detail: intg
+        ? (intg.integrationExecuted
+            ? `Gen #${intg.previousWriteBackGeneration}→#${intg.newWriteBackGeneration} (Δ=$${Number(intg.activePathExecutionVerification?.attributableShiftUsd || 0).toFixed(2)})`
+            : intg.integrationMode)
+        : '—',
+    },
+    {
+      step: '8. MONITOR',
+      stepFa: '۸. پایش و بازگشت (MONITOR)',
+      badge: mon ? (mon.rollbackTriggered ? 'REJECTED' : 'INTEGRATED') : 'PENDING',
+      ok: mon ? !mon.rollbackTriggered : null,
+      detail: mon
+        ? `${mon.monitoringStatus} (RMSE Ratio=${Number(mon.observedMetrics?.rmseRatioVsReference || 1).toFixed(2)}x)`
+        : '—',
+    },
+  ];
+
+  gridEl.innerHTML = stages
+    .map(s => {
+      const borderCol =
+        s.ok === true
+          ? 'rgba(0, 230, 118, 0.45)'
+          : s.ok === false
+          ? 'rgba(255, 82, 82, 0.55)'
+          : 'rgba(0, 229, 255, 0.28)';
+      const headCol =
+        s.ok === true ? '#00e676' : s.ok === false ? '#ff8a80' : '#00e5ff';
+      return `
+        <div style="background: rgba(12, 20, 36, 0.92); border: 1px solid ${borderCol}; border-radius: 7px; padding: 6px 8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+            <span style="font-weight:800;color:${headCol};font-size:9.5px;">${isFa ? s.stepFa : s.step}</span>
+            <span style="font-size:8.5px;color:#f5d76e;">[${s.badge}]</span>
+          </div>
+          <div style="color:#e2e8f0;font-size:9.5px;margin-top:3px;word-break:break-word;" dir="ltr">${s.detail}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+  if (!ac) {
+    chainBox.innerHTML = `<span style="color:#9cb0cc;">${isFa ? 'هنوز پرونده کشف علمی اجرا نشده است.' : 'No active scientific case evaluated yet.'}</span>`;
+    return;
+  }
+
+  const scoreboardRowsHtml =
+    chal && Array.isArray(chal.challengerScoreboard)
+      ? chal.challengerScoreboard
+          .map(
+            r => `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+              <td style="padding:3px 6px;color:#fff;font-weight:700;">${isFa ? r.labelFa : r.labelEn}</td>
+              <td style="padding:3px 6px;font-family:monospace;color:#00e5ff;" dir="ltr">$${Number(r.oosRmseUsd).toFixed(3)}</td>
+              <td style="padding:3px 6px;font-family:monospace;color:#e2e8f0;" dir="ltr">${(Number(r.directionalHitRate) * 100).toFixed(1)}%</td>
+              <td style="padding:3px 6px;font-family:monospace;color:#f5d76e;" dir="ltr">${Number(r.spearmanRankIc).toFixed(3)}</td>
+              <td style="padding:3px 6px;font-family:monospace;color:#9cb0cc;" dir="ltr">K=${r.parameterCountK} · BIC=${Number(r.bicScore).toFixed(1)}</td>
+              <td style="padding:3px 6px;font-family:monospace;color:${r.candidateBeatsChallenger ? '#00e676' : '#ffab00'};" dir="ltr">${r.candidateBeatsChallenger ? '✓ BEATS/TIES' : '✕ TRAILS'}</td>
+            </tr>`
+          )
+          .join('')
+      : '';
+
+  chainBox.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:8px;">
+      <div>
+        <div style="font-weight:800;color:#00e5ff;font-size:10px;">🔭 ${isFa ? 'زنجیره مشاهده و تشخیص ناهنجاری:' : 'OBSERVATION → ANOMALY DIAGNOSIS:'}</div>
+        <div style="font-size:10px;color:#cbd5e1;margin-top:2px;">
+          ${diag ? (isFa ? diag.summaryFa : diag.summaryEn) : (obs?.blockingReasonEn || '—')}
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#f381ff;font-size:10px;">🧬 ${isFa ? 'فرضیه و معادله ساختاری کاندیدا:' : 'HYPOTHESIS & STRUCTURAL EQUATION:'}</div>
+        <div style="font-family:monospace;font-size:10px;color:#f5d76e;margin-top:2px;" dir="ltr">
+          ${inv ? inv.mathematicalFormAscii : '—'}
+        </div>
+        <div style="font-size:9.5px;color:#9cb0cc;margin-top:2px;">
+          ${inv ? `${inv.titleEn} [Ancestry Gen #${inv.ancestry?.generationNumber || 1}]` : ''}
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:800;color:#00e676;font-size:10px;">⚖️ ${isFa ? 'حکم علمی و وضعیت ادغام/پایش:' : 'DECISION, INTEGRATION & MONITORING:'}</div>
+        <div style="font-size:10px;color:#e2e8f0;margin-top:2px;">
+          ${dec ? (isFa ? dec.rationaleFa : dec.rationaleEn) : '—'}
+        </div>
+        ${intg && intg.integrationExecuted ? `<div style="font-size:9.5px;color:#00e676;margin-top:2px;font-family:monospace;" dir="ltr">✓ ${intg.summaryEn}</div>` : ''}
+        ${mon && mon.monitoringStatus !== 'NO_ACTIVE_INTEGRATION' ? `<div style="font-size:9.5px;color:${mon.rollbackTriggered ? '#ff8a80' : '#00e5ff'};margin-top:2px;font-family:monospace;" dir="ltr">🛡️ ${mon.summaryEn}</div>` : ''}
+      </div>
+    </div>
+    ${
+      scoreboardRowsHtml
+        ? `<div style="overflow-x:auto;border:1px solid rgba(0,229,255,0.22);border-radius:6px;margin-top:4px;">
+             <table style="width:100%;border-collapse:collapse;font-size:9.5px;text-align:start;">
+               <thead>
+                 <tr style="background:rgba(8,16,30,0.95);color:#9cb0cc;font-family:monospace;">
+                   <th style="padding:4px 6px;">${isFa ? 'مدل رقیب در چالش هم‌تراز (Step 5 Challenge)' : 'Matched-Sample Challenger (Step 5)'}</th>
+                   <th style="padding:4px 6px;">OOS RMSE</th>
+                   <th style="padding:4px 6px;">Hit Rate</th>
+                   <th style="padding:4px 6px;">Rank-IC</th>
+                   <th style="padding:4px 6px;">Complexity / BIC</th>
+                   <th style="padding:4px 6px;">Result</th>
+                 </tr>
+               </thead>
+               <tbody>${scoreboardRowsHtml}</tbody>
+             </table>
+           </div>`
+        : ''
+    }
+  `;
 }
 
 // Integrated Top-Down Multi-Timeframe Liquidity Engine Renderer
@@ -18353,6 +18604,7 @@ window.GDFMmiConsoleController = (function () {
       auditTrail: jsonSnapshot.auditTrail || [],
       scientificCore: jsonSnapshot.scientificCore,
       latentMathWriteBack: jsonSnapshot.latentMathWriteBack,
+      scientificDiscoveryCycle: jsonSnapshot.scientificDiscoveryCycle,
     };
     if (forecastData) {
       forecastData.parallelUniverse = {
@@ -18745,6 +18997,78 @@ if (chkAutoPromoteVerified) {
       await fetchQuantData(currentTimeframe, true);
     } catch (e) {
       console.warn('Auto-promote mode toggle error:', e);
+    }
+  });
+}
+
+const btnRunEightStepCycle = document.getElementById('btnRunEightStepCycle');
+if (btnRunEightStepCycle) {
+  btnRunEightStepCycle.addEventListener('click', async () => {
+    btnRunEightStepCycle.disabled = true;
+    const origTxt = btnRunEightStepCycle.textContent;
+    btnRunEightStepCycle.textContent = currentLang === 'fa' ? '⏳ در حال اجرای چرخه ۸مرحله‌ای...' : '⏳ Running 8-Step Cycle...';
+    try {
+      const res = await fetch(buildApiUrl('/api/intelligence-core/scientific-cycle'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timeframe: currentTimeframe,
+          authorizeIntegrationMode: 'NONE',
+          operatorNote: 'Operator triggered 8-step scientific discovery cycle from MMI console',
+        }),
+      });
+      const json = await res.json();
+      if (json && json.scientificDiscoveryCycle) {
+        renderEightStepScientificCyclePanel(json.scientificDiscoveryCycle, currentLang === 'fa');
+      }
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('8-step scientific cycle error:', e);
+    } finally {
+      btnRunEightStepCycle.disabled = false;
+      btnRunEightStepCycle.textContent = origTxt;
+    }
+  });
+}
+
+const btnRunPostIntegrationMonitor = document.getElementById('btnRunPostIntegrationMonitor');
+if (btnRunPostIntegrationMonitor) {
+  btnRunPostIntegrationMonitor.addEventListener('click', async () => {
+    btnRunPostIntegrationMonitor.disabled = true;
+    try {
+      const res = await fetch(buildApiUrl('/api/intelligence-core/scientific-cycle/monitor'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timeframe: currentTimeframe }),
+      });
+      const json = await res.json();
+      if (json && json.scientificDiscoveryCycle) {
+        renderEightStepScientificCyclePanel(json.scientificDiscoveryCycle, currentLang === 'fa');
+      }
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Post-integration monitor error:', e);
+    } finally {
+      btnRunPostIntegrationMonitor.disabled = false;
+    }
+  });
+}
+
+const btnRollbackLatentWriteBack = document.getElementById('btnRollbackLatentWriteBack');
+if (btnRollbackLatentWriteBack) {
+  btnRollbackLatentWriteBack.addEventListener('click', async () => {
+    btnRollbackLatentWriteBack.disabled = true;
+    try {
+      await fetch(buildApiUrl('/api/intelligence-core/writeback-rollback'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operatorNote: 'Operator triggered Write-Back Rollback from MMI Console' }),
+      });
+      await fetchQuantData(currentTimeframe, true);
+    } catch (e) {
+      console.warn('Write-back rollback error:', e);
+    } finally {
+      btnRollbackLatentWriteBack.disabled = false;
     }
   });
 }

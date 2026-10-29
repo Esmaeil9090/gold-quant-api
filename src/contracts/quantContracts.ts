@@ -868,6 +868,31 @@ export interface ResidualOracleTelemetry {
   recentResiduals: ResidualOraclePoint[];
 }
 
+export type StructuralEquationFormId =
+  | 'AR1_RESIDUAL_ERROR_CORRECTION'
+  | 'REGIME_GATED_TOXICITY_DAMPING'
+  | 'NONLINEAR_BASIS_THRESHOLD_ATTRACTOR'
+  | 'ASYMMETRIC_VOL_DRIFT_BRAKE'
+  | 'MACRO_YIELD_CONVEX_RESPONSE'
+  | 'PARAMETER_REFINEMENT_ONLY';
+
+export interface ActiveIntegratedStructuralTerm {
+  hypothesisId: string;
+  caseId: string;
+  structuralFormId: StructuralEquationFormId;
+  structuralDistinctionType:
+    | 'STRUCTURAL_FUNCTIONAL_FORM'
+    | 'REGIME_SWITCHING_MECHANISM'
+    | 'NONLINEAR_INTERACTION'
+    | 'PARAMETER_VARIATION_ONLY';
+  equationAscii: string;
+  fittedTheta: number;
+  secondaryParamAlpha: number;
+  targetLatentDimension: 'x1_logPriceLevel' | 'x2_localDrift' | 'x3_localVolatility' | 'x4_pressureToxicity';
+  authorizationMode: 'SCIENTIFICALLY_VERIFIED_PROMOTION' | 'MANUAL_MMI_UNVALIDATED_OVERRIDE';
+  integratedAtIso: string;
+}
+
 export interface LatentModelMathWriteBackState {
   writeBackGeneration: number;
   lastWriteBackIso: string | null;
@@ -880,6 +905,7 @@ export interface LatentModelMathWriteBackState {
   crossVenueObservationPrecisionMult: number;
   activeSymbolicTermsWrittenBack: string[];
   prunedFaultyComponents: string[];
+  activeIntegratedStructuralTerm?: ActiveIntegratedStructuralTerm | null;
 }
 
 export interface BaselineModelComparisonItem {
@@ -958,6 +984,511 @@ export interface ScientificCoreTelemetry {
   scientificScoreboard: PermanentOosScientificScoreboard;
 }
 
+export type ScientificCycleMachineState =
+  | 'IDLE'
+  | 'OBSERVING'
+  | 'DIAGNOSING'
+  | 'HYPOTHESIZING'
+  | 'TESTING'
+  | 'CHALLENGING'
+  | 'DECIDING'
+  | 'INTEGRATING'
+  | 'MONITORING'
+  | 'BLOCKED'
+  | 'FAILED'
+  | 'REJECTED'
+  | 'AWAITING_EVIDENCE'
+  | 'AWAITING_AUTHORIZATION'
+  | 'COMPLETED_WITHOUT_PROMOTION';
+
+export type ScientificEpistemicBadge =
+  | 'OBSERVED'
+  | 'ESTIMATED'
+  | 'INFERRED'
+  | 'HYPOTHESIZED'
+  | 'VALIDATED'
+  | 'APPROVED_FOR_INTEGRATION'
+  | 'INTEGRATED'
+  | 'REJECTED'
+  | 'NOT_TESTED';
+
+export interface AlignedForecastRealizedRecord {
+  originBarIndex: number;
+  originBarTimeSec: number;
+  targetBarIndex: number;
+  targetBarTimeSec: number;
+  horizonBars: number;
+  yellowPredictedUsd: number;
+  yellowStdUsd: number;
+  candidatePredictedUsd: number;
+  randomWalkPredictedUsd: number;
+  emaBaselinePredictedUsd: number;
+  realizedCloseUsd: number;
+  yellowResidualUsd: number;
+  yellowStdResidualSigma: number;
+  clockRegime: string;
+}
+
+export interface ScientificObservationRecord {
+  observationId: string;
+  caseId: string;
+  observedAtIso: string;
+  epistemicBadge: 'OBSERVED' | 'NOT_TESTED';
+  dataProvenance: {
+    provider: string;
+    symbol: string;
+    instrumentIdentity: string;
+    timeframe: string;
+    intervalStepSeconds: number;
+    barCount: number;
+    firstBarTimeSec: number;
+    lastBarTimeSec: number;
+    freshnessAgeSec: number;
+    isStale: boolean;
+    systemState: TerminalSystemState;
+    isSyntheticTestFixture: boolean;
+    provenanceHashSha256: string;
+  };
+  epistemicLayerBreakdown: {
+    observedMarketData: {
+      epistemicTag: 'OBSERVED' | 'SYNTHETIC_FIXTURE';
+      latestCloseUsd: number;
+      latestVolume: number;
+      latestHighLowSpanUsd: number;
+      macroRealYield10Y: number;
+      dxyIndex: number;
+      crossVenueBasisSpreadUsd: number;
+      activeVenueCamerasCount: number;
+    };
+    estimatedLatentState6D: {
+      epistemicTag: 'ESTIMATED';
+      x1_logPriceLevel: number;
+      x2_localDrift: number;
+      x3_localVolatility: number;
+      x4_pressureToxicity: number;
+      x5_liquidityResilience: number;
+      x6_macroResidualForce: number;
+      impliedPriceUsd: number;
+    };
+    derivedMicrostructureFeatures: {
+      epistemicTag: 'INFERRED';
+      vpinToxicity: number;
+      basisZScore: number;
+      garchCondVol: number;
+      currentDeltaTau: number;
+      clockRegime: string;
+      htfPocAnchorUsd: number;
+    };
+    alignedForecastVsRealizedPairs: AlignedForecastRealizedRecord[];
+  };
+  noLookaheadAlignmentVerified: boolean;
+  stagePassed: boolean;
+  blockingReasonEn: string | null;
+  blockingReasonFa: string | null;
+}
+
+export type ScientificAnomalyCategory =
+  | 'PERSISTENT_FORECAST_BIAS'
+  | 'RESIDUAL_SERIAL_AUTOCORRELATION'
+  | 'CONDITIONAL_REGIME_HETEROSKEDASTICITY'
+  | 'INTERVAL_COVERAGE_MISCALIBRATION'
+  | 'CROSS_VENUE_BASIS_LEAKAGE'
+  | 'PULSE_ECHO_TOXICITY_LAG'
+  | 'REDUNDANT_OR_CONTRADICTORY_COMPONENT'
+  | 'SIMPLE_BASELINE_OUTPERFORMANCE';
+
+export interface ScientificAnomalyDiagnostic {
+  anomalyId: string;
+  anomalyCategory: ScientificAnomalyCategory;
+  epistemicBadge: 'INFERRED';
+  detectionRuleSpec: string;
+  observedStatistic: number;
+  thresholdValue: number;
+  pValueOrZScore: number;
+  sampleSizeN: number;
+  timeWindowStartSec: number;
+  timeWindowEndSec: number;
+  affectedTimeframe: string;
+  affectedRegime: string;
+  affectedModelComponentIds: string[];
+  affectedEquationsAscii: string[];
+  attributionConfidence: 'HIGH' | 'MODERATE' | 'AMBIGUOUS';
+  competingExplanations: string[];
+  dataQualityFailureRuledOut: boolean;
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface ScientificDiagnosisReport {
+  diagnosisId: string;
+  caseId: string;
+  observationId: string;
+  diagnosedAtIso: string;
+  diagnosisOutcome: 'WEAKNESS_IDENTIFIED' | 'INSUFFICIENT_EVIDENCE_WHITE_NOISE' | 'DATA_QUALITY_DEGRADED';
+  anomalies: ScientificAnomalyDiagnostic[];
+  primaryAnomaly: ScientificAnomalyDiagnostic | null;
+  residualSummary: {
+    sampleSizeN: number;
+    meanBiasUsd: number;
+    biasTStat: number;
+    rmseUsd: number;
+    lag1Autocorr: number;
+    ljungBoxQ5: number;
+    interval90CoverageRate: number;
+    nominalCoverageTarget: number;
+    highLowVolRmseRatio: number;
+    randomWalkRmseUsd: number;
+    emaBaselineRmseUsd: number;
+    yellowBeatsRandomWalk: boolean;
+  };
+  componentAblationSummary: {
+    redundantComponentIds: string[];
+    destabilizingComponentIds: string[];
+  };
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface ScientificHypothesisRecord {
+  hypothesisId: string;
+  caseId: string;
+  diagnosisId: string;
+  targetAnomalyId: string | null;
+  inventedAtIso: string;
+  inventionOutcome: 'HYPOTHESIS_CONSTRUCTED' | 'NO_DEFENSIBLE_HYPOTHESIS_GENERATED';
+  noHypothesisReasonEn: string | null;
+  noHypothesisReasonFa: string | null;
+  originClassification: 'CONSTRAINED_GRAMMAR_STRUCTURAL_SYNTHESIS' | 'PARAMETER_REESTIMATION_VARIANT' | 'NONE';
+  structuralDistinctionType:
+    | 'STRUCTURAL_FUNCTIONAL_FORM'
+    | 'REGIME_SWITCHING_MECHANISM'
+    | 'NONLINEAR_INTERACTION'
+    | 'PARAMETER_VARIATION_ONLY';
+  structuralFormId: StructuralEquationFormId;
+  ancestry: {
+    parentHypothesisId: string | null;
+    parentArchitectureId: string;
+    generationNumber: number;
+    ancestryChain: string[];
+    mutationDescription: string;
+  };
+  titleEn: string;
+  titleFa: string;
+  mathematicalFormAscii: string;
+  stateTransitionDiffAscii: string;
+  targetLatentStateDimension: 'x1_logPriceLevel' | 'x2_localDrift' | 'x3_localVolatility' | 'x4_pressureToxicity';
+  variableDefinitions: {
+    symbol: string;
+    meaningEn: string;
+    units: string;
+    domainBounds: string;
+    causalSource: string;
+  }[];
+  fittedParameters: {
+    name: string;
+    symbol: string;
+    value: number;
+    allowedMin: number;
+    allowedMax: number;
+    units: string;
+    estimationMethod: string;
+  }[];
+  assumptionsEn: string[];
+  assumptionsFa: string[];
+  identifiabilityCheck: {
+    isIdentifiable: boolean;
+    conditionNumber: number;
+    minSampleSizeRequired: number;
+    actualFitSampleSize: number;
+    jacobianRankFull: boolean;
+    detailsEn: string;
+  };
+  expectedDirectionOfEffectEn: string;
+  falsifiablePredictions: {
+    predictionId: string;
+    statementEn: string;
+    metricName: string;
+    requiredDirection: 'DECREASE' | 'INCREASE' | 'BOUNDED_WITHIN';
+    targetThreshold: number;
+  }[];
+  disconfirmationFailureConditionsEn: string[];
+  epistemicBadge: 'HYPOTHESIZED' | 'REJECTED' | 'VALIDATED' | 'INTEGRATED';
+  rejectionReasonEn?: string | null;
+}
+
+export type ScientificTechnicalCheckId =
+  | 'DIMENSIONAL_AND_UNIT_CONSISTENCY'
+  | 'DOMAIN_AND_RANGE_VALIDITY'
+  | 'PARAMETER_BOUND_AND_FINITENESS'
+  | 'NUMERICAL_STABILITY_EXTREME_INPUTS'
+  | 'COVARIANCE_PSD_AND_VARIANCE_POSITIVITY'
+  | 'CAUSAL_ORDERING_AND_NO_LOOKAHEAD'
+  | 'NO_TARGET_LEAKAGE_IN_FEATURES'
+  | 'MISSING_AND_DEGENERATE_DATA_RESILIENCE'
+  | 'DETERMINISTIC_REPRODUCIBILITY'
+  | 'INDEPENDENT_REFERENCE_CALCULATION_MATCH';
+
+export interface ScientificTechnicalTestReport {
+  testReportId: string;
+  caseId: string;
+  hypothesisId: string;
+  testedAtIso: string;
+  allTechnicalChecksPassed: boolean;
+  epistemicBadge: 'VALIDATED' | 'REJECTED';
+  checks: {
+    checkId: ScientificTechnicalCheckId;
+    titleEn: string;
+    titleFa: string;
+    passed: boolean;
+    measuredValue: string;
+    requiredSpec: string;
+    detailsEn: string;
+  }[];
+  independentReferenceAudit: {
+    maxAbsDiscrepancyUsd: number;
+    toleranceUsd: number;
+    referenceFormulaVerified: boolean;
+  };
+  failureReasonsEn: string[];
+  failureReasonsFa: string[];
+}
+
+export interface ScientificChallengerScoreboardRow {
+  challengerId:
+    | 'CANDIDATE_HYPOTHESIS_MODEL'
+    | 'INCUMBENT_YELLOW_LINE_MODEL'
+    | 'RANDOM_WALK_PERSISTENCE'
+    | 'EMA_SIMPLE_BASELINE'
+    | 'PRIOR_CANDIDATE_MODEL'
+    | 'ABLATED_INCUMBENT_MODEL';
+  labelEn: string;
+  labelFa: string;
+  oosRmseUsd: number;
+  oosMaeUsd: number;
+  oosMeanBiasUsd: number;
+  directionalHitRate: number;
+  spearmanRankIc: number;
+  brierScore: number;
+  interval90Coverage: number;
+  tailP95ErrorUsd: number;
+  maxErrorExcursionUsd: number;
+  residualLag1Autocorr: number;
+  parameterCountK: number;
+  bicScore: number;
+  candidateBeatsChallenger: boolean;
+}
+
+export interface ScientificChallengeComparisonReport {
+  challengeId: string;
+  caseId: string;
+  hypothesisId: string;
+  challengedAtIso: string;
+  matchedSampleSpec: {
+    totalBars: number;
+    calibrationWindow: [number, number];
+    weightingWindow: [number, number];
+    oosEvaluationWindow: [number, number];
+    oosSampleCountN: number;
+    forecastHorizonsEvaluated: number[];
+    identicalTimestampsVerified: boolean;
+    chronologicalNoOverlapVerified: boolean;
+  };
+  multipleTestingAccount: {
+    cumulativeCandidatesSearched: number;
+    effectiveIndependentTrials: number;
+    bonferroniAlpha: number;
+    rawCriticalTStat: number;
+    deflatedCriticalTStat: number;
+    searchPenaltyApplied: boolean;
+  };
+  inSampleMetrics: {
+    candidateFitRmseUsd: number;
+    incumbentFitRmseUsd: number;
+    overfitRatioOosToIs: number;
+  };
+  challengerScoreboard: ScientificChallengerScoreboardRow[];
+  horizonBreakdown: {
+    horizonBars: number;
+    incumbentRmseUsd: number;
+    candidateRmseUsd: number;
+    randomWalkRmseUsd: number;
+    relativeImprovementPct: number;
+  }[];
+  regimeBreakdown: {
+    regimeId: string;
+    sampleSizeN: number;
+    incumbentRmseUsd: number;
+    candidateRmseUsd: number;
+    candidateImprovesOrHolds: boolean;
+  }[];
+  statisticalComparison: {
+    dieboldMarianoTStatVsIncumbent: number;
+    dieboldMarianoTStatVsRandomWalk: number;
+    deflatedThresholdPassed: boolean;
+    targetAnomalyMetricBefore: number;
+    targetAnomalyMetricAfter: number;
+    targetAnomalyReduced: boolean;
+    competingExplanationVerdictEn: string;
+  };
+  challengePassed: boolean;
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export type ScientificDecisionVerdict =
+  | 'REJECT'
+  | 'REVISE_HYPOTHESIS'
+  | 'COLLECT_MORE_EVIDENCE'
+  | 'RETAIN_UNVALIDATED_CANDIDATE'
+  | 'RECOMMEND_REPLICATION'
+  | 'ELIGIBLE_FOR_PROMOTION';
+
+export interface ScientificDecisionRecord {
+  decisionId: string;
+  caseId: string;
+  hypothesisId: string;
+  challengeId: string | null;
+  decidedAtIso: string;
+  verdict: ScientificDecisionVerdict;
+  epistemicBadge: ScientificEpistemicBadge;
+  eightGateStatus: CandidateVerificationStatus;
+  passedGatesCount: number;
+  totalGatesCount: number;
+  isScientificallyVerifiedForPromotion: boolean;
+  requiresHumanAuthorizationForWriteBack: boolean;
+  decisionCriteriaApplied: {
+    criterionName: string;
+    passed: boolean;
+    observedValue: string;
+    requiredThreshold: string;
+  }[];
+  rationaleEn: string;
+  rationaleFa: string;
+}
+
+export interface ScientificIntegrationRecord {
+  integrationId: string;
+  caseId: string;
+  hypothesisId: string;
+  decisionId: string;
+  integratedAtIso: string;
+  integrationExecuted: boolean;
+  integrationMode:
+    | 'SCIENTIFICALLY_VERIFIED_PROMOTION'
+    | 'MANUAL_MMI_UNVALIDATED_OVERRIDE'
+    | 'BLOCKED_UNVERIFIED';
+  epistemicBadge: ScientificEpistemicBadge;
+  previousWriteBackGeneration: number;
+  newWriteBackGeneration: number;
+  previousLiveArchitectureId: string;
+  newLiveArchitectureId: string;
+  equationDiffAscii: {
+    beforeEquation: string;
+    afterEquation: string;
+    addedStructuralTermAscii: string | null;
+  };
+  parameterDiffs: {
+    paramKey: string;
+    beforeValue: number;
+    afterValue: number;
+    deltaValue: number;
+  }[];
+  activePathExecutionVerification: {
+    verifiedOnActiveForecastPath: boolean;
+    yellowForecastTerminalBeforeUsd: number;
+    yellowForecastTerminalAfterUsd: number;
+    attributableShiftUsd: number;
+    structuralTermContributionUsd: number;
+    covarianceRemainPsd: boolean;
+    explanationEn: string;
+  };
+  rollbackSnapshotRef: {
+    rollbackGeneration: number;
+    canRollbackImmediately: boolean;
+  };
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface PostIntegrationMonitoringRecord {
+  monitorId: string;
+  caseId: string;
+  integrationId: string;
+  hypothesisId: string;
+  evaluatedAtIso: string;
+  monitoringStatus:
+    | 'HEALTHY_WITHIN_THRESHOLDS'
+    | 'SINGLE_BAR_NOISE_TOLERATED'
+    | 'DEGRADATION_WARNING'
+    | 'ROLLBACK_TRIGGERED'
+    | 'NO_ACTIVE_INTEGRATION';
+  postIntegrationBarsObserved: number;
+  minBarsBeforeRollbackTrigger: number;
+  preRegisteredThresholds: {
+    maxRmseRatioVsIncumbentBaseline: number;
+    maxAbsStandardizedBiasZ: number;
+    minInterval90Coverage: number;
+    maxResidualLag1Autocorr: number;
+    minConsecutiveDegradedBarsForRollback: number;
+  };
+  observedMetrics: {
+    rollingPostIntegrationRmseUsd: number;
+    incumbentReferenceRmseUsd: number;
+    rmseRatioVsReference: number;
+    rollingMeanBiasUsd: number;
+    standardizedBiasZ: number;
+    interval90Coverage: number;
+    residualLag1Autocorr: number;
+    consecutiveDegradedBars: number;
+    latestBarResidualSigma: number;
+  };
+  rollbackTriggered: boolean;
+  rollbackExecutionSummary: {
+    rolledBackToGeneration: number | null;
+    reasonEn: string;
+    reasonFa: string;
+  } | null;
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface ScientificDiscoveryCaseRecord {
+  caseId: string;
+  cycleNumber: number;
+  createdAtIso: string;
+  updatedAtIso: string;
+  timeframe: string;
+  currentState: ScientificCycleMachineState;
+  epistemicBadge: ScientificEpistemicBadge;
+  stateTransitionHistory: {
+    fromState: ScientificCycleMachineState;
+    toState: ScientificCycleMachineState;
+    timestampIso: string;
+    reasonEn: string;
+  }[];
+  observeRecord: ScientificObservationRecord | null;
+  diagnoseReport: ScientificDiagnosisReport | null;
+  inventRecord: ScientificHypothesisRecord | null;
+  testReport: ScientificTechnicalTestReport | null;
+  challengeReport: ScientificChallengeComparisonReport | null;
+  decisionRecord: ScientificDecisionRecord | null;
+  integrationRecord: ScientificIntegrationRecord | null;
+  monitorRecord: PostIntegrationMonitoringRecord | null;
+  deterministicReplaySeedHash: string;
+}
+
+export interface ScientificDiscoveryCycleTelemetry {
+  schemaVersion: string;
+  machineState: ScientificCycleMachineState;
+  isCycleLocked: boolean;
+  totalCyclesExecuted: number;
+  cumulativeCandidateSearchCount: number;
+  activeCase: ScientificDiscoveryCaseRecord | null;
+  recentCases: ScientificDiscoveryCaseRecord[];
+  hypothesisGraveyard: ScientificHypothesisRecord[];
+  activeMonitoringState: PostIntegrationMonitoringRecord | null;
+}
+
 export interface ParallelUniverseTelemetry {
   enabled: boolean;
   autoPromotionEnabled: boolean;
@@ -993,5 +1524,7 @@ export interface ParallelUniverseTelemetry {
   };
   canRollbackWriteBack?: boolean;
   writeBackVersionHistory?: LatentModelMathWriteBackState[];
+  scientificDiscoveryCycle?: ScientificDiscoveryCycleTelemetry;
 }
+
 

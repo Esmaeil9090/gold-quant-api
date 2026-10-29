@@ -1,5 +1,5 @@
 {
-  "timestampIso": "2026-10-28T17:26:23.894Z",
+  "timestampIso": "2026-10-29T19:31:32.064Z",
   "mode": "POST_REMEDIATION_VERIFICATION",
   "sampleSizeCandles": 300,
   "results": [
@@ -50,8 +50,8 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "All observer states finite and dimensionally consistent ($/step)",
-      "measuredValue": "drift=1.1220, shrunkBias=-0.0260, historyLen=25",
-      "evidenceSummary": "AdaptiveDPObserver produced 25 finite trajectory points; f1=0.854, f2=undefined."
+      "measuredValue": "drift=1.1220, shrunkBias=-0.0250, historyLen=25",
+      "evidenceSummary": "AdaptiveDPObserver produced 25 finite trajectory points; f1=0.84, netLift=0.787."
     },
     {
       "testId": "AUDIT-06",
@@ -70,7 +70,7 @@
       "status": "PASSED",
       "severityIfFailed": "HIGH",
       "toleranceOrCriterion": "All states finite; lower05 <= lower25 <= median <= upper75 <= upper95 for all h=1..24",
-      "measuredValue": "impliedPrice=$4053.21, Δτ=undefined, finite=true",
+      "measuredValue": "impliedPrice=$4053.22, Δτ=4.2, finite=true",
       "evidenceSummary": "Filter and 24-step quantile plume remain bounded and strictly monotonic under a $65 jump + 25x volume spike."
     },
     {
@@ -110,7 +110,7 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Matched-sample walk-forward evaluation across N >= 30 origins with DM t-stat and 90% interval coverage",
-      "measuredValue": "h=1: RMSE_Y=$6.1086 vs RMSE_RW=$4.8509 (DM t=-2.143, Cov90=91.3%)",
+      "measuredValue": "h=1: RMSE_Y=$6.1092 vs RMSE_RW=$4.8509 (DM t=-2.144, Cov90=91.3%)",
       "evidenceSummary": "Evaluated 253 strictly causal origins across h=1,5,15."
     },
     {
@@ -120,7 +120,7 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Quantify exact OOS RMSE, Hit Rate, Rank IC, and ρ_1 contribution of each 6D filter term",
-      "measuredValue": "FULL_MODEL: RMSE=$5 | ABLATE_MEAN_REVERSION: RMSE=$5.0158 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8964 | ABLATE_MACRO_COUPLING: RMSE=$5.0031 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.878",
+      "measuredValue": "FULL_MODEL: RMSE=$4.9999 | ABLATE_MEAN_REVERSION: RMSE=$5.0156 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8963 | ABLATE_MACRO_COUPLING: RMSE=$5.003 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.8781",
       "evidenceSummary": "Completed 5-way component ablation across mean reversion, toxicity coupling, macro coupling, and drift persistence."
     },
     {
@@ -170,8 +170,8 @@
       "status": "PASSED",
       "severityIfFailed": "HIGH",
       "toleranceOrCriterion": "When eligible, write-back increments generation and mutates Yellow-Line trajectory; when ineligible, fails closed with zero mutation",
-      "measuredValue": "applied=true (8/8 gates), gen=36->37, ΔStep24=$-0.01",
-      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4061.51 to $4061.5 (Δ=$-0.01)."
+      "measuredValue": "applied=true (8/8 gates), gen=41->42, ΔStep24=$-0.01",
+      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4061.53 to $4061.52 (Δ=$-0.01)."
     },
     {
       "testId": "AUDIT-18",
@@ -180,41 +180,41 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Must maintain versioned snapshot stack of prior LatentModelMathWriteBackState states and support instant rollback",
-      "measuredValue": "historySnapshots=4",
+      "measuredValue": "historySnapshots=7",
       "evidenceSummary": "Write-back state maintains versioned rollback history with one-step restoration."
     }
   ],
   "forecastMetricsTable": {
     "h=1": {
       "sampleSizeN": 253,
-      "yellowRmseUsd": 6.1086,
+      "yellowRmseUsd": 6.1092,
       "randomWalkRmseUsd": 4.8509,
       "emaBaselineRmseUsd": 4.792,
-      "yellowMaeUsd": 3.9733,
+      "yellowMaeUsd": 3.9739,
       "randomWalkMaeUsd": 3.3361,
       "directionalHitRate": 0.4545,
       "empirical90IntervalCoverage": 0.913,
-      "dieboldMarianoVsRwTStat": -2.143
+      "dieboldMarianoVsRwTStat": -2.144
     },
     "h=5": {
       "sampleSizeN": 253,
-      "yellowRmseUsd": 11.5598,
+      "yellowRmseUsd": 11.5623,
       "randomWalkRmseUsd": 8.571,
       "emaBaselineRmseUsd": 8.517,
-      "yellowMaeUsd": 8.7458,
+      "yellowMaeUsd": 8.7476,
       "randomWalkMaeUsd": 6.3169,
       "directionalHitRate": 0.3755,
       "empirical90IntervalCoverage": 0.9526,
-      "dieboldMarianoVsRwTStat": -6.69
+      "dieboldMarianoVsRwTStat": -6.692
     },
     "h=15": {
       "sampleSizeN": 253,
-      "yellowRmseUsd": 21.3335,
+      "yellowRmseUsd": 21.337,
       "randomWalkRmseUsd": 13.2359,
       "emaBaselineRmseUsd": 13.9937,
-      "yellowMaeUsd": 16.7813,
+      "yellowMaeUsd": 16.784,
       "randomWalkMaeUsd": 10.0054,
-      "directionalHitRate": 0.3715,
+      "directionalHitRate": 0.3676,
       "empirical90IntervalCoverage": 0.9368,
       "dieboldMarianoVsRwTStat": -10.023
     }
@@ -223,64 +223,64 @@
     {
       "id": "FULL_MODEL",
       "label": "Full 6D Latent Filter (Baseline)",
-      "oosRmseUsd": 5,
-      "directionalHitRate": 0.4783,
+      "oosRmseUsd": 4.9999,
+      "directionalHitRate": 0.4749,
       "brierScore": 0.2497,
-      "rankIc": -0.0299,
+      "rankIc": -0.0297,
       "residualLag1Autocorr": -0.1744
     },
     {
       "id": "ABLATE_MEAN_REVERSION",
       "label": "No Equilibrium Mean Reversion (κ_rev = 0)",
-      "oosRmseUsd": 5.0158,
+      "oosRmseUsd": 5.0156,
       "directionalHitRate": 0.5017,
       "brierScore": 0.2486,
-      "rankIc": -0.0015,
-      "residualLag1Autocorr": -0.1696
+      "rankIc": -0.001,
+      "residualLag1Autocorr": -0.1695
     },
     {
       "id": "ABLATE_TOXICITY_COUPLING",
       "label": "No Pulse-Echo Toxicity Coupling (β_tox = 0)",
-      "oosRmseUsd": 4.8964,
-      "directionalHitRate": 0.4849,
+      "oosRmseUsd": 4.8963,
+      "directionalHitRate": 0.4816,
       "brierScore": 0.2488,
-      "rankIc": -0.0095,
+      "rankIc": -0.0097,
       "residualLag1Autocorr": -0.1357
     },
     {
       "id": "ABLATE_MACRO_COUPLING",
       "label": "No Macro Force Coupling (η_macro = 0)",
-      "oosRmseUsd": 5.0031,
-      "directionalHitRate": 0.4682,
+      "oosRmseUsd": 5.003,
+      "directionalHitRate": 0.4716,
       "brierScore": 0.2507,
-      "rankIc": -0.0317,
+      "rankIc": -0.0319,
       "residualLag1Autocorr": -0.1739
     },
     {
       "id": "ABLATE_DRIFT_PERSISTENCE",
       "label": "Low Drift Persistence (φ_drift = 0.20)",
-      "oosRmseUsd": 4.878,
-      "directionalHitRate": 0.5385,
-      "brierScore": 0.247,
-      "rankIc": 0.0828,
+      "oosRmseUsd": 4.8781,
+      "directionalHitRate": 0.5351,
+      "brierScore": 0.2471,
+      "rankIc": 0.0836,
       "residualLag1Autocorr": -0.1631
     }
   ],
   "beforeAfterWriteBackDiff": {
     "writeBackApplied": true,
     "gatesPassedCount": 8,
-    "generationBefore": 36,
-    "generationAfter": 37,
+    "generationBefore": 41,
+    "generationAfter": 42,
     "parametersBefore": {
-      "phi": 0.9252,
+      "phi": 0.9251,
       "kappa": 0.1692,
       "beta": 0.437,
-      "gamma": 0.5344,
+      "gamma": 0.5343,
       "eta": 0.25,
       "precisionMult": 1.327
     },
     "parametersAfter": {
-      "phi": 0.9246,
+      "phi": 0.9245,
       "kappa": 0.169,
       "beta": 0.437,
       "gamma": 0.534,
@@ -289,26 +289,26 @@
     },
     "latentStateBefore": {
       "logPriceLevel": 8.305272,
-      "localDrift": 0.000087,
+      "localDrift": 0.000088,
       "localVolatility": 0.00077,
       "pressureToxicity": 0.1033,
       "liquidityResilience": 0.6959,
-      "macroResidualForce": -0.000061
+      "macroResidualForce": -0.000059
     },
     "latentStateAfter": {
       "logPriceLevel": 8.305272,
-      "localDrift": 0.000085,
+      "localDrift": 0.000086,
       "localVolatility": 0.00077,
       "pressureToxicity": 0.1033,
       "liquidityResilience": 0.6959,
-      "macroResidualForce": -0.000061
+      "macroResidualForce": -0.000058
     },
-    "yellowLineStep1BeforeUsd": 4045.98,
+    "yellowLineStep1BeforeUsd": 4045.99,
     "yellowLineStep1AfterUsd": 4045.98,
-    "yellowLineStep24BeforeUsd": 4061.51,
-    "yellowLineStep24AfterUsd": 4061.5,
+    "yellowLineStep24BeforeUsd": 4061.53,
+    "yellowLineStep24AfterUsd": 4061.52,
     "yellowLineStep24DeltaUsd": -0.01,
-    "oosRmseBeforeUsd": 5,
-    "oosRmseAfterUsd": 4.9992
+    "oosRmseBeforeUsd": 4.9999,
+    "oosRmseAfterUsd": 4.9991
   }
 }
