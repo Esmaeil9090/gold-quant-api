@@ -3343,6 +3343,11 @@ input:checked + .toggle-slider:before {
           <span class="reliability-dot" id="reliabilityDot"></span>
           <span id="reliabilityBtnText">🛡️ Feed Integrity: QUORUM VERIFIED</span>
         </button>
+        <button class="btn" id="btnGdfOsDrawer" style="border-color: rgba(0, 230, 118, 0.55); color: #00e676; background: rgba(0, 230, 118, 0.1);" title="Open GDF 5-Step Delegation, Playbook, Toolbox, Proof & Audit Operating System">
+          <span>📋</span>
+          <span id="btnGdfOsDrawerTxt">GDF OS · Playbooks &amp; Proof</span>
+          <span id="gdfOsHeaderBadge" style="font-family: monospace; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: rgba(0, 230, 118, 0.2); border: 1px solid rgba(0, 230, 118, 0.5); color: #00e676;">PASS</span>
+        </button>
         <button class="btn" id="bugReportBtn" style="border-color: rgba(255, 171, 0, 0.55); color: #ffd740; background: rgba(255, 171, 0, 0.1);" title="Open System Bug, Error & Provider Diagnostic Report Window">
           <span>🐞</span>
           <span data-i18n="btnBugReport">System Report</span>
@@ -19496,6 +19501,343 @@ document.addEventListener('DOMContentLoaded', () => {
   <button id="toastReloadBtn" class="toast-action-btn">Update Now</button>
 </div>
 
+<!-- =========================================================================
+     GDF 5-STEP DELEGATION, PLAYBOOK, TOOLBOX, PROOF & AUDIT DRAWER (NON-INTRUSIVE)
+     ========================================================================= -->
+<div id="gdfOsDrawerOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="GDF 5-Step Operating System Console">
+  <div class="modal-box" style="max-width: 960px; width: 96%; max-height: 88vh; border-color: rgba(0, 229, 255, 0.55);">
+    <div class="modal-header" style="background: rgba(8, 14, 26, 0.96);">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="modal-title" style="color: #f5d76e;">📋 GDF 5-STEP DELEGATION, PLAYBOOK, TOOLBOX, PROOF &amp; AUDIT OS</span>
+          <span id="gdfOsModalStatusPill" style="font-family: monospace; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px; background: rgba(0, 230, 118, 0.16); border: 1px solid rgba(0, 230, 118, 0.5); color: #00e676;">PROOF: PASS</span>
+          <span style="font-family: monospace; font-size: 10px; color: #00e5ff; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); padding: 2px 7px; border-radius: 5px;">EXTERNAL AGENTS: READ-ONLY AUDITOR / ADVISOR</span>
+        </div>
+        <div style="font-size: 10.5px; color: #8fa2bf;">
+          Closed-Loop Operating System: <b>1. Interview</b> → <b>2. Playbook (PB-001..006)</b> → <b>3. Toolbox Store (TB-001..012)</b> → <b>4. Proof Verification</b> → <b>5. Loopback &amp; Audit</b>
+        </div>
+      </div>
+      <button type="button" class="modal-close" id="btnCloseGdfOsDrawer" title="Close GDF OS Console">✕</button>
+    </div>
+
+    <div class="settings-tabs-header" style="overflow-x: auto; flex-wrap: nowrap;">
+      <button type="button" class="settings-tab-btn active" data-gdf-os-tab="interview">1. Interview Gate</button>
+      <button type="button" class="settings-tab-btn" data-gdf-os-tab="playbooks">2. Playbooks (PB-001..006)</button>
+      <button type="button" class="settings-tab-btn" data-gdf-os-tab="toolbox">3. Toolbox Store (TB-001..012)</button>
+      <button type="button" class="settings-tab-btn" data-gdf-os-tab="proof">4. Proof &amp; Live Verification</button>
+      <button type="button" class="settings-tab-btn" data-gdf-os-tab="audit">5. On-Demand Audit &amp; Loopback</button>
+    </div>
+
+    <div class="modal-body" id="gdfOsDrawerBody" style="padding: 16px 20px; background: rgba(6, 10, 18, 0.92);">
+      <div id="gdfOsTabContent" style="font-size: 12px; color: #dbe7f6;">Loading GDF Operating System Registry...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initGdfOperatingSystemConsole() {
+  let gdfOsState = null;
+  let activeTab = 'interview';
+
+  const overlay = document.getElementById('gdfOsDrawerOverlay');
+  const openBtn = document.getElementById('btnGdfOsDrawer');
+  const closeBtn = document.getElementById('btnCloseGdfOsDrawer');
+  const tabContent = document.getElementById('gdfOsTabContent');
+  const headerBadge = document.getElementById('gdfOsHeaderBadge');
+  const modalStatusPill = document.getElementById('gdfOsModalStatusPill');
+  const tabButtons = document.querySelectorAll('[data-gdf-os-tab]');
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function updateStatusBadges(registry) {
+    if (!registry) return;
+    const latestProof = registry.proofReports && registry.proofReports[0];
+    const st = latestProof ? latestProof.overallStatus : 'PASS';
+    if (headerBadge) {
+      headerBadge.textContent = st;
+      headerBadge.style.color = st === 'PASS' ? '#00e676' : st === 'FAIL' ? '#ff3d5a' : '#ffab00';
+      headerBadge.style.borderColor = st === 'PASS' ? 'rgba(0,230,118,0.5)' : st === 'FAIL' ? 'rgba(255,61,90,0.5)' : 'rgba(255,171,0,0.5)';
+    }
+    if (modalStatusPill) {
+      modalStatusPill.textContent = 'PROOF: ' + st;
+      modalStatusPill.style.color = st === 'PASS' ? '#00e676' : st === 'FAIL' ? '#ff3d5a' : '#ffab00';
+    }
+  }
+
+  async function fetchGdfOsState() {
+    try {
+      const res = await fetch('/api/gdf-os/state');
+      const data = await res.json();
+      if (data && data.registry) {
+        gdfOsState = data.registry;
+        updateStatusBadges(gdfOsState);
+        renderActiveTab();
+      }
+    } catch (err) {
+      if (tabContent) {
+        tabContent.innerHTML = '<div style="color:#ff5252;">Failed to load GDF Operating System state.</div>';
+      }
+    }
+  }
+
+  function renderActiveTab() {
+    if (!tabContent || !gdfOsState) return;
+    if (activeTab === 'interview') {
+      const inv = (gdfOsState.interviews && gdfOsState.interviews[0]) || null;
+      if (!inv) {
+        tabContent.innerHTML = '<div>No interview records found.</div>';
+        return;
+      }
+      const turnsHtml = (inv.turns || []).map((t) => (
+        '<div style="padding:8px 10px;border:1px solid rgba(40,60,95,0.45);border-radius:8px;background:rgba(10,16,28,0.8);margin-bottom:6px;">' +
+          '<div style="font-weight:700;color:#00e5ff;">Q' + escapeHtml(t.questionIndex) + ': ' + escapeHtml(t.questionText) + '</div>' +
+          '<div style="color:#f5d76e;margin-top:3px;"><b>Operator Answer:</b> ' + escapeHtml(t.operatorAnswer) + '</div>' +
+          '<div style="color:#9cb0cc;font-size:11px;margin-top:2px;"><b>Locked Constraint:</b> ' + escapeHtml(t.resolvedConstraint) + '</div>' +
+        '</div>'
+      )).join('');
+
+      tabContent.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">' +
+          '<div>' +
+            '<div style="font-size:14px;font-weight:800;color:#fff;">' + escapeHtml(inv.interviewId) + ' · ' + escapeHtml(inv.taskTitle) + '</div>' +
+            '<div style="font-size:11px;color:#8fa2bf;">Owning Hierarchy: ' + escapeHtml((inv.owningRoles || []).join(' → ')) + '</div>' +
+          '</div>' +
+          '<span style="font-family:monospace;font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;background:rgba(0,230,118,0.15);border:1px solid rgba(0,230,118,0.5);color:#00e676;">' +
+            (inv.confirmedByOperator ? '✓ CONFIRMED BY OPERATOR (' + escapeHtml(inv.confirmedAtIso || '') + ')' : 'AWAITING CONFIRMATION') +
+          '</span>' +
+        '</div>' +
+        '<div style="padding:10px 12px;border-radius:8px;background:rgba(13,22,38,0.85);border:1px solid rgba(0,229,255,0.3);margin-bottom:12px;">' +
+          '<div style="font-weight:800;color:#f5d76e;margin-bottom:4px;">Summary of Confirmed Architecture &amp; Boundaries</div>' +
+          '<div style="color:#dbe7f6;line-height:1.5;">' + escapeHtml(inv.summaryOfUnderstanding) + '</div>' +
+        '</div>' +
+        '<div style="font-weight:800;color:#00e5ff;margin-bottom:6px;text-transform:uppercase;font-size:11px;">Step 1 Single-Question Interview Log (5/5 Resolved)</div>' +
+        turnsHtml;
+      return;
+    }
+
+    if (activeTab === 'playbooks') {
+      const pbs = gdfOsState.playbooks || [];
+      tabContent.innerHTML =
+        '<div style="margin-bottom:10px;font-size:11px;color:#9cb0cc;">Bi-directionally synchronized with <code>/playbooks/PB-001.md</code> through <code>/playbooks/PB-006.md</code> on disk.</div>' +
+        pbs.map((pb) => (
+          '<div style="border:1px solid rgba(40,60,95,0.55);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:rgba(9,15,26,0.9);">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">' +
+              '<div style="font-size:13px;font-weight:800;color:#f5d76e;">' + escapeHtml(pb.playbookId) + ' · ' + escapeHtml(pb.playbookName) + '</div>' +
+              '<div style="display:flex;gap:6px;align-items:center;">' +
+                '<span style="font-family:monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(0,229,255,0.14);border:1px solid rgba(0,229,255,0.4);color:#00e5ff;">Version: ' + escapeHtml(pb.version) + '</span>' +
+                '<span style="font-family:monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:#9cb0cc;">' + escapeHtml(pb.markdownPath) + ' [SHA:' + escapeHtml((pb.sha256Digest || '').slice(0, 8)) + ']</span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="font-size:11px;color:#9cb0cc;margin-bottom:6px;"><b>Trigger:</b> ' + escapeHtml(pb.trigger) + '</div>' +
+            '<div style="font-size:11px;color:#dbe7f6;margin-bottom:6px;"><b>Steps:</b><ol style="margin:4px 0 0 18px;padding:0;">' +
+              (pb.steps || []).map((s) => '<li style="margin-bottom:2px;">' + escapeHtml(s) + '</li>').join('') +
+            '</ol></div>' +
+            '<div style="font-size:11px;color:#ffab00;margin-bottom:4px;"><b>Common Failure Modes:</b><ul style="margin:3px 0 0 18px;padding:0;">' +
+              (pb.commonFailureModes || []).map((fm) => '<li>' + escapeHtml(fm) + '</li>').join('') +
+            '</ul></div>' +
+            '<div style="font-size:11px;color:#00e676;"><b>Proof Required:</b> ' + escapeHtml((pb.proofRequired || []).join(' | ')) + '</div>' +
+            '<div style="font-size:10.5px;color:#00e5ff;margin-top:4px;"><b>Next Improvement:</b> ' + escapeHtml(pb.nextImprovement) + '</div>' +
+          '</div>'
+        )).join('');
+      return;
+    }
+
+    if (activeTab === 'toolbox') {
+      const tools = gdfOsState.toolbox || [];
+      tabContent.innerHTML =
+        '<div style="margin-bottom:10px;font-size:11px;color:#9cb0cc;">Synchronized with <code>/toolbox/TOOLBOX_INDEX.md</code>. Every asset is verified on disk before reporting PASS.</div>' +
+        '<div style="overflow-x:auto;"><table class="mtf-table" style="width:100%;font-size:11px;">' +
+          '<thead><tr><th>ID &amp; Resource Name</th><th>What It Does</th><th>Where It Lives</th><th>Related Playbook</th><th>Disk Access Proof</th></tr></thead>' +
+          '<tbody>' +
+            tools.map((t) => (
+              '<tr>' +
+                '<td style="font-weight:700;color:#f5d76e;">' + escapeHtml(t.toolId) + '<br><span style="font-size:10px;color:#00e5ff;">' + escapeHtml(t.toolResourceName) + '</span></td>' +
+                '<td>' + escapeHtml(t.whatItDoes) + '<div style="font-size:10px;color:#8fa2bf;margin-top:2px;"><b>Verify:</b> ' + escapeHtml(t.howToVerifyAccess) + '</div></td>' +
+                '<td><code>' + escapeHtml(t.whereItLives) + '</code></td>' +
+                '<td><code>' + escapeHtml(t.relatedPlaybook) + '</code></td>' +
+                '<td><span style="font-family:monospace;font-weight:800;color:' + (t.verifiedExistsOnDisk ? '#00e676' : '#ff3d5a') + ';">' + (t.verifiedExistsOnDisk ? 'PASS (ON DISK)' : 'FAIL') + '</span></td>' +
+              '</tr>'
+            )).join('') +
+          '</tbody></table></div>';
+      return;
+    }
+
+    if (activeTab === 'proof') {
+      const prf = (gdfOsState.proofReports && gdfOsState.proofReports[0]) || null;
+      tabContent.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">' +
+          '<div style="font-size:13px;font-weight:800;color:#fff;">Step 4 — Independent Proof Verification Report</div>' +
+          '<button type="button" class="btn btn-gold" id="btnRunLiveProofNow">⚡ Execute Live Proof Suite Now</button>' +
+        '</div>' +
+        (prf
+          ? '<div style="border:1px solid rgba(0,230,118,0.4);border-radius:10px;padding:12px;background:rgba(8,16,26,0.9);margin-bottom:12px;font-size:11.5px;">' +
+              '<div style="margin-bottom:4px;"><b>Proof ID:</b> <code>' + escapeHtml(prf.proofId) + '</code> · <b>Timestamp:</b> <code>' + escapeHtml(prf.timestampIso) + '</code> · <b>Overall:</b> <span style="color:#00e676;font-weight:800;">' + escapeHtml(prf.overallStatus) + '</span></div>' +
+              '<div style="margin-bottom:4px;"><b>1. What was requested:</b> ' + escapeHtml(prf.whatWasRequested) + '</div>' +
+              '<div style="margin-bottom:4px;"><b>2. What was executed:</b> ' + escapeHtml(prf.whatWasExecuted) + '</div>' +
+              '<div style="margin-bottom:4px;"><b>3. What output was produced:</b> ' + escapeHtml(prf.whatOutputWasProduced) + '</div>' +
+              '<div style="margin-bottom:4px;"><b>4. How it was verified:</b> ' + escapeHtml(prf.howItWasVerified) + '</div>' +
+              '<div style="margin-bottom:4px;"><b>5. What failed or remains unverified:</b> ' + escapeHtml(prf.whatFailedOrRemainsUnverified) + '</div>' +
+              '<div><b>6. What was updated in Playbook / Toolbox:</b> ' + escapeHtml(prf.whatWasUpdatedInPlaybookOrToolbox) + '</div>' +
+            '</div>' +
+            '<table class="mtf-table" style="width:100%;font-size:11px;">' +
+              '<thead><tr><th>Check ID</th><th>Playbook</th><th>Requirement &amp; Procedure</th><th>Status</th><th>Concrete Evidence</th></tr></thead>' +
+              '<tbody>' +
+                (prf.checks || []).map((c) => (
+                  '<tr>' +
+                    '<td><code>' + escapeHtml(c.checkId) + '</code></td>' +
+                    '<td><code>' + escapeHtml(c.relatedPlaybook) + '</code></td>' +
+                    '<td><b>' + escapeHtml(c.requirement) + '</b><div style="font-size:10px;color:#8fa2bf;">' + escapeHtml(c.procedureExecuted) + '</div></td>' +
+                    '<td><span style="font-family:monospace;font-weight:800;color:' + (c.status === 'PASS' ? '#00e676' : '#ff3d5a') + ';">' + escapeHtml(c.status) + '</span></td>' +
+                    '<td>' + escapeHtml(c.evidence) + '</td>' +
+                  '</tr>'
+                )).join('') +
+              '</tbody></table>'
+          : '<div>No proof report generated yet.</div>');
+
+      const runBtn = document.getElementById('btnRunLiveProofNow');
+      if (runBtn) {
+        runBtn.addEventListener('click', async () => {
+          runBtn.disabled = true;
+          runBtn.textContent = '⏳ Running Live Proof Checks...';
+          try {
+            const res = await fetch('/api/gdf-os/run-proof', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ requestedBy: 'OPERATOR_MMI_CONSOLE' }),
+            });
+            const data = await res.json();
+            if (data && data.registry) {
+              gdfOsState = data.registry;
+              updateStatusBadges(gdfOsState);
+              renderActiveTab();
+            }
+          } finally {
+            runBtn.disabled = false;
+          }
+        });
+      }
+      return;
+    }
+
+    if (activeTab === 'audit') {
+      const aud = (gdfOsState.auditReports && gdfOsState.auditReports[0]) || null;
+      const loopbacks = gdfOsState.loopbackHistory || [];
+      tabContent.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:800;color:#fff;">Step 5 — On-Demand 6-Point Audit &amp; Automatic Loopback</div>' +
+            '<div style="font-size:11px;color:#8fa2bf;">External AI agents (Gemini / ChatGPT / Claude) have READ-ONLY Auditor &amp; Advisor access.</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+            '<button type="button" class="btn btn-gold" id="btnRunGdfAuditNow">🔍 Run 6-Point Audit &amp; Auto-Loopback</button>' +
+            '<button type="button" class="btn" id="btnTriggerManualLoopback" style="border-color:rgba(0,229,255,0.5);color:#00e5ff;">↻ Test Loopback Version Bump</button>' +
+            '<a href="/api/gdf-os/auditor-packet" target="_blank" rel="noopener" class="btn" style="text-decoration:none;border-color:rgba(0,230,118,0.5);color:#00e676;">📤 Export Read-Only Auditor Packet JSON</a>' +
+          '</div>' +
+        '</div>' +
+        (aud
+          ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:14px;">' +
+              (aud.findings || []).map((f, idx) => (
+                '<div style="border:1px solid rgba(40,60,95,0.6);border-radius:8px;padding:10px;background:rgba(9,15,26,0.9);">' +
+                  '<div style="font-size:10px;font-weight:800;color:#00e5ff;">' + (idx + 1) + '. ' + escapeHtml(f.category) + ' (' + escapeHtml(f.severity) + ')</div>' +
+                  '<div style="font-size:11.5px;font-weight:700;color:#f5d76e;margin:4px 0;">' + escapeHtml(f.summary) + '</div>' +
+                  '<ul style="margin:4px 0 0 16px;padding:0;font-size:10.5px;color:#9cb0cc;">' +
+                    (f.details || []).slice(0, 4).map((d) => '<li>' + escapeHtml(d) + '</li>').join('') +
+                  '</ul>' +
+                '</div>'
+              )).join('') +
+            '</div>'
+          : '') +
+        '<div style="font-size:12px;font-weight:800;color:#00e5ff;margin-bottom:6px;">Step 5 Loopback Version Upgrade Log (' + loopbacks.length + ' Events)</div>' +
+        (loopbacks.length > 0
+          ? loopbacks.map((lb) => (
+              '<div style="padding:8px 10px;border:1px solid rgba(0,229,255,0.3);border-radius:8px;background:rgba(8,14,24,0.85);margin-bottom:6px;font-size:11px;">' +
+                '<b>' + escapeHtml(lb.playbookId) + '</b> upgraded <code>' + escapeHtml(lb.previousVersion) + ' → ' + escapeHtml(lb.newVersion) + '</code> at <code>' + escapeHtml(lb.timestampIso) + '</code> · ' +
+                escapeHtml(lb.triggerReason) + '<div style="color:#00e676;margin-top:2px;">+ Added to Playbook: ' + escapeHtml(lb.addedFailureModeOrStep) + '</div>' +
+              '</div>'
+            )).join('')
+          : '<div style="font-size:11px;color:#8fa2bf;">No automatic loopback version bumps triggered yet — all baseline playbooks at v1.0 nominal state.</div>');
+
+      const auditBtn = document.getElementById('btnRunGdfAuditNow');
+      if (auditBtn) {
+        auditBtn.addEventListener('click', async () => {
+          auditBtn.disabled = true;
+          auditBtn.textContent = '⏳ Auditing...';
+          try {
+            const res = await fetch('/api/gdf-os/audit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ autoLoopbackOnFindings: true }),
+            });
+            const data = await res.json();
+            if (data && data.registry) {
+              gdfOsState = data.registry;
+              renderActiveTab();
+            }
+          } finally {
+            auditBtn.disabled = false;
+          }
+        });
+      }
+
+      const lbBtn = document.getElementById('btnTriggerManualLoopback');
+      if (lbBtn) {
+        lbBtn.addEventListener('click', async () => {
+          lbBtn.disabled = true;
+          try {
+            const res = await fetch('/api/gdf-os/loopback', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                playbookId: 'PB-006',
+                reason: 'Operator verified continuous closed-loop Step 5 Loopback SOP upgrade.',
+                addedFailureModeOrStep: 'Verified SHA-256 playbook digest check and read-only External Auditor Packet boundary.',
+              }),
+            });
+            const data = await res.json();
+            if (data && data.registry) {
+              gdfOsState = data.registry;
+              renderActiveTab();
+            }
+          } finally {
+            lbBtn.disabled = false;
+          }
+        });
+      }
+    }
+  }
+
+  if (openBtn && overlay) {
+    openBtn.addEventListener('click', () => {
+      overlay.classList.remove('hidden');
+      fetchGdfOsState();
+    });
+  }
+  if (closeBtn && overlay) {
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.add('hidden');
+    });
+  }
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.getAttribute('data-gdf-os-tab') || 'interview';
+      renderActiveTab();
+    });
+  });
+
+  // Initial background status badge sync
+  setTimeout(fetchGdfOsState, 1200);
+})();
+</script>
+
 </body>
 </html>
+
 

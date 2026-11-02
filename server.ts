@@ -96,6 +96,16 @@ const {
   reloadScientificCycleStoreFromDisk,
   runMonitorStage,
 } = await import('./src/services/scientificDiscoveryCycleService.js');
+const {
+  buildExternalAuditorPacket,
+  evaluateDualControlPromotionGate,
+  loadOrInitializeGdfOsRegistry,
+  runGdfAuditAndLoopback,
+  runGdfProofSuite,
+  triggerLoopbackUpgrade,
+  upsertInterviewRecord,
+} = await import('./src/services/gdfOperatingSystem.js');
+
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -233,7 +243,7 @@ app.get('/api/download/source', (req: Request, res: Response) => {
   }
 
   // Append essential directories, ignoring node_modules, .git, and secrets
-  const directoriesToInclude = ['src', 'public', 'fixtures', 'data', 'scripts'];
+  const directoriesToInclude = ['src', 'public', 'fixtures', 'data', 'scripts', 'playbooks', 'toolbox'];
   for (const dir of directoriesToInclude) {
     const dirPath = path.join(__dirname, dir);
     if (fs.existsSync(dirPath)) {
@@ -819,12 +829,28 @@ app.post('/api/intelligence-core/promote', (req: Request, res: Response) => {
     modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
   const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
 
+  const osGate = evaluateDualControlPromotionGate(mode);
+  if (!osGate.allowed) {
+    const snap = getIntelligenceCoreStateSnapshot();
+    return res.status(409).json({
+      status: 'PROMOTION_REJECTED',
+      promoted: false,
+      reason: osGate.reason,
+      gdfOsDualControlGate: osGate,
+      liveVersionTag: snap.liveArchitecture.versionTag,
+      liveArchitectureId: snap.liveArchitecture.architectureId,
+      candidateVersionTag: snap.candidateArchitecture.versionTag,
+      candidateArchitectureId: snap.candidateArchitecture.architectureId,
+    });
+  }
+
   const result = promoteCandidateArchitecture({ mode, operatorNote });
   if (result.promoted) {
     forecastCache.clear();
   }
   res.status(result.promoted ? 200 : 409).json({
     status: result.promoted ? 'SUCCESS' : 'PROMOTION_REJECTED',
+    gdfOsDualControlGate: osGate,
     liveVersionTag: result.liveArchitecture.versionTag,
     liveArchitectureId: result.liveArchitecture.architectureId,
     candidateVersionTag: result.candidateArchitecture.versionTag,
@@ -1011,6 +1037,125 @@ app.post('/api/intelligence-core/writeback-rollback', (req: Request, res: Respon
 app.post('/api/gold-predictions', async (req: Request, res: Response) => {
   res.redirect(307, '/api/gold-forecast');
 });
+
+// =========================================================================
+// GDF 5-Step AI Delegation, Playbook, Toolbox, Proof & Audit OS Endpoints
+// =========================================================================
+function collectLiveGdfOsContext() {
+  return {
+    waterfallSnapshot: getLatestWaterfallSnapshot('15m'),
+    intelligenceSnapshot: getIntelligenceCoreStateSnapshot(),
+    persistenceHealth: getArchitecturePersistenceHealth(),
+    scientificCycle: getScientificDiscoveryCycleTelemetry(),
+  };
+}
+
+app.get('/api/gdf-os/state', (req: Request, res: Response) => {
+  const registry = loadOrInitializeGdfOsRegistry();
+  const liveCtx = collectLiveGdfOsContext();
+  if (registry.proofReports.length === 0) {
+    runGdfProofSuite({ requestedBy: 'INITIAL_STATE_BOOTSTRAP', liveContext: liveCtx });
+  }
+  if (registry.auditReports.length === 0) {
+    runGdfAuditAndLoopback({ autoLoopbackOnFindings: false, liveContext: liveCtx });
+  }
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    timestampIso: new Date().toISOString(),
+    registry: loadOrInitializeGdfOsRegistry(),
+  });
+});
+
+app.post('/api/gdf-os/interview', (req: Request, res: Response) => {
+  const record = upsertInterviewRecord(req.body || {});
+  res.json({
+    status: 'SUCCESS',
+    interview: record,
+    registry: loadOrInitializeGdfOsRegistry(),
+  });
+});
+
+app.get('/api/gdf-os/playbooks', (req: Request, res: Response) => {
+  const registry = loadOrInitializeGdfOsRegistry();
+  res.json({
+    status: 'SUCCESS',
+    playbooks: registry.playbooks,
+  });
+});
+
+app.get('/api/gdf-os/toolbox', (req: Request, res: Response) => {
+  const registry = loadOrInitializeGdfOsRegistry();
+  res.json({
+    status: 'SUCCESS',
+    toolbox: registry.toolbox,
+  });
+});
+
+app.post('/api/gdf-os/run-proof', (req: Request, res: Response) => {
+  const requestedBy = typeof req.body?.requestedBy === 'string' ? req.body.requestedBy : 'OPERATOR_MMI';
+  const taskDescription = typeof req.body?.taskDescription === 'string' ? req.body.taskDescription : undefined;
+  const proofReport = runGdfProofSuite({
+    requestedBy,
+    taskDescription,
+    liveContext: collectLiveGdfOsContext(),
+  });
+  res.json({
+    status: 'SUCCESS',
+    proofReport,
+    registry: loadOrInitializeGdfOsRegistry(),
+  });
+});
+
+app.post('/api/gdf-os/audit', (req: Request, res: Response) => {
+  const autoLoopbackOnFindings = req.body?.autoLoopbackOnFindings !== false;
+  const auditReport = runGdfAuditAndLoopback({
+    autoLoopbackOnFindings,
+    liveContext: collectLiveGdfOsContext(),
+  });
+  res.json({
+    status: 'SUCCESS',
+    auditReport,
+    registry: loadOrInitializeGdfOsRegistry(),
+  });
+});
+
+app.post('/api/gdf-os/loopback', (req: Request, res: Response) => {
+  const playbookId = typeof req.body?.playbookId === 'string' ? req.body.playbookId.trim() : 'PB-001';
+  const reason =
+    typeof req.body?.reason === 'string' && req.body.reason.trim().length > 0
+      ? req.body.reason.trim()
+      : 'Operator-initiated Loopback SOP refinement.';
+  const addedFailureModeOrStep =
+    typeof req.body?.addedFailureModeOrStep === 'string' && req.body.addedFailureModeOrStep.trim().length > 0
+      ? req.body.addedFailureModeOrStep.trim()
+      : `Operator Loopback (${new Date().toISOString().slice(0, 19)}Z): Verified lesson learned committed to SOP.`;
+  const loopbackEvent = triggerLoopbackUpgrade({
+    playbookId,
+    reason,
+    addedFailureModeOrStep,
+  });
+  if (!loopbackEvent) {
+    return res.status(404).json({
+      status: 'NOT_FOUND',
+      error: `Playbook ${playbookId} not found.`,
+    });
+  }
+  res.json({
+    status: 'SUCCESS',
+    loopbackEvent,
+    registry: loadOrInitializeGdfOsRegistry(),
+  });
+});
+
+app.get('/api/gdf-os/auditor-packet', (req: Request, res: Response) => {
+  const packet = buildExternalAuditorPacket(collectLiveGdfOsContext());
+  res.json({
+    status: 'SUCCESS',
+    packet,
+  });
+});
+
 
 // Strict API 404 JSON Guard: Never allow unknown /api/* routes to fall through to the HTML SPA catch-all
 app.all('/api/*', (req: Request, res: Response) => {
