@@ -622,11 +622,60 @@ async function runTests() {
   );
 
   console.log(
-    `✓ [PASS 6/6] Friday bull-trap breakdown (-$30 off swing high) & scientificCore.ts FaultClassifier feedback loop verified -> Live+6h=$${friLiveStep6.toFixed(2)}, Cand+6h=$${friCandStep6.toFixed(2)}, AppliedPolicies=${directSciCoreOut.yellowLineConditionalExpectation.appliedDriftPolicy}/${directSciCoreOut.yellowLineConditionalExpectation.appliedBandPolicy}`
+    `✓ [PASS 6/7] Friday bull-trap breakdown (-$30 off swing high) & scientificCore.ts FaultClassifier feedback loop verified -> Live+6h=$${friLiveStep6.toFixed(2)}, Cand+6h=$${friCandStep6.toFixed(2)}, AppliedPolicies=${directSciCoreOut.yellowLineConditionalExpectation.appliedDriftPolicy}/${directSciCoreOut.yellowLineConditionalExpectation.appliedBandPolicy}`
+  );
+
+  // ---------------------------------------------------------------------------
+  // TEST 7: Level-5 Full Bayesian Meta-Learning & Open-Ended Causal Discovery
+  // ---------------------------------------------------------------------------
+  const lvl5 = friAw.level5MetaCognition;
+  assert.ok(lvl5, 'Expected level5MetaCognition telemetry on MarketAwarenessState');
+  assert.equal(lvl5.autonomyLevel, 'LEVEL_5_BAYESIAN_CAUSAL_META_LEARNER');
+
+  // Verify Pillar 1: Tri-Engine Bayesian Meta-Learner
+  const bml = lvl5.bayesianMetaLearning;
+  assert.ok(
+    bml.bocpd.currentChangePointProbability >= 0 && bml.bocpd.currentChangePointProbability <= 1,
+    'BOCPD change-point probability must be in [0, 1]'
+  );
+  const regimeSum = (Object.values(bml.regimePosteriors.posteriors) as number[]).reduce(
+    (a: number, b: number) => a + b,
+    0
+  );
+  assert.ok(
+    Math.abs(regimeSum - 1.0) < 0.01,
+    `Expected 5-state Markov regime posteriors to sum to 1.0, got ${regimeSum}`
+  );
+  assert.equal(bml.regimePosteriors.transitionMatrix5x5.length, 5);
+  assert.ok(
+    bml.variationalKalman.continuousDriftRetentionGamma >= 0.05 &&
+      bml.variationalKalman.continuousDriftRetentionGamma <= 1.0,
+    'VB-Kalman continuousDriftRetentionGamma must be in [0.05, 1.0]'
+  );
+
+  // Verify Pillar 2: Open-Ended Causal & SINDy Symbolic Discovery
+  const ocd = lvl5.openEndedCausalDiscovery;
+  assert.ok(ocd.verifiedCausalEdges.length >= 3, 'Expected verified Granger+PC causal edges');
+  assert.ok(ocd.sindyActiveTerms.length >= 3, 'Expected SINDy symbolic DAG trees');
+  assert.ok(
+    ocd.sindyDifferentialEquationAscii.includes('dX_residual(τ)'),
+    'Expected SINDy sparse differential equation ASCII representation'
+  );
+
+  // Verify Pillar 3: Hybrid Episodic Shock Bank & 5x5 Dirichlet Priors
+  const erm = lvl5.episodicRegimeMemory;
+  assert.ok(erm.totalStoredEpisodesCount >= 1, 'Expected stored episodes in persistent shock bank');
+  assert.ok(
+    erm.mahalanobisSimilarityScore > 0 && erm.mahalanobisSimilarityScore <= 1,
+    'Expected Mahalanobis similarity score in (0, 1]'
+  );
+
+  console.log(
+    `✓ [PASS 7/7] Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery verified -> DominantRegime=${bml.regimePosteriors.dominantRegime}, BOCPD P(cp)=${(bml.bocpd.currentChangePointProbability * 100).toFixed(1)}%, VB-Kalman γ=${bml.variationalKalman.continuousDriftRetentionGamma.toFixed(2)}, SINDy R²=${(ocd.sindyResidualExplainedVarianceRatio * 100).toFixed(1)}%, EpisodicBank=${erm.totalStoredEpisodesCount}/64`
   );
 
   console.log('================================================================================');
-  console.log('ALL 6/6 AWARENESS CORE UPGRADE REGRESSION SCENARIOS PASSED.');
+  console.log('ALL 7/7 AWARENESS CORE & LEVEL-5 META-COGNITION SCENARIOS PASSED.');
   console.log('================================================================================');
 }
 

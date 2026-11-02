@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "savedAtIso": "2026-11-01T20:52:22.346Z",
+  "savedAtIso": "2026-11-02T17:10:39.057Z",
   "generationCounter": 48,
   "autoPromotionRuntimeEnabled": false,
   "liveArchitecture": {
@@ -352,10 +352,10 @@
         "isEnabled": true,
         "disabledReasonEn": null,
         "dynamicWeight": 0.1342,
-        "rollingErrorVariance": 11.3142,
+        "rollingErrorVariance": 11.3144,
         "rollingRankIc": 0.3462,
-        "fittedCoefficient": 0.845,
-        "currentStepContributionUsd": 0.833,
+        "fittedCoefficient": 0.8463,
+        "currentStepContributionUsd": 0.8342,
         "oosRSquared": 0.0165,
         "stabilityRatio": 0.731,
         "sampleCountN": 48,
@@ -444,8 +444,8 @@
         "dynamicWeight": 0.0845,
         "rollingErrorVariance": 11.5087,
         "rollingRankIc": -0.0055,
-        "fittedCoefficient": 0.1012,
-        "currentStepContributionUsd": -0.0051,
+        "fittedCoefficient": 0.1001,
+        "currentStepContributionUsd": -0.005,
         "oosRSquared": -0.0004,
         "stabilityRatio": 0.563,
         "sampleCountN": 48,
@@ -478,9 +478,9 @@
         "isEnabled": false,
         "disabledReasonEn": "Pruned by Intelligence Core: Contradictory/Unstable validation fit (Rank-IC=0.247, Stability=0.29)",
         "dynamicWeight": 0,
-        "rollingErrorVariance": 11.8545,
+        "rollingErrorVariance": 11.8549,
         "rollingRankIc": 0.2473,
-        "fittedCoefficient": 0.8752,
+        "fittedCoefficient": 0.8762,
         "currentStepContributionUsd": 0,
         "oosRSquared": -0.0305,
         "stabilityRatio": 0.293,
@@ -513,7 +513,7 @@
       "sweepMicrostructureWeight": 0.3229,
       "mtfLiquidityWeight": 0.2408
     },
-    "compositeNetDriftUsdPerStep": 1.1904,
+    "compositeNetDriftUsdPerStep": 1.1917,
     "compositeEquilibriumAnchor": 4050.53
   },
   "archivedArchitectures": [
@@ -5660,6 +5660,28 @@
   ],
   "auditTrail": [
     {
+      "auditId": "audit-1793639438263-1q9h8",
+      "timestampIso": "2026-11-02T17:10:38.263Z",
+      "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+      "actor": "OPERATOR_MMI",
+      "sourceArchitectureId": "arch-cand-gen49",
+      "targetArchitectureId": "arch-live-gen48",
+      "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
+      "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
+      "verifiableMetrics": "autoPromotionEnabled=false"
+    },
+    {
+      "auditId": "audit-1793639437943-waw9j",
+      "timestampIso": "2026-11-02T17:10:37.943Z",
+      "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+      "actor": "OPERATOR_MMI",
+      "sourceArchitectureId": "arch-cand-gen49",
+      "targetArchitectureId": "arch-live-gen48",
+      "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to ENABLED.",
+      "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به فعال تغییر داد.",
+      "verifiableMetrics": "autoPromotionEnabled=true"
+    },
+    {
       "auditId": "audit-1793566341798-cd7xu",
       "timestampIso": "2026-11-01T20:52:21.798Z",
       "eventType": "DYNAMIC_PRECISION_REWEIGHT",
@@ -6736,28 +6758,6 @@
       "summaryEn": "Validated Parallel Universe mathematics from v39.0-ParallelCandidate-G38 written back into 6D Latent State & Observation Model (Gen #28 → Gen #29: φ=0.95, κ=0.167, β_echo=0.476, γ_res=0.56, η_macro=0.2671, π_obs=1.28, activeSymbolic=5, pruned=4) · Note: Verification test of direct mathematical write-back to 6D Latent State model.",
       "summaryFa": "ریاضیات تاییدشده جهان موازی (v39.0-ParallelCandidate-G38) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #28 به #29: φ=0.95، κ=0.167، β=0.476، γ=0.56، η=0.2671، π_obs=1.28).",
       "verifiableMetrics": "WriteBackGen=29 | phi=0.95->0.95 | kappa=0.167->0.167 | beta=0.476->0.476 | gamma=0.56->0.56 | eta=0.2681->0.2671 | obsPrecMult=1.28->1.28"
-    },
-    {
-      "auditId": "audit-1793206051117-7t52h",
-      "timestampIso": "2026-10-28T16:47:31.117Z",
-      "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
-      "actor": "OPERATOR_MMI",
-      "sourceArchitectureId": "arch-cand-gen39",
-      "targetArchitectureId": "arch-live-gen38",
-      "summaryEn": "Validated Parallel Universe mathematics from v39.0-ParallelCandidate-G38 written back into 6D Latent State & Observation Model (Gen #27 → Gen #28: φ=0.95, κ=0.167, β_echo=0.476, γ_res=0.56, η_macro=0.2681, π_obs=1.28, activeSymbolic=5, pruned=4) · Note: Operator confirmed Direct Mathematical Write-Back after pre-write parameter inspection.",
-      "summaryFa": "ریاضیات تاییدشده جهان موازی (v39.0-ParallelCandidate-G38) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #27 به #28: φ=0.95، κ=0.167، β=0.476، γ=0.56، η=0.2681، π_obs=1.28).",
-      "verifiableMetrics": "WriteBackGen=28 | phi=0.95->0.95 | kappa=0.167->0.167 | beta=0.476->0.476 | gamma=0.56->0.56 | eta=0.2675->0.2681 | obsPrecMult=1.28->1.28"
-    },
-    {
-      "auditId": "audit-1793206050724-q9bc5",
-      "timestampIso": "2026-10-28T16:47:30.724Z",
-      "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
-      "actor": "INTELLIGENCE_AWARENESS_CORE",
-      "sourceArchitectureId": "arch-live-gen38",
-      "targetArchitectureId": "arch-cand-gen39",
-      "summaryEn": "Symbolic-step synthesis blocked: System is in HALTED_DEGRADED / HALTED_FROZEN state. Under STRICT_REAL_DATA_ONLY, symbolic equation fitting and ridge calibration cannot run without live verified market bars.",
-      "summaryFa": "ترکیب گام نمادین متوقف شد: سیستم در وضعیت توقف اضطراری (HALTED_DEGRADED) قرار دارد. بر اساس سیاست منع داده مصنوعی (STRICT_REAL_DATA_ONLY)، برازش معادلات نمادین بدون کندل‌های واقعی تاییدشده مجاز نیست.",
-      "verifiableMetrics": "Candidate=v39.0-ParallelCandidate-G38 | SynthesisExecuted=false | State=HALTED_FROZEN"
     }
   ],
   "promotedCandTheta": 0.167,
@@ -7271,15 +7271,15 @@
       "outputUnits": "USD_PER_STEP",
       "dimensionallyHomogeneous": true,
       "parameterCountK": 3,
-      "fittedTheta": 0.7789,
-      "oosMseUsd2": 54.5974,
-      "incumbentOosMseUsd2": 54.5046,
+      "fittedTheta": 0.7788,
+      "oosMseUsd2": 54.5962,
+      "incumbentOosMseUsd2": 54.5034,
       "deltaBic": 1.2114,
       "passedFalsificationGate": false,
       "status": "REJECTED_ARCHIVED_IN_GRAVEYARD",
       "falsificationCriterion": "Requires θ_hat > 0, OOS MSE <= Incumbent OOS MSE, and complexity-penalized ΔBIC <= 0.50 on untouched Split 3.",
-      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=0.7789, OOS_MSE=54.5974 vs Incumbent=54.5046, ΔBIC=1.2114)",
-      "evaluatedAtIso": "2026-11-01T20:52:21.811Z"
+      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=0.7788, OOS_MSE=54.5962 vs Incumbent=54.5034, ΔBIC=1.2114)",
+      "evaluatedAtIso": "2026-11-02T17:10:38.275Z"
     },
     {
       "hypothesisId": "HYP_NONLINEAR_BASIS_ECHO_COUPLING",
@@ -7290,14 +7290,14 @@
       "dimensionallyHomogeneous": true,
       "parameterCountK": 1,
       "fittedTheta": -0.5,
-      "oosMseUsd2": 5.9778,
-      "incumbentOosMseUsd2": 6.0514,
-      "deltaBic": 0.2246,
+      "oosMseUsd2": 5.9799,
+      "incumbentOosMseUsd2": 6.0536,
+      "deltaBic": 0.2243,
       "passedFalsificationGate": false,
       "status": "REJECTED_ARCHIVED_IN_GRAVEYARD",
       "falsificationCriterion": "Requires θ_hat > 0, OOS MSE <= Incumbent OOS MSE, and complexity-penalized ΔBIC <= 0.50 on untouched Split 3.",
-      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=5.9778 vs Incumbent=6.0514, ΔBIC=0.2246)",
-      "evaluatedAtIso": "2026-11-01T20:52:21.050Z"
+      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=5.9799 vs Incumbent=6.0536, ΔBIC=0.2243)",
+      "evaluatedAtIso": "2026-11-02T17:10:37.043Z"
     },
     {
       "hypothesisId": "HYP_RESIDUAL_CLOCK_DAMPED_FEEDBACK",
@@ -7308,358 +7308,17 @@
       "dimensionallyHomogeneous": true,
       "parameterCountK": 1,
       "fittedTheta": -0.5,
-      "oosMseUsd2": 54.6532,
-      "incumbentOosMseUsd2": 54.5046,
+      "oosMseUsd2": 54.6521,
+      "incumbentOosMseUsd2": 54.5034,
       "deltaBic": 0.434,
       "passedFalsificationGate": false,
       "status": "REJECTED_ARCHIVED_IN_GRAVEYARD",
       "falsificationCriterion": "Requires θ_hat > 0, OOS MSE <= Incumbent OOS MSE, and complexity-penalized ΔBIC <= 0.50 on untouched Split 3.",
-      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=54.6532 vs Incumbent=54.5046, ΔBIC=0.434)",
-      "evaluatedAtIso": "2026-11-01T20:52:21.811Z"
+      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=54.6521 vs Incumbent=54.5034, ΔBIC=0.434)",
+      "evaluatedAtIso": "2026-11-02T17:10:38.275Z"
     }
   ],
   "persistedResidualLog": [
-    {
-      "barTime": 1793350800,
-      "tau": 358.241,
-      "realizedPrice": 3997.26,
-      "predictedYellowPrice": 3998.62,
-      "priceResidualUsd": -1.3644,
-      "standardizedResidualSigma": -0.121,
-      "echoResidualUsd": -11.44,
-      "deltaTau": 0.7609,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793354400,
-      "tau": 359.1414,
-      "realizedPrice": 3986.91,
-      "predictedYellowPrice": 3989.49,
-      "priceResidualUsd": -2.5837,
-      "standardizedResidualSigma": -0.244,
-      "echoResidualUsd": -21.79,
-      "deltaTau": 0.9004,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793358000,
-      "tau": 360.5535,
-      "realizedPrice": 3973.1,
-      "predictedYellowPrice": 3995.78,
-      "priceResidualUsd": -22.6833,
-      "standardizedResidualSigma": -1.74,
-      "echoResidualUsd": -35.6,
-      "deltaTau": 1.4121,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1793365200,
-      "tau": 364.7428,
-      "realizedPrice": 3932.72,
-      "predictedYellowPrice": 3970.63,
-      "priceResidualUsd": -37.9082,
-      "standardizedResidualSigma": -1.927,
-      "echoResidualUsd": -34.026,
-      "deltaTau": 3.099,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1793368800,
-      "tau": 367.0348,
-      "realizedPrice": 3927.63,
-      "predictedYellowPrice": 3947.73,
-      "priceResidualUsd": -20.0965,
-      "standardizedResidualSigma": -0.874,
-      "echoResidualUsd": 4.268,
-      "deltaTau": 2.292,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1793372400,
-      "tau": 368.4554,
-      "realizedPrice": 3913.97,
-      "predictedYellowPrice": 3943.86,
-      "priceResidualUsd": -29.888,
-      "standardizedResidualSigma": -1.529,
-      "echoResidualUsd": -6.818,
-      "deltaTau": 1.4206,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1793379600,
-      "tau": 370.6673,
-      "realizedPrice": 3900.57,
-      "predictedYellowPrice": 3919.34,
-      "priceResidualUsd": -18.7682,
-      "standardizedResidualSigma": -1.35,
-      "echoResidualUsd": -8.462,
-      "deltaTau": 1.3078,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1793383200,
-      "tau": 371.7727,
-      "realizedPrice": 3894.94,
-      "predictedYellowPrice": 3906.08,
-      "priceResidualUsd": -11.1355,
-      "standardizedResidualSigma": -0.877,
-      "echoResidualUsd": -14.092,
-      "deltaTau": 1.1054,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793386800,
-      "tau": 372.6984,
-      "realizedPrice": 3903.43,
-      "predictedYellowPrice": 3903.08,
-      "priceResidualUsd": 0.3466,
-      "standardizedResidualSigma": 0.033,
-      "echoResidualUsd": -5.602,
-      "deltaTau": 0.9257,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793394000,
-      "tau": 373.8338,
-      "realizedPrice": 3898.35,
-      "predictedYellowPrice": 3893.85,
-      "priceResidualUsd": 4.4992,
-      "standardizedResidualSigma": 0.616,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.45,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793397600,
-      "tau": 374.2838,
-      "realizedPrice": 3901.48,
-      "predictedYellowPrice": 3900.43,
-      "priceResidualUsd": 1.0517,
-      "standardizedResidualSigma": 0.157,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.45,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793401200,
-      "tau": 374.7338,
-      "realizedPrice": 3901.71,
-      "predictedYellowPrice": 3895.99,
-      "priceResidualUsd": 5.718,
-      "standardizedResidualSigma": 0.932,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.45,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793561400,
-      "tau": 448.878,
-      "realizedPrice": 3894.82,
-      "predictedYellowPrice": 3896.25,
-      "priceResidualUsd": -1.4325,
-      "standardizedResidualSigma": -0.582,
-      "echoResidualUsd": -0.475,
-      "deltaTau": 1.1496,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793560500,
-      "tau": 447.7284,
-      "realizedPrice": 3895.75,
-      "predictedYellowPrice": 3897.21,
-      "priceResidualUsd": -1.4572,
-      "standardizedResidualSigma": -0.352,
-      "echoResidualUsd": 0,
-      "deltaTau": 2.9595,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1793562300,
-      "tau": 446.4445,
-      "realizedPrice": 3894.83,
-      "predictedYellowPrice": 3895.45,
-      "priceResidualUsd": -0.6193,
-      "standardizedResidualSigma": -0.416,
-      "echoResidualUsd": -0.465,
-      "deltaTau": 0.45,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792761300,
-      "tau": 403.8614,
-      "realizedPrice": 4003.22,
-      "predictedYellowPrice": 4043.83,
-      "priceResidualUsd": -40.6071,
-      "standardizedResidualSigma": -4.105,
-      "echoResidualUsd": -43.783,
-      "deltaTau": 4.2,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1792760400,
-      "tau": 399.6614,
-      "realizedPrice": 4044.64,
-      "predictedYellowPrice": 4039.75,
-      "priceResidualUsd": 4.8922,
-      "standardizedResidualSigma": 0.942,
-      "echoResidualUsd": 0,
-      "deltaTau": 1.2603,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1792759500,
-      "tau": 398.4011,
-      "realizedPrice": 4039.25,
-      "predictedYellowPrice": 4038.37,
-      "priceResidualUsd": 0.8772,
-      "standardizedResidualSigma": 0.185,
-      "echoResidualUsd": 0,
-      "deltaTau": 1.2001,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1792758600,
-      "tau": 397.201,
-      "realizedPrice": 4040.77,
-      "predictedYellowPrice": 4039.35,
-      "priceResidualUsd": 1.4195,
-      "standardizedResidualSigma": 0.367,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.7547,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792757700,
-      "tau": 396.4463,
-      "realizedPrice": 4040.69,
-      "predictedYellowPrice": 4037.29,
-      "priceResidualUsd": 3.4036,
-      "standardizedResidualSigma": 0.648,
-      "echoResidualUsd": 0,
-      "deltaTau": 1.5346,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1792756800,
-      "tau": 394.9117,
-      "realizedPrice": 4037.11,
-      "predictedYellowPrice": 4040.23,
-      "priceResidualUsd": -3.1228,
-      "standardizedResidualSigma": -0.791,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.9916,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792755900,
-      "tau": 393.9201,
-      "realizedPrice": 4039.73,
-      "predictedYellowPrice": 4040.92,
-      "priceResidualUsd": -1.1925,
-      "standardizedResidualSigma": -0.324,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.8701,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792755000,
-      "tau": 393.05,
-      "realizedPrice": 4040.36,
-      "predictedYellowPrice": 4038.35,
-      "priceResidualUsd": 2.0145,
-      "standardizedResidualSigma": 0.555,
-      "echoResidualUsd": 4.285,
-      "deltaTau": 0.9113,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792754100,
-      "tau": 392.1387,
-      "realizedPrice": 4039.61,
-      "predictedYellowPrice": 4039.77,
-      "priceResidualUsd": -0.1595,
-      "standardizedResidualSigma": -0.052,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.7022,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792753200,
-      "tau": 391.4365,
-      "realizedPrice": 4042.13,
-      "predictedYellowPrice": 4038.33,
-      "priceResidualUsd": 3.8041,
-      "standardizedResidualSigma": 1.211,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.8271,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792752300,
-      "tau": 390.6094,
-      "realizedPrice": 4037.95,
-      "predictedYellowPrice": 4038.22,
-      "priceResidualUsd": -0.2651,
-      "standardizedResidualSigma": -0.072,
-      "echoResidualUsd": 0,
-      "deltaTau": 1.2414,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1792751400,
-      "tau": 389.368,
-      "realizedPrice": 4038.7,
-      "predictedYellowPrice": 4038.3,
-      "priceResidualUsd": 0.4019,
-      "standardizedResidualSigma": 0.096,
-      "echoResidualUsd": 0,
-      "deltaTau": 1.4367,
-      "regime": "FAST_INFO_CLOCK_BURST"
-    },
-    {
-      "barTime": 1792750500,
-      "tau": 387.9313,
-      "realizedPrice": 4039.27,
-      "predictedYellowPrice": 4037.37,
-      "priceResidualUsd": 1.902,
-      "standardizedResidualSigma": 0.777,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.45,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792749600,
-      "tau": 387.4813,
-      "realizedPrice": 4037.85,
-      "predictedYellowPrice": 4038.87,
-      "priceResidualUsd": -1.0181,
-      "standardizedResidualSigma": -0.322,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.6422,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792748700,
-      "tau": 386.8391,
-      "realizedPrice": 4038.13,
-      "predictedYellowPrice": 4038.34,
-      "priceResidualUsd": -0.2106,
-      "standardizedResidualSigma": -0.066,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.5838,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1792747800,
-      "tau": 386.2553,
-      "realizedPrice": 4037.26,
-      "predictedYellowPrice": 4037.67,
-      "priceResidualUsd": -0.4113,
-      "standardizedResidualSigma": -0.111,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.8594,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
     {
       "barTime": 1792578600,
       "tau": 376.9525,
@@ -9078,6 +8737,512 @@
       "echoResidualUsd": 0,
       "deltaTau": 0.8594,
       "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793637900,
+      "tau": 453.1158,
+      "realizedPrice": 3971.9,
+      "predictedYellowPrice": 3969.12,
+      "priceResidualUsd": 2.7845,
+      "standardizedResidualSigma": 0.667,
+      "echoResidualUsd": -2.642,
+      "deltaTau": 0.9407,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793637000,
+      "tau": 452.1751,
+      "realizedPrice": 3973.1,
+      "predictedYellowPrice": 3964.29,
+      "priceResidualUsd": 8.8104,
+      "standardizedResidualSigma": 1.472,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.6475,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793636100,
+      "tau": 450.5276,
+      "realizedPrice": 3968.9,
+      "predictedYellowPrice": 3963.37,
+      "priceResidualUsd": 5.5307,
+      "standardizedResidualSigma": 1.01,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.5589,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793635200,
+      "tau": 448.9687,
+      "realizedPrice": 3965.37,
+      "predictedYellowPrice": 3959.8,
+      "priceResidualUsd": 5.5726,
+      "standardizedResidualSigma": 1.202,
+      "echoResidualUsd": 5.892,
+      "deltaTau": 1.0165,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793634300,
+      "tau": 447.9522,
+      "realizedPrice": 3962.21,
+      "predictedYellowPrice": 3961.66,
+      "priceResidualUsd": 0.5475,
+      "standardizedResidualSigma": 0.079,
+      "echoResidualUsd": -9.417,
+      "deltaTau": 1.599,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793633400,
+      "tau": 446.3532,
+      "realizedPrice": 3963.32,
+      "predictedYellowPrice": 3962.14,
+      "priceResidualUsd": 1.1808,
+      "standardizedResidualSigma": 0.162,
+      "echoResidualUsd": -2.423,
+      "deltaTau": 1.7761,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793632500,
+      "tau": 444.5771,
+      "realizedPrice": 3959.81,
+      "predictedYellowPrice": 3958.75,
+      "priceResidualUsd": 1.0556,
+      "standardizedResidualSigma": 0.1,
+      "echoResidualUsd": 3.837,
+      "deltaTau": 3.0009,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793631600,
+      "tau": 441.5762,
+      "realizedPrice": 3962.83,
+      "predictedYellowPrice": 3965.42,
+      "priceResidualUsd": -2.5892,
+      "standardizedResidualSigma": -0.184,
+      "echoResidualUsd": 13.628,
+      "deltaTau": 4.0348,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793630700,
+      "tau": 437.5414,
+      "realizedPrice": 3968.74,
+      "predictedYellowPrice": 3953.93,
+      "priceResidualUsd": 14.8109,
+      "standardizedResidualSigma": 0.811,
+      "echoResidualUsd": 28.917,
+      "deltaTau": 4.2,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793629800,
+      "tau": 433.3414,
+      "realizedPrice": 3961.32,
+      "predictedYellowPrice": 3948.86,
+      "priceResidualUsd": 12.4641,
+      "standardizedResidualSigma": 0.876,
+      "echoResidualUsd": 2.068,
+      "deltaTau": 4.2,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793628900,
+      "tau": 429.1414,
+      "realizedPrice": 3953.18,
+      "predictedYellowPrice": 3951.36,
+      "priceResidualUsd": 1.8203,
+      "standardizedResidualSigma": 0.127,
+      "echoResidualUsd": 31.724,
+      "deltaTau": 4.2,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793628000,
+      "tau": 424.9414,
+      "realizedPrice": 3946.55,
+      "predictedYellowPrice": 3939,
+      "priceResidualUsd": 7.5544,
+      "standardizedResidualSigma": 0.584,
+      "echoResidualUsd": 35.875,
+      "deltaTau": 4.2,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793627100,
+      "tau": 420.7414,
+      "realizedPrice": 3944.92,
+      "predictedYellowPrice": 3931.16,
+      "priceResidualUsd": 13.7586,
+      "standardizedResidualSigma": 1.164,
+      "echoResidualUsd": 0,
+      "deltaTau": 3.1434,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793626200,
+      "tau": 417.598,
+      "realizedPrice": 3950.85,
+      "predictedYellowPrice": 3915.35,
+      "priceResidualUsd": 35.4971,
+      "standardizedResidualSigma": 4.354,
+      "echoResidualUsd": 39.794,
+      "deltaTau": 3.1434,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793625300,
+      "tau": 414.4546,
+      "realizedPrice": 3918.78,
+      "predictedYellowPrice": 3911.36,
+      "priceResidualUsd": 7.4244,
+      "standardizedResidualSigma": 1.26,
+      "echoResidualUsd": 9.107,
+      "deltaTau": 2.3081,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793624400,
+      "tau": 412.1465,
+      "realizedPrice": 3912.08,
+      "predictedYellowPrice": 3912.73,
+      "priceResidualUsd": -0.6483,
+      "standardizedResidualSigma": -0.156,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.3015,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793638800,
+      "tau": 453.9343,
+      "realizedPrice": 3971.85,
+      "predictedYellowPrice": 3970.15,
+      "priceResidualUsd": 1.7032,
+      "standardizedResidualSigma": 0.706,
+      "echoResidualUsd": -2.692,
+      "deltaTau": 0.45,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1792761300,
+      "tau": 403.8614,
+      "realizedPrice": 4003.22,
+      "predictedYellowPrice": 4043.83,
+      "priceResidualUsd": -40.6062,
+      "standardizedResidualSigma": -4.105,
+      "echoResidualUsd": -43.783,
+      "deltaTau": 4.2,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1792760400,
+      "tau": 399.6614,
+      "realizedPrice": 4044.64,
+      "predictedYellowPrice": 4039.75,
+      "priceResidualUsd": 4.8924,
+      "standardizedResidualSigma": 0.942,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.2603,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1792759500,
+      "tau": 398.4011,
+      "realizedPrice": 4039.25,
+      "predictedYellowPrice": 4040.76,
+      "priceResidualUsd": -1.513,
+      "standardizedResidualSigma": -0.315,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.2001,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1792758600,
+      "tau": 397.201,
+      "realizedPrice": 4040.77,
+      "predictedYellowPrice": 4040.57,
+      "priceResidualUsd": 0.204,
+      "standardizedResidualSigma": 0.052,
+      "echoResidualUsd": 0,
+      "deltaTau": 0.7547,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1792757700,
+      "tau": 396.4463,
+      "realizedPrice": 4040.69,
+      "predictedYellowPrice": 4037.22,
+      "priceResidualUsd": 3.4738,
+      "standardizedResidualSigma": 0.655,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.5346,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1792756800,
+      "tau": 394.9117,
+      "realizedPrice": 4037.11,
+      "predictedYellowPrice": 4039.77,
+      "priceResidualUsd": -2.6553,
+      "standardizedResidualSigma": -0.664,
+      "echoResidualUsd": 0,
+      "deltaTau": 0.9916,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793358000,
+      "tau": 403.4777,
+      "realizedPrice": 4030.69,
+      "predictedYellowPrice": 4044.31,
+      "priceResidualUsd": -13.6233,
+      "standardizedResidualSigma": -1.617,
+      "echoResidualUsd": -11.632,
+      "deltaTau": 1.6242,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793354400,
+      "tau": 401.8535,
+      "realizedPrice": 4044.69,
+      "predictedYellowPrice": 4054.84,
+      "priceResidualUsd": -10.1544,
+      "standardizedResidualSigma": -1.318,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.6584,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793350800,
+      "tau": 400.1951,
+      "realizedPrice": 4054.69,
+      "predictedYellowPrice": 4055.48,
+      "priceResidualUsd": -0.7948,
+      "standardizedResidualSigma": -0.099,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.2418,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793343600,
+      "tau": 396.4463,
+      "realizedPrice": 4040.69,
+      "predictedYellowPrice": 4037.11,
+      "priceResidualUsd": 3.5829,
+      "standardizedResidualSigma": 0.675,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.5346,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1793340000,
+      "tau": 394.9117,
+      "realizedPrice": 4037.11,
+      "predictedYellowPrice": 4039.69,
+      "priceResidualUsd": -2.5846,
+      "standardizedResidualSigma": -0.647,
+      "echoResidualUsd": 0,
+      "deltaTau": 0.9916,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793336400,
+      "tau": 393.9201,
+      "realizedPrice": 4039.73,
+      "predictedYellowPrice": 4040.26,
+      "priceResidualUsd": -0.5328,
+      "standardizedResidualSigma": -0.142,
+      "echoResidualUsd": 0,
+      "deltaTau": 0.8701,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793329200,
+      "tau": 392.1387,
+      "realizedPrice": 4039.61,
+      "predictedYellowPrice": 4041.38,
+      "priceResidualUsd": -1.7731,
+      "standardizedResidualSigma": -0.562,
+      "echoResidualUsd": 0,
+      "deltaTau": 0.7022,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1793325600,
+      "tau": 391.4365,
+      "realizedPrice": 4042.13,
+      "predictedYellowPrice": 4037.87,
+      "priceResidualUsd": 4.2618,
+      "standardizedResidualSigma": 1.341,
+      "echoResidualUsd": 0,
+      "deltaTau": 0.8271,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
     }
+  ],
+  "episodicRegimeBank": [
+    {
+      "episodeId": "ep-seed-1792627200",
+      "recordedAtIso": "2026-10-22T00:00:00.000Z",
+      "dominantRegime": "RANGE_EQUILIBRIUM",
+      "sessionId": "LONDON_NY_OVERLAP",
+      "weekpart": "WEEKDAY_FULL_AUCTION",
+      "shockZScorePeak": -0.859,
+      "basisZScore": -4.454,
+      "realYieldChangeBps": 1.82,
+      "realizedPostShockDrift12BarsPct": -0.4093,
+      "optimalLearnedDriftGamma": 0.18,
+      "optimalLearnedBandMult": 1.694,
+      "featureFingerprint6D": [
+        -0.094,
+        -4.25,
+        0.31,
+        -1.517,
+        0.493,
+        0.014
+      ]
+    },
+    {
+      "episodeId": "ep-1792761300",
+      "recordedAtIso": "2026-10-23T13:15:00.000Z",
+      "dominantRegime": "TAIL_SHOCK_LIQUIDATION",
+      "sessionId": "LONDON_NY_OVERLAP",
+      "weekpart": "WEEKDAY_FULL_AUCTION",
+      "shockZScorePeak": -0.111,
+      "basisZScore": -5.24,
+      "realYieldChangeBps": 1.82,
+      "realizedPostShockDrift12BarsPct": -0.8925,
+      "optimalLearnedDriftGamma": 0.0579,
+      "optimalLearnedBandMult": 1.6943,
+      "featureFingerprint6D": [
+        -0.111,
+        -5,
+        0.365,
+        -1.785,
+        0.58,
+        0.017
+      ]
+    },
+    {
+      "episodeId": "ep-1792850400",
+      "recordedAtIso": "2026-10-24T14:00:00.000Z",
+      "dominantRegime": "LAMINAR_TREND",
+      "sessionId": "WEEKEND_CLOSED_THIN",
+      "weekpart": "WEEKEND_THIN",
+      "shockZScorePeak": -0.348,
+      "basisZScore": 3.09,
+      "realYieldChangeBps": 2.04,
+      "realizedPostShockDrift12BarsPct": 0.8155,
+      "optimalLearnedDriftGamma": 1,
+      "optimalLearnedBandMult": 1.0066,
+      "featureFingerprint6D": [
+        -0.348,
+        3.09,
+        0.409,
+        1.631,
+        0.066,
+        1.156
+      ]
+    },
+    {
+      "episodeId": "ep-1792591200",
+      "recordedAtIso": "2026-10-21T14:00:00.000Z",
+      "dominantRegime": "LAMINAR_TREND",
+      "sessionId": "LONDON_NY_OVERLAP",
+      "weekpart": "WEEKDAY_FULL_AUCTION",
+      "shockZScorePeak": -0.348,
+      "basisZScore": 3.09,
+      "realYieldChangeBps": 2.04,
+      "realizedPostShockDrift12BarsPct": 0.8155,
+      "optimalLearnedDriftGamma": 1,
+      "optimalLearnedBandMult": 0.9992,
+      "featureFingerprint6D": [
+        -0.348,
+        3.09,
+        0.409,
+        1.631,
+        0.066,
+        1.052
+      ]
+    },
+    {
+      "episodeId": "ep-1792956600",
+      "recordedAtIso": "2026-10-25T19:30:00.000Z",
+      "dominantRegime": "LAMINAR_TREND",
+      "sessionId": "WEEKEND_CLOSED_THIN",
+      "weekpart": "WEEKEND_THIN",
+      "shockZScorePeak": -0.348,
+      "basisZScore": 3.09,
+      "realYieldChangeBps": 2.04,
+      "realizedPostShockDrift12BarsPct": 0.8155,
+      "optimalLearnedDriftGamma": 1,
+      "optimalLearnedBandMult": 1.0066,
+      "featureFingerprint6D": [
+        -0.348,
+        3.09,
+        0.409,
+        1.631,
+        0.066,
+        1.156
+      ]
+    },
+    {
+      "episodeId": "ep-1793358000",
+      "recordedAtIso": "2026-10-30T11:00:00.000Z",
+      "dominantRegime": "LAMINAR_TREND",
+      "sessionId": "LONDON",
+      "weekpart": "WEEKDAY_FULL_AUCTION",
+      "shockZScorePeak": -0.432,
+      "basisZScore": -1.54,
+      "realYieldChangeBps": 3.84,
+      "realizedPostShockDrift12BarsPct": -0.2124,
+      "optimalLearnedDriftGamma": 1,
+      "optimalLearnedBandMult": 1.0076,
+      "featureFingerprint6D": [
+        -0.432,
+        -1.54,
+        0.768,
+        -0.425,
+        0.097,
+        1.063
+      ]
+    }
+  ],
+  "dirichletTransitionCounts5x5": [
+    [
+      0.8297,
+      0.0656,
+      0.0391,
+      0.0495,
+      0.0161
+    ],
+    [
+      0.1324,
+      0.6849,
+      0.0365,
+      0.0913,
+      0.0548
+    ],
+    [
+      0.135,
+      0.1534,
+      0.5521,
+      0.1227,
+      0.0368
+    ],
+    [
+      0.1898,
+      0.1133,
+      0.102,
+      0.5666,
+      0.0283
+    ],
+    [
+      0.0394,
+      0.1232,
+      0.0197,
+      0.0296,
+      0.7882
+    ]
   ]
 }

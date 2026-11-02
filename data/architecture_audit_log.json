@@ -1,5 +1,27 @@
 [
   {
+    "auditId": "audit-1793639438263-1q9h8",
+    "timestampIso": "2026-11-02T17:10:38.263Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen49",
+    "targetArchitectureId": "arch-live-gen48",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to DISABLED (Manual MMI Only).",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به غیرفعال (صرفاً دستی MMI) تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=false"
+  },
+  {
+    "auditId": "audit-1793639437943-waw9j",
+    "timestampIso": "2026-11-02T17:10:37.943Z",
+    "eventType": "DYNAMIC_PRECISION_REWEIGHT",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen49",
+    "targetArchitectureId": "arch-live-gen48",
+    "summaryEn": "Operator set Automatic Promotion (When Verified 8/8 Gates) to ENABLED.",
+    "summaryFa": "اپراتور وضعیت ارتقای خودکار (پس از عبور از هر ۸ گیت) را به فعال تغییر داد.",
+    "verifiableMetrics": "autoPromotionEnabled=true"
+  },
+  {
     "auditId": "audit-1793566341798-cd7xu",
     "timestampIso": "2026-11-01T20:52:21.798Z",
     "eventType": "DYNAMIC_PRECISION_REWEIGHT",
@@ -856,27 +878,5 @@
     "summaryEn": "Validated Parallel Universe mathematics from v43.0-ParallelCandidate-G42 written back into 6D Latent State & Observation Model (Gen #35 → Gen #36: φ=0.9252, κ=0.1692, β_echo=0.437, γ_res=0.5344, η_macro=0.25, π_obs=1.327, activeSymbolic=4, pruned=5) · Note: Operator confirmed Direct Mathematical Write-Back after pre-write parameter inspection.",
     "summaryFa": "ریاضیات تاییدشده جهان موازی (v43.0-ParallelCandidate-G42) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #35 به #36: φ=0.9252، κ=0.1692، β=0.437، γ=0.5344، η=0.25، π_obs=1.327).",
     "verifiableMetrics": "WriteBackGen=36 | phi=0.9252->0.9252 | kappa=0.1692->0.1692 | beta=0.437->0.437 | gamma=0.5344->0.5344 | eta=0.25->0.25 | obsPrecMult=1.327->1.327"
-  },
-  {
-    "auditId": "audit-1793208371030-b0z3k",
-    "timestampIso": "2026-10-28T17:26:11.030Z",
-    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
-    "actor": "INTELLIGENCE_AWARENESS_CORE",
-    "sourceArchitectureId": "arch-live-gen42",
-    "targetArchitectureId": "arch-cand-gen43",
-    "summaryEn": "Symbolic-step synthesis blocked: System is in HALTED_DEGRADED / HALTED_FROZEN state. Under STRICT_REAL_DATA_ONLY, symbolic equation fitting and ridge calibration cannot run without live verified market bars.",
-    "summaryFa": "ترکیب گام نمادین متوقف شد: سیستم در وضعیت توقف اضطراری (HALTED_DEGRADED) قرار دارد. بر اساس سیاست منع داده مصنوعی (STRICT_REAL_DATA_ONLY)، برازش معادلات نمادین بدون کندل‌های واقعی تاییدشده مجاز نیست.",
-    "verifiableMetrics": "Candidate=v43.0-ParallelCandidate-G42 | SynthesisExecuted=false | State=HALTED_FROZEN"
-  },
-  {
-    "auditId": "audit-1793208371003-tybqv",
-    "timestampIso": "2026-10-28T17:26:11.003Z",
-    "eventType": "LEVEL_B_MODEL_INVENTED",
-    "actor": "INTELLIGENCE_AWARENESS_CORE",
-    "sourceArchitectureId": "arch-live-gen42",
-    "targetArchitectureId": "arch-cand-gen43",
-    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (4/8 symbolic equations active, 4 pruned in v43.0-ParallelCandidate-G42; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=12.9%, λ_ridge=NaN) — Operator-triggered Level-B symbolic synthesis & causal ridge calibration step.",
-    "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (4/۸ معادله نمادین فعال، 4 حذف‌شده در v43.0-ParallelCandidate-G42؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 12.9%).",
-    "verifiableMetrics": "Candidate=v43.0-ParallelCandidate-G42 | N_bars=300 | OOS_N=48 | lambda=NaN | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=12.9%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=12.9%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1187,w=11.8%,IC=0.055), LAGGED_RESIDUAL_SELF_CORRECTION(theta=0.1305,w=9.8%,IC=-0.005)"
   }
 ]

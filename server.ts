@@ -79,6 +79,7 @@ const {
 } = await import('./src/services/walkForwardValidationService.js');
 const {
   evaluateParallelUniverseAndAwarenessCore,
+  executeLevel5BayesianCausalMetaCycle,
   executeSymbolicDiscoveryStep,
   getArchitecturePersistenceHealth,
   getIntelligenceCoreStateSnapshot,
@@ -890,6 +891,34 @@ app.post('/api/intelligence-core/discover-step', (req: Request, res: Response) =
       cycleResult = executeEightStepScientificDiscoveryCycle({
         timeframe,
         operatorNote: note,
+        authorizeIntegrationMode: 'NONE',
+      });
+    } catch {
+      cycleResult = null;
+    }
+    forecastCache.clear();
+  }
+  const httpStatus = result.synthesisExecuted ? 200 : 409;
+  res.status(httpStatus).json({
+    status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
+    ...result,
+    ...getIntelligenceCoreStateSnapshot(),
+    scientificDiscoveryCycle: cycleResult?.telemetry || getScientificDiscoveryCycleTelemetry(),
+  });
+});
+
+app.post('/api/intelligence-core/level5-meta-cycle', (req: Request, res: Response) => {
+  const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
+  const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
+  const result = executeLevel5BayesianCausalMetaCycle({ note });
+  let cycleResult: any = null;
+  if (result.synthesisExecuted) {
+    try {
+      cycleResult = executeEightStepScientificDiscoveryCycle({
+        timeframe,
+        operatorNote:
+          note ||
+          'Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery (Granger + PC + DAG + SINDy) cycle.',
         authorizeIntegrationMode: 'NONE',
       });
     } catch {

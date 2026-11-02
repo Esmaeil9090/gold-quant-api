@@ -4634,6 +4634,7 @@ input:checked + .toggle-slider:before {
               <button type="button" id="btnManualMmiPromote" data-i18n="btnManualMmiPromote" title="Operator Manual MMI Override: Explicitly promote the Candidate Architecture to become the new Live Yellow Line immediately (writes immutable audit log)" style="background: linear-gradient(135deg, rgba(245, 215, 110, 0.28), rgba(224, 64, 251, 0.24)); border: 1.5px solid #f5d76e; color: #f5d76e; font-size: 11px; font-weight: 800; padding: 7px 13px; border-radius: 7px; cursor: pointer;">⚡ Promote Candidate to Live (Manual MMI)</button>
               <button type="button" id="btnWriteBackLatentMath" data-i18n="btnWriteBackLatentMath" title="Direct Mathematical Write-Back: Inspect candidate validation gates & write validated Parallel Universe mathematical parameters (φ, κ, β_echo, γ_res, η_macro, π_obs, and pruned components) directly into the 6D Latent State & Observation Model" style="background: rgba(0, 230, 118, 0.16); border: 1.5px solid rgba(0, 230, 118, 0.6); color: #00e676; font-size: 11px; font-weight: 800; padding: 7px 12px; border-radius: 7px; cursor: pointer;">🔬 Write Back Validated Math to Latent Model</button>
               <button type="button" id="btnTriggerSymbolicDiscovery" data-i18n="btnTriggerSymbolicDiscovery" title="Run an immediate Level-B Symbolic Equation synthesis, causal ridge calibration, split-half stability check, and precision re-weighting step" style="background: rgba(0, 229, 255, 0.14); border: 1px solid rgba(0, 229, 255, 0.45); color: var(--cyan); font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🧬 Synthesize Symbolic Step</button>
+              <button type="button" id="btnRunLevel5MetaCycle" data-i18n="btnRunLevel5MetaCycle" title="Execute Level-5 Tri-Engine Bayesian Meta-Learning (BOCPD + 5-State Particle Filter + VB-Kalman) &amp; Open-Ended Causal Discovery (Granger + PC + DAG + SINDy)" style="background: linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(224, 64, 251, 0.24)); border: 1.5px solid #00e5ff; color: #7ce8ff; font-size: 11px; font-weight: 800; padding: 7px 12px; border-radius: 7px; cursor: pointer;">🧠 Run Level-5 Bayesian &amp; Causal Cycle</button>
               <button type="button" id="btnBootstrapMtfNow" data-i18n="btnBootstrapMtfNow" title="Proactively bootstrap all 5 required discovery timeframes (5m, 15m, 1h, 4h, 1d) into the real-data waterfall cache" style="background: rgba(224, 64, 251, 0.14); border: 1px solid rgba(224, 64, 251, 0.45); color: #f381ff; font-size: 11px; font-weight: 700; padding: 7px 11px; border-radius: 7px; cursor: pointer;">🔄 Bootstrap 5-TF Cache</button>
               <label style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-family: monospace; color: #e2e8f0; background: rgba(10, 16, 28, 0.95); border: 1px solid rgba(0, 230, 118, 0.5); padding: 6px 11px; border-radius: 7px; cursor: pointer;" title="Automatic Promotion Path: Strictly blocked unless all 8/8 closed-loop verification gates pass (VERIFIED_FOR_PROMOTION)">
                 <input type="checkbox" id="chkAutoPromoteVerified" style="accent-color: #00e676; cursor: pointer;">
@@ -4667,6 +4668,51 @@ input:checked + .toggle-slider:before {
               <div id="mmiOperationActiveContent" style="font-size: 11px; color: #e2e8f0; line-height: 1.45;"></div>
               <div id="mmiPreviousSuccessReportContainer" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(148, 163, 184, 0.3);"></div>
             </div>
+          </div>
+
+          <!-- LEVEL-5 BAYESIAN META-LEARNING & OPEN-ENDED CAUSAL DISCOVERY CONSOLE -->
+          <div id="level5MetaCognitionPanel" style="background: linear-gradient(180deg, rgba(7, 15, 32, 0.98), rgba(10, 18, 36, 0.96)); border: 1.5px solid rgba(0, 229, 255, 0.55); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.38);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <span id="lvl5HeaderTitle" style="font-size: 10.5px; font-weight: 800; color: #00e5ff; text-transform: uppercase; letter-spacing: 0.7px;">
+                  🧠 LEVEL-5 FULL BAYESIAN META-LEARNING &amp; OPEN-ENDED CAUSAL DISCOVERY (BOCPD · 5-STATE PARTICLE FILTER · VB-KALMAN · GRANGER+PC DAG · SINDy STLSQ)
+                </span>
+                <div id="lvl5HeaderSubtitle" style="font-size: 10px; color: #9cb0cc; font-family: monospace; margin-top: 2px;">
+                  Continuous Posterior Meta-Parameters (γ_drift, κ_anchor, BandMult) · Causal Graph Pruning · Episodic Shock Bank &amp; 5×5 Dirichlet Priors
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span id="lvl5DominantRegimeBadge" style="font-family: monospace; font-size: 10px; font-weight: 800; color: #00e676; background: rgba(0, 230, 118, 0.14); border: 1px solid rgba(0, 230, 118, 0.45); padding: 3px 8px; border-radius: 5px;">
+                  REGIME: CALIBRATING
+                </span>
+                <span id="lvl5BocpdBreakBadge" style="font-family: monospace; font-size: 10px; font-weight: 800; color: #ffd54f; background: rgba(255, 213, 79, 0.14); border: 1px solid rgba(255, 213, 79, 0.45); padding: 3px 8px; border-radius: 5px;">
+                  BOCPD P(r_t=0): —
+                </span>
+              </div>
+            </div>
+
+            <!-- Compact Regime Posterior & BOCPD Hazard Ribbon -->
+            <div id="lvl5CompactRibbon" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 8px; margin-bottom: 10px;"></div>
+
+            <!-- 3-Tab Selector Bar -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid rgba(148, 163, 184, 0.22); padding-bottom: 8px; margin-bottom: 10px;">
+              <button type="button" class="lvl5-tab-btn" data-lvl5-tab="bayesian" style="background: rgba(0, 229, 255, 0.2); border: 1px solid rgba(0, 229, 255, 0.65); color: #00e5ff; font-size: 10.5px; font-weight: 800; padding: 5px 11px; border-radius: 6px; cursor: pointer;">
+                1. Tri-Engine Bayesian Posteriors &amp; VB-Kalman
+              </button>
+              <button type="button" class="lvl5-tab-btn" data-lvl5-tab="causal" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; font-size: 10.5px; font-weight: 700; padding: 5px 11px; border-radius: 6px; cursor: pointer;">
+                2. Open-Ended Causal DAG &amp; SINDy Symbolic Trees
+              </button>
+              <button type="button" class="lvl5-tab-btn" data-lvl5-tab="episodic" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; font-size: 10.5px; font-weight: 700; padding: 5px 11px; border-radius: 6px; cursor: pointer;">
+                3. Episodic Shock Memory Bank &amp; 5×5 Dirichlet Matrix
+              </button>
+            </div>
+
+            <!-- Tab 1: Bayesian Posteriors & VB-Kalman -->
+            <div id="lvl5TabContentBayesian" style="display: block; font-size: 11px; color: #e2e8f0;"></div>
+            <!-- Tab 2: Open-Ended Causal DAG & SINDy Symbolic Trees -->
+            <div id="lvl5TabContentCausal" style="display: none; font-size: 11px; color: #e2e8f0;"></div>
+            <!-- Tab 3: Episodic Shock Memory Bank & 5x5 Dirichlet Matrix -->
+            <div id="lvl5TabContentEpisodic" style="display: none; font-size: 11px; color: #e2e8f0;"></div>
           </div>
 
           <!-- Eight-Step Scientific Discovery Cycle Laboratory & End-to-End Case View -->
@@ -11187,8 +11233,325 @@ function renderParallelUniverseTelemetry(pu) {
     }
   }
 
+  // Render Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery Console
+  renderLevel5MetaCognitionPanel(pu, isFa);
+
   // Render Eight-Step Scientific Discovery Cycle & End-to-End Case View
   renderEightStepScientificCyclePanel(pu.scientificDiscoveryCycle, isFa);
+}
+
+window.__activeLvl5Tab = window.__activeLvl5Tab || 'bayesian';
+document.addEventListener('click', function (ev) {
+  const btn = ev.target && ev.target.closest ? ev.target.closest('.lvl5-tab-btn') : null;
+  if (!btn) return;
+  const tab = btn.getAttribute('data-lvl5-tab') || 'bayesian';
+  window.__activeLvl5Tab = tab;
+  document.querySelectorAll('.lvl5-tab-btn').forEach(function (b) {
+    const isAct = b.getAttribute('data-lvl5-tab') === tab;
+    b.style.background = isAct ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+    b.style.borderColor = isAct ? 'rgba(0, 229, 255, 0.65)' : 'rgba(148, 163, 184, 0.3)';
+    b.style.color = isAct ? '#00e5ff' : '#cbd5e1';
+    b.style.fontWeight = isAct ? '800' : '700';
+  });
+  const tBay = document.getElementById('lvl5TabContentBayesian');
+  const tCau = document.getElementById('lvl5TabContentCausal');
+  const tEpi = document.getElementById('lvl5TabContentEpisodic');
+  if (tBay) tBay.style.display = tab === 'bayesian' ? 'block' : 'none';
+  if (tCau) tCau.style.display = tab === 'causal' ? 'block' : 'none';
+  if (tEpi) tEpi.style.display = tab === 'episodic' ? 'block' : 'none';
+});
+
+function renderLevel5MetaCognitionPanel(pu, isFa) {
+  const ribbonEl = document.getElementById('lvl5CompactRibbon');
+  const domBadge = document.getElementById('lvl5DominantRegimeBadge');
+  const bocpdBadge = document.getElementById('lvl5BocpdBreakBadge');
+  const tabBay = document.getElementById('lvl5TabContentBayesian');
+  const tabCau = document.getElementById('lvl5TabContentCausal');
+  const tabEpi = document.getElementById('lvl5TabContentEpisodic');
+  if (!ribbonEl || !tabBay || !tabCau || !tabEpi) return;
+
+  const lvl5 =
+    (pu && pu.level5MetaCognition) ||
+    (pu && pu.marketAwarenessState && pu.marketAwarenessState.level5MetaCognition) ||
+    null;
+
+  if (!lvl5 || !lvl5.bayesianMetaLearning) {
+    ribbonEl.innerHTML = `<div style="color:#9cb0cc;font-family:monospace;font-size:10.5px;">${
+      isFa
+        ? 'در انتظار داده‌های واقعی برای محاسبه فرایادگیری بیزی سطح ۵ و کشف علیت باز...'
+        : 'Awaiting verified real-data snapshot for Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery...'
+    }</div>`;
+    return;
+  }
+
+  const bml = lvl5.bayesianMetaLearning;
+  const ocd = lvl5.openEndedCausalDiscovery;
+  const erm = lvl5.episodicRegimeMemory;
+  const bocpd = bml.bocpd || {};
+  const reg = bml.regimePosteriors || {};
+  const vbk = bml.variationalKalman || {};
+  const posts = reg.posteriors || {};
+
+  const cpPct = ((Number(bocpd.currentChangePointProbability) || 0) * 100).toFixed(1);
+  const domRegime = reg.dominantRegime || 'RANGE_EQUILIBRIUM';
+  const domProbPct = (((posts[domRegime] || 0)) * 100).toFixed(1);
+
+  if (domBadge) {
+    domBadge.textContent = `${isFa ? 'رژیم غالب' : 'REGIME'}: ${domRegime} (${domProbPct}%)`;
+    domBadge.style.color = domRegime === 'TAIL_SHOCK_LIQUIDATION' ? '#ff5252' : '#00e676';
+  }
+  if (bocpdBadge) {
+    const isBreak = Boolean(bocpd.structuralBreakTriggered);
+    bocpdBadge.textContent = `BOCPD P(r_t=0): ${cpPct}% · E[r_t]=${Number(bocpd.expectedRunLengthBars || 0).toFixed(1)}b ${
+      isBreak ? (isFa ? '[شکست ساختاری]' : '[BREAK]') : '[STABLE]'
+    }`;
+    bocpdBadge.style.color = isBreak ? '#ff5252' : '#ffd54f';
+  }
+
+  ribbonEl.innerHTML = `
+    <div style="background:rgba(15,23,42,0.85);border:1px solid rgba(0,229,255,0.28);border-radius:7px;padding:7px 9px;">
+      <div style="font-size:9.5px;color:#9cb0cc;text-transform:uppercase;">${isFa ? 'تشخیص نقطه تغییر بیزی (BOCPD)' : 'BOCPD Change-Point Hazard'}</div>
+      <div style="font-family:monospace;font-size:12px;font-weight:800;color:#00e5ff;margin-top:2px;">P(r_t=0) = ${cpPct}% | E[r_t] = ${Number(bocpd.expectedRunLengthBars || 0).toFixed(1)}</div>
+      <div style="font-family:monospace;font-size:9.5px;color:#cbd5e1;">log BF(Break/Cont) = ${Number(bocpd.logBayesFactorBreakVsContinuity || 0).toFixed(2)}</div>
+    </div>
+    <div style="background:rgba(15,23,42,0.85);border:1px solid rgba(224,64,251,0.28);border-radius:7px;padding:7px 9px;">
+      <div style="font-size:9.5px;color:#9cb0cc;text-transform:uppercase;">${isFa ? 'ضرایب پیوسته VB-Kalman' : 'VB-Kalman Continuous Posteriors'}</div>
+      <div style="font-family:monospace;font-size:12px;font-weight:800;color:#f381ff;margin-top:2px;">γ_drift=${Number(vbk.continuousDriftRetentionGamma || 1).toFixed(2)} · κ_anchor=${Number(vbk.continuousAnchorPullKappa || 0.5).toFixed(2)}</div>
+      <div style="font-family:monospace;font-size:9.5px;color:#cbd5e1;">BandMult=${Number(vbk.continuousBandUncertaintyMult || 1).toFixed(2)}× · ELBO=${Number(vbk.variationalFreeEnergyElbo || 0).toFixed(2)}</div>
+    </div>
+    <div style="background:rgba(15,23,42,0.85);border:1px solid rgba(0,230,118,0.28);border-radius:7px;padding:7px 9px;">
+      <div style="font-size:9.5px;color:#9cb0cc;text-transform:uppercase;">${isFa ? 'کشف علیت گرنجر+PC و SINDy' : 'Granger+PC & SINDy Sparse Trees'}</div>
+      <div style="font-family:monospace;font-size:12px;font-weight:800;color:#00e676;margin-top:2px;">${
+        ocd ? (ocd.sindyActiveTerms || []).filter(t => t.survivedStlsqThreshold).length : 0
+      }/${ocd ? (ocd.sindyActiveTerms || []).length : 0} ${isFa ? 'درخت فعال' : 'Active Trees'} · R²=${
+    ocd ? (Number(ocd.sindyResidualExplainedVarianceRatio || 0) * 100).toFixed(1) : '0.0'
+  }%</div>
+      <div style="font-family:monospace;font-size:9.5px;color:#cbd5e1;">${
+        ocd ? (ocd.verifiedCausalEdges || []).filter(e => e.survivedPcConditioning).length : 0
+      } ${isFa ? 'یال علیتی تاییدشده' : 'Verified Causal Edges'}</div>
+    </div>
+    <div style="background:rgba(15,23,42,0.85);border:1px solid rgba(245,215,110,0.28);border-radius:7px;padding:7px 9px;">
+      <div style="font-size:9.5px;color:#9cb0cc;text-transform:uppercase;">${isFa ? 'بانک حافظه اپیزودیک شوک' : 'Episodic Shock Memory Recall'}</div>
+      <div style="font-family:monospace;font-size:12px;font-weight:800;color:#f5d76e;margin-top:2px;">${
+        erm ? erm.totalStoredEpisodesCount : 0
+      }/64 ${isFa ? 'اپیزود' : 'Episodes'} · Sim=${
+    erm ? (Number(erm.mahalanobisSimilarityScore || 0) * 100).toFixed(1) : '0.0'
+  }%</div>
+      <div style="font-family:monospace;font-size:9.5px;color:#cbd5e1;">Prior γ=${
+        erm ? Number(erm.recalledPriorDriftGamma || 1).toFixed(2) : '—'
+      } · Prior Band=${erm ? Number(erm.recalledPriorBandMult || 1).toFixed(2) : '—'}×</div>
+    </div>
+  `;
+
+  // Render Tab 1: Bayesian Posteriors & VB-Kalman
+  const regimeKeys = [
+    'LAMINAR_TREND',
+    'RANGE_EQUILIBRIUM',
+    'TAIL_SHOCK_LIQUIDATION',
+    'VOLATILITY_SQUEEZE_BREAKOUT',
+    'THIN_ILLIQUID_AUCTION',
+  ];
+  const regimeBarsHtml = regimeKeys
+    .map(k => {
+      const p = Number(posts[k] || 0);
+      const pct = (p * 100).toFixed(1);
+      const barCol =
+        k === 'TAIL_SHOCK_LIQUIDATION'
+          ? '#ff5252'
+          : k === 'LAMINAR_TREND'
+          ? '#00e676'
+          : k === 'VOLATILITY_SQUEEZE_BREAKOUT'
+          ? '#f381ff'
+          : '#00e5ff';
+      return `<div style="margin-bottom:5px;">
+        <div style="display:flex;justify-content:space-between;font-family:monospace;font-size:10px;">
+          <span>${k}</span><span style="color:${barCol};font-weight:800;">${pct}%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:2px;">
+          <div style="width:${Math.min(100, Math.max(2, p * 100))}%;height:100%;background:${barCol};"></div>
+        </div>
+      </div>`;
+    })
+    .join('');
+
+  const topBucketsHtml = ((bocpd.runLengthPosteriorTopBuckets || []).slice(0, 5))
+    .map(
+      b =>
+        `<span style="display:inline-block;margin-right:6px;padding:2px 6px;border-radius:4px;background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);font-family:monospace;font-size:9.5px;">r=${
+          b.runLength
+        }: ${(Number(b.probability) * 100).toFixed(1)}%</span>`
+    )
+    .join('');
+
+  tabBay.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+      <div style="background:rgba(15,23,42,0.75);border:1px solid rgba(148,163,184,0.2);border-radius:7px;padding:9px;">
+        <div style="font-weight:800;color:#00e5ff;margin-bottom:6px;font-size:10.5px;">${
+          isFa ? 'توزیع پسین ۵ رژیم مارکوف و فیلتر ذره‌ای' : '5-State Markov Regime Posterior & Particle Filter'
+        } (N_eff=${Number(reg.particleEffectiveSampleSize || 64).toFixed(1)}/64, H=${Number(
+    reg.regimeEntropyBits || 0
+  ).toFixed(2)} bits)</div>
+        ${regimeBarsHtml}
+      </div>
+      <div style="background:rgba(15,23,42,0.75);border:1px solid rgba(148,163,184,0.2);border-radius:7px;padding:9px;">
+        <div style="font-weight:800;color:#f381ff;margin-bottom:6px;font-size:10.5px;">${
+          isFa
+            ? 'ابرپارامترهای بیزی تغییرپذیر کالمن (Normal-Inverse-Gamma) و BOCPD'
+            : 'Variational Bayesian Kalman (N-IG) & BOCPD Run-Length'
+        }</div>
+        <div style="font-family:monospace;font-size:10px;line-height:1.6;color:#cbd5e1;">
+          • Process Noise N-IG(α_Q=${vbk.igAlphaProcess}, β_Q=${vbk.igBetaProcess}) → q̂_t = <b>${vbk.posteriorProcessNoiseScale}</b><br>
+          • Observation Noise N-IG(α_R=${vbk.igAlphaObs}, β_R=${vbk.igBetaObs}) → r̂_t = <b>${vbk.posteriorObsNoiseScale}</b><br>
+          • Continuous Drift Retention γ_t = <b style="color:#00e676;">${vbk.continuousDriftRetentionGamma}</b> | Anchor Pull κ_t = <b style="color:#00e5ff;">${vbk.continuousAnchorPullKappa}</b><br>
+          • Continuous Uncertainty Band Mult = <b style="color:#ffd54f;">${vbk.continuousBandUncertaintyMult}×</b>
+        </div>
+        <div style="margin-top:6px;">${topBucketsHtml}</div>
+        <div style="margin-top:6px;font-size:10px;color:#9cb0cc;">${
+          isFa ? bml.metaPolicyRationaleFa || bml.metaPolicyRationaleEn : bml.metaPolicyRationaleEn
+        }</div>
+      </div>
+    </div>
+  `;
+
+  // Render Tab 2: Open-Ended Causal DAG & SINDy Symbolic Trees
+  if (ocd) {
+    const edgesRows = (ocd.verifiedCausalEdges || [])
+      .map(
+        e => `<tr style="border-bottom:1px solid rgba(148,163,184,0.12);">
+          <td style="padding:4px 6px;font-family:monospace;color:#00e5ff;">${e.sourceFeature} (lag ${e.optimalLagBars})</td>
+          <td style="padding:4px 6px;font-family:monospace;color:#f8fafc;">→ ${e.targetLatentState}</td>
+          <td style="padding:4px 6px;font-family:monospace;color:#ffd54f;">F=${Number(e.grangerFStat).toFixed(2)} (p=${Number(e.pValueApprox).toFixed(3)})</td>
+          <td style="padding:4px 6px;font-family:monospace;color:${e.polarity === 'POSITIVE' ? '#00e676' : '#ff5252'};">PC=${Number(e.partialCorrelationPc).toFixed(3)} · TE=${Number(e.causalTransferEntropyBits).toFixed(3)}b</td>
+          <td style="padding:4px 6px;font-family:monospace;">${
+            e.survivedPcConditioning
+              ? '<span style="color:#00e676;font-weight:800;">VERIFIED</span>'
+              : '<span style="color:#9cb0cc;">PRUNED</span>'
+          }</td>
+        </tr>`
+      )
+      .join('');
+
+    const treesRows = (ocd.sindyActiveTerms || [])
+      .map(
+        t => `<tr style="border-bottom:1px solid rgba(148,163,184,0.12);">
+          <td style="padding:4px 6px;font-family:monospace;color:#f381ff;">${t.treeId} (${t.targetStateComponent})</td>
+          <td style="padding:4px 6px;font-family:monospace;color:#e2e8f0;font-size:10px;">${t.expressionAscii}</td>
+          <td style="padding:4px 6px;font-family:monospace;color:#00e5ff;font-weight:800;">ξ=${Number(t.sindySparseWeightXi).toFixed(4)}</td>
+          <td style="padding:4px 6px;font-family:monospace;color:#00e676;">IC=${Number(t.oosRankIc).toFixed(3)} · BIC=${Number(t.bicComplexityScore).toFixed(1)}</td>
+          <td style="padding:4px 6px;font-family:monospace;">${
+            t.survivedStlsqThreshold
+              ? '<span style="color:#00e676;font-weight:800;">ACTIVE (STLSQ)</span>'
+              : '<span style="color:#9cb0cc;">ZEROED</span>'
+          }</td>
+        </tr>`
+      )
+      .join('');
+
+    tabCau.innerHTML = `
+      <div style="margin-bottom:8px;padding:7px 10px;border-radius:6px;background:rgba(0,229,255,0.09);border:1px solid rgba(0,229,255,0.3);font-family:monospace;font-size:10.5px;color:#7ce8ff;overflow-x:auto;">
+        <b>SINDy Sparse Differential Law:</b> ${ocd.sindyDifferentialEquationAscii}
+      </div>
+      <div style="overflow-x:auto;margin-bottom:8px;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead>
+            <tr style="text-align:left;color:#9cb0cc;border-bottom:1px solid rgba(148,163,184,0.25);">
+              <th style="padding:4px 6px;">Causal Driver (Lag)</th>
+              <th style="padding:4px 6px;">Target 6D State</th>
+              <th style="padding:4px 6px;">Granger F (p-val)</th>
+              <th style="padding:4px 6px;">PC Partial Corr &amp; TE</th>
+              <th style="padding:4px 6px;">PC Status</th>
+            </tr>
+          </thead>
+          <tbody>${edgesRows}</tbody>
+        </table>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead>
+            <tr style="text-align:left;color:#9cb0cc;border-bottom:1px solid rgba(148,163,184,0.25);">
+              <th style="padding:4px 6px;">Symbolic DAG Tree</th>
+              <th style="padding:4px 6px;">Algebraic Expression</th>
+              <th style="padding:4px 6px;">SINDy Sparse Weight ξ</th>
+              <th style="padding:4px 6px;">OOS Rank-IC / BIC</th>
+              <th style="padding:4px 6px;">STLSQ Gate</th>
+            </tr>
+          </thead>
+          <tbody>${treesRows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // Render Tab 3: Episodic Shock Memory Bank & 5x5 Dirichlet Transition Matrix
+  if (erm) {
+    const mat = erm.dirichletTransitionMatrix5x5 || [];
+    const shortLabels = ['TREND', 'RANGE', 'SHOCK', 'SQUEEZE', 'THIN'];
+    const matRows = mat
+      .map(
+        (row, rIdx) => `<tr>
+          <td style="padding:3px 6px;font-family:monospace;font-weight:700;color:#00e5ff;">${shortLabels[rIdx] || rIdx}</td>
+          ${(row || [])
+            .map(
+              v =>
+                `<td style="padding:3px 6px;font-family:monospace;text-align:right;color:${
+                  Number(v) >= 0.35 ? '#00e676' : '#cbd5e1'
+                };">${(Number(v) * 100).toFixed(1)}%</td>`
+            )
+            .join('')}
+        </tr>`
+      )
+      .join('');
+
+    const epRows = (erm.recentEpisodes || [])
+      .slice(0, 5)
+      .map(
+        ep => `<tr style="border-bottom:1px solid rgba(148,163,184,0.12);">
+          <td style="padding:3px 6px;font-family:monospace;color:#f5d76e;">${ep.episodeId}</td>
+          <td style="padding:3px 6px;font-family:monospace;color:#00e5ff;">${ep.dominantRegime}</td>
+          <td style="padding:3px 6px;font-family:monospace;">z=${Number(ep.shockZScorePeak).toFixed(2)} · Δ12b=${Number(ep.realizedPostShockDrift12BarsPct).toFixed(2)}%</td>
+          <td style="padding:3px 6px;font-family:monospace;color:#00e676;">γ=${Number(ep.optimalLearnedDriftGamma).toFixed(2)} · Band=${Number(ep.optimalLearnedBandMult).toFixed(2)}×</td>
+        </tr>`
+      )
+      .join('');
+
+    tabEpi.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;">
+        <div style="background:rgba(15,23,42,0.75);border:1px solid rgba(148,163,184,0.2);border-radius:7px;padding:9px;overflow-x:auto;">
+          <div style="font-weight:800;color:#00e5ff;margin-bottom:6px;font-size:10.5px;">${
+            isFa ? 'ماتریس انتقال مارکوف ۵×۵ دیریکله آنلاین' : 'Online 5×5 Dirichlet Markov Transition Matrix P(S_t | S_{t-1})'
+          }</div>
+          <table style="width:100%;border-collapse:collapse;font-size:9.5px;">
+            <thead>
+              <tr style="color:#9cb0cc;border-bottom:1px solid rgba(148,163,184,0.25);">
+                <th style="padding:3px 6px;text-align:left;">From \\ To</th>
+                ${shortLabels.map(l => `<th style="padding:3px 6px;text-align:right;">${l}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>${matRows}</tbody>
+          </table>
+        </div>
+        <div style="background:rgba(15,23,42,0.75);border:1px solid rgba(148,163,184,0.2);border-radius:7px;padding:9px;overflow-x:auto;">
+          <div style="font-weight:800;color:#f5d76e;margin-bottom:6px;font-size:10.5px;">${
+            isFa ? 'بانک حافظه اپیزودیک شوک (بازیابی نزدیک‌ترین همسایه ماهالانوبیس)' : 'Persistent Episodic Shock Bank (Mahalanobis Nearest-Neighbor Recall)'
+          }</div>
+          <table style="width:100%;border-collapse:collapse;font-size:9.5px;">
+            <thead>
+              <tr style="color:#9cb0cc;border-bottom:1px solid rgba(148,163,184,0.25);text-align:left;">
+                <th style="padding:3px 6px;">Episode</th>
+                <th style="padding:3px 6px;">Regime</th>
+                <th style="padding:3px 6px;">Shock z / Drift</th>
+                <th style="padding:3px 6px;">Learned Priors</th>
+              </tr>
+            </thead>
+            <tbody>${epRows}</tbody>
+          </table>
+          <div style="margin-top:6px;font-size:10px;color:#9cb0cc;">${
+            isFa ? erm.summaryFa || erm.summaryEn : erm.summaryEn
+          }</div>
+        </div>
+      </div>
+    `;
+  }
 }
 
 function renderEightStepScientificCyclePanel(cycleTel, isFa) {
@@ -17986,6 +18349,43 @@ if (btnManualMmiPromote) {
       console.warn('Manual MMI promotion error:', e);
     } finally {
       btnManualMmiPromote.disabled = false;
+    }
+  });
+}
+
+const btnRunLevel5MetaCycle = document.getElementById('btnRunLevel5MetaCycle');
+if (btnRunLevel5MetaCycle) {
+  btnRunLevel5MetaCycle.addEventListener('click', async function () {
+    btnRunLevel5MetaCycle.disabled = true;
+    const origText = btnRunLevel5MetaCycle.textContent;
+    btnRunLevel5MetaCycle.textContent = '⏳ Running Level-5 Bayesian & Causal Cycle...';
+    try {
+      const resp = await fetch('/api/intelligence-core/level5-meta-cycle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timeframe: window.activeInterval || '15m',
+          note: 'Operator triggered Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery cycle from MMI.',
+        }),
+      });
+      const data = await resp.json();
+      if (data && data.level5MetaCognition) {
+        renderLevel5MetaCognitionPanel(
+          {
+            level5MetaCognition: data.level5MetaCognition,
+            marketAwarenessState: data.marketAwarenessState,
+          },
+          document.documentElement.lang === 'fa'
+        );
+      }
+      if (typeof window.fetchLiveGoldForecast === 'function') {
+        await window.fetchLiveGoldForecast(true);
+      }
+    } catch (err) {
+      console.warn('Level-5 Meta-Cycle error:', err);
+    } finally {
+      btnRunLevel5MetaCycle.disabled = false;
+      btnRunLevel5MetaCycle.textContent = origText;
     }
   });
 }

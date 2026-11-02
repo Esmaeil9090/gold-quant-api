@@ -676,6 +676,10 @@ export interface MarketAwarenessState {
     avoidCollinearWrongDirectionClone: boolean;
     exploreOppositeNewsTransmission: boolean;
   };
+  bayesianMetaLearning?: BayesianMetaLearningTelemetry;
+  openEndedCausalDiscovery?: OpenEndedCausalDiscoveryTelemetry;
+  episodicRegimeMemory?: EpisodicRegimeMemoryTelemetry;
+  level5MetaCognition?: Level5MetaCognitionTelemetry;
   summaryEn: string;
   summaryFa: string;
 }
@@ -1229,6 +1233,7 @@ export interface ScientificCoreTelemetry {
   latentMathWriteBack: LatentModelMathWriteBackState;
   scientificScoreboard: PermanentOosScientificScoreboard;
   faultClassification?: FaultClassificationReport;
+  bayesianMetaLearning?: BayesianMetaLearningTelemetry;
 }
 
 export type ScientificCycleMachineState =
@@ -1773,6 +1778,130 @@ export interface ParallelUniverseTelemetry {
   writeBackVersionHistory?: LatentModelMathWriteBackState[];
   scientificDiscoveryCycle?: ScientificDiscoveryCycleTelemetry;
   marketAwarenessState?: MarketAwarenessState;
+  level5MetaCognition?: Level5MetaCognitionTelemetry;
 }
 
+// ============================================================================
+// LEVEL-5 BAYESIAN META-LEARNING & OPEN-ENDED CAUSAL DISCOVERY CONTRACTS
+// ============================================================================
 
+export type BayesianRegimeStateId =
+  | 'LAMINAR_TREND'
+  | 'RANGE_EQUILIBRIUM'
+  | 'TAIL_SHOCK_LIQUIDATION'
+  | 'VOLATILITY_SQUEEZE_BREAKOUT'
+  | 'THIN_ILLIQUID_AUCTION';
+
+export interface BocpdRunLengthState {
+  currentChangePointProbability: number; // P(r_t = 0 | e_{1:t}) in [0, 1]
+  expectedRunLengthBars: number; // E[r_t | e_{1:t}]
+  mapRunLengthBars: number; // argmax_r P(r_t = r | e_{1:t})
+  hazardRateLambda: number; // Adaptive baseline hazard 1 / lambda
+  logBayesFactorBreakVsContinuity: number;
+  runLengthPosteriorTopBuckets: { runLength: number; probability: number }[];
+  structuralBreakTriggered: boolean;
+}
+
+export interface MarkovRegimePosteriorState {
+  dominantRegime: BayesianRegimeStateId;
+  regimeEntropyBits: number;
+  posteriors: Record<BayesianRegimeStateId, number>;
+  transitionMatrix5x5: number[][]; // 5x5 online Dirichlet-updated Markov transition matrix
+  particleEffectiveSampleSize: number; // N_eff in [1, N_particles]
+}
+
+export interface VariationalKalmanHyperState {
+  igAlphaProcess: number;
+  igBetaProcess: number;
+  igAlphaObs: number;
+  igBetaObs: number;
+  posteriorProcessNoiseScale: number;
+  posteriorObsNoiseScale: number;
+  continuousDriftRetentionGamma: number; // [0.05, 1.0]
+  continuousAnchorPullKappa: number; // [0.10, 1.0]
+  continuousBandUncertaintyMult: number; // [0.95, 2.25]
+  variationalFreeEnergyElbo: number;
+}
+
+export interface BayesianMetaLearningTelemetry {
+  evaluatedAtIso: string;
+  bocpd: BocpdRunLengthState;
+  regimePosteriors: MarkovRegimePosteriorState;
+  variationalKalman: VariationalKalmanHyperState;
+  metaPolicyRationaleEn: string;
+  metaPolicyRationaleFa: string;
+}
+
+export interface CausalGraphEdgeRecord {
+  edgeId: string;
+  sourceFeature: string;
+  targetLatentState: string;
+  optimalLagBars: number;
+  grangerFStat: number;
+  pValueApprox: number;
+  partialCorrelationPc: number;
+  causalTransferEntropyBits: number;
+  survivedPcConditioning: boolean;
+  polarity: 'POSITIVE' | 'NEGATIVE';
+}
+
+export interface SymbolicExpressionNodeRecord {
+  treeId: string;
+  targetStateComponent: 'localDrift' | 'pressureToxicity' | 'macroResidualForce';
+  expressionAscii: string;
+  treeDepth: number;
+  activeOperators: string[];
+  sindySparseWeightXi: number;
+  oosRankIc: number;
+  bicComplexityScore: number;
+  survivedStlsqThreshold: boolean;
+  rationaleEn: string;
+  rationaleFa: string;
+}
+
+export interface OpenEndedCausalDiscoveryTelemetry {
+  evaluatedAtIso: string;
+  generationNumber: number;
+  candidatePoolEvaluatedCount: number;
+  verifiedCausalEdges: CausalGraphEdgeRecord[];
+  prunedSpuriousEdgesCount: number;
+  sindyActiveTerms: SymbolicExpressionNodeRecord[];
+  sindyDifferentialEquationAscii: string;
+  sindyResidualExplainedVarianceRatio: number;
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface EpisodicShockRecord {
+  episodeId: string;
+  recordedAtIso: string;
+  dominantRegime: BayesianRegimeStateId;
+  sessionId: string;
+  weekpart: string;
+  shockZScorePeak: number;
+  basisZScore: number;
+  realYieldChangeBps: number;
+  realizedPostShockDrift12BarsPct: number;
+  optimalLearnedDriftGamma: number;
+  optimalLearnedBandMult: number;
+  featureFingerprint6D: number[]; // Normalized 6D signature for Mahalanobis/Cosine nearest-neighbor recall
+}
+
+export interface EpisodicRegimeMemoryTelemetry {
+  totalStoredEpisodesCount: number;
+  nearestHistoricalEpisode: EpisodicShockRecord | null;
+  mahalanobisSimilarityScore: number; // [0, 1]
+  recalledPriorDriftGamma: number;
+  recalledPriorBandMult: number;
+  recentEpisodes: EpisodicShockRecord[];
+  dirichletTransitionMatrix5x5: number[][];
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface Level5MetaCognitionTelemetry {
+  autonomyLevel: 'LEVEL_5_BAYESIAN_CAUSAL_META_LEARNER';
+  bayesianMetaLearning: BayesianMetaLearningTelemetry;
+  openEndedCausalDiscovery: OpenEndedCausalDiscoveryTelemetry;
+  episodicRegimeMemory: EpisodicRegimeMemoryTelemetry;
+}
