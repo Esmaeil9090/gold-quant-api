@@ -1,28 +1,40 @@
-import type {
-  ActiveIntegratedStructuralTerm,
-  BaselineModelComparisonItem,
-  Candle,
-  DetectedPulseEvent,
-  EnsemblePlume,
-  InformationClockState,
-  LatentModelMathWriteBackState,
-  LatentStateVector6D,
-  MeasuredPulseEcho,
-  OrderBookMicrostructureExtensionInput,
-  PermanentOosScientificScoreboard,
-  PulseEchoSonarTelemetry,
-  PulseType,
-  RegimeConditionedOosEntry,
-  ResidualOraclePoint,
-  ResidualOracleTelemetry,
-  ResidualStructureDiagnostics,
-  ScientificCoreTelemetry,
-  VenueObservationEquationRecord,
-  VerifiedMacroNewsItem,
-  VerifiedMacroYieldResult,
-  VerifiedVenueCameraObservation,
+import {
+  FaultType,
+  type ActiveIntegratedStructuralTerm,
+  type BaselineModelComparisonItem,
+  type Candle,
+  type DetectedPulseEvent,
+  type EnsemblePlume,
+  type FaultClassificationReport,
+  type FaultClassifierMetricsInput,
+  type ForecastFaultRecord,
+  type InformationClockState,
+  type LatentModelMathWriteBackState,
+  type LatentStateVector6D,
+  type MarketAwarenessState,
+  type MeasuredPulseEcho,
+  type OrderBookMicrostructureExtensionInput,
+  type PermanentOosScientificScoreboard,
+  type PulseEchoSonarTelemetry,
+  type PulseType,
+  type RecommendedAnchorPolicy,
+  type RecommendedBandPolicy,
+  type RecommendedDriftPolicy,
+  type RegimeConditionedOosEntry,
+  type ResidualOraclePoint,
+  type ResidualOracleTelemetry,
+  type ResidualStructureDiagnostics,
+  type ScientificCoreTelemetry,
+  type VenueObservationEquationRecord,
+  type VerifiedMacroNewsItem,
+  type VerifiedMacroYieldResult,
+  type VerifiedVenueCameraObservation,
+  type WeekpartType,
 } from '../contracts/quantContracts.js';
 import { computeCointegrationBasis } from './quantEngine.js';
+import { evaluateGoldSessionAndCalendar } from '../services/sessionCalendar.js';
+
+export { FaultType, type FaultClassifierMetricsInput, type FaultClassificationReport };
 
 /**
  * GDF Scientific Core Engine (Pure Quantitative State-Space & Sonar Layer — Zero I/O)
@@ -126,6 +138,449 @@ export interface LatentFilterTuningOverrides {
   equilibriumAnchorOverride?: number;
   symbolicStepDriftUsd?: number;
   activeIntegratedStructuralTerm?: ActiveIntegratedStructuralTerm | null;
+  recommendedDriftPolicy?: RecommendedDriftPolicy;
+  recommendedBandPolicy?: RecommendedBandPolicy;
+  recommendedAnchorPolicy?: RecommendedAnchorPolicy;
+  seasonalUncertaintyMult?: number;
+  marketAwarenessState?: MarketAwarenessState | null;
+}
+
+/**
+ * Deterministic FaultClassifier utility for identifying WRONG_DIRECTION and OVERCONFIDENT_TREND
+ * forecast faults from causal market telemetry and MarketAwarenessState, and translating them
+ * into closed-loop feedback adjustments for the 6D latent forecast engine in scientificCore.ts.
+ */
+export class FaultClassifier {
+  /**
+   * Classifies WRONG_DIRECTION and OVERCONFIDENT_TREND faults from causal market & residual metrics.
+   */
+  static classifyFromMetrics(input: FaultClassifierMetricsInput): FaultClassificationReport {
+    const {
+      safeAtr,
+      liveForwardSlopeUsdPerStep,
+      liveBandWidthStep1Usd,
+      latestResidualUsd,
+      latestResidualZ,
+      lastBarMoveUsd,
+      trailingRealizedMoveUsd,
+      structuralRealizedMoveUsd,
+      consecutiveBearBars,
+      consecutiveBullBars,
+      streakBars,
+      macroBearishGravity,
+      macroBullishSupport,
+      sessionId,
+      weekpart,
+      isTurnOfMonth,
+    } = input;
+
+    const isHighFlowSessionOrTurnOfMonth =
+      sessionId === 'LONDON_NY_OVERLAP' ||
+      sessionId === 'LONDON' ||
+      weekpart === 'FRIDAY_LATE_ROLL' ||
+      isTurnOfMonth;
+    const streakAlignedWithMacro =
+      (consecutiveBearBars >= 2 && macroBearishGravity) ||
+      (consecutiveBullBars >= 2 && macroBullishSupport);
+
+    const effectiveMoveAtrThreshold =
+      streakAlignedWithMacro && isHighFlowSessionOrTurnOfMonth
+        ? 0.85
+        : streakAlignedWithMacro
+        ? 0.95
+        : (consecutiveBearBars >= 2 || consecutiveBullBars >= 2) && isHighFlowSessionOrTurnOfMonth
+        ? 1.02
+        : consecutiveBearBars >= 2 || consecutiveBullBars >= 2
+        ? 1.12
+        : 1.35;
+
+    const hasSignificantShockOrMove =
+      Math.abs(structuralRealizedMoveUsd) >= effectiveMoveAtrThreshold * safeAtr ||
+      Math.abs(trailingRealizedMoveUsd) >= 1.35 * safeAtr ||
+      Math.abs(latestResidualZ) >= 1.8 ||
+      Math.abs(lastBarMoveUsd) >= 1.5 * safeAtr;
+
+    const referenceRealizedMoveUsd =
+      Math.abs(lastBarMoveUsd) >= 1.5 * safeAtr
+        ? lastBarMoveUsd
+        : Math.abs(structuralRealizedMoveUsd) > Math.abs(trailingRealizedMoveUsd)
+        ? structuralRealizedMoveUsd
+        : trailingRealizedMoveUsd;
+
+    let wrongDirectionFault: ForecastFaultRecord | null = null;
+    if (
+      hasSignificantShockOrMove &&
+      Math.abs(liveForwardSlopeUsdPerStep) >= 0.045 * safeAtr &&
+      Math.sign(liveForwardSlopeUsdPerStep) !== Math.sign(referenceRealizedMoveUsd) &&
+      Math.sign(referenceRealizedMoveUsd) !== 0
+    ) {
+      const isCritical =
+        Math.abs(latestResidualZ) >= 2.4 ||
+        Math.abs(referenceRealizedMoveUsd) >= 2.0 * safeAtr ||
+        streakBars >= 3;
+      wrongDirectionFault = {
+        code: FaultType.WRONG_DIRECTION,
+        faultType: FaultType.WRONG_DIRECTION,
+        severity: isCritical ? 'CRITICAL' : 'WARNING',
+        summaryEn: `Forecast slope (${liveForwardSlopeUsdPerStep >= 0 ? '+' : ''}$${liveForwardSlopeUsdPerStep.toFixed(2)}/step) points opposite to the realized structural move (${referenceRealizedMoveUsd >= 0 ? '+' : ''}$${referenceRealizedMoveUsd.toFixed(2)}, streak=${streakBars}b, Z=${latestResidualZ.toFixed(2)}σ) during ${sessionId}.`,
+        summaryFa: `شیب پیش‌بینی خط زرد (${liveForwardSlopeUsdPerStep.toFixed(2)}$ در هر گام) در جهت مخالف حرکت ساختاری تحقق‌یافته بازار (${referenceRealizedMoveUsd.toFixed(2)}$، Z=${latestResidualZ.toFixed(2)}σ) قرار دارد.`,
+        empiricalEvidence: `RealizedMove=${referenceRealizedMoveUsd.toFixed(2)} USD (Streak=${streakBars}b, Session=${sessionId}, TurnOfMonth=${isTurnOfMonth}) | LiveSlope=${liveForwardSlopeUsdPerStep.toFixed(3)} USD/step | ResidualZ=${latestResidualZ.toFixed(2)}σ`,
+        recommendedAction: 'SHOCK_RESET_DRIFT',
+      };
+    }
+
+    const safeBandWidth = Math.max(0.1, liveBandWidthStep1Usd);
+    const bandBreachRatio = parseFloat((Math.abs(latestResidualUsd) / safeBandWidth).toFixed(4));
+
+    let overconfidentTrendFault: ForecastFaultRecord | null = null;
+    if (Math.abs(latestResidualZ) >= 1.75 && bandBreachRatio >= 0.78) {
+      overconfidentTrendFault = {
+        code: FaultType.OVERCONFIDENT_TREND,
+        faultType: FaultType.OVERCONFIDENT_TREND,
+        severity: Math.abs(latestResidualZ) >= 2.5 ? 'CRITICAL' : 'WARNING',
+        summaryEn: `Overconfident trend bands: latest realized residual ($${Math.abs(latestResidualUsd).toFixed(2)}, ${latestResidualZ.toFixed(2)}σ) breached the step-1 90% uncertainty band width ($${safeBandWidth.toFixed(2)}).`,
+        summaryFa: `باندهای اطمینان بیش‌ازحد باریک: پسماند تحقق‌یافته اخیر (${Math.abs(latestResidualUsd).toFixed(2)}$، ${latestResidualZ.toFixed(2)}σ) از عرض باند عدم‌قطعیت گام اول (${safeBandWidth.toFixed(2)}$) فراتر رفته است.`,
+        empiricalEvidence: `|e_t|=${Math.abs(latestResidualUsd).toFixed(2)} USD vs Band90_Step1=${safeBandWidth.toFixed(2)} USD | Z=${latestResidualZ.toFixed(2)}σ`,
+        recommendedAction: 'WIDEN_UNCERTAINTY_BANDS',
+      };
+    }
+
+    const classifiedFaults: ForecastFaultRecord[] = [];
+    if (wrongDirectionFault) classifiedFaults.push(wrongDirectionFault);
+    if (overconfidentTrendFault) classifiedFaults.push(overconfidentTrendFault);
+
+    const hasWrongDirection = Boolean(wrongDirectionFault);
+    const hasOverconfidentTrend = Boolean(overconfidentTrendFault);
+    const slopeDivergenceAtrPerStep = parseFloat(
+      (Math.abs(liveForwardSlopeUsdPerStep) / safeAtr).toFixed(4)
+    );
+
+    return {
+      hasWrongDirection,
+      hasOverconfidentTrend,
+      wrongDirectionFault,
+      overconfidentTrendFault,
+      classifiedFaults,
+      referenceRealizedMoveUsd,
+      effectiveMoveAtrThreshold,
+      hasSignificantShockOrMove,
+      bandBreachRatio,
+      slopeDivergenceAtrPerStep,
+      requiresFeedbackCorrection: hasWrongDirection || hasOverconfidentTrend,
+      recommendedDriftPolicy: hasWrongDirection ? 'SHOCK_RESET' : 'UNCHANGED',
+      recommendedBandPolicy:
+        hasWrongDirection || hasOverconfidentTrend ? 'WIDEN' : 'NORMAL',
+      recommendedAnchorPolicy: hasWrongDirection ? 'RECENTER_TO_POST_SHOCK' : 'UNCHANGED',
+      bandExpansionFactor: hasOverconfidentTrend
+        ? Math.min(1.65, Math.max(1.25, bandBreachRatio * 1.15))
+        : hasWrongDirection
+        ? 1.25
+        : 1.0,
+      driftCorrectionSign: Math.sign(referenceRealizedMoveUsd || latestResidualUsd) || -1,
+    };
+  }
+
+  /**
+   * Analyzes an incoming MarketAwarenessState to extract and evaluate WRONG_DIRECTION and
+   * OVERCONFIDENT_TREND faults and determine closed-loop feedback requirements.
+   */
+  static analyzeMarketAwarenessState(state: MarketAwarenessState): FaultClassificationReport {
+    const activeFaults = state.activeFaults ?? [];
+    const activeFaultCodes = state.activeFaultCodes ?? [];
+    const activeFaultTypes = state.activeFaultTypes ?? [];
+
+    const wrongDirectionFault =
+      activeFaults.find(
+        f => f.code === FaultType.WRONG_DIRECTION || f.faultType === FaultType.WRONG_DIRECTION
+      ) ?? null;
+    const overconfidentTrendFault =
+      activeFaults.find(
+        f => f.code === FaultType.OVERCONFIDENT_TREND || f.faultType === FaultType.OVERCONFIDENT_TREND
+      ) ?? null;
+    const hasWrongDirection =
+      Boolean(wrongDirectionFault) ||
+      activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
+      activeFaultTypes.includes(FaultType.WRONG_DIRECTION);
+    const hasOverconfidentTrend =
+      Boolean(overconfidentTrendFault) ||
+      activeFaultCodes.includes(FaultType.OVERCONFIDENT_TREND) ||
+      activeFaultTypes.includes(FaultType.OVERCONFIDENT_TREND);
+
+    const classifiedFaults: ForecastFaultRecord[] = [];
+    if (wrongDirectionFault) classifiedFaults.push(wrongDirectionFault);
+    if (overconfidentTrendFault) classifiedFaults.push(overconfidentTrendFault);
+
+    const isCriticalOverconfident = overconfidentTrendFault?.severity === 'CRITICAL';
+    const isCriticalWrongDir = wrongDirectionFault?.severity === 'CRITICAL';
+    const fallbackDrift =
+      state.recommendedPolicies?.driftPolicy ?? state.recommendedDriftPolicy;
+    const fallbackBand =
+      state.recommendedPolicies?.bandPolicy ?? state.recommendedBandPolicy;
+    const fallbackAnchor =
+      state.recommendedPolicies?.anchorPolicy ?? state.recommendedAnchorPolicy;
+
+    return {
+      hasWrongDirection,
+      hasOverconfidentTrend,
+      wrongDirectionFault,
+      overconfidentTrendFault,
+      classifiedFaults,
+      referenceRealizedMoveUsd: 0,
+      effectiveMoveAtrThreshold: 1.0,
+      hasSignificantShockOrMove: hasWrongDirection || hasOverconfidentTrend,
+      bandBreachRatio: hasOverconfidentTrend ? (isCriticalOverconfident ? 1.25 : 0.9) : 0,
+      slopeDivergenceAtrPerStep: hasWrongDirection ? (isCriticalWrongDir ? 0.12 : 0.06) : 0,
+      requiresFeedbackCorrection: hasWrongDirection || hasOverconfidentTrend,
+      recommendedDriftPolicy: hasWrongDirection ? 'SHOCK_RESET' : fallbackDrift,
+      recommendedBandPolicy:
+        hasWrongDirection || hasOverconfidentTrend ? 'WIDEN' : fallbackBand,
+      recommendedAnchorPolicy: hasWrongDirection
+        ? 'RECENTER_TO_POST_SHOCK'
+        : fallbackAnchor,
+      bandExpansionFactor: hasOverconfidentTrend
+        ? isCriticalOverconfident
+          ? 1.35
+          : 1.2
+        : hasWrongDirection
+        ? 1.15
+        : 1.0,
+      driftCorrectionSign:
+        state.newsTransmissionMode === 'RISK_OFF_LIQUIDATION' ? -1 : 0,
+    };
+  }
+
+  /**
+   * Merges causal filter metrics fault classification with incoming MarketAwarenessState fault classification.
+   */
+  static mergeClassificationReports(
+    metricsReport: FaultClassificationReport,
+    stateReport: FaultClassificationReport | null
+  ): FaultClassificationReport {
+    if (!stateReport) return metricsReport;
+
+    const hasWrongDirection = metricsReport.hasWrongDirection || stateReport.hasWrongDirection;
+    const hasOverconfidentTrend =
+      metricsReport.hasOverconfidentTrend || stateReport.hasOverconfidentTrend;
+    const wrongDirectionFault =
+      metricsReport.wrongDirectionFault ?? stateReport.wrongDirectionFault;
+    const overconfidentTrendFault =
+      metricsReport.overconfidentTrendFault ?? stateReport.overconfidentTrendFault;
+
+    const classifiedFaults: ForecastFaultRecord[] = [];
+    if (wrongDirectionFault) classifiedFaults.push(wrongDirectionFault);
+    if (overconfidentTrendFault) classifiedFaults.push(overconfidentTrendFault);
+
+    return {
+      hasWrongDirection,
+      hasOverconfidentTrend,
+      wrongDirectionFault,
+      overconfidentTrendFault,
+      classifiedFaults,
+      referenceRealizedMoveUsd:
+        metricsReport.referenceRealizedMoveUsd || stateReport.referenceRealizedMoveUsd,
+      effectiveMoveAtrThreshold: metricsReport.effectiveMoveAtrThreshold,
+      hasSignificantShockOrMove:
+        metricsReport.hasSignificantShockOrMove || stateReport.hasSignificantShockOrMove,
+      bandBreachRatio: Math.max(metricsReport.bandBreachRatio, stateReport.bandBreachRatio),
+      slopeDivergenceAtrPerStep: Math.max(
+        metricsReport.slopeDivergenceAtrPerStep,
+        stateReport.slopeDivergenceAtrPerStep
+      ),
+      requiresFeedbackCorrection: hasWrongDirection || hasOverconfidentTrend,
+      recommendedDriftPolicy: hasWrongDirection
+        ? 'SHOCK_RESET'
+        : stateReport.recommendedDriftPolicy !== 'UNCHANGED'
+        ? stateReport.recommendedDriftPolicy
+        : metricsReport.recommendedDriftPolicy,
+      recommendedBandPolicy:
+        hasWrongDirection || hasOverconfidentTrend
+          ? 'WIDEN'
+          : stateReport.recommendedBandPolicy !== 'NORMAL'
+          ? stateReport.recommendedBandPolicy
+          : metricsReport.recommendedBandPolicy,
+      recommendedAnchorPolicy: hasWrongDirection
+        ? 'RECENTER_TO_POST_SHOCK'
+        : stateReport.recommendedAnchorPolicy !== 'UNCHANGED'
+        ? stateReport.recommendedAnchorPolicy
+        : metricsReport.recommendedAnchorPolicy,
+      bandExpansionFactor: Math.max(
+        metricsReport.bandExpansionFactor,
+        stateReport.bandExpansionFactor
+      ),
+      driftCorrectionSign:
+        metricsReport.driftCorrectionSign || stateReport.driftCorrectionSign || -1,
+    };
+  }
+
+  /**
+   * Resolves the forecast engine feedback policy overrides inside evaluateLatentStateFilterOnInformationClock.
+   * Ensures that when WRONG_DIRECTION or OVERCONFIDENT_TREND is flagged, the system automatically applies
+   * the corresponding recommendedDriftPolicy (SHOCK_RESET), recommendedBandPolicy (WIDEN), and
+   * recommendedAnchorPolicy (RECENTER_TO_POST_SHOCK) overrides.
+   */
+  static resolveForecastFeedbackPolicies(params: {
+    tuningOverrides?: LatentFilterTuningOverrides;
+    awareness?: MarketAwarenessState | null;
+    faultClassification: FaultClassificationReport;
+    defaultWeekpart: WeekpartType;
+    isFuturesClosed: boolean;
+  }): {
+    driftPolicy: RecommendedDriftPolicy;
+    bandPolicy: RecommendedBandPolicy;
+    anchorPolicy: RecommendedAnchorPolicy;
+    seasonalUncMult: number;
+  } {
+    const {
+      tuningOverrides,
+      awareness,
+      faultClassification,
+      defaultWeekpart,
+      isFuturesClosed,
+    } = params;
+
+    const explicitDrift = tuningOverrides?.recommendedDriftPolicy;
+    const awarenessDrift =
+      awareness?.recommendedPolicies?.driftPolicy ?? awareness?.recommendedDriftPolicy;
+    let driftPolicy: RecommendedDriftPolicy =
+      explicitDrift && explicitDrift !== 'UNCHANGED'
+        ? explicitDrift
+        : awarenessDrift && awarenessDrift !== 'UNCHANGED'
+        ? awarenessDrift
+        : explicitDrift ?? awarenessDrift ?? 'UNCHANGED';
+
+    const explicitBand = tuningOverrides?.recommendedBandPolicy;
+    const awarenessBand =
+      awareness?.recommendedPolicies?.bandPolicy ?? awareness?.recommendedBandPolicy;
+    let bandPolicy: RecommendedBandPolicy =
+      explicitBand && explicitBand !== 'NORMAL'
+        ? explicitBand
+        : awarenessBand && awarenessBand !== 'NORMAL'
+        ? awarenessBand
+        : explicitBand ?? awarenessBand ?? 'NORMAL';
+
+    const explicitAnchor = tuningOverrides?.recommendedAnchorPolicy;
+    const awarenessAnchor =
+      awareness?.recommendedPolicies?.anchorPolicy ?? awareness?.recommendedAnchorPolicy;
+    let anchorPolicy: RecommendedAnchorPolicy =
+      explicitAnchor && explicitAnchor !== 'UNCHANGED'
+        ? explicitAnchor
+        : awarenessAnchor && awarenessAnchor !== 'UNCHANGED'
+        ? awarenessAnchor
+        : explicitAnchor ?? awarenessAnchor ?? 'UNCHANGED';
+
+    let seasonalUncMult = Math.max(
+      1.0,
+      Math.min(
+        2.5,
+        tuningOverrides?.seasonalUncertaintyMult ?? awareness?.uncertaintyBandMultiplier ?? 1.0
+      )
+    );
+
+    const activeWeekpart = awareness?.weekpart ?? defaultWeekpart;
+    const isClosedSession =
+      activeWeekpart === 'WEEKEND_THIN' ||
+      activeWeekpart === 'FUTURES_CLOSED_OVERLAP' ||
+      isFuturesClosed ||
+      driftPolicy === 'ZERO_FOR_SESSION' ||
+      anchorPolicy === 'FREEZE';
+
+    if (faultClassification.hasWrongDirection && !isClosedSession) {
+      driftPolicy = faultClassification.recommendedDriftPolicy;
+      bandPolicy = faultClassification.recommendedBandPolicy;
+      anchorPolicy = faultClassification.recommendedAnchorPolicy;
+    }
+
+    if (faultClassification.hasOverconfidentTrend) {
+      bandPolicy = faultClassification.recommendedBandPolicy;
+      if (tuningOverrides?.seasonalUncertaintyMult === undefined) {
+        seasonalUncMult = parseFloat(
+          Math.max(
+            1.0,
+            Math.min(2.5, seasonalUncMult * faultClassification.bandExpansionFactor)
+          ).toFixed(4)
+        );
+      }
+    }
+
+    return {
+      driftPolicy,
+      bandPolicy,
+      anchorPolicy,
+      seasonalUncMult,
+    };
+  }
+
+  /**
+   * Applies closed-loop feedback from FaultClassificationReport and MarketAwarenessState
+   * into live and candidate latent filter tuning overrides before re-propagating the forecast.
+   */
+  static applyFeedbackToForecastTuning(params: {
+    state: MarketAwarenessState;
+    livePolicyTuning: LatentModelMathWriteBackState & LatentFilterTuningOverrides;
+    candPolicyTuning: LatentFilterTuningOverrides;
+    currentPrice: number;
+    atr: number;
+    shockSign: number;
+    shockMagUsd: number;
+  }): {
+    report: FaultClassificationReport;
+    livePolicyTuning: LatentModelMathWriteBackState & LatentFilterTuningOverrides;
+    candPolicyTuning: LatentFilterTuningOverrides;
+  } {
+    const {
+      state,
+      livePolicyTuning,
+      candPolicyTuning,
+      currentPrice,
+      atr,
+      shockSign,
+      shockMagUsd,
+    } = params;
+    const report = FaultClassifier.analyzeMarketAwarenessState(state);
+    const isClosedSession =
+      state.weekpart === 'WEEKEND_THIN' || state.weekpart === 'FUTURES_CLOSED_OVERLAP';
+
+    if (report.hasOverconfidentTrend) {
+      livePolicyTuning.recommendedBandPolicy = 'WIDEN';
+      candPolicyTuning.recommendedBandPolicy = 'WIDEN';
+      const baseMult = livePolicyTuning.seasonalUncertaintyMult ?? 1.0;
+      const expandedMult = parseFloat(
+        Math.min(2.2, Math.max(baseMult, baseMult * report.bandExpansionFactor)).toFixed(4)
+      );
+      livePolicyTuning.seasonalUncertaintyMult = expandedMult;
+      candPolicyTuning.seasonalUncertaintyMult = expandedMult;
+    }
+
+    if (report.hasWrongDirection && !isClosedSession) {
+      livePolicyTuning.recommendedDriftPolicy = 'SHOCK_RESET';
+      livePolicyTuning.recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
+      livePolicyTuning.recommendedBandPolicy = 'WIDEN';
+      livePolicyTuning.equilibriumAnchorOverride = parseFloat(
+        (currentPrice + shockSign * Math.min(0.75 * atr, Math.max(0.2 * atr, shockMagUsd * 0.25))).toFixed(2)
+      );
+      if ((livePolicyTuning.symbolicStepDriftUsd ?? 0) * shockSign < 0) {
+        livePolicyTuning.symbolicStepDriftUsd = parseFloat(
+          (shockSign * Math.min(0.28 * atr, Math.max(0.1 * atr, shockMagUsd * 0.08))).toFixed(4)
+        );
+      }
+
+      candPolicyTuning.recommendedDriftPolicy = 'SHOCK_RESET';
+      candPolicyTuning.recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
+      candPolicyTuning.recommendedBandPolicy = 'WIDEN';
+      candPolicyTuning.equilibriumAnchorOverride = parseFloat(
+        (currentPrice + shockSign * Math.min(1.25 * atr, Math.max(0.35 * atr, shockMagUsd * 0.42))).toFixed(2)
+      );
+      candPolicyTuning.symbolicStepDriftUsd = parseFloat(
+        (shockSign * Math.min(0.55 * atr, Math.max(0.18 * atr, shockMagUsd * 0.14))).toFixed(4)
+      );
+    }
+
+    return {
+      report,
+      livePolicyTuning,
+      candPolicyTuning,
+    };
+  }
 }
 
 /**
@@ -793,6 +1248,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   barEchoResidualsUsd: number[];
   equilibriumAnchorPrice: number;
   intervalStepSeconds: number;
+  atr?: number;
   activeProvider: string;
   activeSymbol: string;
   instrumentIdentity: string;
@@ -807,6 +1263,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   latentCovarianceMatrix6x6: number[][];
   venueObservations: VenueObservationEquationRecord[];
   yellowLinePlume: EnsemblePlume;
+  faultClassification: FaultClassificationReport;
   oneStepPredictedPrices: number[];
   oneStepPredictedStds: number[];
   oneStepPredictedProbUp: number[];
@@ -827,6 +1284,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     barEchoResidualsUsd,
     equilibriumAnchorPrice,
     intervalStepSeconds,
+    atr,
     activeProvider,
     activeSymbol,
     instrumentIdentity,
@@ -1280,14 +1738,375 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   // --- STEP 3: PROPAGATE CONDITIONAL EXPECTATION OF LATENT STATE X FORWARD ON INFORMATION CLOCK τ ---
   const horizonSteps = 24;
   const lastBarTime = candles[n - 1].time;
-  const effectiveEqAnchor = tuningOverrides?.equilibriumAnchorOverride ?? equilibriumAnchorPrice;
-  const logEqTarget = Math.log(Math.max(100, effectiveEqAnchor));
-  const symbolicLogDriftBase =
-    (tuningOverrides?.symbolicStepDriftUsd ?? 0) / Math.max(100, candles[n - 1].close);
+  const lastCloseUsd = Math.max(100, candles[n - 1].close);
+  const rawEqAnchor = tuningOverrides?.equilibriumAnchorOverride ?? equilibriumAnchorPrice;
+  const awareness = tuningOverrides?.marketAwarenessState ?? null;
+
+  // Compute causal 14-bar ATR if not explicitly supplied by caller
+  const atrWindow = Math.min(14, n);
+  let trSum = 0;
+  for (let idx = n - atrWindow; idx < n; idx++) {
+    const cBar = candles[idx];
+    const prevBarClose = idx > 0 ? candles[idx - 1].close : cBar.open;
+    const tr = Math.max(
+      cBar.high - cBar.low,
+      Math.abs(cBar.high - prevBarClose),
+      Math.abs(cBar.low - prevBarClose)
+    );
+    trSum += tr;
+  }
+  const safeAtr = Math.max(0.5, atr ?? (atrWindow > 0 ? trSum / atrWindow : lastCloseUsd * medVol));
+
+  // Measure causal multi-bar swing drawdown / rally and streak velocity at t = n - 1
+  const swingLookbackW = Math.min(6, Math.max(1, n - 1));
+  let recentSwingHigh = lastCloseUsd;
+  let recentSwingLow = lastCloseUsd;
+  for (let idx = n - 1 - swingLookbackW; idx < n - 1; idx++) {
+    if (idx >= 0) {
+      if (candles[idx].close > recentSwingHigh) recentSwingHigh = candles[idx].close;
+      if (candles[idx].close < recentSwingLow) recentSwingLow = candles[idx].close;
+    }
+  }
+  const drawdownFromSwingHighUsd = lastCloseUsd - recentSwingHigh;
+  const rallyFromSwingLowUsd = lastCloseUsd - recentSwingLow;
+  const swingDropLog = Math.log(lastCloseUsd) - Math.log(Math.max(100, recentSwingHigh));
+  const swingRallyLog = Math.log(lastCloseUsd) - Math.log(Math.max(100, recentSwingLow));
+
+  let consecutiveDirBars = 0;
+  let streakSign = 0;
+  let consecutiveBearBars = 0;
+  let consecutiveBullBars = 0;
+  for (let idx = n - 1; idx >= 1; idx--) {
+    const dp = candles[idx].close - candles[idx - 1].close;
+    const s = Math.sign(dp);
+    if (Math.abs(dp) <= 1e-4 || s === 0) break;
+    if (streakSign === 0) streakSign = s;
+    if (s !== streakSign) break;
+    consecutiveDirBars++;
+    if (s < 0) consecutiveBearBars++;
+    if (s > 0) consecutiveBullBars++;
+  }
+  const streakBars = Math.max(consecutiveBearBars, consecutiveBullBars);
+  const lastBarMoveUsd = n >= 2 ? candles[n - 1].close - candles[n - 2].close : 0;
+  const lookbackK = Math.min(4, Math.max(1, n - 1));
+  const trailingRealizedMoveUsd =
+    n > lookbackK ? candles[n - 1].close - candles[n - 1 - lookbackK].close : lastBarMoveUsd;
+  const streakStartIdx = Math.max(0, n - 1 - streakBars);
+  const consecutiveStreakMoveUsd =
+    streakBars >= 2 ? lastCloseUsd - candles[streakStartIdx].close : lastBarMoveUsd;
+
+  let structuralRealizedMoveUsd = trailingRealizedMoveUsd;
+  if (
+    consecutiveBearBars >= 2 &&
+    Math.abs(drawdownFromSwingHighUsd) > Math.abs(trailingRealizedMoveUsd)
+  ) {
+    structuralRealizedMoveUsd = Math.min(drawdownFromSwingHighUsd, consecutiveStreakMoveUsd);
+  } else if (
+    consecutiveBullBars >= 2 &&
+    rallyFromSwingLowUsd > Math.abs(trailingRealizedMoveUsd)
+  ) {
+    structuralRealizedMoveUsd = Math.max(rallyFromSwingLowUsd, consecutiveStreakMoveUsd);
+  }
+
+  // Compute unadjusted (pre-feedback) 6-step forward slope & step-1 90% band width for FaultClassifier
+  let previewX = [...X];
+  let previewP = P.map(row => [...row]);
+  let previewDeltaTau = deltaTauSeries[n - 1] || 1.0;
+  const rawOpenLogEqTarget = Math.log(Math.max(100, rawEqAnchor));
+  const rawSymbolicLogDrift = (tuningOverrides?.symbolicStepDriftUsd ?? 0) / lastCloseUsd;
+  let preFeedbackBandWidthStep1Usd = safeAtr * 2.0;
+  let preFeedbackExpectedStep6Usd = lastCloseUsd;
+
+  for (let h = 1; h <= 6; h++) {
+    previewDeltaTau = 0.72 * previewDeltaTau + 0.28 * 1.0;
+    const eDriftP = Math.exp(-kappaDrift * previewDeltaTau);
+    const eVolP = Math.exp(-kappaVol * previewDeltaTau);
+    const eToxP = Math.exp(-kappaTox * previewDeltaTau);
+    const eResP = Math.exp(-kappaRes * previewDeltaTau);
+    const eMacP = Math.exp(-kappaMacro * previewDeltaTau);
+
+    const safeResP = Math.max(0.2, previewX[4]);
+    const toxRatioP = previewX[3] / safeResP;
+    const eqRestoringLogP = kappaMeanRev * (rawOpenLogEqTarget - previewX[0]);
+    const decayIdxP = Math.max(0, h - 1);
+    const decayingSymbolicLogP = rawSymbolicLogDrift * Math.exp(-0.075 * decayIdxP);
+    const forwardStructuralLogP = tuningOverrides?.activeIntegratedStructuralTerm
+      ? evaluateCausalStructuralHypothesisTermLogDrift({
+          structuralTerm: tuningOverrides.activeIntegratedStructuralTerm,
+          X: previewX,
+          prevLogResidual: prevLogResidual * Math.exp(-0.22 * decayIdxP),
+          causalMedVol: medVol,
+          causalLogEq: rawOpenLogEqTarget,
+          cointegrationBasisLog: -cointegrationBasisMeanUsd / lastCloseUsd,
+          causalMacroLogForce: previewX[5],
+          dt: previewDeltaTau,
+        }) * Math.exp(-0.06 * decayIdxP)
+      : 0;
+
+    const stepLogDriftP =
+      (previewX[1] +
+        betaTox * toxRatioP * previewX[2] +
+        previewX[5] +
+        eqRestoringLogP * 0.45 +
+        decayingSymbolicLogP) *
+        previewDeltaTau +
+      forwardStructuralLogP;
+
+    const nextX0P = previewX[0] + stepLogDriftP;
+    const nextX1P = eDriftP * previewX[1] + (1 - eDriftP) * (eqRestoringLogP + previewX[5]);
+    const nextX2P = Math.max(0.0002, Math.min(0.035, eVolP * previewX[2] + (1 - eVolP) * medVol));
+    const nextX3P = eToxP * previewX[3];
+    const nextX4P = Math.max(0.05, Math.min(0.99, eResP * previewX[4] + (1 - eResP) * 0.75));
+    const nextX5P = eMacP * previewX[5];
+
+    const FhP: number[][] = [
+      [
+        1 - 0.45 * kappaMeanRev * previewDeltaTau,
+        previewDeltaTau,
+        betaTox * toxRatioP * previewDeltaTau,
+        (betaTox * previewX[2] * previewDeltaTau) / safeResP,
+        (-betaTox * previewX[3] * previewX[2] * previewDeltaTau) / (safeResP * safeResP),
+        previewDeltaTau,
+      ],
+      [-(1 - eDriftP) * kappaMeanRev, eDriftP, 0, 0, 0, 1 - eDriftP],
+      [0, 0, eVolP, 0, 0, 0],
+      [0, 0, 0, eToxP, 0, 0],
+      [0, 0, 0, 0, eResP, 0],
+      [0, 0, 0, 0, 0, eMacP],
+    ];
+    const stepVarP = Math.max(1e-8, previewX[2] * previewX[2] * previewDeltaTau);
+    const QDiagP = [
+      stepVarP * 0.85,
+      stepVarP * 0.14,
+      stepVarP * 0.04,
+      0.012 * previewDeltaTau,
+      0.008 * previewDeltaTau,
+      stepVarP * 0.02,
+    ];
+    const nextPP: number[][] = Array.from({ length: 6 }, () => new Array<number>(6).fill(0));
+    for (let i = 0; i < 6; i++) {
+      for (let j = 0; j < 6; j++) {
+        let s = 0;
+        for (let k = 0; k < 6; k++) {
+          for (let l = 0; l < 6; l++) {
+            s += FhP[i][k] * previewP[k][l] * FhP[j][l];
+          }
+        }
+        nextPP[i][j] = s + (i === j ? QDiagP[i] : 0);
+      }
+    }
+
+    previewX = [nextX0P, nextX1P, nextX2P, nextX3P, nextX4P, nextX5P];
+    previewP = nextPP;
+
+    const predLogVarP = Math.max(1e-8, previewP[0][0]);
+    const predLogStdP = Math.sqrt(predLogVarP);
+    const expectedPriceP = Math.exp(previewX[0] + 0.5 * predLogVarP);
+    if (h === 1) {
+      const pUp95P = parseFloat((expectedPriceP * Math.exp(1.96 * predLogStdP)).toFixed(2));
+      const pLo05P = parseFloat((expectedPriceP * Math.exp(-1.96 * predLogStdP)).toFixed(2));
+      preFeedbackBandWidthStep1Usd = Math.max(0.1, pUp95P - pLo05P);
+    }
+    if (h === 6) {
+      preFeedbackExpectedStep6Usd = parseFloat(expectedPriceP.toFixed(2));
+    }
+  }
+  const preFeedbackForwardSlopeUsdPerStep = parseFloat(
+    ((preFeedbackExpectedStep6Usd - lastCloseUsd) / 6).toFixed(4)
+  );
+
+  // Evaluate FaultClassifier in the forecast engine feedback loop
+  const lastResPt = residualPoints.length > 0 ? residualPoints[residualPoints.length - 1] : null;
+  const latestResidualUsd = lastResPt ? lastResPt.priceResidualUsd : lastBarMoveUsd;
+  const latestResidualZ = lastResPt
+    ? lastResPt.standardizedResidualSigma
+    : latestResidualUsd / safeAtr;
+  const latestSessionCal = evaluateGoldSessionAndCalendar({
+    timestampSec: lastBarTime,
+    extensionInput,
+  });
+  const macroBearishGravity = Boolean(
+    liveMacro && liveMacro.status !== 'MACRO_FEED_UNAVAILABLE' && liveMacro.netMacroLift <= -0.35
+  );
+  const macroBullishSupport = Boolean(
+    liveMacro && liveMacro.status !== 'MACRO_FEED_UNAVAILABLE' && liveMacro.netMacroLift >= 0.35
+  );
+
+  const metricsFaultReport = FaultClassifier.classifyFromMetrics({
+    safeAtr,
+    currentPrice: lastCloseUsd,
+    liveForwardSlopeUsdPerStep: preFeedbackForwardSlopeUsdPerStep,
+    liveBandWidthStep1Usd: preFeedbackBandWidthStep1Usd,
+    latestResidualUsd,
+    latestResidualZ,
+    lastBarMoveUsd,
+    trailingRealizedMoveUsd,
+    structuralRealizedMoveUsd,
+    consecutiveBearBars,
+    consecutiveBullBars,
+    streakBars,
+    macroBearishGravity,
+    macroBullishSupport,
+    sessionId: awareness?.sessionId ?? latestSessionCal.sessionId,
+    weekpart: awareness?.weekpart ?? latestSessionCal.weekpart,
+    isTurnOfMonth:
+      awareness?.seasonalCalendar?.isTurnOfMonth ?? latestSessionCal.seasonalCalendar.isTurnOfMonth,
+  });
+  const stateFaultReport = awareness
+    ? FaultClassifier.analyzeMarketAwarenessState(awareness)
+    : null;
+  const faultClassification = FaultClassifier.mergeClassificationReports(
+    metricsFaultReport,
+    stateFaultReport
+  );
+
+  const resolvedFeedbackPolicies = FaultClassifier.resolveForecastFeedbackPolicies({
+    tuningOverrides,
+    awareness,
+    faultClassification,
+    defaultWeekpart: latestSessionCal.weekpart,
+    isFuturesClosed: latestSessionCal.isFuturesClosed,
+  });
+  const driftPolicy: RecommendedDriftPolicy = resolvedFeedbackPolicies.driftPolicy;
+  const bandPolicy: RecommendedBandPolicy = resolvedFeedbackPolicies.bandPolicy;
+  const anchorPolicy: RecommendedAnchorPolicy = resolvedFeedbackPolicies.anchorPolicy;
+  const seasonalUncMult = resolvedFeedbackPolicies.seasonalUncMult;
+
+  // Compute open-auction structural reference from candles so 40+ hours of flat weekend bars
+  // never wash out the post-open equilibrium anchor or active-session directional drift
+  let openAuctionWeightedSum = 0;
+  let openAuctionWeightTotal = 0;
+  const openAuctionCloses: number[] = [];
+  for (let idx = 0; idx < n; idx++) {
+    const cBar = candles[idx];
+    const cal = evaluateGoldSessionAndCalendar({ timestampSec: cBar.time });
+    const isBarOpen = !cal.isFuturesClosed && cal.sessionId !== 'DAILY_ROLL_MAINTENANCE';
+    const w = (isBarOpen ? 3.5 : 0.35) * Math.max(1, cBar.volume || 1);
+    openAuctionWeightedSum += cBar.close * w;
+    openAuctionWeightTotal += w;
+    if (isBarOpen) {
+      openAuctionCloses.push(cBar.close);
+    }
+  }
+  const openAuctionStructuralVwap =
+    openAuctionWeightTotal > 0 ? openAuctionWeightedSum / openAuctionWeightTotal : rawEqAnchor;
+
+  let preCloseActiveLogDrift = 0;
+  if (openAuctionCloses.length >= 4) {
+    const lookback = Math.min(12, openAuctionCloses.length - 1);
+    const pEnd = Math.max(100, openAuctionCloses[openAuctionCloses.length - 1]);
+    const pStart = Math.max(100, openAuctionCloses[openAuctionCloses.length - 1 - lookback]);
+    preCloseActiveLogDrift = (Math.log(pEnd) - Math.log(pStart)) / lookback;
+  } else if (n >= 4) {
+    const lookback = Math.min(24, n - 1);
+    preCloseActiveLogDrift =
+      (Math.log(Math.max(100, candles[n - 1].close)) -
+        Math.log(Math.max(100, candles[n - 1 - lookback].close))) /
+      lookback;
+  }
+
+  const hasShockFault = Boolean(
+    anchorPolicy === 'RECENTER_TO_POST_SHOCK' ||
+      driftPolicy === 'SHOCK_RESET' ||
+      faultClassification.hasWrongDirection ||
+      awareness?.activeFaultCodes?.includes('EQUILIBRIUM_ANCHOR_MISMATCH') ||
+      awareness?.activeFaultCodes?.includes('STALE_DRIFT') ||
+      awareness?.activeFaultCodes?.includes('WRONG_DIRECTION')
+  );
+
+  const dominantShockLogMove =
+    streakSign < 0 && Math.abs(swingDropLog) > Math.abs(prevLogResidual)
+      ? swingDropLog
+      : streakSign > 0 && swingRallyLog > Math.abs(prevLogResidual)
+      ? swingRallyLog
+      : prevLogResidual;
+  const shockDir = Math.sign(dominantShockLogMove || prevLogResidual) || -1;
+  const dominantShockLogRate =
+    consecutiveDirBars >= 2
+      ? dominantShockLogMove / Math.max(1.5, Math.min(4, consecutiveDirBars))
+      : prevLogResidual;
+
+  let effectiveEqAnchor = rawEqAnchor;
+  if (hasShockFault) {
+    if ((rawEqAnchor - lastCloseUsd) * shockDir >= 0 && Math.abs(rawEqAnchor - lastCloseUsd) > 0.05) {
+      // Caller already recentered equilibriumAnchorOverride in the direction of the post-shock regime
+      effectiveEqAnchor = rawEqAnchor;
+    } else {
+      // Never leave effectiveEqAnchor on the pre-shock side of spot where it manufactures a fake recovery pull
+      effectiveEqAnchor =
+        lastCloseUsd *
+        Math.exp(shockDir * Math.min(0.01, Math.max(0.0015, 0.35 * Math.abs(dominantShockLogMove))));
+    }
+  } else if (driftPolicy === 'ZERO_FOR_SESSION' || anchorPolicy === 'FREEZE') {
+    // Preserve true post-open equilibrium target (blending HTF POC / equilibriumAnchorPrice & open-auction VWAP
+    // if short-window rawEqAnchor collapsed onto flat weekend spot)
+    const htfAnchorRef = equilibriumAnchorPrice > 100 ? equilibriumAnchorPrice : openAuctionStructuralVwap;
+    const candidateOpenTarget =
+      Math.abs(rawEqAnchor - lastCloseUsd) < Math.abs(htfAnchorRef - lastCloseUsd) * 0.5
+        ? 0.45 * rawEqAnchor + 0.35 * htfAnchorRef + 0.20 * openAuctionStructuralVwap
+        : rawEqAnchor;
+    effectiveEqAnchor = candidateOpenTarget;
+  }
+
+  const openMarketLogEqTarget = Math.log(Math.max(100, effectiveEqAnchor));
+  let closedMarketLogEqTarget = Math.log(
+    Math.max(100, 0.92 * lastCloseUsd + 0.08 * effectiveEqAnchor)
+  );
+  let symbolicLogDriftBase =
+    (tuningOverrides?.symbolicStepDriftUsd ?? 0) / lastCloseUsd;
 
   let simX = [...X];
   let simP = P.map(row => [...row]);
   let simDeltaTau = deltaTauSeries[n - 1] || 1.0;
+
+  let eqRestoringPullMult = 0.45;
+  let driftStepMult = 1.0;
+
+  // Compute conserved open-market drift velocity so when a future step crosses into market open,
+  // price moves higher or lower according to latent drift, equilibrium/HTF-POC pull, and macro lift
+  const openEqGradientLog = kappaMeanRev * (openMarketLogEqTarget - Math.log(lastCloseUsd));
+  const postShockInitDrift = Math.max(
+    -0.0085,
+    Math.min(0.0085, 0.14 * prevLogResidual + 0.28 * dominantShockLogRate)
+  );
+  const conservedOpenDriftX1 =
+    hasShockFault
+      ? postShockInitDrift
+      : Math.abs(X[1]) >= Math.abs(preCloseActiveLogDrift) * 0.65 && Math.abs(X[1]) > 1e-5
+      ? X[1]
+      : 0.45 * X[1] + 0.55 * preCloseActiveLogDrift + 0.25 * openEqGradientLog;
+
+  if (driftPolicy === 'ZERO_FOR_SESSION') {
+    // Start cleanly at current spot level, but NEVER erase latent velocity X[1], toxicity X[3],
+    // macro lift X[5], or symbolicLogDriftBase: closed steps are damped per-step while open steps release them
+    simX[0] = Math.log(lastCloseUsd);
+    simX[1] = conservedOpenDriftX1;
+  } else if (driftPolicy === 'SHRINK') {
+    simX[1] = simX[1] * 0.35;
+    simX[5] = simX[5] * 0.5;
+    symbolicLogDriftBase = symbolicLogDriftBase * 0.35;
+    eqRestoringPullMult = 0.22;
+    driftStepMult = 0.45;
+  } else if (driftPolicy === 'SHOCK_RESET') {
+    // Recenter latent starting level to post-shock realized price and align velocity with realized breakdown/impulse
+    simX[0] = Math.log(lastCloseUsd);
+    simX[1] = postShockInitDrift;
+    simX[3] = Math.max(-0.75, Math.min(0.75, 0.32 * shockDir + 0.25 * (barSignedImbalances[n - 1] || 0)));
+    if (simX[5] * shockDir < 0) {
+      simX[5] = simX[5] * 0.2;
+    }
+    if (symbolicLogDriftBase * shockDir < 0) {
+      // Prevent stale pre-shock symbolic drift from pulling opposite to the realized shock
+      symbolicLogDriftBase = 0;
+    } else {
+      symbolicLogDriftBase = 0.78 * symbolicLogDriftBase;
+    }
+    eqRestoringPullMult = 0.28;
+    driftStepMult = 0.72;
+  }
+
+  const bandPolicyMult =
+    (bandPolicy === 'WIDEN' ? 1.38 : 1.0) * seasonalUncMult;
 
   const medianTrack: { time: number; value: number }[] = [];
   const upper75: { time: number; value: number }[] = [];
@@ -1300,9 +2119,81 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     (_, idx) => ({ id: idx, path: [] })
   );
 
+  const startedInClosedSession =
+    driftPolicy === 'ZERO_FOR_SESSION' || anchorPolicy === 'FREEZE';
+  const hasAwarenessPolicyActive = Boolean(
+    startedInClosedSession ||
+      tuningOverrides?.marketAwarenessState ||
+      driftPolicy !== 'UNCHANGED' ||
+      anchorPolicy !== 'UNCHANGED'
+  );
+  let openStepsElapsed = 0;
+  let prevStepWasClosed = startedInClosedSession;
+
   for (let h = 1; h <= horizonSteps; h++) {
     const stepTime = lastBarTime + h * intervalStepSeconds;
-    simDeltaTau = 0.72 * simDeltaTau + 0.28 * 1.0;
+
+    // Evaluate whether THIS specific future horizon step h falls inside a market close or an open session
+    let isStepClosed = false;
+    const stepCal = evaluateGoldSessionAndCalendar({ timestampSec: stepTime });
+    if (hasAwarenessPolicyActive) {
+      if (intervalStepSeconds >= 86400) {
+        // Daily (1d) bars span 24 hours: only Saturday or early Sunday is a closed weekend step;
+        // Sunday evening and Monday–Friday are active open trading days
+        const dUtc = new Date(stepTime * 1000);
+        const dayUtc = dUtc.getUTCDay();
+        const hourUtc = stepCal.utcHourDecimal ?? dUtc.getUTCHours();
+        isStepClosed = dayUtc === 6 || (dayUtc === 0 && hourUtc < 16);
+      } else if (intervalStepSeconds >= 14400) {
+        // 4-hour (4h) bars: closed only if both midpoint and endpoint are inside the weekend close
+        const midCal = evaluateGoldSessionAndCalendar({
+          timestampSec: stepTime - Math.floor(intervalStepSeconds * 0.5),
+        });
+        isStepClosed = stepCal.isFuturesClosed && midCal.isFuturesClosed;
+      } else {
+        // Intraday (5m, 15m, 1h) bars: closed during weekend thin, or during daily maintenance if h=0 started in maintenance
+        isStepClosed =
+          stepCal.isFuturesClosed ||
+          (startedInClosedSession && stepCal.sessionId === 'DAILY_ROLL_MAINTENANCE');
+      }
+    }
+
+    const useStepSessionRouting = hasAwarenessPolicyActive && (startedInClosedSession || isStepClosed);
+    let stepSessionTauTarget = 1.0;
+    if (!isStepClosed) {
+      if (stepCal.weekpart === 'SUNDAY_OPEN_RISK' || prevStepWasClosed) {
+        stepSessionTauTarget = 1.12;
+      } else if (stepCal.sessionId === 'LONDON_NY_OVERLAP') {
+        stepSessionTauTarget = 1.15;
+      } else if (stepCal.sessionId === 'LONDON' || stepCal.sessionId === 'NEW_YORK') {
+        stepSessionTauTarget = 1.04;
+      } else if (stepCal.sessionId === 'ASIA') {
+        stepSessionTauTarget = 0.92;
+      } else {
+        stepSessionTauTarget = 0.76;
+      }
+    }
+
+    if (useStepSessionRouting) {
+      if (isStepClosed) {
+        if (!prevStepWasClosed) {
+          // Horizon just crossed from an open Friday session into the Friday 22:00 UTC weekend close:
+          // freeze the closed-market target at the Friday closing level (simX[0]) instead of pulling back to h=0
+          closedMarketLogEqTarget = simX[0];
+        }
+        simDeltaTau = 0.22;
+      } else {
+        if (prevStepWasClosed) {
+          // Market just reopened at stepTime: release conserved active-auction drift velocity
+          simX[1] = conservedOpenDriftX1;
+        }
+        openStepsElapsed++;
+        simDeltaTau = 0.65 * simDeltaTau + 0.35 * stepSessionTauTarget;
+      }
+    } else {
+      openStepsElapsed = h;
+      simDeltaTau = 0.72 * simDeltaTau + 0.28 * 1.0;
+    }
 
     const eDrift = Math.exp(-kappaDrift * simDeltaTau);
     const eVol = Math.exp(-kappaVol * simDeltaTau);
@@ -1312,36 +2203,70 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
 
     const safeRes = Math.max(0.2, simX[4]);
     const toxRatio = simX[3] / safeRes;
-    const eqRestoringLog = kappaMeanRev * (logEqTarget - simX[0]);
-    const decayingSymbolicLog = symbolicLogDriftBase * Math.exp(-0.075 * (h - 1));
+    const activeLogEqTarget =
+      useStepSessionRouting && isStepClosed ? closedMarketLogEqTarget : openMarketLogEqTarget;
+    const eqRestoringLog = kappaMeanRev * (activeLogEqTarget - simX[0]);
+
+    const effectiveOpenDecayIdx = Math.max(0, openStepsElapsed - 1);
+    const decayingSymbolicLog =
+      symbolicLogDriftBase *
+      (useStepSessionRouting && isStepClosed ? 0.18 : Math.exp(-0.075 * effectiveOpenDecayIdx));
     const forwardStructuralLog = tuningOverrides?.activeIntegratedStructuralTerm
       ? evaluateCausalStructuralHypothesisTermLogDrift({
           structuralTerm: tuningOverrides.activeIntegratedStructuralTerm,
           X: simX,
-          prevLogResidual: prevLogResidual * Math.exp(-0.22 * (h - 1)),
+          prevLogResidual: prevLogResidual * Math.exp(-0.22 * effectiveOpenDecayIdx),
           causalMedVol: medVol,
-          causalLogEq: logEqTarget,
-          cointegrationBasisLog: -cointegrationBasisMeanUsd / Math.max(100, candles[n - 1].close),
+          causalLogEq: activeLogEqTarget,
+          cointegrationBasisLog: -cointegrationBasisMeanUsd / lastCloseUsd,
           causalMacroLogForce: simX[5],
           dt: simDeltaTau,
-        }) * Math.exp(-0.06 * (h - 1))
+        }) * (useStepSessionRouting && isStepClosed ? 0.18 : Math.exp(-0.06 * effectiveOpenDecayIdx))
       : 0;
 
-    const stepLogDrift =
-      (simX[1] + betaTox * toxRatio * simX[2] + simX[5] + eqRestoringLog * 0.45 + decayingSymbolicLog) *
+    const stepEqPullMult = useStepSessionRouting
+      ? isStepClosed
+        ? 0.08
+        : hasShockFault
+        ? 0.28
+        : prevStepWasClosed || openStepsElapsed <= 3
+        ? 0.56
+        : 0.45
+      : eqRestoringPullMult;
+
+    const stepDriftScale = useStepSessionRouting
+      ? isStepClosed
+        ? 0.18
+        : hasShockFault
+        ? 0.72
+        : prevStepWasClosed || openStepsElapsed <= 3
+        ? 1.12
+        : 1.0
+      : driftPolicy === 'UNCHANGED'
+      ? 1.0
+      : driftStepMult;
+
+    const rawStepDrift =
+      (simX[1] + betaTox * toxRatio * simX[2] + simX[5] + eqRestoringLog * stepEqPullMult + decayingSymbolicLog) *
         simDeltaTau +
       forwardStructuralLog;
+    const stepLogDrift = rawStepDrift * stepDriftScale;
 
     const nextX0 = simX[0] + stepLogDrift;
-    const nextX1 = eDrift * simX[1] + (1 - eDrift) * (eqRestoringLog + simX[5]);
+    // During closed steps, conserve latent directional velocity X[1] in suspension so it is ready when market opens
+    const nextX1 =
+      useStepSessionRouting && isStepClosed
+        ? 0.96 * simX[1] + 0.04 * (kappaMeanRev * (openMarketLogEqTarget - simX[0]) + simX[5])
+        : eDrift * simX[1] + (1 - eDrift) * (eqRestoringLog + simX[5]);
     const nextX2 = Math.max(0.0002, Math.min(0.035, eVol * simX[2] + (1 - eVol) * medVol));
-    const nextX3 = eTox * simX[3];
+    const nextX3 = useStepSessionRouting && isStepClosed ? 0.96 * simX[3] : eTox * simX[3];
     const nextX4 = Math.max(0.05, Math.min(0.99, eRes * simX[4] + (1 - eRes) * 0.75));
-    const nextX5 = eMac * simX[5];
+    const nextX5 = useStepSessionRouting && isStepClosed ? 0.97 * simX[5] : eMac * simX[5];
+    prevStepWasClosed = isStepClosed;
 
     const Fh: number[][] = [
       [
-        1 - 0.45 * kappaMeanRev * simDeltaTau,
+        1 - stepEqPullMult * kappaMeanRev * simDeltaTau,
         simDeltaTau,
         betaTox * toxRatio * simDeltaTau,
         (betaTox * simX[2] * simDeltaTau) / safeRes,
@@ -1382,7 +2307,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     simP = nextP;
 
     const predLogVar = Math.max(1e-8, simP[0][0]);
-    const predLogStd = Math.sqrt(predLogVar);
+    const predLogStd = Math.sqrt(predLogVar) * bandPolicyMult;
     const expectedPrice = Math.exp(simX[0] + 0.5 * predLogVar);
 
     const pMed = parseFloat(expectedPrice.toFixed(2));
@@ -1441,7 +2366,14 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       lower25,
       lower05,
       sampleTracks,
+      preFeedbackForwardSlopeUsdPerStep,
+      preFeedbackBandWidthStep1Usd,
+      appliedDriftPolicy: driftPolicy,
+      appliedBandPolicy: bandPolicy,
+      appliedAnchorPolicy: anchorPolicy,
+      faultClassification,
     },
+    faultClassification,
     oneStepPredictedPrices,
     oneStepPredictedStds,
     oneStepPredictedProbUp,
@@ -1999,6 +2931,7 @@ export function evaluateScientificCorePipeline(params: {
     barEchoResidualsUsd: sonarOut.barEchoResidualsUsd,
     equilibriumAnchorPrice: htfPocAnchorPrice,
     intervalStepSeconds,
+    atr: params.atr,
     activeProvider,
     activeSymbol,
     instrumentIdentity,
@@ -2022,6 +2955,7 @@ export function evaluateScientificCorePipeline(params: {
       barEchoResidualsUsd: sonarOut.barEchoResidualsUsd,
       equilibriumAnchorPrice: htfPocAnchorPrice,
       intervalStepSeconds,
+      atr: params.atr,
       activeProvider,
       activeSymbol,
       instrumentIdentity,
@@ -2106,5 +3040,6 @@ export function evaluateScientificCorePipeline(params: {
     residualOracle,
     latentMathWriteBack,
     scientificScoreboard,
+    faultClassification: liveFilterOut.faultClassification,
   };
 }

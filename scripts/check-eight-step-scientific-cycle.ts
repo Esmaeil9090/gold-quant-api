@@ -173,7 +173,7 @@ function buildVerifiedCameras(candles: Candle[]): VerifiedVenueCameraObservation
 async function runAcceptanceSuite(): Promise<void> {
   const dataDir = path.resolve(process.cwd(), 'data');
   const sciStorePath = path.join(dataDir, 'gdf_eight_step_scientific_cycle_store.v1.json');
-  const archStorePath = path.join(dataDir, 'gdf_parallel_universe_architecture_store.v1.json');
+  const archStorePath = path.join(dataDir, 'gdf_intelligence_architecture_store.v2.json');
 
   const sciBackup = fs.existsSync(sciStorePath) ? fs.readFileSync(sciStorePath, 'utf-8') : null;
   const archBackup = fs.existsSync(archStorePath) ? fs.readFileSync(archStorePath, 'utf-8') : null;

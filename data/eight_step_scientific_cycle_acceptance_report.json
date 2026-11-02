@@ -1,5 +1,5 @@
 {
-  "verifiedAtIso": "2026-10-29T19:31:34.459Z",
+  "verifiedAtIso": "2026-11-01T19:56:09.883Z",
   "totalScenarios": 18,
   "passedScenarios": 18,
   "allPassed": true,
@@ -44,7 +44,7 @@
       "id": 7,
       "name": "Matched-Sample 6-Challenger Scoreboard & Multiple-Testing Accounting in Step 5 (CHALLENGE)",
       "passed": true,
-      "details": "challengers=6, N_oos=20, K_search=3, candRmse=$1.365 vs incRmse=$3.132"
+      "details": "challengers=6, N_oos=20, K_search=3, candRmse=$1.349 vs incRmse=$3.289"
     },
     {
       "id": 8,
@@ -68,13 +68,13 @@
       "id": 11,
       "name": "Atomic Versioned Write-Back in Step 7 (INTEGRATE)",
       "passed": true,
-      "details": "Gen #42 -> Gen #43, mode=MANUAL_MMI_UNVALIDATED_OVERRIDE, term=AR1_RESIDUAL_ERROR_CORRECTION, canRollback=true"
+      "details": "Gen #1 -> Gen #2, mode=MANUAL_MMI_UNVALIDATED_OVERRIDE, term=AR1_RESIDUAL_ERROR_CORRECTION, canRollback=true"
     },
     {
       "id": 12,
       "name": "Active Execution Path Verification (Yellow-Line Forecast Shifts Attributably)",
       "passed": true,
-      "details": "terminalBefore=$2750.9700, terminalAfter=$2747.3800, attributableShift=$-3.5900, covPSD=true"
+      "details": "terminalBefore=$2749.6600, terminalAfter=$2748.4500, attributableShift=$-1.2100, covPSD=true"
     },
     {
       "id": 13,
@@ -86,7 +86,7 @@
       "id": 14,
       "name": "Rollback Restoration of Previous Write-Back Generation & Exact Yellow-Line Forecast",
       "passed": true,
-      "details": "restoredGen=#42 (expected #42), activeTerm=null, forecastDiffFromBaseline=$0.000000000"
+      "details": "restoredGen=#1 (expected #1), activeTerm=null, forecastDiffFromBaseline=$0.000000000"
     },
     {
       "id": 15,
@@ -110,7 +110,7 @@
       "id": 18,
       "name": "Deterministic Experiment Replay (Identical Inputs -> Identical Seed, Parameters & Metrics)",
       "passed": true,
-      "details": "seed=32c8a8dc521eae2a, form=AR1_RESIDUAL_ERROR_CORRECTION, θ_A=0.85 === θ_B=0.85, RMSE_A=$1.365 === RMSE_B=$1.365"
+      "details": "seed=32c8a8dc521eae2a, form=AR1_RESIDUAL_ERROR_CORRECTION, θ_A=0.85 === θ_B=0.85, RMSE_A=$1.3489 === RMSE_B=$1.3489"
     }
   ]
 }

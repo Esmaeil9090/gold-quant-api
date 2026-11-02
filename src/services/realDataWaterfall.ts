@@ -222,6 +222,14 @@ export function assertVerifiedProvenance(
   }
 }
 
+export function attachCandleProvenance(
+  candles: VerifiedCandle[],
+  meta: { providerName: string; symbol: string; endpoint: string; tier: ProviderTier }
+): VerifiedCandle[] {
+  assertVerifiedProvenance(candles, meta);
+  return candles;
+}
+
 const providerHttpDiagnosticsLog: ProviderHttpDiagnosticEvent[] = [];
 const systemWarningErrorLog: SystemWarningErrorEntry[] = [];
 
@@ -1863,6 +1871,7 @@ function classifyRealHeadline(title: string, summary: string, sourceName: string
   titleFa: string;
   transmission: string;
   transmissionFa: string;
+  isHighRelevanceMacroGold: boolean;
 } {
   const text = `${title} ${summary}`.toLowerCase();
 
@@ -1877,32 +1886,47 @@ function classifyRealHeadline(title: string, summary: string, sourceName: string
   } else if (/\bboe\b|\buk\b|britain|sterling/.test(text)) {
     country = 'GB';
     flag = '🇬🇧';
-  } else if (/middle east|geopolit|oil|opec|tariff|global|imf|brics/.test(text)) {
+  } else if (/middle east|geopolit|oil|opec|tariff|global|imf|brics|iran|israel|ukraine|russia|red sea/.test(text)) {
     country = 'GLOBAL';
     flag = '🌐';
   }
 
   let category: VerifiedMacroNewsItem['category'] = 'monetary';
-  if (/cpi|inflation|pce|price index|stagflation/.test(text)) {
+  if (/cpi|inflation|pce|ppi|price index|stagflation|consumer price|breakeven/.test(text)) {
     category = 'inflation';
-  } else if (/treasury|yield|bond|10-year|tips|debt/.test(text)) {
+  } else if (/treasury|yield|bond|10-year|2-year|30-year|tips|real yield|sovereign debt|curve/.test(text)) {
     category = 'yields';
-  } else if (/central bank|reserve|pboc|bullion|gold buying/.test(text)) {
+  } else if (/central bank|reserve|pboc|bullion|gold buying|sovereign gold|gold reserve/.test(text)) {
     category = 'central_bank';
-  } else if (/war|geopolit|tariff|sanction|oil|middle east|strait|conflict/.test(text)) {
+  } else if (/war|geopolit|tariff|sanction|oil|middle east|strait|conflict|strike|missile|escalation|iran|israel|ukraine|russia|red sea|trade war|tension/.test(text)) {
     category = 'geopolitics';
   }
 
+  const isHighRelevanceMacroGold =
+    /gold|bullion|xau|paxg|precious metal|fed\b|fomc|powell|central bank|pboc|ecb|boe|boj|interest rate|rate cut|rate hike|treasury|yield|tips|dxy|dollar|greenback|inflation|cpi|pce|ppi|payroll|nonfarm|jobs report|unemployment|gdp|recession|stagflation|geopolit|war|conflict|tariff|sanction|middle east|oil|opec|safe[\s-]?haven|selloff|sell-off|liquidation|margin/.test(
+      text
+    );
+
   let score = 0;
-  if (/rate cut|dovish|lower rates|gold rises|gold climbs|safe-haven|safe haven|recession|cooling|buying gold|weak dollar|inflation hedge/.test(text)) {
+  if (
+    /rate cut|dovish|lower rates|gold rises|gold climbs|gold surges|gold rallies|safe-haven|safe haven|recession|cooling inflation|buying gold|weak dollar|dollar falls|yields fall|yields drop|inflation hedge/.test(
+      text
+    )
+  ) {
     score += 1;
   }
-  if (/rate hike|hawkish|higher yields|yields rise|strong dollar|dollar jumps|gold falls|gold drops|selloff|hot cpi/.test(text)) {
+  if (
+    /rate hike|hawkish|higher for longer|higher yields|yields rise|yields climb|yields jump|strong dollar|dollar jumps|dollar rallies|greenback|gold falls|gold drops|gold tumbles|gold plunges|gold slides|selloff|sell-off|liquidation|margin call|profit-taking|outflow|hot cpi|sticky inflation|strong jobs|payrolls beat|de-escalation|ceasefire|risk-off/.test(
+      text
+    )
+  ) {
     score -= 1;
   }
 
-  const sentiment: VerifiedMacroNewsItem['sentiment'] = score > 0 ? 'bullish' : score < 0 ? 'bearish' : 'neutral';
-  const goldImpactPct = score > 0 ? 0.85 : score < 0 ? -0.85 : 0.15;
+  const sentiment: VerifiedMacroNewsItem['sentiment'] =
+    score > 0 ? 'bullish' : score < 0 ? 'bearish' : 'neutral';
+  // Neutral headlines must carry 0.0 impact (never a hardcoded +0.15% bullish bias)
+  const goldImpactPct = score > 0 ? 0.85 : score < 0 ? -0.85 : 0.0;
 
   const categoryTranslations: Record<
     VerifiedMacroNewsItem['category'],
@@ -1925,8 +1949,8 @@ function classifyRealHeadline(title: string, summary: string, sourceName: string
     },
     geopolitics: {
       prefixFa: 'گزارش ریسک‌های ژئوپلیتیک و تجارت جهانی',
-      transEn: `Verified external feed (${sourceName}): Geopolitical and trade uncertainty modulates safe-haven convexity demand.`,
-      transFa: `منبع خبری خارجی تاییدشده (${sourceName}): تحولات ژئوپلیتیک و تجاری تقاضای پناهگاه امن سرمایه‌گذاران را تغییر می‌دهد.`,
+      transEn: `Verified external feed (${sourceName}): Geopolitical and trade uncertainty modulates safe-haven convexity demand vs. USD liquidity demand.`,
+      transFa: `منبع خبری خارجی تاییدشده (${sourceName}): تحولات ژئوپلیتیک و تجاری تقاضای پناهگاه امن یا لیکوییدیشن دلاری را تغییر می‌دهد.`,
     },
     yields: {
       prefixFa: 'گزارش بازار اوراق خزانه‌داری و بازدهی',
@@ -1945,6 +1969,7 @@ function classifyRealHeadline(title: string, summary: string, sourceName: string
     titleFa: `[${meta.prefixFa} · ${sourceName}] ${title}`,
     transmission: meta.transEn,
     transmissionFa: meta.transFa,
+    isHighRelevanceMacroGold,
   };
 }
 
@@ -1988,7 +2013,8 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
 
   const activeSources: string[] = [];
   const failedSources: string[] = [];
-  const parsedEvents: VerifiedMacroNewsItem[] = [];
+  const highRelevanceEvents: VerifiedMacroNewsItem[] = [];
+  const fallbackMarketEvents: VerifiedMacroNewsItem[] = [];
   const seenTitles = new Set<string>();
 
   await Promise.all(
@@ -2028,7 +2054,7 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
           });
           throw new Error('RSS provider returned HTML instead of XML');
         }
-        const itemMatches = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8);
+        const itemMatches = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 18);
         if (itemMatches.length === 0) throw new Error('Zero RSS <item> nodes');
 
         recordProviderHttpDiagnostic({
@@ -2058,6 +2084,8 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
           const cleanTitle = rawTitle
             .replace(/&amp;/g, '&')
             .replace(/&#39;/g, "'")
+            .replace(/&#x2018;/gi, "'")
+            .replace(/&#x2019;/gi, "'")
             .replace(/&apos;/g, "'")
             .replace(/&quot;/g, '"')
             .replace(/&lt;/g, '<')
@@ -2065,7 +2093,12 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
             .trim();
 
           if (!cleanTitle || seenTitles.has(cleanTitle.toLowerCase())) continue;
-          if (/mortgage|retire|401\(k\)|my husband|my wife|credit card|inheritance|social security/i.test(cleanTitle)) {
+          // Exclude personal-finance advice, entertainment/gaming, lifestyle, and non-market consumer fluff
+          if (
+            /mortgage|retire|401\(k\)|my husband|my wife|my father|my mother|caregiver|doordash|debit card|credit card|inheritance|social security|gta 6|grand theft|video game|dating|wedding|divorce|vacation|airline miles/i.test(
+              cleanTitle
+            )
+          ) {
             continue;
           }
           seenTitles.add(cleanTitle.toLowerCase());
@@ -2078,8 +2111,8 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
           const cleanSummary = rawDesc.replace(/<[^>]+>/g, '').trim().slice(0, 240);
 
           const classified = classifyRealHeadline(cleanTitle, cleanSummary, feed.name);
-          parsedEvents.push({
-            id: `ext-news-${timestampSec}-${parsedEvents.length}`,
+          const itemObj: VerifiedMacroNewsItem = {
+            id: `ext-news-${timestampSec}-${highRelevanceEvents.length + fallbackMarketEvents.length}`,
             timestamp: timestampSec,
             timeStr,
             country: classified.country,
@@ -2094,7 +2127,12 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
             transmissionFa: classified.transmissionFa,
             externalUrl: linkStr.trim() || undefined,
             isVerifiedExternal: true,
-          });
+          };
+          if (classified.isHighRelevanceMacroGold) {
+            highRelevanceEvents.push(itemObj);
+          } else {
+            fallbackMarketEvents.push(itemObj);
+          }
         }
       } catch (err: any) {
         failedSources.push(feed.name);
@@ -2102,8 +2140,10 @@ export async function fetchVerifiedMacroNews(options?: { simulateFailure?: strin
     })
   );
 
-  parsedEvents.sort((a, b) => b.timestamp - a.timestamp);
-  const topEvents = parsedEvents.slice(0, 8);
+  highRelevanceEvents.sort((a, b) => b.timestamp - a.timestamp);
+  fallbackMarketEvents.sort((a, b) => b.timestamp - a.timestamp);
+  const parsedEvents = [...highRelevanceEvents, ...fallbackMarketEvents];
+  const topEvents = parsedEvents.slice(0, 10);
 
   if (topEvents.length === 0) {
     return {

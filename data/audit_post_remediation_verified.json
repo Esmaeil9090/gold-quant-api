@@ -1,5 +1,5 @@
 {
-  "timestampIso": "2026-10-29T19:31:32.064Z",
+  "timestampIso": "2026-11-01T19:56:07.269Z",
   "mode": "POST_REMEDIATION_VERIFICATION",
   "sampleSizeCandles": 300,
   "results": [
@@ -50,8 +50,8 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "All observer states finite and dimensionally consistent ($/step)",
-      "measuredValue": "drift=1.1220, shrunkBias=-0.0250, historyLen=25",
-      "evidenceSummary": "AdaptiveDPObserver produced 25 finite trajectory points; f1=0.84, netLift=0.787."
+      "measuredValue": "drift=1.1220, shrunkBias=-0.0240, historyLen=25",
+      "evidenceSummary": "AdaptiveDPObserver produced 25 finite trajectory points; f1=0.822, netLift=0.77."
     },
     {
       "testId": "AUDIT-06",
@@ -120,7 +120,7 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Quantify exact OOS RMSE, Hit Rate, Rank IC, and ρ_1 contribution of each 6D filter term",
-      "measuredValue": "FULL_MODEL: RMSE=$4.9999 | ABLATE_MEAN_REVERSION: RMSE=$5.0156 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8963 | ABLATE_MACRO_COUPLING: RMSE=$5.003 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.8781",
+      "measuredValue": "FULL_MODEL: RMSE=$4.9999 | ABLATE_MEAN_REVERSION: RMSE=$5.0156 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8964 | ABLATE_MACRO_COUPLING: RMSE=$5.003 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.8782",
       "evidenceSummary": "Completed 5-way component ablation across mean reversion, toxicity coupling, macro coupling, and drift persistence."
     },
     {
@@ -170,8 +170,8 @@
       "status": "PASSED",
       "severityIfFailed": "HIGH",
       "toleranceOrCriterion": "When eligible, write-back increments generation and mutates Yellow-Line trajectory; when ineligible, fails closed with zero mutation",
-      "measuredValue": "applied=true (8/8 gates), gen=41->42, ΔStep24=$-0.01",
-      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4061.53 to $4061.52 (Δ=$-0.01)."
+      "measuredValue": "applied=true (8/8 gates), gen=51->52, ΔStep24=$-0.01",
+      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4061.54 to $4061.53 (Δ=$-0.01)."
     },
     {
       "testId": "AUDIT-18",
@@ -180,7 +180,7 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Must maintain versioned snapshot stack of prior LatentModelMathWriteBackState states and support instant rollback",
-      "measuredValue": "historySnapshots=7",
+      "measuredValue": "historySnapshots=13",
       "evidenceSummary": "Write-back state maintains versioned rollback history with one-step restoration."
     }
   ],
@@ -224,9 +224,9 @@
       "id": "FULL_MODEL",
       "label": "Full 6D Latent Filter (Baseline)",
       "oosRmseUsd": 4.9999,
-      "directionalHitRate": 0.4749,
+      "directionalHitRate": 0.4716,
       "brierScore": 0.2497,
-      "rankIc": -0.0297,
+      "rankIc": -0.03,
       "residualLag1Autocorr": -0.1744
     },
     {
@@ -235,16 +235,16 @@
       "oosRmseUsd": 5.0156,
       "directionalHitRate": 0.5017,
       "brierScore": 0.2486,
-      "rankIc": -0.001,
+      "rankIc": -0.0008,
       "residualLag1Autocorr": -0.1695
     },
     {
       "id": "ABLATE_TOXICITY_COUPLING",
       "label": "No Pulse-Echo Toxicity Coupling (β_tox = 0)",
-      "oosRmseUsd": 4.8963,
+      "oosRmseUsd": 4.8964,
       "directionalHitRate": 0.4816,
       "brierScore": 0.2488,
-      "rankIc": -0.0097,
+      "rankIc": -0.0094,
       "residualLag1Autocorr": -0.1357
     },
     {
@@ -259,18 +259,18 @@
     {
       "id": "ABLATE_DRIFT_PERSISTENCE",
       "label": "Low Drift Persistence (φ_drift = 0.20)",
-      "oosRmseUsd": 4.8781,
+      "oosRmseUsd": 4.8782,
       "directionalHitRate": 0.5351,
       "brierScore": 0.2471,
-      "rankIc": 0.0836,
+      "rankIc": 0.0841,
       "residualLag1Autocorr": -0.1631
     }
   ],
   "beforeAfterWriteBackDiff": {
     "writeBackApplied": true,
     "gatesPassedCount": 8,
-    "generationBefore": 41,
-    "generationAfter": 42,
+    "generationBefore": 51,
+    "generationAfter": 52,
     "parametersBefore": {
       "phi": 0.9251,
       "kappa": 0.1692,
@@ -293,7 +293,7 @@
       "localVolatility": 0.00077,
       "pressureToxicity": 0.1033,
       "liquidityResilience": 0.6959,
-      "macroResidualForce": -0.000059
+      "macroResidualForce": -0.000058
     },
     "latentStateAfter": {
       "logPriceLevel": 8.305272,
@@ -305,8 +305,8 @@
     },
     "yellowLineStep1BeforeUsd": 4045.99,
     "yellowLineStep1AfterUsd": 4045.98,
-    "yellowLineStep24BeforeUsd": 4061.53,
-    "yellowLineStep24AfterUsd": 4061.52,
+    "yellowLineStep24BeforeUsd": 4061.54,
+    "yellowLineStep24AfterUsd": 4061.53,
     "yellowLineStep24DeltaUsd": -0.01,
     "oosRmseBeforeUsd": 4.9999,
     "oosRmseAfterUsd": 4.9991

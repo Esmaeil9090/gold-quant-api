@@ -7,26 +7,41 @@ import type {
   ArchitecturePersistenceHealth,
   ArchitectureState,
   AwarenessFinding,
+  AwarenessRecommendedAction,
   Candle,
   CandidateVerificationStatus,
   DynamicModelSlot,
   EnsemblePlume,
+  ForecastFaultCode,
+  ForecastFaultRecord,
+  IntradaySessionId,
   LatentModelMathWriteBackState,
   MultiTimeframeDiscoveryContext,
+  NewsTransmissionAnalysis,
+  NewsTransmissionMode,
   OrderBookMicrostructureExtensionInput,
   ParallelUniverseTelemetry,
   ProportionalFusionWeights,
+  RecommendedAnchorPolicy,
+  RecommendedBandPolicy,
+  RecommendedDriftPolicy,
   ResidualOraclePoint,
   ResidualStructureDiagnostics,
   ScientificCoreTelemetry,
+  SeasonalCalendarContext,
   SymbolicPrimitiveId,
   TerminalSystemState,
   TestAndVerifyGateResult,
   TestAndVerifyReport,
+  TradingCalendarSessionContext,
   VerifiedMacroNewsItem,
   VerifiedMacroYieldResult,
   VerifiedVenueCameraObservation,
+  WeekpartType,
 } from '../contracts/quantContracts.js';
+import {
+  evaluateGoldSessionAndCalendar,
+} from './sessionCalendar.js';
 import {
   AdaptiveDPObserver,
   computeCointegrationBasis,
@@ -38,6 +53,9 @@ import {
 import {
   evaluateLatentStateFilterOnInformationClock,
   evaluateScientificCorePipeline,
+  FaultClassifier,
+  type FaultClassificationReport,
+  type FaultClassifierMetricsInput,
   LatentFilterTuningOverrides,
 } from '../engine/scientificCore.js';
 import {
@@ -53,6 +71,62 @@ import {
   REQUIRED_DISCOVERY_TIMEFRAMES,
   triggerNonBlockingMultiTimeframeBootstrap,
 } from './realDataWaterfall.js';
+
+export enum FaultType {
+  WRONG_DIRECTION = 'WRONG_DIRECTION',
+  OVERCONFIDENT_TREND = 'OVERCONFIDENT_TREND',
+  STALE_DRIFT = 'STALE_DRIFT',
+  EQUILIBRIUM_ANCHOR_MISMATCH = 'EQUILIBRIUM_ANCHOR_MISMATCH',
+  CANDIDATE_COLLINEAR_WITH_LIVE_ERROR = 'CANDIDATE_COLLINEAR_WITH_LIVE_ERROR',
+  SESSION_REGIME_VIOLATION = 'SESSION_REGIME_VIOLATION',
+  NEWS_TRANSMISSION_MISMATCH = 'NEWS_TRANSMISSION_MISMATCH',
+}
+
+export interface MarketAwarenessState {
+  timestampIso?: string;
+  evaluatedAtIso: string;
+  barTimeSec?: number;
+  timestampSec: number;
+  sessionRegime: {
+    weekpart: WeekpartType;
+    sessionId: IntradaySessionId | string;
+    isFuturesClosed: boolean;
+    isThinLiquiditySubSession: boolean;
+    isTurnOfMonth: boolean;
+    isTurnOfYearHolidayWindow: boolean;
+    seasonalLiquidityPenalty: number;
+  };
+  weekpart: WeekpartType;
+  sessionId: IntradaySessionId | string;
+  isThinLiquiditySubSession: boolean;
+  sessionContext?: TradingCalendarSessionContext;
+  sessionCalendar: TradingCalendarSessionContext;
+  seasonalCalendar: SeasonalCalendarContext;
+  newsTransmission?: NewsTransmissionAnalysis;
+  newsTransmissionMode: NewsTransmissionMode;
+  detectedFaults?: ForecastFaultRecord[];
+  activeFaults: ForecastFaultRecord[];
+  activeFaultCodes: ForecastFaultCode[];
+  activeFaultTypes: FaultType[];
+  recommendedPolicies: {
+    driftPolicy: RecommendedDriftPolicy;
+    bandPolicy: RecommendedBandPolicy;
+    anchorPolicy: RecommendedAnchorPolicy;
+  };
+  recommendedDriftPolicy: RecommendedDriftPolicy;
+  recommendedBandPolicy: RecommendedBandPolicy;
+  recommendedAnchorPolicy: RecommendedAnchorPolicy;
+  uncertaintyBandMultiplier?: number;
+  blockAutoPromotionDueToFaults: boolean;
+  candidateObligations: {
+    proposeWeekendSidewaysCandidate: boolean;
+    proposePostShockAbsorptionCandidate: boolean;
+    avoidCollinearWrongDirectionClone: boolean;
+    exploreOppositeNewsTransmission: boolean;
+  };
+  summaryEn: string;
+  summaryFa: string;
+}
 
 const ARCHITECTURE_STORE_SCHEMA_VERSION = 2;
 
@@ -390,6 +464,7 @@ interface RuntimeCoreStore {
     garchVolSeries: number[];
   };
   lastSymbolicSynthesisReport?: SymbolicSynthesisReport | null;
+  lastMarketAwarenessState?: MarketAwarenessState;
 }
 
 export interface LatentParameterDiffItem {
@@ -2153,10 +2228,431 @@ function calibrateAndWeightArchitectureOnRealSnapshot(params: {
   };
 }
 
+export { FaultClassifier, type FaultClassifierMetricsInput, type FaultClassificationReport };
+
+/**
+ * Evaluates the deterministic, session-aware, regime-aware, and fault-aware
+ * MarketAwarenessState from the Residual Oracle, live & candidate trajectories,
+ * UTC session/calendar context, and verified macro news.
+ */
+export function evaluateMarketAwarenessState(params: {
+  candles: Candle[];
+  atr: number;
+  equilibriumAnchorPrice: number;
+  liveEnsemble: EnsemblePlume;
+  candidateEnsemble: EnsemblePlume;
+  recentResiduals: ResidualOraclePoint[];
+  liveMacro?: VerifiedMacroYieldResult;
+  macroNews?: VerifiedMacroNewsItem[];
+  extensionInput?: OrderBookMicrostructureExtensionInput;
+}): MarketAwarenessState {
+  const {
+    candles,
+    atr,
+    equilibriumAnchorPrice,
+    liveEnsemble,
+    candidateEnsemble,
+    recentResiduals,
+    liveMacro,
+    macroNews,
+    extensionInput,
+  } = params;
+
+  const lastCandle = candles.length > 0 ? candles[candles.length - 1] : null;
+  const timestampSec = lastCandle ? lastCandle.time : Math.floor(Date.now() / 1000);
+  const currentPrice = lastCandle ? lastCandle.close : equilibriumAnchorPrice;
+  const safeAtr = Math.max(0.5, atr);
+
+  // 1. Evaluate UTC Session & Seasonal Calendar Context
+  const sessionCalendar = evaluateGoldSessionAndCalendar({
+    timestampSec,
+    macroNews,
+    extensionInput,
+  });
+
+  // 2. Compute Realized vs Forecast Metrics (including Swing Peak/Trough Excursion & Consecutive Streaks)
+  const latestResidualPt =
+    recentResiduals.length > 0 ? recentResiduals[recentResiduals.length - 1] : null;
+  const lastBarMoveUsd =
+    candles.length >= 2
+      ? candles[candles.length - 1].close - candles[candles.length - 2].close
+      : 0;
+  const latestResidualUsd = latestResidualPt ? latestResidualPt.priceResidualUsd : lastBarMoveUsd;
+  const latestResidualZ = latestResidualPt
+    ? latestResidualPt.standardizedResidualSigma
+    : latestResidualUsd / safeAtr;
+
+  const lookbackK = Math.min(4, Math.max(1, candles.length - 1));
+  const trailingRealizedMoveUsd =
+    candles.length > lookbackK
+      ? candles[candles.length - 1].close - candles[candles.length - 1 - lookbackK].close
+      : lastBarMoveUsd;
+
+  // Measure causal swing high/low excursion over trailing 6 bars & consecutive directional bar streak
+  // so a bull-trap spike (e.g. Friday 08:00 UTC +$19.84 followed by 09:00-11:00 UTC -$30.10 dump)
+  // is never masked by a rigid 4-bar point-to-point subtraction.
+  const swingLookback = Math.min(6, Math.max(1, candles.length - 1));
+  let recentSwingHighClose = currentPrice;
+  let recentSwingLowClose = currentPrice;
+  for (let idx = candles.length - 1 - swingLookback; idx < candles.length - 1; idx++) {
+    if (idx >= 0) {
+      if (candles[idx].close > recentSwingHighClose) recentSwingHighClose = candles[idx].close;
+      if (candles[idx].close < recentSwingLowClose) recentSwingLowClose = candles[idx].close;
+    }
+  }
+  const drawdownFromSwingHighUsd = currentPrice - recentSwingHighClose; // <= 0
+  const rallyFromSwingLowUsd = currentPrice - recentSwingLowClose; // >= 0
+
+  let consecutiveBearBars = 0;
+  let consecutiveBullBars = 0;
+  for (let idx = candles.length - 1; idx >= 1; idx--) {
+    const stepDelta = candles[idx].close - candles[idx - 1].close;
+    if (stepDelta < -1e-4) {
+      if (consecutiveBullBars > 0) break;
+      consecutiveBearBars++;
+    } else if (stepDelta > 1e-4) {
+      if (consecutiveBearBars > 0) break;
+      consecutiveBullBars++;
+    } else {
+      break;
+    }
+  }
+  const streakBars = Math.max(consecutiveBearBars, consecutiveBullBars);
+  const streakStartIdx = Math.max(0, candles.length - 1 - streakBars);
+  const consecutiveStreakMoveUsd =
+    streakBars >= 2 ? currentPrice - candles[streakStartIdx].close : lastBarMoveUsd;
+
+  const macroBearishGravity =
+    Boolean(liveMacro && liveMacro.status !== 'MACRO_FEED_UNAVAILABLE' && liveMacro.netMacroLift <= -0.35);
+  const macroBullishSupport =
+    Boolean(liveMacro && liveMacro.status !== 'MACRO_FEED_UNAVAILABLE' && liveMacro.netMacroLift >= 0.35);
+
+  let structuralRealizedMoveUsd = trailingRealizedMoveUsd;
+  if (
+    consecutiveBearBars >= 2 &&
+    Math.abs(drawdownFromSwingHighUsd) > Math.abs(trailingRealizedMoveUsd)
+  ) {
+    structuralRealizedMoveUsd = Math.min(drawdownFromSwingHighUsd, consecutiveStreakMoveUsd);
+  } else if (
+    consecutiveBullBars >= 2 &&
+    rallyFromSwingLowUsd > Math.abs(trailingRealizedMoveUsd)
+  ) {
+    structuralRealizedMoveUsd = Math.max(rallyFromSwingLowUsd, consecutiveStreakMoveUsd);
+  }
+
+  const liveTrack = liveEnsemble.medianTrack || [];
+  const candTrack = candidateEnsemble.medianTrack || [];
+  const slopeStepIdx = Math.min(5, Math.max(0, liveTrack.length - 1));
+  const slopeStepsCount = Math.max(1, Math.min(6, liveTrack.length));
+
+  const liveForwardSlopeUsdPerStep =
+    liveEnsemble.preFeedbackForwardSlopeUsdPerStep ??
+    (liveTrack.length > 0
+      ? (liveTrack[slopeStepIdx].value - currentPrice) / slopeStepsCount
+      : 0);
+  const liveTotalExcursionUsd =
+    liveTrack.length > 0
+      ? liveTrack[liveTrack.length - 1].value - currentPrice
+      : 0;
+
+  const candSlopeStepIdx = Math.min(5, Math.max(0, candTrack.length - 1));
+  const candSlopeStepsCount = Math.max(1, Math.min(6, candTrack.length));
+  const candForwardSlopeUsdPerStep =
+    candidateEnsemble.preFeedbackForwardSlopeUsdPerStep ??
+    (candTrack.length > 0
+      ? (candTrack[candSlopeStepIdx].value - currentPrice) / candSlopeStepsCount
+      : 0);
+
+  const liveBandWidthStep1Usd =
+    liveEnsemble.preFeedbackBandWidthStep1Usd ??
+    (liveEnsemble.upper95?.[0]?.value !== undefined &&
+    liveEnsemble.lower05?.[0]?.value !== undefined
+      ? Math.max(0.1, liveEnsemble.upper95[0].value - liveEnsemble.lower05[0].value)
+      : safeAtr * 2.0);
+
+  const anchorDislocationUsd = equilibriumAnchorPrice - currentPrice;
+  const anchorDislocationAtr = Math.abs(anchorDislocationUsd) / safeAtr;
+
+  // Fault A.1 & A.2: Classify WRONG_DIRECTION and OVERCONFIDENT_TREND via FaultClassifier
+  const faultClassifierReport = FaultClassifier.classifyFromMetrics({
+    safeAtr,
+    currentPrice,
+    liveForwardSlopeUsdPerStep,
+    liveBandWidthStep1Usd,
+    latestResidualUsd,
+    latestResidualZ,
+    lastBarMoveUsd,
+    trailingRealizedMoveUsd,
+    structuralRealizedMoveUsd,
+    consecutiveBearBars,
+    consecutiveBullBars,
+    streakBars,
+    macroBearishGravity,
+    macroBullishSupport,
+    sessionId: sessionCalendar.sessionId,
+    weekpart: sessionCalendar.weekpart,
+    isTurnOfMonth: sessionCalendar.seasonalCalendar.isTurnOfMonth,
+  });
+
+  const activeFaults: ForecastFaultRecord[] = [...faultClassifierReport.classifiedFaults];
+  const hasSignificantShockOrMove = faultClassifierReport.hasSignificantShockOrMove;
+  const referenceRealizedMove = faultClassifierReport.referenceRealizedMoveUsd;
+
+  // Fault A.3: STALE_DRIFT (drift / equilibrium pull still pre-shock after a large residual or multi-bar breakdown)
+  const hasMultiBarBreakdownAgainstForecast =
+    hasSignificantShockOrMove &&
+    streakBars >= 2 &&
+    ((Math.sign(liveForwardSlopeUsdPerStep) !== Math.sign(referenceRealizedMove) &&
+      Math.abs(liveForwardSlopeUsdPerStep) >= 0.035 * safeAtr) ||
+      (anchorDislocationAtr >= 1.25 &&
+        Math.sign(anchorDislocationUsd) !== Math.sign(referenceRealizedMove)));
+
+  if (
+    hasMultiBarBreakdownAgainstForecast ||
+    ((Math.abs(latestResidualZ) >= 1.8 || Math.abs(lastBarMoveUsd) >= 1.65 * safeAtr) &&
+      ((Math.sign(liveForwardSlopeUsdPerStep) !== Math.sign(latestResidualUsd) &&
+        Math.abs(liveForwardSlopeUsdPerStep) >= 0.035 * safeAtr) ||
+        anchorDislocationAtr >= 1.55))
+  ) {
+    activeFaults.push({
+      code: 'STALE_DRIFT',
+      severity: Math.abs(latestResidualZ) >= 2.4 || streakBars >= 3 ? 'CRITICAL' : 'WARNING',
+      summaryEn: `Stale pre-shock drift persists after a ${referenceRealizedMove.toFixed(2)} USD (${latestResidualZ.toFixed(2)}σ) structural move; filter velocity has not yet reset to the active regime.`,
+      summaryFa: `رانش منقضی پیش از شوک پس از حرکت ساختاری (${referenceRealizedMove.toFixed(2)}$، ${latestResidualZ.toFixed(2)}σ) همچنان باقی مانده و سرعت فیلتر بازنشانی نشده است.`,
+      empiricalEvidence: `StructuralMove=${referenceRealizedMove.toFixed(2)} USD (Z=${latestResidualZ.toFixed(2)}σ, Streak=${streakBars}b) | LiveSlope=${liveForwardSlopeUsdPerStep.toFixed(3)} USD/step | AnchorGap=${anchorDislocationAtr.toFixed(2)} ATR`,
+      recommendedAction: 'SHOCK_RESET_DRIFT',
+    });
+  }
+
+  // Fault A.4: EQUILIBRIUM_ANCHOR_MISMATCH (anchor far from post-shock price, manufacturing fake recovery pull)
+  if (
+    hasSignificantShockOrMove &&
+    anchorDislocationAtr >= 1.25 &&
+    Math.sign(anchorDislocationUsd) !== Math.sign(referenceRealizedMove)
+  ) {
+    activeFaults.push({
+      code: 'EQUILIBRIUM_ANCHOR_MISMATCH',
+      severity: anchorDislocationAtr >= 2.0 ? 'CRITICAL' : 'WARNING',
+      summaryEn: `Equilibrium anchor ($${equilibriumAnchorPrice.toFixed(2)}) lags post-move spot ($${currentPrice.toFixed(2)}) by ${anchorDislocationAtr.toFixed(2)} ATR, manufacturing an artificial mean-reversion recovery pull.`,
+      summaryFa: `لنگر تعادلی (${equilibriumAnchorPrice.toFixed(2)}$) به اندازه ${anchorDislocationAtr.toFixed(2)} ATR از قیمت فعلی (${currentPrice.toFixed(2)}$) عقب مانده و کشش بازگشتی مصنوعی ایجاد می‌کند.`,
+      empiricalEvidence: `Anchor=$${equilibriumAnchorPrice.toFixed(2)} vs Spot=$${currentPrice.toFixed(2)} (Gap=${anchorDislocationUsd >= 0 ? '+' : ''}$${anchorDislocationUsd.toFixed(2)} = ${anchorDislocationAtr.toFixed(2)} ATR)`,
+      recommendedAction: 'RECENTER_EQUILIBRIUM_ANCHOR',
+    });
+  }
+
+  // Fault A.5: CANDIDATE_COLLINEAR_WITH_LIVE_ERROR (candidate and live agree in the same wrong direction)
+  const hasDirectionOrStaleFault = activeFaults.some(
+    f => f.code === 'WRONG_DIRECTION' || f.code === 'STALE_DRIFT'
+  );
+  if (
+    hasDirectionOrStaleFault &&
+    Math.sign(candForwardSlopeUsdPerStep) === Math.sign(liveForwardSlopeUsdPerStep) &&
+    Math.abs(candForwardSlopeUsdPerStep) >= 0.03 * safeAtr
+  ) {
+    activeFaults.push({
+      code: 'CANDIDATE_COLLINEAR_WITH_LIVE_ERROR',
+      severity: 'WARNING',
+      summaryEn: `Parallel candidate slope (${candForwardSlopeUsdPerStep >= 0 ? '+' : ''}$${candForwardSlopeUsdPerStep.toFixed(2)}/step) is collinear with the live wrong-direction drift (${liveForwardSlopeUsdPerStep >= 0 ? '+' : ''}$${liveForwardSlopeUsdPerStep.toFixed(2)}/step); overriding candidate to test post-shock continuation.`,
+      summaryFa: `شیب کاندیدای جهان موازی (${candForwardSlopeUsdPerStep.toFixed(2)}$/گام) هم‌جهت با خطای جهت خط زرد (${liveForwardSlopeUsdPerStep.toFixed(2)}$/گام) است؛ کاندیدا برای آزمون رژیم پس از شوک بازتنظیم می‌شود.`,
+      empiricalEvidence: `LiveSlope=${liveForwardSlopeUsdPerStep.toFixed(3)} USD/step | CandSlope=${candForwardSlopeUsdPerStep.toFixed(3)} USD/step`,
+      recommendedAction: 'PROPOSE_POST_SHOCK_CANDIDATE',
+    });
+  }
+
+  // Fault A.6: SESSION_REGIME_VIOLATION (strong directional plume projected during WEEKEND_THIN / FUTURES_CLOSED_OVERLAP)
+  const isClosedOrWeekend =
+    sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+    sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP' ||
+    sessionCalendar.sessionId === 'DAILY_ROLL_MAINTENANCE';
+  if (
+    isClosedOrWeekend &&
+    (Math.abs(liveTotalExcursionUsd) >= 0.35 * safeAtr ||
+      Math.abs(liveForwardSlopeUsdPerStep) >= 0.035 * safeAtr)
+  ) {
+    activeFaults.push({
+      code: 'SESSION_REGIME_VIOLATION',
+      severity: sessionCalendar.weekpart === 'WEEKEND_THIN' ? 'CRITICAL' : 'WARNING',
+      summaryEn: `Session regime violation: directional trend plume (${liveTotalExcursionUsd >= 0 ? '+' : ''}$${liveTotalExcursionUsd.toFixed(2)}) projected during ${sessionCalendar.weekpart} (${sessionCalendar.sessionId}) when COMEX futures are closed.`,
+      summaryFa: `نقض رژیم نشست معاملاتی: پیش‌بینی روند جهت‌دار (${liveTotalExcursionUsd.toFixed(2)}$) در وضعیت ${sessionCalendar.weekpart} (${sessionCalendar.sessionId}) در زمان تعطیلی معاملات آتی کامکس.`,
+      empiricalEvidence: `Weekpart=${sessionCalendar.weekpart} | Session=${sessionCalendar.sessionId} | UnclampedExcursion=${liveTotalExcursionUsd.toFixed(2)} USD (${(Math.abs(liveTotalExcursionUsd) / safeAtr).toFixed(2)} ATR)`,
+      recommendedAction: 'CLAMP_SESSION_DRIFT',
+    });
+  }
+
+  // Fault A.7: NEWS_TRANSMISSION_MISMATCH & Macro/News Transmission Mode
+  let newsTransmissionMode: NewsTransmissionMode = 'UNKNOWN';
+  const geoRegex =
+    /geopolit|war|conflict|strike|missile|sanction|escalation|middle\s*east|red\s*sea|safe[\s-]?haven|tariff|crisis|military|attack|tension/i;
+  const verifiedGeoHeadlines: string[] = [];
+
+  if (Array.isArray(macroNews)) {
+    for (const item of macroNews) {
+      const text = `${item.title || ''} ${item.category || ''}`;
+      if (geoRegex.test(text)) {
+        verifiedGeoHeadlines.push(item.title);
+      }
+    }
+  }
+  if (extensionInput?.macroEventContext?.scheduledEvents) {
+    for (const ev of extensionInput.macroEventContext.scheduledEvents) {
+      if (geoRegex.test(ev.name || '')) {
+        verifiedGeoHeadlines.push(ev.name);
+      }
+    }
+  }
+
+  const isBearishLiquidationMove =
+    referenceRealizedMove <= -0.95 * safeAtr ||
+    latestResidualZ <= -1.35 ||
+    (consecutiveBearBars >= 2 && macroBearishGravity && referenceRealizedMove <= -0.75 * safeAtr);
+
+  if (verifiedGeoHeadlines.length > 0) {
+    if (isBearishLiquidationMove) {
+      newsTransmissionMode = 'RISK_OFF_LIQUIDATION';
+      activeFaults.push({
+        code: 'NEWS_TRANSMISSION_MISMATCH',
+        severity: 'CRITICAL',
+        summaryEn: `Geopolitics/safe-haven headline ("${verifiedGeoHeadlines[0].slice(0, 68)}") coincided with a realized price selloff (${referenceRealizedMove.toFixed(2)} USD, Z=${latestResidualZ.toFixed(2)}σ), indicating RISK_OFF_LIQUIDATION / dollar-yield margin shock rather than safe-haven buying.`,
+        summaryFa: `خبر ژئوپلیتیک/پناهگاه امن («${verifiedGeoHeadlines[0].slice(0, 68)}») هم‌زمان با ریزش تحقق‌یافته قیمت (${referenceRealizedMove.toFixed(2)}$، Z=${latestResidualZ.toFixed(2)}σ) رخ داده است که نشان‌دهنده لیکوییدیشن ریسک‌گریز و شوک نقدینگی دلار به جای خرید پناهگاه امن است.`,
+        empiricalEvidence: `Headline="${verifiedGeoHeadlines[0].slice(0, 50)}" | RealizedMove=${referenceRealizedMove.toFixed(2)} USD | Mode=RISK_OFF_LIQUIDATION`,
+        recommendedAction: 'EXPLORE_OPPOSITE_NEWS_TRANSMISSION',
+      });
+    } else if (referenceRealizedMove >= 0.75 * safeAtr || latestResidualZ >= 1.0) {
+      newsTransmissionMode = 'SAFE_HAVEN';
+    } else {
+      newsTransmissionMode = 'NEUTRAL_ABSORBED';
+    }
+  } else if ((Array.isArray(macroNews) && macroNews.length > 0) || liveMacro) {
+    newsTransmissionMode = isBearishLiquidationMove
+      ? 'RISK_OFF_LIQUIDATION'
+      : referenceRealizedMove >= 1.1 * safeAtr || (consecutiveBullBars >= 2 && macroBullishSupport)
+      ? 'SAFE_HAVEN'
+      : 'NEUTRAL_ABSORBED';
+  }
+
+  const activeFaultCodes: ForecastFaultCode[] = activeFaults
+    .map(f => f.code)
+    .filter((c): c is ForecastFaultCode => Boolean(c));
+  const activeFaultTypes: FaultType[] = activeFaultCodes.map(c => c as FaultType);
+
+  // 3. Policy Determination (Drift, Band, Anchor)
+  let recommendedDriftPolicy: RecommendedDriftPolicy = 'UNCHANGED';
+  if (
+    sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+    sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP'
+  ) {
+    recommendedDriftPolicy = 'ZERO_FOR_SESSION';
+  } else if (
+    activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
+    activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
+    activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
+    (activeFaultCodes.includes(FaultType.NEWS_TRANSMISSION_MISMATCH) &&
+      newsTransmissionMode === 'RISK_OFF_LIQUIDATION')
+  ) {
+    recommendedDriftPolicy = 'SHOCK_RESET';
+  } else if (
+    sessionCalendar.isThinLiquiditySubSession ||
+    sessionCalendar.weekpart === 'FRIDAY_LATE_ROLL' ||
+    sessionCalendar.weekpart === 'SUNDAY_OPEN_RISK' ||
+    activeFaultCodes.includes(FaultType.NEWS_TRANSMISSION_MISMATCH)
+  ) {
+    recommendedDriftPolicy = 'SHRINK';
+  }
+
+  let recommendedBandPolicy: RecommendedBandPolicy = 'NORMAL';
+  if (
+    activeFaultCodes.includes(FaultType.OVERCONFIDENT_TREND) ||
+    activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
+    activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
+    activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
+    activeFaultCodes.includes(FaultType.NEWS_TRANSMISSION_MISMATCH) ||
+    sessionCalendar.seasonalCalendar.isTurnOfYearHolidayWindow ||
+    sessionCalendar.weekpart === 'SUNDAY_OPEN_RISK' ||
+    sessionCalendar.weekpart === 'FRIDAY_LATE_ROLL'
+  ) {
+    recommendedBandPolicy = 'WIDEN';
+  }
+
+  let recommendedAnchorPolicy: RecommendedAnchorPolicy = 'UNCHANGED';
+  if (
+    sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+    sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP'
+  ) {
+    recommendedAnchorPolicy = 'FREEZE';
+  } else if (
+    activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
+    recommendedDriftPolicy === 'SHOCK_RESET'
+  ) {
+    recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
+  }
+
+  const blockAutoPromotionDueToFaults = activeFaults.some(
+    f =>
+      f.severity === 'CRITICAL' ||
+      f.code === FaultType.WRONG_DIRECTION ||
+      f.code === FaultType.SESSION_REGIME_VIOLATION ||
+      f.code === FaultType.CANDIDATE_COLLINEAR_WITH_LIVE_ERROR
+  );
+
+  const candidateObligations = {
+    proposeWeekendSidewaysCandidate:
+      sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+      sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP',
+    proposePostShockAbsorptionCandidate:
+      activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
+      activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
+      activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH),
+    avoidCollinearWrongDirectionClone:
+      activeFaultCodes.includes(FaultType.CANDIDATE_COLLINEAR_WITH_LIVE_ERROR) ||
+      activeFaultCodes.includes(FaultType.WRONG_DIRECTION),
+    exploreOppositeNewsTransmission: activeFaultCodes.includes(
+      FaultType.NEWS_TRANSMISSION_MISMATCH
+    ),
+  };
+
+  const faultListStr =
+    activeFaultCodes.length > 0 ? activeFaultCodes.join(', ') : 'NONE (Nominal Alignment)';
+
+  return {
+    evaluatedAtIso: sessionCalendar.evaluatedAtIso,
+    timestampSec,
+    sessionRegime: {
+      weekpart: sessionCalendar.weekpart,
+      sessionId: sessionCalendar.sessionId,
+      isFuturesClosed: sessionCalendar.isFuturesClosed,
+      isThinLiquiditySubSession: sessionCalendar.isThinLiquiditySubSession,
+      isTurnOfMonth: Boolean(sessionCalendar.seasonalCalendar.isTurnOfMonth),
+      isTurnOfYearHolidayWindow: Boolean(sessionCalendar.seasonalCalendar.isTurnOfYearHolidayWindow),
+      seasonalLiquidityPenalty: sessionCalendar.seasonalCalendar.seasonalLiquidityPenalty ?? 0,
+    },
+    weekpart: sessionCalendar.weekpart,
+    sessionId: sessionCalendar.sessionId,
+    isThinLiquiditySubSession: sessionCalendar.isThinLiquiditySubSession,
+    seasonalCalendar: sessionCalendar.seasonalCalendar,
+    sessionCalendar,
+    activeFaultCodes,
+    activeFaultTypes,
+    activeFaults,
+    recommendedPolicies: {
+      driftPolicy: recommendedDriftPolicy,
+      bandPolicy: recommendedBandPolicy,
+      anchorPolicy: recommendedAnchorPolicy,
+    },
+    recommendedDriftPolicy,
+    recommendedBandPolicy,
+    recommendedAnchorPolicy,
+    newsTransmissionMode,
+    blockAutoPromotionDueToFaults,
+    candidateObligations,
+    summaryEn: `Awareness [${sessionCalendar.weekpart} · ${sessionCalendar.sessionId}] | Faults: ${faultListStr} | Policies: Drift=${recommendedDriftPolicy}, Band=${recommendedBandPolicy}, Anchor=${recommendedAnchorPolicy}, News=${newsTransmissionMode}`,
+    summaryFa: `آگاهی بازار [${sessionCalendar.weekpart} · ${sessionCalendar.sessionId}] | خطاهای فعال: ${faultListStr} | سیاست‌ها: رانش=${recommendedDriftPolicy}، باند=${recommendedBandPolicy}، لنگر=${recommendedAnchorPolicy}`,
+  };
+}
+
 /**
  * Generates structured Awareness Findings by inspecting real market inputs,
- * live yellow-line residuals (Residual Oracle), pulse-echo sonar anomalies,
- * multi-timeframe confluence, and model contradictions.
+ * live yellow-line residuals (Residual Oracle), session/calendar regime state,
+ * forecast-fault taxonomy, multi-timeframe confluence, and model contradictions.
  */
 function generateStructuredAwarenessFindings(params: {
   liveArch: ArchitectureState;
@@ -2168,6 +2664,7 @@ function generateStructuredAwarenessFindings(params: {
   prunedModelIds: SymbolicPrimitiveId[];
   mtfContext: MultiTimeframeDiscoveryContext;
   residualDiagnostics?: ResidualStructureDiagnostics;
+  marketAwarenessState?: MarketAwarenessState;
 }): AwarenessFinding[] {
   const {
     liveArch,
@@ -2179,9 +2676,91 @@ function generateStructuredAwarenessFindings(params: {
     prunedModelIds,
     mtfContext,
     residualDiagnostics,
+    marketAwarenessState,
   } = params;
   const nowIso = new Date().toISOString();
   const findings: AwarenessFinding[] = [];
+  const sessionRegimeTag = marketAwarenessState
+    ? `${marketAwarenessState.weekpart}_${marketAwarenessState.sessionId}`
+    : garchExceededMedian
+    ? 'HIGH_VOL_GARCH'
+    : 'LOW_VOL_GARCH';
+
+  // 0. First-class Forecast-Fault & Session/Calendar Findings from MarketAwarenessState
+  if (marketAwarenessState) {
+    for (const fault of marketAwarenessState.activeFaults) {
+      const categoryMap: Record<ForecastFaultCode, AwarenessFinding['category']> = {
+        WRONG_DIRECTION: 'FORECAST_FAULT_WRONG_DIRECTION',
+        OVERCONFIDENT_TREND: 'FORECAST_FAULT_OVERCONFIDENT_TREND',
+        STALE_DRIFT: 'FORECAST_FAULT_STALE_DRIFT',
+        EQUILIBRIUM_ANCHOR_MISMATCH: 'FORECAST_FAULT_EQUILIBRIUM_ANCHOR_MISMATCH',
+        CANDIDATE_COLLINEAR_WITH_LIVE_ERROR: 'FORECAST_FAULT_CANDIDATE_COLLINEAR',
+        SESSION_REGIME_VIOLATION: 'SESSION_REGIME_VIOLATION',
+        NEWS_TRANSMISSION_MISMATCH: 'NEWS_TRANSMISSION_MISMATCH',
+      };
+      findings.push({
+        id: `finding-fault-${fault.code.toLowerCase()}`,
+        timestampIso: nowIso,
+        category: categoryMap[fault.code],
+        severity: fault.severity,
+        affectedModelId:
+          fault.code === 'EQUILIBRIUM_ANCHOR_MISMATCH'
+            ? 'OU_MEAN_REVERSION'
+            : fault.code === 'NEWS_TRANSMISSION_MISMATCH'
+            ? 'ORTHOGONAL_MACRO_LIFT'
+            : 'EKF_STATE_DRIFT',
+        regimeContext: sessionRegimeTag,
+        summaryEn: `[${fault.code}] ${fault.summaryEn}`,
+        summaryFa: `[${fault.code}] ${fault.summaryFa}`,
+        empiricalEvidence: `${fault.empiricalEvidence} | Policy: Drift=${marketAwarenessState.recommendedDriftPolicy}, Band=${marketAwarenessState.recommendedBandPolicy}, Anchor=${marketAwarenessState.recommendedAnchorPolicy}`,
+        recommendedAction: fault.recommendedAction,
+      });
+    }
+
+    // Seasonal & Turn-of-Year / Turn-of-Month Context Finding
+    if (
+      marketAwarenessState.seasonalCalendar.isTurnOfYearHolidayWindow ||
+      marketAwarenessState.seasonalCalendar.isTurnOfMonth
+    ) {
+      findings.push({
+        id: 'finding-seasonal-calendar-context',
+        timestampIso: nowIso,
+        category: 'SEASONAL_LOW_LIQUIDITY',
+        severity: marketAwarenessState.seasonalCalendar.isTurnOfYearHolidayWindow
+          ? 'WARNING'
+          : 'INFO',
+        affectedModelId: 'EKF_STATE_DRIFT',
+        regimeContext: sessionRegimeTag,
+        summaryEn: marketAwarenessState.seasonalCalendar.summaryEn,
+        summaryFa: marketAwarenessState.seasonalCalendar.summaryFa,
+        empiricalEvidence: `TurnOfMonth=${marketAwarenessState.seasonalCalendar.isTurnOfMonth} | TurnOfYear=${marketAwarenessState.seasonalCalendar.isTurnOfYearHolidayWindow} | LiquidityPenalty=${marketAwarenessState.seasonalCalendar.seasonalLiquidityPenalty.toFixed(2)}`,
+        recommendedAction: marketAwarenessState.seasonalCalendar.isTurnOfYearHolidayWindow
+          ? 'WIDEN_UNCERTAINTY_BANDS'
+          : 'OBSERVE_ONLY',
+      });
+    }
+
+    // Always include deterministic UTC Session & Weekpart context finding
+    findings.push({
+      id: 'finding-session-calendar-context',
+      timestampIso: nowIso,
+      category: 'SESSION_CALENDAR_CONTEXT',
+      severity:
+        marketAwarenessState.weekpart === 'WEEKEND_THIN' ||
+        marketAwarenessState.weekpart === 'FUTURES_CLOSED_OVERLAP'
+          ? 'WARNING'
+          : 'INFO',
+      affectedModelId: 'MTF_LIQUIDITY_PULL',
+      regimeContext: sessionRegimeTag,
+      summaryEn: `${marketAwarenessState.sessionCalendar.sessionSummaryEn} (${marketAwarenessState.sessionCalendar.weekpartSummaryEn})`,
+      summaryFa: `${marketAwarenessState.sessionCalendar.sessionSummaryFa} (${marketAwarenessState.sessionCalendar.weekpartSummaryFa})`,
+      empiricalEvidence: `UTC=${marketAwarenessState.sessionCalendar.utcHourDecimal.toFixed(2)}h | Weekpart=${marketAwarenessState.weekpart} | Session=${marketAwarenessState.sessionId} | ThinSubSession=${marketAwarenessState.isThinLiquiditySubSession} | DriftPolicy=${marketAwarenessState.recommendedDriftPolicy}`,
+      recommendedAction:
+        marketAwarenessState.recommendedDriftPolicy === 'ZERO_FOR_SESSION'
+          ? 'CLAMP_SESSION_DRIFT'
+          : 'OBSERVE_ONLY',
+    });
+  }
 
   // 1. Check for contradictory models in Live or Candidate architecture
   for (const m of liveArch.models) {
@@ -2192,7 +2771,7 @@ function generateStructuredAwarenessFindings(params: {
         category: 'MODEL_CONTRADICTION',
         severity: m.rollingRankIc < -0.14 ? 'CRITICAL' : 'WARNING',
         affectedModelId: m.modelId,
-        regimeContext: garchExceededMedian ? 'HIGH_VOL_GARCH' : 'LOW_VOL_GARCH',
+        regimeContext: sessionRegimeTag,
         summaryEn: `Live model "${m.modelId}" exhibits negative OOS Rank-IC (${m.rollingRankIc.toFixed(3)}) against realized bars; Parallel Universe re-weights or prunes it.`,
         summaryFa: `مدل زنده «${m.modelId}» دارای ضریب اطلاعاتی خارج از نمونه منفی (${m.rollingRankIc.toFixed(3)}) است؛ جهان موازی وزن آن را کاهش داده یا غیرفعال می‌کند.`,
         empiricalEvidence: `Rolling OOS Rank-IC = ${m.rollingRankIc.toFixed(3)} | ErrorVar = ${m.rollingErrorVariance.toFixed(3)} USD^2 | PrunedInCandidate=${prunedModelIds.includes(m.modelId)}`,
@@ -2211,7 +2790,7 @@ function generateStructuredAwarenessFindings(params: {
         category: 'RESIDUAL_AUTOCORRELATION',
         severity: residualDiagnostics.isStatisticallyStructured ? 'WARNING' : 'INFO',
         affectedModelId: 'LAGGED_RESIDUAL_SELF_CORRECTION',
-        regimeContext: `ORACLE_${residualDiagnostics.dominantBlindspotChannel}`,
+        regimeContext: `${sessionRegimeTag}_ORACLE_${residualDiagnostics.dominantBlindspotChannel}`,
         summaryEn: `Residual Oracle [${residualDiagnostics.dominantBlindspotChannel}]: ${residualDiagnostics.summaryEn}`,
         summaryFa: `اوراکل پسماند [${residualDiagnostics.dominantBlindspotChannel}]: ${residualDiagnostics.summaryFa}`,
         empiricalEvidence: `ρ₁=${resRho1.toFixed(3)}, Q(5)=${residualDiagnostics.ljungBoxQ5Stat.toFixed(2)} (p=${residualDiagnostics.ljungBoxPValueApprox.toFixed(3)}) | Corr(Basis)=${residualDiagnostics.corrWithCrossVenueBasis.toFixed(2)}, Corr(Echo)=${residualDiagnostics.corrWithEchoToxicity.toFixed(2)}, Corr(Δτ)=${residualDiagnostics.corrWithInfoClockDeltaTau.toFixed(2)}`,
@@ -2236,7 +2815,7 @@ function generateStructuredAwarenessFindings(params: {
         category: 'RESIDUAL_AUTOCORRELATION',
         severity: Math.abs(resRho1) > 0.28 ? 'WARNING' : 'INFO',
         affectedModelId: 'LAGGED_RESIDUAL_SELF_CORRECTION',
-        regimeContext: garchExceededMedian ? 'HIGH_VOL_GARCH' : 'LOW_VOL_GARCH',
+        regimeContext: sessionRegimeTag,
         summaryEn: `Serial structure detected in Live Yellow-Line OOS residuals (lag-1 ρ = ${resRho1.toFixed(3)}). Level-B Lagged Residual Self-Correction equation (phi_res) absorbs unmodeled error memory.`,
         summaryFa: `همبستگی پیاپی در پسماندهای خارج از نمونه خط زرد شناسایی شد (ρ = ${resRho1.toFixed(3)}). معادله نمادین تصحیح خودکار پسماند تاخیری (phi_res) این ساختار را جذب می‌کند.`,
         empiricalEvidence: `Residual Lag-1 ρ_1 = ${resRho1.toFixed(3)} across N=${residuals.length} bars | phi_res weight = ${((candArch.models.find(m => m.modelId === 'LAGGED_RESIDUAL_SELF_CORRECTION')?.dynamicWeight || 0) * 100).toFixed(1)}%`,
@@ -2253,7 +2832,7 @@ function generateStructuredAwarenessFindings(params: {
     category: 'REGIME_BLINDSPOT',
     severity: Math.abs(mtfContext.htfNormalizedDriftZ) > 1.2 ? 'WARNING' : 'INFO',
     affectedModelId: 'MTF_DRIFT_CONFLUENCE_SYNERGY',
-    regimeContext: `MTF_${mtfContext.participatingTimeframes.join('_')}`,
+    regimeContext: `${sessionRegimeTag}_MTF_${mtfContext.participatingTimeframes.join('_')}`,
     summaryEn: `Multi-Timeframe Discovery (${mtfContext.participatingTimeframes.join('→')}) couples HTF drift (${mtfContext.htfNormalizedDriftZ >= 0 ? '+' : ''}${mtfContext.htfNormalizedDriftZ.toFixed(2)}σ) & LTF impulse (${mtfContext.ltfNormalizedDriftZ >= 0 ? '+' : ''}${mtfContext.ltfNormalizedDriftZ.toFixed(2)}σ) with HTF POC ($${mtfContext.htfPocAnchorPrice.toFixed(2)}).`,
     summaryFa: `کشف چندتایم‌فریمی (${mtfContext.participatingTimeframes.join('→')}) رانش تایم‌فریم بالا (${mtfContext.htfNormalizedDriftZ.toFixed(2)}σ) و پایین (${mtfContext.ltfNormalizedDriftZ.toFixed(2)}σ) را با جاذب POC ($${mtfContext.htfPocAnchorPrice.toFixed(2)}) ترکیب می‌کند.`,
     empiricalEvidence: `MTF Confluence = ${mtfContext.mtfConfluenceAlignment >= 0 ? '+' : ''}${mtfContext.mtfConfluenceAlignment.toFixed(2)} | phi_mtf IC = ${(mtfSlot?.rollingRankIc || 0).toFixed(3)} | w_mtf = ${((mtfSlot?.dynamicWeight || 0) * 100).toFixed(1)}%`,
@@ -2268,7 +2847,7 @@ function generateStructuredAwarenessFindings(params: {
       category: 'BASIS_DRIFT_MISMATCH',
       severity: Math.abs(basisZScore) > 1.5 ? 'WARNING' : 'INFO',
       affectedModelId: 'BASIS_ACCELERATION_SECOND_ORDER',
-      regimeContext: `BASIS_Z_${basisZScore >= 0 ? 'POS' : 'NEG'}`,
+      regimeContext: `${sessionRegimeTag}_BASIS_Z_${basisZScore >= 0 ? 'POS' : 'NEG'}`,
       summaryEn: `Cross-venue basis Z-score is ${basisZScore >= 0 ? '+' : ''}${basisZScore.toFixed(2)}σ. Parallel Universe activates first-order Basis-Velocity and second-order Basis-Acceleration equations.`,
       summaryFa: `نمره Z اسپرد بین‌بازاری برابر ${basisZScore.toFixed(2)}σ است. جهان موازی معادلات سرعت و شتاب مرتبه دوم اسپرد را فعال کرد.`,
       empiricalEvidence: `Basis Z = ${basisZScore.toFixed(3)}σ | Active Symbolic Equations = ${candArch.discoveredModelsCount}/8`,
@@ -2276,7 +2855,7 @@ function generateStructuredAwarenessFindings(params: {
     });
   }
 
-  return findings.slice(0, 6);
+  return findings.slice(0, 10);
 }
 
 /**
@@ -2989,6 +3568,161 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
   });
 
+  // 4b. Evaluate deterministic session-aware, calendar-aware, and fault-aware MarketAwarenessState
+  const marketAwarenessState = evaluateMarketAwarenessState({
+    candles,
+    atr,
+    equilibriumAnchorPrice: liveBaseTuning.equilibriumAnchorOverride ?? rawEquilibriumPrice,
+    liveEnsemble: scientificCore.yellowLineConditionalExpectation,
+    candidateEnsemble:
+      scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation,
+    recentResiduals: scientificCore.residualOracle.recentResiduals,
+    liveMacro,
+    macroNews,
+    extensionInput,
+  });
+  coreStore.lastMarketAwarenessState = marketAwarenessState;
+
+  // 4c. Analyze incoming MarketAwarenessState via FaultClassifier & apply closed-loop feedback
+  const faultClassification = FaultClassifier.analyzeMarketAwarenessState(marketAwarenessState);
+  const hasActivePolicyOrObligation =
+    faultClassification.requiresFeedbackCorrection ||
+    marketAwarenessState.recommendedDriftPolicy !== 'UNCHANGED' ||
+    marketAwarenessState.recommendedBandPolicy !== 'NORMAL' ||
+    marketAwarenessState.recommendedAnchorPolicy !== 'UNCHANGED' ||
+    marketAwarenessState.seasonalCalendar.seasonalLiquidityPenalty > 0 ||
+    marketAwarenessState.candidateObligations.proposeWeekendSidewaysCandidate ||
+    marketAwarenessState.candidateObligations.proposePostShockAbsorptionCandidate ||
+    marketAwarenessState.candidateObligations.avoidCollinearWrongDirectionClone ||
+    marketAwarenessState.candidateObligations.exploreOppositeNewsTransmission;
+
+  if (hasActivePolicyOrObligation) {
+    const seasonalMult = parseFloat(
+      (1 + marketAwarenessState.seasonalCalendar.seasonalLiquidityPenalty).toFixed(4)
+    );
+    const livePolicyTuning: LatentModelMathWriteBackState & LatentFilterTuningOverrides = {
+      ...liveBaseTuning,
+      marketAwarenessState,
+      recommendedDriftPolicy: marketAwarenessState.recommendedDriftPolicy,
+      recommendedBandPolicy: marketAwarenessState.recommendedBandPolicy,
+      recommendedAnchorPolicy: marketAwarenessState.recommendedAnchorPolicy,
+      seasonalUncertaintyMult: seasonalMult,
+    };
+
+    const candPolicyTuning: LatentFilterTuningOverrides = {
+      ...candTuningOverrides,
+      marketAwarenessState,
+      recommendedDriftPolicy: marketAwarenessState.recommendedDriftPolicy,
+      recommendedBandPolicy: marketAwarenessState.recommendedBandPolicy,
+      recommendedAnchorPolicy: marketAwarenessState.recommendedAnchorPolicy,
+      seasonalUncertaintyMult: seasonalMult,
+    };
+
+    // Compute multi-bar structural shock / breakdown impulse (including swing-high drawdown & streak)
+    const lastBarDelta =
+      candles.length >= 2
+        ? candles[candles.length - 1].close - candles[candles.length - 2].close
+        : 0;
+    const swingW = Math.min(6, Math.max(1, candles.length - 1));
+    let recentPeak = currentPrice;
+    let recentTrough = currentPrice;
+    for (let idx = candles.length - 1 - swingW; idx < candles.length - 1; idx++) {
+      if (idx >= 0) {
+        if (candles[idx].close > recentPeak) recentPeak = candles[idx].close;
+        if (candles[idx].close < recentTrough) recentTrough = candles[idx].close;
+      }
+    }
+    const swingDrop = currentPrice - recentPeak;
+    const swingRally = currentPrice - recentTrough;
+    const structuralDelta =
+      lastBarDelta < 0 && Math.abs(swingDrop) > Math.abs(lastBarDelta)
+        ? 0.55 * lastBarDelta + 0.45 * swingDrop
+        : lastBarDelta > 0 && swingRally > Math.abs(lastBarDelta)
+        ? 0.55 * lastBarDelta + 0.45 * swingRally
+        : lastBarDelta;
+    const shockSign = Math.sign(structuralDelta || lastBarDelta) || -1;
+    const shockMagUsd = Math.max(Math.abs(lastBarDelta), Math.abs(structuralDelta));
+
+    // Apply FaultClassifier closed-loop feedback for WRONG_DIRECTION and OVERCONFIDENT_TREND
+    FaultClassifier.applyFeedbackToForecastTuning({
+      state: marketAwarenessState,
+      livePolicyTuning,
+      candPolicyTuning,
+      currentPrice,
+      atr,
+      shockSign,
+      shockMagUsd,
+    });
+
+    // Ensure Live Yellow Line also recenters its equilibrium anchor & clears opposite symbolic drift
+    // under SHOCK_RESET / RECENTER_TO_POST_SHOCK so pre-breakdown mean reversion never pulls UP during a crash
+    if (
+      livePolicyTuning.recommendedDriftPolicy === 'SHOCK_RESET' ||
+      livePolicyTuning.recommendedAnchorPolicy === 'RECENTER_TO_POST_SHOCK'
+    ) {
+      livePolicyTuning.equilibriumAnchorOverride = parseFloat(
+        (currentPrice + shockSign * Math.min(0.75 * atr, Math.max(0.2 * atr, shockMagUsd * 0.25))).toFixed(2)
+      );
+      if ((livePolicyTuning.symbolicStepDriftUsd ?? 0) * shockSign < 0) {
+        livePolicyTuning.symbolicStepDriftUsd = parseFloat(
+          (shockSign * Math.min(0.28 * atr, Math.max(0.1 * atr, shockMagUsd * 0.08))).toFixed(4)
+        );
+      }
+    }
+
+    if (marketAwarenessState.candidateObligations.proposeWeekendSidewaysCandidate) {
+      candPolicyTuning.recommendedDriftPolicy = 'ZERO_FOR_SESSION';
+      candPolicyTuning.recommendedAnchorPolicy = 'FREEZE';
+      // Forward propagation in scientificCore.ts evaluates each horizon step h's timestamp:
+      // steps while futures are closed are damped toward the frozen anchor, while steps
+      // after the market opens release the equilibrium anchor and directional drift.
+    } else if (
+      marketAwarenessState.candidateObligations.proposePostShockAbsorptionCandidate ||
+      marketAwarenessState.candidateObligations.avoidCollinearWrongDirectionClone
+    ) {
+      candPolicyTuning.recommendedDriftPolicy = 'SHOCK_RESET';
+      candPolicyTuning.recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
+      candPolicyTuning.equilibriumAnchorOverride = parseFloat(
+        (currentPrice + shockSign * Math.min(1.25 * atr, Math.max(0.35 * atr, shockMagUsd * 0.42))).toFixed(2)
+      );
+      candPolicyTuning.symbolicStepDriftUsd = parseFloat(
+        (shockSign * Math.min(0.55 * atr, Math.max(0.18 * atr, shockMagUsd * 0.14))).toFixed(4)
+      );
+    }
+
+    if (
+      marketAwarenessState.candidateObligations.exploreOppositeNewsTransmission &&
+      marketAwarenessState.newsTransmissionMode === 'RISK_OFF_LIQUIDATION'
+    ) {
+      candPolicyTuning.recommendedDriftPolicy = 'SHOCK_RESET';
+      candPolicyTuning.recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
+      candPolicyTuning.equilibriumAnchorOverride = parseFloat(
+        (currentPrice - Math.max(0.45 * atr, shockMagUsd * 0.45)).toFixed(2)
+      );
+      candPolicyTuning.symbolicStepDriftUsd = parseFloat(
+        (-Math.max(0.22 * atr, Math.abs(candPolicyTuning.symbolicStepDriftUsd || 0))).toFixed(4)
+      );
+    }
+
+    coreStore.lastCandTuningOverrides = candPolicyTuning;
+
+    scientificCore = evaluateScientificCorePipeline({
+      candles,
+      interval,
+      intervalStepSeconds,
+      atr,
+      htfPocAnchorPrice: liquidityEngine.compositeHtfPocAnchor,
+      liveMacro,
+      secondaryBenchmark,
+      verifiedVenueCameras,
+      macroNews,
+      extensionInput,
+      liveTuning: livePolicyTuning,
+      candidateTuningOverrides: candPolicyTuning,
+      dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
+    });
+  }
+
   // Update persisted residual log with latest realized OOS residual points
   if (scientificCore.residualOracle.recentResiduals.length > 0) {
     const existingTimes = new Set(coreStore.persistedResidualLog.map(r => r.barTime));
@@ -3004,7 +3738,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   }
   coreStore.lastScientificCore = scientificCore;
 
-  // 5. Generate Structured Awareness Findings driven by the Residual Oracle & Market State
+  // 5. Generate Structured Awareness Findings driven by the Residual Oracle & MarketAwarenessState
   const findings = generateStructuredAwarenessFindings({
     liveArch: coreStore.liveArchitecture,
     candArch: coreStore.candidateArchitecture,
@@ -3015,6 +3749,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     prunedModelIds: candEval.prunedModelIds,
     mtfContext: mtfDiscoveryContext,
     residualDiagnostics: scientificCore.residualOracle.diagnostics,
+    marketAwarenessState,
   });
   coreStore.lastFindings = findings;
 
@@ -3025,10 +3760,12 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation;
 
   // 7. Check if Automatic Promotion is enabled AND all 8 gates passed (VERIFIED_FOR_PROMOTION)
+  //    AND no blocking forecast faults are active in MarketAwarenessState
   let promotionOccurredThisCycle = hadPendingPromotionAck;
   if (
     !hadPendingPromotionAck &&
     coreStore.autoPromotionRuntimeEnabled &&
+    !marketAwarenessState.blockAutoPromotionDueToFaults &&
     verificationReport.overallStatus === 'VERIFIED_FOR_PROMOTION' &&
     verificationReport.passedGatesCount === verificationReport.totalGatesCount
   ) {
@@ -3101,6 +3838,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     enabled: flags.ENABLE_PARALLEL_UNIVERSE_CORE,
     autoPromotionEnabled: coreStore.autoPromotionRuntimeEnabled,
     ReadyForPromotion:
+      !marketAwarenessState.blockAutoPromotionDueToFaults &&
       verificationReport.overallStatus === 'VERIFIED_FOR_PROMOTION' &&
       verificationReport.passedGatesCount === verificationReport.totalGatesCount,
     snapshotId,
@@ -3112,6 +3850,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     liveEnsemble,
     candidateEnsemble,
     findings,
+    marketAwarenessState,
     verificationReport,
     auditTrail: coreStore.auditTrail.slice(0, 25),
     promotionOccurredThisCycle,
@@ -3305,6 +4044,25 @@ export function promoteCandidateArchitecture(params: {
     auditEntry,
     persistenceHealth: coreStore.persistenceHealth,
   };
+}
+
+/**
+ * Resets the active architectures, generation counter, and awareness state to the clean baseline.
+ * Used for testing and deterministic environment reset.
+ */
+export function resetToInitialBaselineArchitecture(): void {
+  coreStore.liveArchitecture = createDefaultLiveArchitecture();
+  coreStore.candidateArchitecture = createDefaultCandidateArchitecture();
+  coreStore.generationCounter = 1;
+  coreStore.promotedCandTheta = null;
+  coreStore.promotedCandDriftMult = null;
+  coreStore.promotedCandTuningOverrides = null;
+  coreStore.promotedLiveReferencePreds = null;
+  coreStore.lastMarketAwarenessState = undefined;
+  coreStore.persistedResidualLog = [];
+  coreStore.autoPromotionRuntimeEnabled = false;
+  coreStore.pendingManualPromotionCycleAck = false;
+  persistCoreStoreToDisk(coreStore);
 }
 
 /**
@@ -4318,6 +5076,7 @@ export function getIntelligenceCoreStateSnapshot() {
     archivedArchitectures: coreStore.archivedArchitectures,
     lastVerificationReport: coreStore.lastVerificationReport,
     lastFindings: coreStore.lastFindings,
+    marketAwarenessState: coreStore.lastMarketAwarenessState || null,
     auditTrail: coreStore.auditTrail,
     scientificCore: coreStore.lastScientificCore,
     latentMathWriteBack: coreStore.latentMathWriteBack,
@@ -4407,6 +5166,7 @@ export function buildHaltedParallelUniverseTelemetry(
       sampleTracks: [],
     },
     findings: [],
+    marketAwarenessState: coreStore.lastMarketAwarenessState,
     verificationReport: haltedReport,
     auditTrail: coreStore.auditTrail.slice(0, 20),
     promotionOccurredThisCycle: false,

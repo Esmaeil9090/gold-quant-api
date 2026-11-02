@@ -442,7 +442,243 @@ export type AwarenessFindingCategory =
   | 'REGIME_BLINDSPOT'
   | 'RESIDUAL_AUTOCORRELATION'
   | 'TAIL_EXCURSION_WEAKNESS'
-  | 'BASIS_DRIFT_MISMATCH';
+  | 'BASIS_DRIFT_MISMATCH'
+  | 'SESSION_REGIME_MISMATCH'
+  | 'NEWS_TRANSMISSION_FAULT'
+  | 'FORECAST_DIRECTION_FAULT'
+  | 'FORECAST_FAULT_WRONG_DIRECTION'
+  | 'FORECAST_FAULT_OVERCONFIDENT_TREND'
+  | 'FORECAST_FAULT_STALE_DRIFT'
+  | 'FORECAST_FAULT_EQUILIBRIUM_ANCHOR_MISMATCH'
+  | 'FORECAST_FAULT_CANDIDATE_COLLINEAR'
+  | 'SESSION_REGIME_VIOLATION'
+  | 'NEWS_TRANSMISSION_MISMATCH'
+  | 'SEASONAL_LOW_LIQUIDITY'
+  | 'SESSION_CALENDAR_CONTEXT';
+
+export type WeekpartType =
+  | 'WEEKDAY_FULL_AUCTION'
+  | 'WEEKEND_THIN'
+  | 'FRIDAY_LATE_ROLL'
+  | 'SUNDAY_OPEN_RISK'
+  | 'FUTURES_CLOSED_OVERLAP';
+
+export type IntradaySessionId =
+  | 'ASIA'
+  | 'LONDON'
+  | 'NEW_YORK'
+  | 'LONDON_NY_OVERLAP'
+  | 'PACIFIC_QUIET'
+  | 'DAILY_ROLL_MAINTENANCE'
+  | 'WEEKEND_CLOSED_THIN';
+
+export type SeasonalCalendarEvent =
+  | 'TURN_OF_YEAR_HOLIDAY'
+  | 'TURN_OF_MONTH'
+  | 'VERIFIED_MACRO_SCHEDULED_WINDOW'
+  | 'NORMAL_TRADING_DAY';
+
+export enum FaultType {
+  WRONG_DIRECTION = 'WRONG_DIRECTION',
+  OVERCONFIDENT_TREND = 'OVERCONFIDENT_TREND',
+  STALE_DRIFT = 'STALE_DRIFT',
+  EQUILIBRIUM_ANCHOR_MISMATCH = 'EQUILIBRIUM_ANCHOR_MISMATCH',
+  CANDIDATE_COLLINEAR_WITH_LIVE_ERROR = 'CANDIDATE_COLLINEAR_WITH_LIVE_ERROR',
+  SESSION_REGIME_VIOLATION = 'SESSION_REGIME_VIOLATION',
+  NEWS_TRANSMISSION_MISMATCH = 'NEWS_TRANSMISSION_MISMATCH',
+}
+
+export type ForecastFaultCode =
+  | `${FaultType}`
+  | 'WRONG_DIRECTION'
+  | 'OVERCONFIDENT_TREND'
+  | 'STALE_DRIFT'
+  | 'EQUILIBRIUM_ANCHOR_MISMATCH'
+  | 'CANDIDATE_COLLINEAR_WITH_LIVE_ERROR'
+  | 'SESSION_REGIME_VIOLATION'
+  | 'NEWS_TRANSMISSION_MISMATCH';
+
+export type ForecastFaultType = ForecastFaultCode;
+
+export type RecommendedDriftPolicy =
+  | 'UNCHANGED'
+  | 'SHRINK'
+  | 'ZERO_FOR_SESSION'
+  | 'SHOCK_RESET';
+
+export type RecommendedBandPolicy =
+  | 'NORMAL'
+  | 'WIDEN';
+
+export type RecommendedAnchorPolicy =
+  | 'UNCHANGED'
+  | 'RECENTER_TO_POST_SHOCK'
+  | 'FREEZE';
+
+export type NewsTransmissionMode =
+  | 'SAFE_HAVEN'
+  | 'RISK_OFF_LIQUIDATION'
+  | 'NEUTRAL_ABSORBED'
+  | 'UNKNOWN';
+
+export type AwarenessRecommendedAction =
+  | 'INVENT_SYMBOLIC_TERM'
+  | 'DISABLE_CONTRADICTORY_MODEL'
+  | 'REWEIGHT_PRECISION'
+  | 'RETUNE_DAMPING'
+  | 'SHOCK_RESET_DRIFT'
+  | 'WIDEN_UNCERTAINTY_BANDS'
+  | 'RECENTER_EQUILIBRIUM_ANCHOR'
+  | 'PROPOSE_POST_SHOCK_CANDIDATE'
+  | 'CLAMP_SESSION_DRIFT'
+  | 'EXPLORE_OPPOSITE_NEWS_TRANSMISSION'
+  | 'OBSERVE_ONLY';
+
+export interface ForecastFaultRecord {
+  code?: ForecastFaultCode;
+  faultType?: ForecastFaultCode | FaultType;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  summaryEn?: string;
+  summaryFa?: string;
+  descriptionEn?: string;
+  descriptionFa?: string;
+  empiricalEvidence?: string;
+  recommendedAction?: AwarenessRecommendedAction;
+  metricValue?: string;
+  threshold?: string;
+  observedAtIso?: string;
+}
+
+export interface FaultClassifierMetricsInput {
+  safeAtr: number;
+  currentPrice: number;
+  liveForwardSlopeUsdPerStep: number;
+  liveBandWidthStep1Usd: number;
+  latestResidualUsd: number;
+  latestResidualZ: number;
+  lastBarMoveUsd: number;
+  trailingRealizedMoveUsd: number;
+  structuralRealizedMoveUsd: number;
+  consecutiveBearBars: number;
+  consecutiveBullBars: number;
+  streakBars: number;
+  macroBearishGravity: boolean;
+  macroBullishSupport: boolean;
+  sessionId: IntradaySessionId | string;
+  weekpart: WeekpartType;
+  isTurnOfMonth: boolean;
+}
+
+export interface FaultClassificationReport {
+  hasWrongDirection: boolean;
+  hasOverconfidentTrend: boolean;
+  wrongDirectionFault: ForecastFaultRecord | null;
+  overconfidentTrendFault: ForecastFaultRecord | null;
+  classifiedFaults: ForecastFaultRecord[];
+  referenceRealizedMoveUsd: number;
+  effectiveMoveAtrThreshold: number;
+  hasSignificantShockOrMove: boolean;
+  bandBreachRatio: number;
+  slopeDivergenceAtrPerStep: number;
+  requiresFeedbackCorrection: boolean;
+  recommendedDriftPolicy: RecommendedDriftPolicy;
+  recommendedBandPolicy: RecommendedBandPolicy;
+  recommendedAnchorPolicy: RecommendedAnchorPolicy;
+  bandExpansionFactor: number;
+  driftCorrectionSign: number;
+}
+
+export interface SeasonalCalendarContext {
+  activeEvents?: SeasonalCalendarEvent[];
+  isHolidayWeek?: boolean;
+  isTurnOfYearHolidayWindow?: boolean;
+  isTurnOfMonth?: boolean;
+  macroScheduledWindowActive?: boolean;
+  seasonalLiquidityPenalty?: number;
+  notesEn?: string;
+  notesFa?: string;
+  summaryEn?: string;
+  summaryFa?: string;
+}
+
+export interface TradingCalendarSessionContext {
+  barTimeSec: number;
+  barTimestampIso?: string;
+  weekpart: WeekpartType;
+  intradaySession?: IntradaySessionId;
+  sessionId?: IntradaySessionId | string;
+  isFuturesClosed: boolean;
+  isThinLiquidity: boolean;
+  isThinLiquiditySubSession?: boolean;
+  sessionNameEn?: string;
+  sessionNameFa?: string;
+  sessionNotesEn?: string;
+  sessionNotesFa?: string;
+  sessionSummaryEn?: string;
+  sessionSummaryFa?: string;
+  weekpartSummaryEn?: string;
+  weekpartSummaryFa?: string;
+  hourUtc?: number;
+  dayOfWeekUtc?: number;
+  utcHourDecimal?: number;
+  evaluatedAtIso?: string;
+  seasonalCalendar?: SeasonalCalendarContext;
+}
+
+export interface NewsTransmissionAnalysis {
+  mode: NewsTransmissionMode;
+  observedPriceChangeUsd: number;
+  macroSurpriseDirection: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  activeNewsItemTitle?: string | null;
+  rationaleEn: string;
+  rationaleFa: string;
+}
+
+export interface MarketAwarenessState {
+  timestampIso?: string;
+  evaluatedAtIso: string;
+  barTimeSec?: number;
+  timestampSec: number;
+  sessionRegime: {
+    weekpart: WeekpartType;
+    sessionId: IntradaySessionId | string;
+    isFuturesClosed: boolean;
+    isThinLiquiditySubSession: boolean;
+    isTurnOfMonth: boolean;
+    isTurnOfYearHolidayWindow: boolean;
+    seasonalLiquidityPenalty: number;
+  };
+  weekpart: WeekpartType;
+  sessionId: IntradaySessionId | string;
+  isThinLiquiditySubSession: boolean;
+  sessionContext?: TradingCalendarSessionContext;
+  sessionCalendar: TradingCalendarSessionContext;
+  seasonalCalendar: SeasonalCalendarContext;
+  newsTransmission?: NewsTransmissionAnalysis;
+  newsTransmissionMode: NewsTransmissionMode;
+  detectedFaults?: ForecastFaultRecord[];
+  activeFaults: ForecastFaultRecord[];
+  activeFaultCodes: ForecastFaultCode[];
+  activeFaultTypes: FaultType[];
+  recommendedPolicies: {
+    driftPolicy: RecommendedDriftPolicy;
+    bandPolicy: RecommendedBandPolicy;
+    anchorPolicy: RecommendedAnchorPolicy;
+  };
+  recommendedDriftPolicy: RecommendedDriftPolicy;
+  recommendedBandPolicy: RecommendedBandPolicy;
+  recommendedAnchorPolicy: RecommendedAnchorPolicy;
+  uncertaintyBandMultiplier?: number;
+  blockAutoPromotionDueToFaults: boolean;
+  candidateObligations: {
+    proposeWeekendSidewaysCandidate: boolean;
+    proposePostShockAbsorptionCandidate: boolean;
+    avoidCollinearWrongDirectionClone: boolean;
+    exploreOppositeNewsTransmission: boolean;
+  };
+  summaryEn: string;
+  summaryFa: string;
+}
 
 export interface AwarenessFinding {
   id: string;
@@ -454,7 +690,8 @@ export interface AwarenessFinding {
   summaryEn: string;
   summaryFa: string;
   empiricalEvidence: string;
-  recommendedAction: 'INVENT_SYMBOLIC_TERM' | 'DISABLE_CONTRADICTORY_MODEL' | 'REWEIGHT_PRECISION' | 'RETUNE_DAMPING';
+  recommendedAction: AwarenessRecommendedAction;
+  faultType?: ForecastFaultType;
 }
 
 export type SymbolicPrimitiveId =
@@ -654,6 +891,12 @@ export interface EnsemblePlume {
   lower25: { time: number; value: number }[];
   lower05: { time: number; value: number }[];
   sampleTracks?: { id: number; path: { time: number; value: number }[] }[];
+  preFeedbackForwardSlopeUsdPerStep?: number;
+  preFeedbackBandWidthStep1Usd?: number;
+  appliedDriftPolicy?: RecommendedDriftPolicy;
+  appliedBandPolicy?: RecommendedBandPolicy;
+  appliedAnchorPolicy?: RecommendedAnchorPolicy;
+  faultClassification?: FaultClassificationReport;
 }
 
 /**
@@ -792,6 +1035,9 @@ export interface OrderBookMicrostructureExtensionInput {
   topOfBookSpreadBps?: number[];
   bidDepthTop5Usd?: number[];
   askDepthTop5Usd?: number[];
+  macroEventContext?: {
+    scheduledEvents?: { name?: string; timestampSec?: number }[];
+  };
 }
 
 export interface PulseEchoSonarTelemetry {
@@ -982,6 +1228,7 @@ export interface ScientificCoreTelemetry {
   residualOracle: ResidualOracleTelemetry;
   latentMathWriteBack: LatentModelMathWriteBackState;
   scientificScoreboard: PermanentOosScientificScoreboard;
+  faultClassification?: FaultClassificationReport;
 }
 
 export type ScientificCycleMachineState =
@@ -1525,6 +1772,7 @@ export interface ParallelUniverseTelemetry {
   canRollbackWriteBack?: boolean;
   writeBackVersionHistory?: LatentModelMathWriteBackState[];
   scientificDiscoveryCycle?: ScientificDiscoveryCycleTelemetry;
+  marketAwarenessState?: MarketAwarenessState;
 }
 
 
