@@ -462,13 +462,54 @@ async function runAuditSuite() {
     passed++;
   }
 
-  // 20. Root /sw.js and /public/sw.js synchronization check
+  // 20. Root /sw.js and /public/sw.js synchronization & semantic /api/* bypass check
   {
     const rootSw = fs.readFileSync(path.join(process.cwd(), 'sw.js'), 'utf8');
     const pubSw = fs.readFileSync(path.join(process.cwd(), 'public', 'sw.js'), 'utf8');
     assert.equal(rootSw, pubSw, 'Root sw.js and public/sw.js must be identical');
-    assert.ok(pubSw.includes("if (url.pathname.startsWith('/api/')) return;"));
-    console.log('[PASS 20/20] ServiceWorker synchronization & /api/* bypass verified');
+
+    // Semantic check: verify /api/ pathname check returns early without calling event.respondWith
+    const bypassPattern = /if\s*\(\s*url\.pathname\.startsWith\(\s*['"]\/api\/['"]\s*\)\s*\)\s*(?:\{\s*return\s*;\s*\}|return\s*;)/;
+    assert.ok(
+      bypassPattern.test(pubSw),
+      'ServiceWorker must bypass /api/ routes before intercepting fetch requests'
+    );
+
+    // Execute ServiceWorker fetch listener in isolated VM to prove /api/* requests never call event.respondWith
+    const vm = await import('node:vm');
+    let fetchHandler: ((event: any) => void) | null = null;
+    const swSandbox: any = {
+      self: {
+        location: { origin: 'http://127.0.0.1:3000' },
+        skipWaiting: () => Promise.resolve(),
+        clients: { claim: () => Promise.resolve(), matchAll: () => Promise.resolve([]) },
+        addEventListener: (type: string, fn: (event: any) => void) => {
+          if (type === 'fetch') fetchHandler = fn;
+        },
+      },
+      caches: {
+        open: () => Promise.resolve({ addAll: () => Promise.resolve(), put: () => Promise.resolve() }),
+        keys: () => Promise.resolve([]),
+        delete: () => Promise.resolve(true),
+        match: () => Promise.resolve(null),
+      },
+      URL,
+      fetch: () => Promise.resolve(new Response('{}')),
+      console,
+    };
+    vm.createContext(swSandbox);
+    vm.runInContext(pubSw, swSandbox);
+    assert.ok(typeof fetchHandler === 'function', 'ServiceWorker must register a fetch event listener');
+
+    let apiIntercepted = false;
+    (fetchHandler as (event: any) => void)({
+      request: { method: 'GET', url: 'http://127.0.0.1:3000/api/gold-forecast?interval=15m', mode: 'cors' },
+      respondWith: () => {
+        apiIntercepted = true;
+      },
+    });
+    assert.equal(apiIntercepted, false, 'ServiceWorker fetch handler must NOT intercept /api/* requests');
+    console.log('[PASS 20/20] ServiceWorker synchronization & semantic /api/* bypass verified');
     passed++;
   }
 

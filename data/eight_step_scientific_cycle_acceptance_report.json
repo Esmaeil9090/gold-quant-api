@@ -1,5 +1,5 @@
 {
-  "verifiedAtIso": "2026-11-01T19:56:09.883Z",
+  "verifiedAtIso": "2026-11-03T19:09:42.898Z",
   "totalScenarios": 18,
   "passedScenarios": 18,
   "allPassed": true,
@@ -74,7 +74,7 @@
       "id": 12,
       "name": "Active Execution Path Verification (Yellow-Line Forecast Shifts Attributably)",
       "passed": true,
-      "details": "terminalBefore=$2749.6600, terminalAfter=$2748.4500, attributableShift=$-1.2100, covPSD=true"
+      "details": "terminalBefore=$2749.6800, terminalAfter=$2748.3800, attributableShift=$-1.3000, covPSD=true"
     },
     {
       "id": 13,

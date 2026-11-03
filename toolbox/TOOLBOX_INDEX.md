@@ -75,7 +75,7 @@
 - **Where It Lives:** `/src/services/gdfOperatingSystem.ts`
 - **How to Verify Access:** Verify file exists on disk and invoke GET /api/gdf-os/state, POST /api/gdf-os/run-proof, and POST /api/gdf-os/audit.
 - **Related Playbook:** `PB-006`
-- **Last Updated:** `2026-11-02T19:09:51.395Z`
+- **Last Updated:** `2026-11-03T16:38:51.607Z`
 - **Verified On Disk:** `PASS`
 
 ### TB-009 · ScientificCoreCheck (scripts/check-scientific-core.ts)

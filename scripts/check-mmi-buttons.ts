@@ -27,6 +27,7 @@ import {
   fetchVerifiedMacroWaterfall,
   fetchVerifiedMarketWaterfall,
 } from '../src/services/realDataWaterfall.js';
+import { runGdfProofSuite } from '../src/services/gdfOperatingSystem.js';
 
 function createDomHarness() {
   const elements = new Map<string, any>();
@@ -166,6 +167,7 @@ async function main() {
     activeTier: 'TIER_1_PRIMARY',
   });
   assert.equal(Boolean(puTelemetry.scientificCore), true, 'Scientific core must be initialized');
+  runGdfProofSuite({ requestedBy: 'MMI_BUTTONS_SUITE_SETUP' });
 
   // Set up VM harness with controllable fetch handler
   const { elements, documentStub } = createDomHarness();

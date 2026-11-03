@@ -99,12 +99,20 @@ const {
 const {
   buildExternalAuditorPacket,
   evaluateDualControlPromotionGate,
+  evaluateProofReportFreshness,
+  hydrateGdfOsRegistryFromCloudSqlIfAvailable,
+  issueOperatorSessionCookieAndCsrf,
   loadOrInitializeGdfOsRegistry,
+  recordSecurityAuditEvent,
   runGdfAuditAndLoopback,
   runGdfProofSuite,
+  syncGdfOsRegistryToCloudSqlImmediate,
   triggerLoopbackUpgrade,
   upsertInterviewRecord,
+  verifyOperatorMutationAuthorization,
 } = await import('./src/services/gdfOperatingSystem.js');
+const { adminAuth } = await import('./src/lib/firebase-admin.js');
+const { getOrCreateUser, isCloudSqlConfigured } = await import('./src/db/gdfRepository.js');
 
 
 const app = express();
@@ -801,165 +809,340 @@ app.get('/api/intelligence-core/persistence-health', (req: Request, res: Respons
   });
 });
 
-app.post('/api/intelligence-core/bootstrap-mtf', async (req: Request, res: Response) => {
-  const fixtureReplay = Boolean(req.body?.fixtureReplay);
-  const force = Boolean(req.body?.force);
-  const mtfBootstrap = await bootstrapMultiTimeframeWaterfallCache({ fixtureReplay, force });
-  forecastCache.clear();
-  res.json({
-    status: 'SUCCESS',
-    mtfBootstrap,
-    ...getIntelligenceCoreStateSnapshot(),
-  });
-});
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!cookieHeader || typeof cookieHeader !== 'string') return out;
+  for (const part of cookieHeader.split(';')) {
+    const eqIdx = part.indexOf('=');
+    if (eqIdx > 0) {
+      const key = part.slice(0, eqIdx).trim();
+      const val = part.slice(eqIdx + 1).trim();
+      if (key) {
+        try {
+          out[key] = decodeURIComponent(val);
+        } catch {
+          out[key] = val;
+        }
+      }
+    }
+  }
+  return out;
+}
 
-app.post('/api/intelligence-core/reload-store', (req: Request, res: Response) => {
-  const persistenceHealth = reloadArchitectureStoreFromDisk();
-  forecastCache.clear();
-  res.json({
-    status: 'SUCCESS',
-    persistenceHealth,
-    ...getIntelligenceCoreStateSnapshot(),
-  });
-});
+const handleOperatorSessionEndpoint = async (req: Request, res: Response) => {
+  try {
+    const authHeader = (req.headers['authorization'] as string) || '';
+    const bearerToken = authHeader.toLowerCase().startsWith('bearer ')
+      ? authHeader.slice(7).trim()
+      : undefined;
 
-app.post('/api/intelligence-core/promote', (req: Request, res: Response) => {
-  const modeRaw = String(req.body?.mode || 'MANUAL_MMI').toUpperCase();
-  const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
-    modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
-  const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+    let operatorIdentity = 'OPERATOR_MMI_BROWSER_SESSION';
+    let firebaseUserRecord: any = null;
 
-  const osGate = evaluateDualControlPromotionGate(mode);
-  if (!osGate.allowed) {
-    const snap = getIntelligenceCoreStateSnapshot();
-    return res.status(409).json({
-      status: 'PROMOTION_REJECTED',
-      promoted: false,
-      reason: osGate.reason,
-      gdfOsDualControlGate: osGate,
-      liveVersionTag: snap.liveArchitecture.versionTag,
-      liveArchitectureId: snap.liveArchitecture.architectureId,
-      candidateVersionTag: snap.candidateArchitecture.versionTag,
-      candidateArchitectureId: snap.candidateArchitecture.architectureId,
+    if (bearerToken && bearerToken.split('.').length === 3) {
+      try {
+        const decoded = await adminAuth.verifyIdToken(bearerToken);
+        operatorIdentity = `FIREBASE_OPERATOR:${decoded.email || decoded.uid}`;
+        if (isCloudSqlConfigured()) {
+          firebaseUserRecord = await getOrCreateUser(decoded.uid, decoded.email || `${decoded.uid}@firebase.local`, decoded.name);
+        }
+      } catch {
+        // Fallback to standard operator browser session if token is not a Firebase JWT
+      }
+    }
+
+    const session = issueOperatorSessionCookieAndCsrf(operatorIdentity);
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const cookieFlags = [
+      `gdf_operator_session=${encodeURIComponent(session.sessionCookieValue)}`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Strict',
+      'Max-Age=43200',
+    ];
+    if (isSecure) {
+      cookieFlags.push('Secure');
+    }
+    res.setHeader('Set-Cookie', cookieFlags.join('; '));
+    res.json({
+      status: 'SUCCESS',
+      csrfToken: session.csrfToken,
+      expiresAtIso: session.expiresAtIso,
+      operatorIdentity,
+      firebaseUser: firebaseUserRecord,
+      cloudSqlConfigured: isCloudSqlConfigured(),
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'ERROR',
+      error: err?.message || 'Failed to establish operator session.',
     });
   }
+};
 
-  const result = promoteCandidateArchitecture({ mode, operatorNote });
-  if (result.promoted) {
-    forecastCache.clear();
-  }
-  res.status(result.promoted ? 200 : 409).json({
-    status: result.promoted ? 'SUCCESS' : 'PROMOTION_REJECTED',
-    gdfOsDualControlGate: osGate,
-    liveVersionTag: result.liveArchitecture.versionTag,
-    liveArchitectureId: result.liveArchitecture.architectureId,
-    candidateVersionTag: result.candidateArchitecture.versionTag,
-    candidateArchitectureId: result.candidateArchitecture.architectureId,
-    ...result,
-  });
-});
+app.get('/api/auth/operator-session', handleOperatorSessionEndpoint);
+app.post('/api/auth/operator-session', handleOperatorSessionEndpoint);
 
-app.post('/api/intelligence-core/writeback-math', (req: Request, res: Response) => {
-  const modeRaw = String(req.body?.mode || 'MANUAL_MMI').toUpperCase();
-  const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
-    modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
-  const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
-  const dryRun = Boolean(req.body?.dryRun);
-  const requireFullGateVerification = Boolean(req.body?.requireFullGateVerification);
-  const confirmedByOperator = Boolean(req.body?.confirmedByOperator);
+function requireOperatorMutationAuth(endpointPath: string) {
+  return async (req: Request, res: Response, next: () => void) => {
+    const authHeader = (req.headers['authorization'] as string) || '';
+    const bearerToken = authHeader.toLowerCase().startsWith('bearer ')
+      ? authHeader.slice(7).trim()
+      : undefined;
+    const actorRole =
+      (req.headers['x-gdf-actor-role'] as string) ||
+      req.body?.actorRole ||
+      req.body?.externalAgentRole ||
+      (req.query?.actorRole as string) ||
+      undefined;
 
-  const result = writeBackValidatedMathToLatentModel({
-    mode,
-    operatorNote,
-    dryRun,
-    requireFullGateVerification,
-    confirmedByOperator,
-  });
-
-  if (result.writtenBack) {
-    forecastCache.clear();
-  }
-
-  const httpStatus = dryRun ? (result.eligible ? 200 : 409) : result.writtenBack ? 200 : 409;
-  const responseStatus = dryRun
-    ? result.eligible
-      ? 'DRY_RUN_ELIGIBLE'
-      : 'WRITEBACK_REJECTED'
-    : result.writtenBack
-      ? 'SUCCESS'
-      : 'WRITEBACK_REJECTED';
-
-  res.status(httpStatus).json({
-    status: responseStatus,
-    ...result,
-    ...getIntelligenceCoreStateSnapshot(),
-  });
-});
-
-app.post('/api/intelligence-core/auto-promote-mode', (req: Request, res: Response) => {
-  const enabled = Boolean(req.body?.enabled);
-  const result = setAutoPromotionRuntimeMode(enabled);
-  forecastCache.clear();
-  res.json({
-    status: 'SUCCESS',
-    ...result,
-  });
-});
-
-app.post('/api/intelligence-core/discover-step', (req: Request, res: Response) => {
-  const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
-  const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
-  const result = executeSymbolicDiscoveryStep({ note, timeframe });
-  // Also advance the connected Eight-Step Scientific Discovery Cycle on the active timeframe
-  let cycleResult = null;
-  if (result.synthesisExecuted) {
-    try {
-      cycleResult = executeEightStepScientificDiscoveryCycle({
-        timeframe,
-        operatorNote: note,
-        authorizeIntegrationMode: 'NONE',
-      });
-    } catch {
-      cycleResult = null;
+    let firebaseUser: { uid: string; email?: string } | null = null;
+    if (bearerToken && bearerToken.split('.').length === 3) {
+      try {
+        const decoded = await adminAuth.verifyIdToken(bearerToken);
+        firebaseUser = { uid: decoded.uid, email: decoded.email };
+        if (isCloudSqlConfigured()) {
+          await getOrCreateUser(decoded.uid, decoded.email || `${decoded.uid}@firebase.local`, decoded.name).catch(() => {});
+        }
+      } catch {
+        // Not a valid Firebase ID token; fall through to operatorToken / session cookie checks
+      }
     }
-    forecastCache.clear();
-  }
-  const httpStatus = result.synthesisExecuted ? 200 : 409;
-  res.status(httpStatus).json({
-    status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
-    ...result,
-    ...getIntelligenceCoreStateSnapshot(),
-    scientificDiscoveryCycle: cycleResult?.telemetry || getScientificDiscoveryCycleTelemetry(),
-  });
-});
 
-app.post('/api/intelligence-core/level5-meta-cycle', (req: Request, res: Response) => {
-  const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
-  const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
-  const result = executeLevel5BayesianCausalMetaCycle({ note });
-  let cycleResult: any = null;
-  if (result.synthesisExecuted) {
-    try {
-      cycleResult = executeEightStepScientificDiscoveryCycle({
-        timeframe,
-        operatorNote:
-          note ||
-          'Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery (Granger + PC + DAG + SINDy) cycle.',
-        authorizeIntegrationMode: 'NONE',
+    const cookies = parseCookies(req.headers.cookie);
+    const sessionCookieValue = cookies['gdf_operator_session'] || undefined;
+    const csrfTokenHeader =
+      (req.headers['x-gdf-csrf-token'] as string) ||
+      req.body?.csrfToken ||
+      undefined;
+
+    const operatorToken =
+      (req.headers['x-gdf-operator-token'] as string) ||
+      (!firebaseUser ? bearerToken : undefined) ||
+      req.body?.operatorToken ||
+      undefined;
+
+    const authCheck = verifyOperatorMutationAuthorization({
+      endpointOrOperation: `${req.method} ${endpointPath}`,
+      actorRole,
+      operatorToken,
+      sessionCookie: sessionCookieValue,
+      csrfToken: csrfTokenHeader,
+      firebaseUser,
+      requestedBy: req.body?.requestedBy || undefined,
+    });
+    if (!authCheck.authorized) {
+      const errStatus =
+        authCheck.httpStatus === 403
+          ? authCheck.reason.includes('CSRF')
+            ? 'FORBIDDEN_CSRF_TOKEN_INVALID'
+            : 'FORBIDDEN_READ_ONLY_AUDITOR'
+          : 'UNAUTHORIZED_OPERATOR_TOKEN';
+      return res.status(authCheck.httpStatus).json({
+        status: errStatus,
+        promoted: false,
+        authorized: false,
+        actorRole: actorRole || authCheck.operatorIdentity,
+        error: authCheck.reason,
+        reason: authCheck.reason,
+        reasonEn: authCheck.reason,
+        reasonFa: authCheck.reason,
       });
-    } catch {
-      cycleResult = null;
     }
+    (req as any).gdfOperatorIdentity = authCheck.operatorIdentity;
+    (req as any).gdfActorRole = actorRole || 'OPERATOR_MMI';
+    next();
+  };
+}
+
+app.post(
+  '/api/intelligence-core/bootstrap-mtf',
+  requireOperatorMutationAuth('/api/intelligence-core/bootstrap-mtf'),
+  async (req: Request, res: Response) => {
+    const fixtureReplay = Boolean(req.body?.fixtureReplay);
+    const force = Boolean(req.body?.force);
+    const mtfBootstrap = await bootstrapMultiTimeframeWaterfallCache({ fixtureReplay, force });
     forecastCache.clear();
+    res.json({
+      status: 'SUCCESS',
+      mtfBootstrap,
+      ...getIntelligenceCoreStateSnapshot(),
+    });
   }
-  const httpStatus = result.synthesisExecuted ? 200 : 409;
-  res.status(httpStatus).json({
-    status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
-    ...result,
-    ...getIntelligenceCoreStateSnapshot(),
-    scientificDiscoveryCycle: cycleResult?.telemetry || getScientificDiscoveryCycleTelemetry(),
-  });
-});
+);
+
+app.post(
+  '/api/intelligence-core/reload-store',
+  requireOperatorMutationAuth('/api/intelligence-core/reload-store'),
+  (req: Request, res: Response) => {
+    const persistenceHealth = reloadArchitectureStoreFromDisk();
+    forecastCache.clear();
+    res.json({
+      status: 'SUCCESS',
+      persistenceHealth,
+      ...getIntelligenceCoreStateSnapshot(),
+    });
+  }
+);
+
+app.post(
+  '/api/intelligence-core/promote',
+  requireOperatorMutationAuth('/api/intelligence-core/promote'),
+  (req: Request, res: Response) => {
+    const modeRaw = String(req.body?.mode || 'MANUAL_MMI').toUpperCase();
+    const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
+      modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
+    const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+    const operatorAuthorization =
+      (req as any).gdfOperatorIdentity ||
+      (typeof req.body?.operatorAuthorization === 'string' ? req.body.operatorAuthorization.trim() : 'OPERATOR_MMI_AUTHENTICATED');
+    const actorRole = (req as any).gdfActorRole || 'OPERATOR_MMI';
+
+    const result = promoteCandidateArchitecture({
+      mode,
+      operatorNote,
+      operatorAuthorization,
+      actorRole,
+    });
+    if (result.promoted) {
+      forecastCache.clear();
+    }
+    const osGate = evaluateDualControlPromotionGate(mode, {
+      candidateArchitectureId: result.candidateArchitecture.architectureId,
+      operatorAuthorization,
+      actorRole,
+      dryRun: true,
+    });
+    res.status(result.promoted ? 200 : 409).json({
+      status: result.promoted ? 'SUCCESS' : 'PROMOTION_REJECTED',
+      reason: result.reasonEn,
+      gdfOsDualControlGate: osGate,
+      liveVersionTag: result.liveArchitecture.versionTag,
+      liveArchitectureId: result.liveArchitecture.architectureId,
+      candidateVersionTag: result.candidateArchitecture.versionTag,
+      candidateArchitectureId: result.candidateArchitecture.architectureId,
+      ...result,
+    });
+  }
+);
+
+app.post(
+  '/api/intelligence-core/writeback-math',
+  requireOperatorMutationAuth('/api/intelligence-core/writeback-math'),
+  (req: Request, res: Response) => {
+    const modeRaw = String(req.body?.mode || 'MANUAL_MMI').toUpperCase();
+    const mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED' =
+      modeRaw === 'AUTOMATIC_VERIFIED' ? 'AUTOMATIC_VERIFIED' : 'MANUAL_MMI';
+    const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
+    const dryRun = Boolean(req.body?.dryRun);
+    const requireFullGateVerification = Boolean(req.body?.requireFullGateVerification);
+    const confirmedByOperator = Boolean(req.body?.confirmedByOperator);
+
+    const result = writeBackValidatedMathToLatentModel({
+      mode,
+      operatorNote,
+      dryRun,
+      requireFullGateVerification,
+      confirmedByOperator,
+    });
+
+    if (result.writtenBack) {
+      forecastCache.clear();
+    }
+
+    const httpStatus = dryRun ? (result.eligible ? 200 : 409) : result.writtenBack ? 200 : 409;
+    const responseStatus = dryRun
+      ? result.eligible
+        ? 'DRY_RUN_ELIGIBLE'
+        : 'WRITEBACK_REJECTED'
+      : result.writtenBack
+        ? 'SUCCESS'
+        : 'WRITEBACK_REJECTED';
+
+    res.status(httpStatus).json({
+      status: responseStatus,
+      ...result,
+      ...getIntelligenceCoreStateSnapshot(),
+    });
+  }
+);
+
+app.post(
+  '/api/intelligence-core/auto-promote-mode',
+  requireOperatorMutationAuth('/api/intelligence-core/auto-promote-mode'),
+  (req: Request, res: Response) => {
+    const enabled = Boolean(req.body?.enabled);
+    const result = setAutoPromotionRuntimeMode(enabled);
+    forecastCache.clear();
+    res.json({
+      status: 'SUCCESS',
+      ...result,
+    });
+  }
+);
+
+app.post(
+  '/api/intelligence-core/discover-step',
+  requireOperatorMutationAuth('/api/intelligence-core/discover-step'),
+  (req: Request, res: Response) => {
+    const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
+    const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
+    const result = executeSymbolicDiscoveryStep({ note, timeframe });
+    // Also advance the connected Eight-Step Scientific Discovery Cycle on the active timeframe
+    let cycleResult = null;
+    if (result.synthesisExecuted) {
+      try {
+        cycleResult = executeEightStepScientificDiscoveryCycle({
+          timeframe,
+          operatorNote: note,
+          authorizeIntegrationMode: 'NONE',
+        });
+      } catch {
+        cycleResult = null;
+      }
+      forecastCache.clear();
+    }
+    const httpStatus = result.synthesisExecuted ? 200 : 409;
+    res.status(httpStatus).json({
+      status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
+      ...result,
+      ...getIntelligenceCoreStateSnapshot(),
+      scientificDiscoveryCycle: cycleResult?.telemetry || getScientificDiscoveryCycleTelemetry(),
+    });
+  }
+);
+
+app.post(
+  '/api/intelligence-core/level5-meta-cycle',
+  requireOperatorMutationAuth('/api/intelligence-core/level5-meta-cycle'),
+  (req: Request, res: Response) => {
+    const note = typeof req.body?.note === 'string' ? req.body.note.trim() : undefined;
+    const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
+    const result = executeLevel5BayesianCausalMetaCycle({ note });
+    let cycleResult: any = null;
+    if (result.synthesisExecuted) {
+      try {
+        cycleResult = executeEightStepScientificDiscoveryCycle({
+          timeframe,
+          operatorNote:
+            note ||
+            'Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery (Granger + PC + DAG + SINDy) cycle.',
+          authorizeIntegrationMode: 'NONE',
+        });
+      } catch {
+        cycleResult = null;
+      }
+      forecastCache.clear();
+    }
+    const httpStatus = result.synthesisExecuted ? 200 : 409;
+    res.status(httpStatus).json({
+      status: result.synthesisExecuted ? 'SUCCESS' : 'SYNTHESIS_REJECTED',
+      ...result,
+      ...getIntelligenceCoreStateSnapshot(),
+      scientificDiscoveryCycle: cycleResult?.telemetry || getScientificDiscoveryCycleTelemetry(),
+    });
+  }
+);
 
 app.get('/api/intelligence-core/scientific-cycle', (req: Request, res: Response) => {
   res.json({
@@ -971,7 +1154,7 @@ app.get('/api/intelligence-core/scientific-cycle', (req: Request, res: Response)
   });
 });
 
-app.post('/api/intelligence-core/scientific-cycle', (req: Request, res: Response) => {
+app.post('/api/intelligence-core/scientific-cycle', requireOperatorMutationAuth('/api/intelligence-core/scientific-cycle'), (req: Request, res: Response) => {
   const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
   const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
   const authModeRaw = String(req.body?.authorizeIntegrationMode || 'NONE').toUpperCase();
@@ -1006,7 +1189,7 @@ app.post('/api/intelligence-core/scientific-cycle', (req: Request, res: Response
   });
 });
 
-app.post('/api/intelligence-core/scientific-cycle/monitor', (req: Request, res: Response) => {
+app.post('/api/intelligence-core/scientific-cycle/monitor', requireOperatorMutationAuth('/api/intelligence-core/scientific-cycle/monitor'), (req: Request, res: Response) => {
   const timeframe = typeof req.body?.timeframe === 'string' ? req.body.timeframe.trim() : undefined;
   const monitorRecord = runMonitorStage(undefined, { timeframe });
   if (monitorRecord.rollbackTriggered) {
@@ -1020,7 +1203,7 @@ app.post('/api/intelligence-core/scientific-cycle/monitor', (req: Request, res: 
   });
 });
 
-app.post('/api/intelligence-core/writeback-rollback', (req: Request, res: Response) => {
+app.post('/api/intelligence-core/writeback-rollback', requireOperatorMutationAuth('/api/intelligence-core/writeback-rollback'), (req: Request, res: Response) => {
   const operatorNote = typeof req.body?.operatorNote === 'string' ? req.body.operatorNote.trim() : undefined;
   const rb = rollbackLatentMathWriteBack(operatorNote);
   if (rb.rolledBack) {
@@ -1051,30 +1234,48 @@ function collectLiveGdfOsContext() {
 }
 
 app.get('/api/gdf-os/state', (req: Request, res: Response) => {
-  const registry = loadOrInitializeGdfOsRegistry();
-  const liveCtx = collectLiveGdfOsContext();
-  if (registry.proofReports.length === 0) {
-    runGdfProofSuite({ requestedBy: 'INITIAL_STATE_BOOTSTRAP', liveContext: liveCtx });
+  try {
+    // Do NOT automatically run the proof suite or audit suite on state-loading requests.
+    const registry = loadOrInitializeGdfOsRegistry();
+    const latestProof = registry.proofReports[0] || null;
+    const proofFreshness = evaluateProofReportFreshness(latestProof);
+    res.json({
+      status: 'SUCCESS',
+      version: APP_VERSION,
+      timestampIso: new Date().toISOString(),
+      proofFreshness,
+      registry,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'ERROR',
+      error: err?.message || 'Failed to load GDF Operating System state.',
+      timestampIso: new Date().toISOString(),
+    });
   }
-  if (registry.auditReports.length === 0) {
-    runGdfAuditAndLoopback({ autoLoopbackOnFindings: false, liveContext: liveCtx });
-  }
-  res.json({
-    status: 'SUCCESS',
-    version: APP_VERSION,
-    timestampIso: new Date().toISOString(),
-    registry: loadOrInitializeGdfOsRegistry(),
-  });
 });
 
-app.post('/api/gdf-os/interview', (req: Request, res: Response) => {
-  const record = upsertInterviewRecord(req.body || {});
-  res.json({
-    status: 'SUCCESS',
-    interview: record,
-    registry: loadOrInitializeGdfOsRegistry(),
-  });
-});
+app.post(
+  '/api/gdf-os/interview',
+  requireOperatorMutationAuth('/api/gdf-os/interview'),
+  (req: Request, res: Response) => {
+    try {
+      const record = upsertInterviewRecord(req.body || {});
+      const registry = loadOrInitializeGdfOsRegistry();
+      res.json({
+        status: 'SUCCESS',
+        interview: record,
+        proofFreshness: evaluateProofReportFreshness(registry.proofReports[0] || null),
+        registry,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'ERROR',
+        error: err?.message || 'Failed to update interview record.',
+      });
+    }
+  }
+);
 
 app.get('/api/gdf-os/playbooks', (req: Request, res: Response) => {
   const registry = loadOrInitializeGdfOsRegistry();
@@ -1092,60 +1293,117 @@ app.get('/api/gdf-os/toolbox', (req: Request, res: Response) => {
   });
 });
 
-app.post('/api/gdf-os/run-proof', (req: Request, res: Response) => {
-  const requestedBy = typeof req.body?.requestedBy === 'string' ? req.body.requestedBy : 'OPERATOR_MMI';
-  const taskDescription = typeof req.body?.taskDescription === 'string' ? req.body.taskDescription : undefined;
-  const proofReport = runGdfProofSuite({
-    requestedBy,
-    taskDescription,
-    liveContext: collectLiveGdfOsContext(),
-  });
-  res.json({
-    status: 'SUCCESS',
-    proofReport,
-    registry: loadOrInitializeGdfOsRegistry(),
-  });
-});
+app.post(
+  '/api/gdf-os/run-proof',
+  requireOperatorMutationAuth('/api/gdf-os/run-proof'),
+  (req: Request, res: Response) => {
+    try {
+      const requestedBy = typeof req.body?.requestedBy === 'string' ? req.body.requestedBy : 'OPERATOR_MMI';
+      const taskDescription = typeof req.body?.taskDescription === 'string' ? req.body.taskDescription : undefined;
+      const proofReport = runGdfProofSuite({
+        requestedBy,
+        taskDescription,
+        liveContext: collectLiveGdfOsContext(),
+      });
+      const registry = loadOrInitializeGdfOsRegistry();
+      const proofFreshness = evaluateProofReportFreshness(registry.proofReports[0] || null);
+      res.json({
+        status: 'SUCCESS',
+        proofReport,
+        proofFreshness,
+        registry,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'ERROR',
+        error: err?.message || 'Failed to execute GDF live proof suite.',
+      });
+    }
+  }
+);
 
-app.post('/api/gdf-os/audit', (req: Request, res: Response) => {
-  const autoLoopbackOnFindings = req.body?.autoLoopbackOnFindings !== false;
-  const auditReport = runGdfAuditAndLoopback({
-    autoLoopbackOnFindings,
-    liveContext: collectLiveGdfOsContext(),
-  });
-  res.json({
-    status: 'SUCCESS',
-    auditReport,
-    registry: loadOrInitializeGdfOsRegistry(),
-  });
-});
+app.post(
+  '/api/gdf-os/audit',
+  requireOperatorMutationAuth('/api/gdf-os/audit'),
+  (req: Request, res: Response) => {
+    try {
+      const autoLoopbackOnFindings = req.body?.autoLoopbackOnFindings !== false;
+      const auditReport = runGdfAuditAndLoopback({
+        autoLoopbackOnFindings,
+        liveContext: collectLiveGdfOsContext(),
+      });
+      const registry = loadOrInitializeGdfOsRegistry();
+      const proofFreshness = evaluateProofReportFreshness(registry.proofReports[0] || null);
+      res.json({
+        status: 'SUCCESS',
+        auditReport,
+        proofFreshness,
+        registry,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'ERROR',
+        error: err?.message || 'Failed to execute GDF 6-point audit.',
+      });
+    }
+  }
+);
 
-app.post('/api/gdf-os/loopback', (req: Request, res: Response) => {
-  const playbookId = typeof req.body?.playbookId === 'string' ? req.body.playbookId.trim() : 'PB-001';
-  const reason =
-    typeof req.body?.reason === 'string' && req.body.reason.trim().length > 0
-      ? req.body.reason.trim()
-      : 'Operator-initiated Loopback SOP refinement.';
-  const addedFailureModeOrStep =
-    typeof req.body?.addedFailureModeOrStep === 'string' && req.body.addedFailureModeOrStep.trim().length > 0
-      ? req.body.addedFailureModeOrStep.trim()
-      : `Operator Loopback (${new Date().toISOString().slice(0, 19)}Z): Verified lesson learned committed to SOP.`;
-  const loopbackEvent = triggerLoopbackUpgrade({
-    playbookId,
-    reason,
-    addedFailureModeOrStep,
-  });
-  if (!loopbackEvent) {
-    return res.status(404).json({
-      status: 'NOT_FOUND',
-      error: `Playbook ${playbookId} not found.`,
+app.post(
+  '/api/gdf-os/loopback',
+  requireOperatorMutationAuth('/api/gdf-os/loopback'),
+  (req: Request, res: Response) => {
+    try {
+      const playbookId = typeof req.body?.playbookId === 'string' ? req.body.playbookId.trim() : 'PB-001';
+      const reason =
+        typeof req.body?.reason === 'string' && req.body.reason.trim().length > 0
+          ? req.body.reason.trim()
+          : 'Operator-initiated Loopback SOP refinement.';
+      const addedFailureModeOrStep =
+        typeof req.body?.addedFailureModeOrStep === 'string' && req.body.addedFailureModeOrStep.trim().length > 0
+          ? req.body.addedFailureModeOrStep.trim()
+          : `Operator Loopback (${new Date().toISOString().slice(0, 19)}Z): Verified lesson learned committed to SOP.`;
+      const loopbackEvent = triggerLoopbackUpgrade({
+        playbookId,
+        reason,
+        addedFailureModeOrStep,
+      });
+      if (!loopbackEvent) {
+        return res.status(404).json({
+          status: 'NOT_FOUND',
+          error: `Playbook ${playbookId} not found.`,
+        });
+      }
+      const registry = loadOrInitializeGdfOsRegistry();
+      res.json({
+        status: 'SUCCESS',
+        loopbackEvent,
+        proofFreshness: evaluateProofReportFreshness(registry.proofReports[0] || null),
+        registry,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'ERROR',
+        error: err?.message || 'Failed to execute Playbook loopback upgrade.',
+      });
+    }
+  }
+);
+
+app.all('/api/gdf-os/auditor-packet', (req: Request, res: Response, next: () => void) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    recordSecurityAuditEvent({
+      endpointOrOperation: `${req.method} /api/gdf-os/auditor-packet`,
+      actorRole: (req.headers['x-gdf-actor-role'] as string) || 'EXTERNAL_AUDITOR',
+      outcome: 'BLOCKED_EXTERNAL_AUDITOR_READ_ONLY',
+      reason: `Method ${req.method} is forbidden on read-only External Auditor Packet endpoint.`,
+    });
+    return res.status(403).json({
+      status: 'FORBIDDEN_READ_ONLY_AUDITOR',
+      error: 'External Auditor Packet endpoint is strictly read-only (GET only).',
     });
   }
-  res.json({
-    status: 'SUCCESS',
-    loopbackEvent,
-    registry: loadOrInitializeGdfOsRegistry(),
-  });
+  next();
 });
 
 app.get('/api/gdf-os/auditor-packet', (req: Request, res: Response) => {
@@ -1182,6 +1440,11 @@ app.listen(PORT, '0.0.0.0', () => {
     if (ph.remediationInstructionsEn) {
       console.warn(`[GDF Persistence] ${ph.remediationInstructionsEn}`);
     }
+  }
+  if (isCloudSqlConfigured()) {
+    hydrateGdfOsRegistryFromCloudSqlIfAvailable()
+      .then(() => syncGdfOsRegistryToCloudSqlImmediate())
+      .catch(() => {});
   }
   // Proactively and non-blockingly bootstrap the 5 multi-timeframe discovery series (5m, 15m, 1h, 4h, 1d)
   setTimeout(() => {

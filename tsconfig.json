@@ -6,9 +6,10 @@
     "esModuleInterop": true,
     "strict": false,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist"
   },
-  "include": ["server.ts", "src/**/*.ts", "scripts/**/*.ts"]
+  "include": ["server.ts", "src/**/*.ts", "scripts/**/*.ts", "firebase-applet-config.json"]
 }
 

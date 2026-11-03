@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "tsc",
-    "check:all": "tsx scripts/check-bilingual-terminology.ts && tsx scripts/check-client-update-engine.ts && tsx scripts/check-phase0-baseline-integrity.ts && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts && tsx scripts/check-phase6-cognitive-hierarchy.ts && tsx scripts/check-parallel-universe-core.ts && tsx scripts/check-scientific-core.ts && tsx scripts/check-mmi-buttons.ts && tsx scripts/check-independent-mathematical-audit.ts && tsx scripts/check-eight-step-scientific-cycle.ts && tsx scripts/check-awareness-core-upgrade.ts",
+    "check:all": "tsx scripts/check-bilingual-terminology.ts && tsx scripts/check-client-update-engine.ts && tsx scripts/check-phase0-baseline-integrity.ts && tsx scripts/check-phase3-spec-parity.ts && tsx scripts/check-phase4-confidence-metrics.ts && tsx scripts/check-phase5-validation-and-html-guard.ts && tsx scripts/check-phase6-cognitive-hierarchy.ts && tsx scripts/check-parallel-universe-core.ts && tsx scripts/check-scientific-core.ts && tsx scripts/check-mmi-buttons.ts && tsx scripts/check-independent-mathematical-audit.ts && tsx scripts/check-eight-step-scientific-cycle.ts && tsx scripts/check-awareness-core-upgrade.ts && tsx scripts/check-gdf-operating-system.ts",
     "check:bilingual-terminology": "tsx scripts/check-bilingual-terminology.ts",
     "check:update-engine": "tsx scripts/check-client-update-engine.ts",
     "check:baseline-integrity": "tsx scripts/check-phase0-baseline-integrity.ts",
@@ -20,13 +20,21 @@
     "check:independent-math-audit": "tsx scripts/check-independent-mathematical-audit.ts",
     "check:eight-step-cycle": "tsx scripts/check-eight-step-scientific-cycle.ts",
     "check:awareness-upgrade": "tsx scripts/check-awareness-core-upgrade.ts",
+    "check:gdf-os": "tsx scripts/check-gdf-operating-system.ts",
     "lint": "tsc --noEmit",
     "start": "node server.ts"
   },
   "dependencies": {
+    "@types/pg": "^8.23.1",
     "archiver": "^8.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^18.0.9",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
     "express": "^4.21.2",
+    "firebase": "^13.2.0",
+    "firebase-admin": "^14.5.0",
+    "pg": "^8.23.1",
     "three": "^0.186.1",
     "tsx": "^4.19.2"
   },

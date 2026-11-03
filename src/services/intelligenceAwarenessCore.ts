@@ -80,6 +80,16 @@ import {
   REQUIRED_DISCOVERY_TIMEFRAMES,
   triggerNonBlockingMultiTimeframeBootstrap,
 } from './realDataWaterfall.js';
+import {
+  evaluateDualControlPromotionGate,
+  recordPromotionGateDecision,
+  type GdfPromotionDecisionRecord,
+  type ProofGateEvaluationStatus,
+} from './gdfOperatingSystem.js';
+import {
+  isCloudSqlConfigured,
+  syncArchitectureStoreToCloudSql,
+} from '../db/gdfRepository.js';
 
 export enum FaultType {
   WRONG_DIRECTION = 'WRONG_DIRECTION',
@@ -985,6 +995,10 @@ function persistCoreStoreToDisk(store: RuntimeCoreStore): void {
     fs.writeFileSync(cfg.legacyAuditFilePath, JSON.stringify(doc.auditTrail.slice(0, 80), null, 2), 'utf8');
   } catch {
     // Ignore read-only filesystem errors in restricted containers
+  }
+
+  if (isCloudSqlConfigured()) {
+    syncArchitectureStoreToCloudSql(doc).catch(() => {});
   }
 }
 
@@ -3571,24 +3585,29 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
           equilibriumAnchorOverride: liquidityEngine.fusedEquilibriumAnchor,
           symbolicStepDriftUsd: parseFloat((liquidityEngine.fusedNetDriftUsd * 0.35).toFixed(4)),
         }
+      : hadPendingPromotionAck && coreStore.promotedCandTuningOverrides
+      ? {
+          ...coreStore.latentMathWriteBack,
+          ...coreStore.promotedCandTuningOverrides,
+          activeIntegratedStructuralTerm:
+            coreStore.promotedCandTuningOverrides.activeIntegratedStructuralTerm,
+        }
       : {
           ...coreStore.latentMathWriteBack,
-          ...(coreStore.promotedCandTuningOverrides || {
-            driftPersistencePhi: coreStore.latentMathWriteBack.driftPersistencePhi,
-            meanReversionKappa: coreStore.promotedCandTheta ?? 0.135,
-            echoToxicityCouplingBeta: coreStore.latentMathWriteBack.echoToxicityCouplingBeta,
-            echoResilienceCouplingGamma: coreStore.latentMathWriteBack.echoResilienceCouplingGamma,
-            macroResidualCouplingEta: coreStore.latentMathWriteBack.macroResidualCouplingEta,
-            crossVenueObservationPrecisionMult:
-              coreStore.latentMathWriteBack.crossVenueObservationPrecisionMult,
-            equilibriumAnchorOverride: coreStore.liveArchitecture.compositeEquilibriumAnchor,
-            symbolicStepDriftUsd: parseFloat(
-              (
-                coreStore.liveArchitecture.compositeNetDriftUsdPerStep *
-                (coreStore.promotedCandDriftMult ?? 0.42)
-              ).toFixed(4)
-            ),
-          }),
+          driftPersistencePhi: coreStore.latentMathWriteBack.driftPersistencePhi,
+          meanReversionKappa: coreStore.promotedCandTheta ?? 0.135,
+          echoToxicityCouplingBeta: coreStore.latentMathWriteBack.echoToxicityCouplingBeta,
+          echoResilienceCouplingGamma: coreStore.latentMathWriteBack.echoResilienceCouplingGamma,
+          macroResidualCouplingEta: coreStore.latentMathWriteBack.macroResidualCouplingEta,
+          crossVenueObservationPrecisionMult:
+            coreStore.latentMathWriteBack.crossVenueObservationPrecisionMult,
+          equilibriumAnchorOverride: coreStore.liveArchitecture.compositeEquilibriumAnchor,
+          symbolicStepDriftUsd: parseFloat(
+            (
+              coreStore.liveArchitecture.compositeNetDriftUsdPerStep *
+              (coreStore.promotedCandDriftMult ?? 0.42)
+            ).toFixed(4)
+          ),
         };
 
   let scientificCore = evaluateScientificCorePipeline({
@@ -3743,7 +3762,13 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
       );
     }
 
-    coreStore.lastCandTuningOverrides = candPolicyTuning;
+    coreStore.lastCandTuningOverrides = {
+      ...candPolicyTuning,
+      marketAwarenessState: {
+        ...marketAwarenessState,
+        bayesianMetaLearning: undefined,
+      },
+    };
 
     scientificCore = evaluateScientificCorePipeline({
       candles,
@@ -3756,7 +3781,10 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
       verifiedVenueCameras,
       macroNews,
       extensionInput,
-      liveTuning: livePolicyTuning,
+      liveTuning:
+        hadPendingPromotionAck && coreStore.promotedCandTuningOverrides
+          ? liveBaseTuning
+          : livePolicyTuning,
       candidateTuningOverrides: candPolicyTuning,
       dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
     });
@@ -3936,6 +3964,9 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
 export function promoteCandidateArchitecture(params: {
   mode: 'MANUAL_MMI' | 'AUTOMATIC_VERIFIED';
   operatorNote?: string;
+  operatorAuthorization?: string;
+  actorRole?: string;
+  maxProofAgeMs?: number;
 }): {
   promoted: boolean;
   reasonEn: string;
@@ -3944,25 +3975,102 @@ export function promoteCandidateArchitecture(params: {
   candidateArchitecture: ArchitectureState;
   auditEntry: ArchitectureAuditLogEntry;
   persistenceHealth: ArchitecturePersistenceHealth;
+  gdfOsDualControlGate: {
+    allowed: boolean;
+    reason: string;
+    latestProofId: string | null;
+    latestProofStatus: ProofGateEvaluationStatus;
+    proofAgeMs: number | null;
+    decisionRecord: GdfPromotionDecisionRecord;
+  };
 } {
-  const { mode, operatorNote } = params;
+  const { mode, operatorNote, operatorAuthorization, actorRole, maxProofAgeMs } = params;
   const report = coreStore.lastVerificationReport;
+  const passedStr = report ? `${report.passedGatesCount}/${report.totalGatesCount}` : '0/8';
+  const quantStatusStr = `${report?.overallStatus || 'UNVERIFIED'} (${passedStr})`;
+  const effectiveOperatorAuth =
+    operatorAuthorization ||
+    (mode === 'MANUAL_MMI' ? `OPERATOR_MMI${operatorNote ? ` (${operatorNote})` : ''}` : 'CLOSED_LOOP_VERIFIER');
 
+  // 1. Unified GDF OS Dual-Control Proof Gate Enforcement (Required for BOTH MANUAL_MMI and AUTOMATIC_VERIFIED)
+  const osGate = evaluateDualControlPromotionGate(mode, {
+    candidateArchitectureId: coreStore.candidateArchitecture.architectureId,
+    candidateVersionTag: coreStore.candidateArchitecture.versionTag,
+    liveArchitectureId: coreStore.liveArchitecture.architectureId,
+    operatorAuthorization: effectiveOperatorAuth,
+    actorRole,
+    maxProofAgeMs,
+    quantitativeGateStatus: quantStatusStr,
+    dryRun: true, // We record the final combined decision below so quantitative rejections are also captured accurately
+  });
+
+  if (!osGate.allowed) {
+    const decisionRec = recordPromotionGateDecision({
+      mode,
+      decision: 'REJECTED',
+      proofReportId: osGate.latestProofId,
+      proofStatus: osGate.latestProofStatus,
+      proofAgeMs: osGate.proofAgeMs,
+      candidateArchitectureId: coreStore.candidateArchitecture.architectureId,
+      candidateVersionTag: coreStore.candidateArchitecture.versionTag,
+      liveArchitectureId: coreStore.liveArchitecture.architectureId,
+      operatorAuthorization: effectiveOperatorAuth,
+      quantitativeGateStatus: quantStatusStr,
+      reason: osGate.reason,
+    });
+    const rejectedEntry = appendAuditEntry({
+      eventType: 'AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED',
+      actor: mode === 'MANUAL_MMI' ? 'OPERATOR_MMI' : 'CLOSED_LOOP_VERIFIER',
+      sourceArchitectureId: coreStore.candidateArchitecture.architectureId,
+      targetArchitectureId: coreStore.liveArchitecture.architectureId,
+      summaryEn: osGate.reason,
+      summaryFa: `ارتقای معماری کاندیدا (${mode}) توسط گیت کنترل دوگانه GDF OS متوقف شد: گزارش اثبات (Proof) معتبر و به‌روز (${osGate.latestProofStatus}) وجود ندارد.`,
+      verifiableMetrics: `Mode=${mode} | ProofId=${osGate.latestProofId || 'NONE'} | ProofStatus=${osGate.latestProofStatus} | Candidate=${coreStore.candidateArchitecture.architectureId} | Auth=${effectiveOperatorAuth}`,
+    });
+    return {
+      promoted: false,
+      reasonEn: osGate.reason,
+      reasonFa: rejectedEntry.summaryFa,
+      liveArchitecture: coreStore.liveArchitecture,
+      candidateArchitecture: coreStore.candidateArchitecture,
+      auditEntry: rejectedEntry,
+      persistenceHealth: coreStore.persistenceHealth,
+      gdfOsDualControlGate: {
+        ...osGate,
+        decisionRecord: decisionRec,
+      },
+    };
+  }
+
+  // 2. Quantitative Gate Enforcement for AUTOMATIC_VERIFIED (Requires 8/8 VERIFIED_FOR_PROMOTION)
   if (mode === 'AUTOMATIC_VERIFIED') {
     if (
       !report ||
       report.overallStatus !== 'VERIFIED_FOR_PROMOTION' ||
       report.passedGatesCount < report.totalGatesCount
     ) {
-      const passedStr = report ? `${report.passedGatesCount}/${report.totalGatesCount}` : '0/8';
+      const rejectReasonEn = `Automatic promotion blocked: Candidate has passed ${passedStr} quantitative gates (status: ${report?.overallStatus || 'UNVERIFIED'}). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION) in addition to GDF OS Proof (${osGate.latestProofId}).`;
+      const decisionRec = recordPromotionGateDecision({
+        mode,
+        decision: 'REJECTED',
+        proofReportId: osGate.latestProofId,
+        proofStatus: osGate.latestProofStatus,
+        proofAgeMs: osGate.proofAgeMs,
+        candidateArchitectureId: coreStore.candidateArchitecture.architectureId,
+        candidateVersionTag: coreStore.candidateArchitecture.versionTag,
+        liveArchitectureId: coreStore.liveArchitecture.architectureId,
+        operatorAuthorization: effectiveOperatorAuth,
+        quantitativeGateStatus: quantStatusStr,
+        reason: rejectReasonEn,
+      });
       const rejectedEntry = appendAuditEntry({
         eventType: 'AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED',
         actor: 'CLOSED_LOOP_VERIFIER',
         sourceArchitectureId: coreStore.candidateArchitecture.architectureId,
         targetArchitectureId: coreStore.liveArchitecture.architectureId,
-        summaryEn: `Automatic promotion blocked: Candidate has passed ${passedStr} gates (status: ${report?.overallStatus || 'UNVERIFIED'}). Automatic promotion requires 8/8 gates (VERIFIED_FOR_PROMOTION).`,
+        summaryEn: rejectReasonEn,
         summaryFa: `ارتقای خودکار متوقف شد: کاندیدا ${passedStr} گیت را گذرانده است. ارتقای خودکار نیازمند عبور از هر ۸ گیت راستی‌آزمایی است.`,
-        verifiableMetrics: `Status=${report?.overallStatus || 'NONE'} | PassedGates=${passedStr}`,
+        verifiableMetrics: `Status=${report?.overallStatus || 'NONE'} | PassedGates=${passedStr} | ProofId=${osGate.latestProofId}`,
       });
       return {
         promoted: false,
@@ -3972,8 +4080,61 @@ export function promoteCandidateArchitecture(params: {
         candidateArchitecture: coreStore.candidateArchitecture,
         auditEntry: rejectedEntry,
         persistenceHealth: coreStore.persistenceHealth,
+        gdfOsDualControlGate: {
+          ...osGate,
+          allowed: false,
+          reason: rejectReasonEn,
+          decisionRecord: decisionRec,
+        },
       };
     }
+  }
+
+  // 3. Scientific & Structural Validity Guard for MANUAL_MMI (Cannot promote a HALTED_FROZEN or non-finite candidate)
+  if (
+    report?.overallStatus === 'HALTED_FROZEN' ||
+    coreStore.candidateArchitecture.models.filter((m) => m.isEnabled).length === 0 ||
+    !Number.isFinite(coreStore.candidateArchitecture.compositeNetDriftUsdPerStep) ||
+    !Number.isFinite(coreStore.candidateArchitecture.compositeEquilibriumAnchor)
+  ) {
+    const haltRejectEn = `Promotion blocked: Candidate (${coreStore.candidateArchitecture.architectureId}) is in ${report?.overallStatus || 'INVALID'} state or has non-finite structural parameters.`;
+    const decisionRec = recordPromotionGateDecision({
+      mode,
+      decision: 'REJECTED',
+      proofReportId: osGate.latestProofId,
+      proofStatus: osGate.latestProofStatus,
+      proofAgeMs: osGate.proofAgeMs,
+      candidateArchitectureId: coreStore.candidateArchitecture.architectureId,
+      candidateVersionTag: coreStore.candidateArchitecture.versionTag,
+      liveArchitectureId: coreStore.liveArchitecture.architectureId,
+      operatorAuthorization: effectiveOperatorAuth,
+      quantitativeGateStatus: quantStatusStr,
+      reason: haltRejectEn,
+    });
+    const rejectedEntry = appendAuditEntry({
+      eventType: 'AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED',
+      actor: mode === 'MANUAL_MMI' ? 'OPERATOR_MMI' : 'CLOSED_LOOP_VERIFIER',
+      sourceArchitectureId: coreStore.candidateArchitecture.architectureId,
+      targetArchitectureId: coreStore.liveArchitecture.architectureId,
+      summaryEn: haltRejectEn,
+      summaryFa: `ارتقای معماری متوقف شد: کاندیدا در وضعیت توقف اضطراری (HALTED_FROZEN) یا دارای پارامترهای نامعتبر است.`,
+      verifiableMetrics: `Mode=${mode} | Status=${report?.overallStatus || 'NONE'} | ProofId=${osGate.latestProofId}`,
+    });
+    return {
+      promoted: false,
+      reasonEn: haltRejectEn,
+      reasonFa: rejectedEntry.summaryFa,
+      liveArchitecture: coreStore.liveArchitecture,
+      candidateArchitecture: coreStore.candidateArchitecture,
+      auditEntry: rejectedEntry,
+      persistenceHealth: coreStore.persistenceHealth,
+      gdfOsDualControlGate: {
+        ...osGate,
+        allowed: false,
+        reason: haltRejectEn,
+        decisionRecord: decisionRec,
+      },
+    };
   }
 
   const nowIso = new Date().toISOString();
@@ -4036,7 +4197,6 @@ export function promoteCandidateArchitecture(params: {
   coreStore.liveArchitecture = newLiveArch;
 
   // Spawn fresh next-generation Candidate Architecture in the Parallel Universe
-  // Re-seed with fresh initial candidate discovery priors scaled by generation discovery step
   const genExplorationScale = 1 + 0.06 * ((gen % 4) + 1);
   const nextCandidateModels = createInitialCandidateModels().map(m => {
     if (m.origin === 'LEVEL_B_SYMBOLIC_DISCOVERY') {
@@ -4070,20 +4230,34 @@ export function promoteCandidateArchitecture(params: {
   coreStore.candidateArchitecture = newCandidateArch;
   coreStore.pendingManualPromotionCycleAck = true;
 
-  const passedGatesStr = report ? `${report.passedGatesCount}/${report.totalGatesCount}` : 'MMI-Override';
+  const passedGatesStr = report ? `${report.passedGatesCount}/${report.totalGatesCount}` : 'MMI-Verified';
   const noteSuffix = operatorNote ? ` · Note: ${operatorNote}` : '';
   const summaryEn =
     mode === 'MANUAL_MMI'
-      ? `Operator manually approved & promoted Parallel Universe Candidate (${promotedCand.versionTag}) to Live Yellow-Line Architecture (${newLiveArch.versionTag}) via MMI [Gates: ${passedGatesStr}]${noteSuffix}.`
-      : `Closed-Loop Verifier automatically promoted Verified Candidate (${promotedCand.versionTag}) to Live Yellow-Line Architecture (${newLiveArch.versionTag}) after passing all ${passedGatesStr} gates${noteSuffix}.`;
+      ? `Operator manually approved & promoted Parallel Universe Candidate (${promotedCand.versionTag}) to Live Yellow-Line Architecture (${newLiveArch.versionTag}) via MMI [Gates: ${passedGatesStr} · Proof: ${osGate.latestProofId}]${noteSuffix}.`
+      : `Closed-Loop Verifier automatically promoted Verified Candidate (${promotedCand.versionTag}) to Live Yellow-Line Architecture (${newLiveArch.versionTag}) after passing all ${passedGatesStr} gates [Proof: ${osGate.latestProofId}]${noteSuffix}.`;
 
   const summaryFa =
     mode === 'MANUAL_MMI'
-      ? `اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (${promotedCand.versionTag}) را به معماری خط زرد زنده (${newLiveArch.versionTag}) ارتقا داد [گیت‌ها: ${passedGatesStr}].`
-      : `راستی‌آزمای حلقه بسته پس از عبور از تمامی ${passedGatesStr} گیت، معماری کاندیدا (${promotedCand.versionTag}) را به صورت خودکار به خط زرد زنده (${newLiveArch.versionTag}) ارتقا داد.`;
+      ? `اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (${promotedCand.versionTag}) را پس از تایید گواهی اثبات (${osGate.latestProofId}) به معماری خط زرد زنده (${newLiveArch.versionTag}) ارتقا داد [گیت‌ها: ${passedGatesStr}].`
+      : `راستی‌آزمای حلقه بسته پس از عبور از تمامی ${passedGatesStr} گیت و تایید اثبات (${osGate.latestProofId})، معماری کاندیدا (${promotedCand.versionTag}) را به صورت خودکار به خط زرد زنده (${newLiveArch.versionTag}) ارتقا داد.`;
 
   coreStore.lastPromotionBannerEn = summaryEn;
   coreStore.lastPromotionBannerFa = summaryFa;
+
+  const decisionRec = recordPromotionGateDecision({
+    mode,
+    decision: 'ALLOWED',
+    proofReportId: osGate.latestProofId,
+    proofStatus: osGate.latestProofStatus,
+    proofAgeMs: osGate.proofAgeMs,
+    candidateArchitectureId: promotedCand.architectureId,
+    candidateVersionTag: promotedCand.versionTag,
+    liveArchitectureId: newLiveArch.architectureId,
+    operatorAuthorization: effectiveOperatorAuth,
+    quantitativeGateStatus: quantStatusStr,
+    reason: summaryEn,
+  });
 
   const auditEntry = appendAuditEntry({
     eventType: mode === 'MANUAL_MMI' ? 'PROMOTED_MANUAL_MMI' : 'PROMOTED_AUTOMATIC_VERIFIED',
@@ -4092,7 +4266,7 @@ export function promoteCandidateArchitecture(params: {
     targetArchitectureId: newLiveArch.architectureId,
     summaryEn,
     summaryFa,
-    verifiableMetrics: `Mode=${mode} | Gates=${passedGatesStr} | ActiveModels=${newLiveArch.activeModelsCount} | Discovered=${newLiveArch.discoveredModelsCount} | Archived=${oldLive.architectureId}`,
+    verifiableMetrics: `Mode=${mode} | ProofId=${osGate.latestProofId} | Gates=${passedGatesStr} | Auth=${effectiveOperatorAuth} | ActiveModels=${newLiveArch.activeModelsCount} | Archived=${oldLive.architectureId}`,
   });
 
   return {
@@ -4103,6 +4277,10 @@ export function promoteCandidateArchitecture(params: {
     candidateArchitecture: coreStore.candidateArchitecture,
     auditEntry,
     persistenceHealth: coreStore.persistenceHealth,
+    gdfOsDualControlGate: {
+      ...osGate,
+      decisionRecord: decisionRec,
+    },
   };
 }
 
@@ -4430,6 +4608,25 @@ export function writeBackValidatedMathToLatentModel(params?: {
     );
   }
 
+  // Enforce GDF Operating System Dual-Control Proof Gate (P0 Rule 8) on every latent-math write-back
+  const osProofGate = evaluateDualControlPromotionGate(mode, {
+    candidateArchitectureId: cand.architectureId,
+    candidateVersionTag: cand.versionTag,
+    liveArchitectureId: live.architectureId,
+    operatorAuthorization:
+      params?.operatorNote ||
+      (mode === 'MANUAL_MMI' ? 'OPERATOR_MMI_WRITEBACK_SESSION' : 'CLOSED_LOOP_AUTO_WRITEBACK_VERIFIER'),
+    quantitativeGateStatus: report ? report.overallStatus : 'UNVERIFIED_COLD_START',
+    dryRun,
+  });
+
+  if (!osProofGate.allowed) {
+    unmetRequirementsEn.push(osProofGate.reason);
+    unmetRequirementsFa.push(
+      `گیت کنترل دوگانه سیستم‌عامل GDF (قانون ۸) بازنویسی ریاضی مدل پنهان را مسدود کرد: گزارش اثبات (Proof Report) معتبر و جاری با وضعیت PASS یافت نشد (${osProofGate.latestProofStatus}).`
+    );
+  }
+
   const pendingPromotionGatesEn = (report?.gates || [])
     .filter(g => !g.passed)
     .map(g => `${g.titleEn} (${g.metricSummary})`);
@@ -4437,20 +4634,22 @@ export function writeBackValidatedMathToLatentModel(params?: {
     .filter(g => !g.passed)
     .map(g => `${g.titleFa} (${g.metricSummary})`);
 
-  const eligible = requireFullGates
-    ? hasVerificationReport &&
-      notHaltedFrozen &&
-      gate1MinOosWindowPassed &&
-      gate5RealDataProvenancePassed &&
-      gate6SafetyInvariantsPassed &&
-      symbolicParameterStabilityPassed &&
-      fullEightGatePromotionPassed
-    : hasVerificationReport &&
-      notHaltedFrozen &&
-      gate1MinOosWindowPassed &&
-      gate5RealDataProvenancePassed &&
-      gate6SafetyInvariantsPassed &&
-      symbolicParameterStabilityPassed;
+  const eligible =
+    osProofGate.allowed &&
+    (requireFullGates
+      ? hasVerificationReport &&
+        notHaltedFrozen &&
+        gate1MinOosWindowPassed &&
+        gate5RealDataProvenancePassed &&
+        gate6SafetyInvariantsPassed &&
+        symbolicParameterStabilityPassed &&
+        fullEightGatePromotionPassed
+      : hasVerificationReport &&
+        notHaltedFrozen &&
+        gate1MinOosWindowPassed &&
+        gate5RealDataProvenancePassed &&
+        gate6SafetyInvariantsPassed &&
+        symbolicParameterStabilityPassed);
 
   const validationCheck: LatentWriteBackValidationCheck = {
     eligible,

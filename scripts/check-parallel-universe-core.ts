@@ -18,6 +18,7 @@ import {
   bootstrapMultiTimeframeWaterfallCache,
   getMultiTimeframeBootstrapState,
 } from '../src/services/realDataWaterfall.js';
+import { runGdfProofSuite } from '../src/services/gdfOperatingSystem.js';
 
 async function runParallelUniverseVerification(): Promise<void> {
   console.log('======================================================================');
@@ -267,11 +268,12 @@ async function runParallelUniverseVerification(): Promise<void> {
   assert.equal(prePromoLiveTrack.length, 24, 'Pre-promotion liveEnsemble must have 24 steps');
   assert.equal(prePromoCandTrack.length, 24, 'Pre-promotion candidateEnsemble must have 24 steps');
 
+  runGdfProofSuite({ requestedBy: 'PARALLEL_UNIVERSE_TEST_SUITE' });
   const manualPromo = promoteCandidateArchitecture({
     mode: 'MANUAL_MMI',
     operatorNote: 'Automated test verification of MMI promotion path',
   });
-  assert.equal(manualPromo.promoted, true, 'Manual MMI promotion must succeed when explicitly invoked by operator');
+  assert.equal(manualPromo.promoted, true, 'Manual MMI promotion must succeed when explicitly invoked by operator with valid PASS proof');
   assert.notEqual(
     manualPromo.liveArchitecture.architectureId,
     prevLiveId,

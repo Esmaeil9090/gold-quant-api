@@ -3343,10 +3343,10 @@ input:checked + .toggle-slider:before {
           <span class="reliability-dot" id="reliabilityDot"></span>
           <span id="reliabilityBtnText">🛡️ Feed Integrity: QUORUM VERIFIED</span>
         </button>
-        <button class="btn" id="btnGdfOsDrawer" style="border-color: rgba(0, 230, 118, 0.55); color: #00e676; background: rgba(0, 230, 118, 0.1);" title="Open GDF 5-Step Delegation, Playbook, Toolbox, Proof & Audit Operating System">
+        <button class="btn" id="btnGdfOsDrawer" style="border-color: rgba(0, 229, 255, 0.55); color: #00e5ff; background: rgba(0, 229, 255, 0.1);" title="Open GDF 5-Step Delegation, Playbook, Toolbox, Proof & Audit Operating System">
           <span>📋</span>
           <span id="btnGdfOsDrawerTxt">GDF OS · Playbooks &amp; Proof</span>
-          <span id="gdfOsHeaderBadge" style="font-family: monospace; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: rgba(0, 230, 118, 0.2); border: 1px solid rgba(0, 230, 118, 0.5); color: #00e676;">PASS</span>
+          <span id="gdfOsHeaderBadge" style="font-family: monospace; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: rgba(0, 229, 255, 0.16); border: 1px solid rgba(0, 229, 255, 0.45); color: #00e5ff;">CHECKING</span>
         </button>
         <button class="btn" id="bugReportBtn" style="border-color: rgba(255, 171, 0, 0.55); color: #ffd740; background: rgba(255, 171, 0, 0.1);" title="Open System Bug, Error & Provider Diagnostic Report Window">
           <span>🐞</span>
@@ -18282,6 +18282,59 @@ if (btnQuickOpenMmiPanel) {
   });
 }
 
+(function initGdfOperatorSessionClient() {
+  let csrfTokenInMemory = '';
+  let sessionBootstrapPromise = null;
+
+  async function refreshOperatorSession() {
+    if (sessionBootstrapPromise) return sessionBootstrapPromise;
+    sessionBootstrapPromise = (async () => {
+      try {
+        const res = await fetch('/api/auth/operator-session', {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-store',
+          },
+        });
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && typeof data.csrfToken === 'string') {
+            csrfTokenInMemory = data.csrfToken;
+          }
+        }
+      } catch (_) {
+        // Ignore offline/harness environments where session endpoint is not mounted
+      } finally {
+        sessionBootstrapPromise = null;
+      }
+      return csrfTokenInMemory;
+    })();
+    return sessionBootstrapPromise;
+  }
+
+  window.getGdfOperatorSessionHeadersSync = function () {
+    const hdrs = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-GDF-Actor-Role': 'OPERATOR_MMI',
+    };
+    if (csrfTokenInMemory) {
+      hdrs['X-GDF-CSRF-Token'] = csrfTokenInMemory;
+    }
+    return hdrs;
+  };
+
+  window.ensureGdfOperatorSessionHeaders = async function () {
+    if (!csrfTokenInMemory) {
+      await refreshOperatorSession();
+    }
+    return window.getGdfOperatorSessionHeadersSync();
+  };
+})();
+
 const btnManualMmiPromote = document.getElementById('btnManualMmiPromote');
 if (btnManualMmiPromote) {
   btnManualMmiPromote.addEventListener('click', async () => {
@@ -18291,9 +18344,11 @@ if (btnManualMmiPromote) {
       const preCandVer = forecastData?.parallelUniverse?.candidateArchitecture?.versionTag || 'unknown';
       const preCandEnd = forecastData?.parallelUniverse?.candidateEnsemble?.medianTrack?.slice(-1)?.[0]?.value;
 
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       const res = await fetch(buildApiUrl('/api/intelligence-core/promote'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({
           mode: 'MANUAL_MMI',
           operatorNote: 'Operator manual MMI approval from GDF console',
@@ -18303,7 +18358,11 @@ if (btnManualMmiPromote) {
       const bannerEl = document.getElementById('puPromotionStatusBanner');
       if (bannerEl) {
         bannerEl.style.display = 'block';
-        bannerEl.textContent = `✓ ${currentLang === 'fa' ? json.reasonFa : json.reasonEn}`;
+        const isSuccess = Boolean(res.ok && json && json.promoted);
+        const msg = currentLang === 'fa' ? (json.reasonFa || json.reason || json.error) : (json.reasonEn || json.reason || json.error);
+        bannerEl.style.color = isSuccess ? '#00e676' : '#ff5252';
+        bannerEl.style.borderColor = isSuccess ? 'rgba(0, 230, 118, 0.5)' : 'rgba(255, 82, 82, 0.55)';
+        bannerEl.textContent = `${isSuccess ? '✓' : '✕'} ${msg}`;
       }
 
       if (json && json.promoted && forecastData) {
@@ -18365,9 +18424,11 @@ if (btnRunLevel5MetaCycle) {
     const origText = btnRunLevel5MetaCycle.textContent;
     btnRunLevel5MetaCycle.textContent = '⏳ Running Level-5 Bayesian & Causal Cycle...';
     try {
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       const resp = await fetch('/api/intelligence-core/level5-meta-cycle', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({
           timeframe: window.activeInterval || '15m',
           note: 'Operator triggered Level-5 Bayesian Meta-Learning & Open-Ended Causal Discovery cycle from MMI.',
@@ -19029,14 +19090,20 @@ window.GDFMmiConsoleController = (function () {
       try { controller.abort('MMI operation timeout'); } catch (_) {}
     }, timeoutMs);
     try {
+      const syncHeaders =
+        typeof window.getGdfOperatorSessionHeadersSync === 'function'
+          ? window.getGdfOperatorSessionHeadersSync()
+          : {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Cache-Control': 'no-store',
+              'X-GDF-Actor-Role': 'OPERATOR_MMI',
+            };
       const res = await fetch(url, {
         method: 'POST',
+        credentials: 'same-origin',
         signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-store',
-        },
+        headers: syncHeaders,
         body: JSON.stringify(bodyObj || {}),
       });
       clearTimeout(timer);
@@ -19375,9 +19442,11 @@ if (btnBootstrapMtfNow) {
     const origText = btnBootstrapMtfNow.textContent;
     btnBootstrapMtfNow.textContent = '⏳ Bootstrapping 5m/15m/1h/4h/1d...';
     try {
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       await fetch(buildApiUrl('/api/intelligence-core/bootstrap-mtf'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({ force: true }),
       });
       await fetchQuantData(currentTimeframe, true);
@@ -19394,9 +19463,11 @@ const chkAutoPromoteVerified = document.getElementById('chkAutoPromoteVerified')
 if (chkAutoPromoteVerified) {
   chkAutoPromoteVerified.addEventListener('change', async () => {
     try {
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       await fetch(buildApiUrl('/api/intelligence-core/auto-promote-mode'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({ enabled: chkAutoPromoteVerified.checked }),
       });
       await fetchQuantData(currentTimeframe, true);
@@ -19413,9 +19484,11 @@ if (btnRunEightStepCycle) {
     const origTxt = btnRunEightStepCycle.textContent;
     btnRunEightStepCycle.textContent = currentLang === 'fa' ? '⏳ در حال اجرای چرخه ۸مرحله‌ای...' : '⏳ Running 8-Step Cycle...';
     try {
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       const res = await fetch(buildApiUrl('/api/intelligence-core/scientific-cycle'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({
           timeframe: currentTimeframe,
           authorizeIntegrationMode: 'NONE',
@@ -19441,9 +19514,11 @@ if (btnRunPostIntegrationMonitor) {
   btnRunPostIntegrationMonitor.addEventListener('click', async () => {
     btnRunPostIntegrationMonitor.disabled = true;
     try {
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       const res = await fetch(buildApiUrl('/api/intelligence-core/scientific-cycle/monitor'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({ timeframe: currentTimeframe }),
       });
       const json = await res.json();
@@ -19464,9 +19539,11 @@ if (btnRollbackLatentWriteBack) {
   btnRollbackLatentWriteBack.addEventListener('click', async () => {
     btnRollbackLatentWriteBack.disabled = true;
     try {
+      const opHeaders = await window.ensureGdfOperatorSessionHeaders();
       await fetch(buildApiUrl('/api/intelligence-core/writeback-rollback'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: opHeaders,
         body: JSON.stringify({ operatorNote: 'Operator triggered Write-Back Rollback from MMI Console' }),
       });
       await fetchQuantData(currentTimeframe, true);
@@ -19480,6 +19557,9 @@ if (btnRollbackLatentWriteBack) {
 
 // Startup Initialization (Strict Real-Data Mode: No Synthetic Pre-Seed)
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof window.ensureGdfOperatorSessionHeaders === 'function') {
+    window.ensureGdfOperatorSessionHeaders().catch(() => {});
+  }
   applyLanguage(currentLang);
   setupDrawingToolbar();
   initParticles();
@@ -19510,7 +19590,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="display: flex; flex-direction: column; gap: 3px;">
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <span class="modal-title" style="color: #f5d76e;">📋 GDF 5-STEP DELEGATION, PLAYBOOK, TOOLBOX, PROOF &amp; AUDIT OS</span>
-          <span id="gdfOsModalStatusPill" style="font-family: monospace; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px; background: rgba(0, 230, 118, 0.16); border: 1px solid rgba(0, 230, 118, 0.5); color: #00e676;">PROOF: PASS</span>
+          <span id="gdfOsModalStatusPill" style="font-family: monospace; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px; background: rgba(0, 229, 255, 0.16); border: 1px solid rgba(0, 229, 255, 0.45); color: #00e5ff;">PROOF: CHECKING</span>
           <span style="font-family: monospace; font-size: 10px; color: #00e5ff; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); padding: 2px 7px; border-radius: 5px;">EXTERNAL AGENTS: READ-ONLY AUDITOR / ADVISOR</span>
         </div>
         <div style="font-size: 10.5px; color: #8fa2bf;">
@@ -19529,6 +19609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <div class="modal-body" id="gdfOsDrawerBody" style="padding: 16px 20px; background: rgba(6, 10, 18, 0.92);">
+      <div id="gdfOsActionErrorBanner" style="display: none; margin-bottom: 10px; padding: 8px 12px; border-radius: 7px; background: rgba(255, 61, 90, 0.14); border: 1px solid rgba(255, 61, 90, 0.55); color: #ff8a80; font-size: 11.5px; font-weight: 700;"></div>
       <div id="gdfOsTabContent" style="font-size: 12px; color: #dbe7f6;">Loading GDF Operating System Registry...</div>
     </div>
   </div>
@@ -19537,12 +19618,29 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 (function initGdfOperatingSystemConsole() {
   let gdfOsState = null;
+  let gdfOsProofFreshness = null;
+  let lastStateFetchFailed = false;
   let activeTab = 'interview';
+
+  const PROOF_MAX_AGE_MS = 15 * 60 * 1000;
+  const STATE_FETCH_TIMEOUT_MS = 5000;
+  async function getOperatorAuthHeaders() {
+    if (typeof window.ensureGdfOperatorSessionHeaders === 'function') {
+      return await window.ensureGdfOperatorSessionHeaders();
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-GDF-Actor-Role': 'OPERATOR_MMI',
+    };
+  }
 
   const overlay = document.getElementById('gdfOsDrawerOverlay');
   const openBtn = document.getElementById('btnGdfOsDrawer');
   const closeBtn = document.getElementById('btnCloseGdfOsDrawer');
   const tabContent = document.getElementById('gdfOsTabContent');
+  const actionErrorBanner = document.getElementById('gdfOsActionErrorBanner');
   const headerBadge = document.getElementById('gdfOsHeaderBadge');
   const modalStatusPill = document.getElementById('gdfOsModalStatusPill');
   const tabButtons = document.querySelectorAll('[data-gdf-os-tab]');
@@ -19555,39 +19653,198 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;');
   }
 
-  function updateStatusBadges(registry) {
-    if (!registry) return;
-    const latestProof = registry.proofReports && registry.proofReports[0];
-    const st = latestProof ? latestProof.overallStatus : 'PASS';
+  function showActionError(msg) {
+    if (!actionErrorBanner) return;
+    if (!msg) {
+      actionErrorBanner.style.display = 'none';
+      actionErrorBanner.textContent = '';
+      return;
+    }
+    actionErrorBanner.style.display = 'block';
+    actionErrorBanner.textContent = '✕ ' + msg;
+  }
+
+  function evaluateClientProofStatus(registry, serverFreshness) {
+    if (!registry || !Array.isArray(registry.proofReports) || registry.proofReports.length === 0) {
+      return { status: 'UNAVAILABLE', reason: 'No proof report in registry.' };
+    }
+    const latestProof = registry.proofReports[0];
+    if (!latestProof || typeof latestProof !== 'object') {
+      return { status: 'UNAVAILABLE', reason: 'Invalid proof report object.' };
+    }
+    // Always verify timestamp freshness on client so cached or stale PASS is never presented as current
+    const tsMs = Date.parse(latestProof.timestampIso || '');
+    const nowMs = Date.now();
+    if (!Number.isFinite(tsMs)) {
+      return { status: 'UNAVAILABLE', reason: 'Proof report has invalid timestamp.' };
+    }
+    const ageMs = Math.max(0, nowMs - tsMs);
+    const maxAgeMs = (serverFreshness && Number.isFinite(serverFreshness.maxAllowedAgeMs))
+      ? serverFreshness.maxAllowedAgeMs
+      : PROOF_MAX_AGE_MS;
+
+    const checks = Array.isArray(latestProof.checks) ? latestProof.checks : [];
+    const allChecksPass = checks.length >= 7 && checks.every((c) => c && c.status === 'PASS');
+    if (latestProof.overallStatus !== 'PASS' || !allChecksPass) {
+      return {
+        status: 'FAIL',
+        reason: serverFreshness?.reason || 'Latest proof report did not pass all 7 executable checks.',
+      };
+    }
+    const srvStatus = serverFreshness ? (serverFreshness.effectiveStatus || serverFreshness.status) : null;
+    if (ageMs > maxAgeMs || srvStatus === 'STALE') {
+      return {
+        status: 'STALE',
+        reason: serverFreshness?.reason || ('Latest PASS proof report is stale (age ' + Math.round(ageMs / 1000) + 's > ' + Math.round(maxAgeMs / 1000) + 's).'),
+      };
+    }
+    if (srvStatus && srvStatus !== 'PASS') {
+      return {
+        status: srvStatus,
+        reason: serverFreshness.reason || 'Backend reported non-PASS proof status.',
+      };
+    }
+    return {
+      status: 'PASS',
+      reason: 'Verified current PASS proof report (' + latestProof.proofId + ').',
+    };
+  }
+
+  function applyBadgeState(rawStatus, reasonText) {
+    const allowed = ['PASS', 'FAIL', 'STALE', 'UNAVAILABLE', 'CHECKING'];
+    const st = allowed.indexOf(rawStatus) >= 0 ? rawStatus : 'UNAVAILABLE';
+    const palette = {
+      PASS: {
+        color: '#00e676',
+        border: 'rgba(0, 230, 118, 0.5)',
+        bg: 'rgba(0, 230, 118, 0.16)',
+      },
+      FAIL: {
+        color: '#ff3d5a',
+        border: 'rgba(255, 61, 90, 0.55)',
+        bg: 'rgba(255, 61, 90, 0.16)',
+      },
+      STALE: {
+        color: '#ffab00',
+        border: 'rgba(255, 171, 0, 0.55)',
+        bg: 'rgba(255, 171, 0, 0.16)',
+      },
+      UNAVAILABLE: {
+        color: '#ffab00',
+        border: 'rgba(255, 171, 0, 0.55)',
+        bg: 'rgba(255, 171, 0, 0.16)',
+      },
+      CHECKING: {
+        color: '#00e5ff',
+        border: 'rgba(0, 229, 255, 0.45)',
+        bg: 'rgba(0, 229, 255, 0.16)',
+      },
+    }[st];
+
     if (headerBadge) {
       headerBadge.textContent = st;
-      headerBadge.style.color = st === 'PASS' ? '#00e676' : st === 'FAIL' ? '#ff3d5a' : '#ffab00';
-      headerBadge.style.borderColor = st === 'PASS' ? 'rgba(0,230,118,0.5)' : st === 'FAIL' ? 'rgba(255,61,90,0.5)' : 'rgba(255,171,0,0.5)';
+      headerBadge.style.color = palette.color;
+      headerBadge.style.borderColor = palette.border;
+      headerBadge.style.background = palette.bg;
+      if (reasonText) headerBadge.title = reasonText;
+    }
+    if (openBtn) {
+      openBtn.style.borderColor = palette.border;
+      openBtn.style.color = palette.color;
     }
     if (modalStatusPill) {
       modalStatusPill.textContent = 'PROOF: ' + st;
-      modalStatusPill.style.color = st === 'PASS' ? '#00e676' : st === 'FAIL' ? '#ff3d5a' : '#ffab00';
+      modalStatusPill.style.color = palette.color;
+      modalStatusPill.style.borderColor = palette.border;
+      modalStatusPill.style.background = palette.bg;
+      if (reasonText) modalStatusPill.title = reasonText;
+    }
+  }
+
+  function updateStatusBadges(registry, serverFreshness) {
+    if (!registry) {
+      applyBadgeState('UNAVAILABLE', 'GDF Operating System state is unavailable.');
+      return;
+    }
+    const evaluated = evaluateClientProofStatus(registry, serverFreshness);
+    gdfOsProofFreshness = evaluated;
+    applyBadgeState(evaluated.status, evaluated.reason);
+  }
+
+  async function fetchWithBoundedTimeout(url, options, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      try { controller.abort('GDF OS request timeout'); } catch (_) {}
+    }, timeoutMs || STATE_FETCH_TIMEOUT_MS);
+    try {
+      const res = await fetch(url, {
+        ...(options || {}),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      return res;
+    } catch (err) {
+      clearTimeout(timer);
+      throw err;
+    }
+  }
+
+  function renderStateLoadError(errorMsg) {
+    if (!tabContent) return;
+    tabContent.innerHTML =
+      '<div style="padding:14px 16px;border:1px solid rgba(255,61,90,0.55);border-radius:10px;background:rgba(255,61,90,0.1);color:#ff8a80;">' +
+        '<div style="font-weight:800;font-size:13px;margin-bottom:6px;">✕ Failed to load GDF Operating System state</div>' +
+        '<div style="font-family:monospace;font-size:11px;color:#ffd0d0;margin-bottom:10px;">' + escapeHtml(errorMsg || 'Network or timeout error while contacting /api/gdf-os/state') + '</div>' +
+        '<button type="button" class="btn btn-gold" id="btnRetryGdfOsState">↻ Retry Loading GDF OS State</button>' +
+      '</div>';
+    const retryBtn = document.getElementById('btnRetryGdfOsState');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        fetchGdfOsState();
+      });
     }
   }
 
   async function fetchGdfOsState() {
+    if (!gdfOsState) {
+      applyBadgeState('CHECKING', 'Checking GDF Operating System proof state...');
+    }
     try {
-      const res = await fetch('/api/gdf-os/state');
+      const res = await fetchWithBoundedTimeout('/api/gdf-os/state', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json', 'Cache-Control': 'no-store' },
+      }, STATE_FETCH_TIMEOUT_MS);
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status + ' while loading /api/gdf-os/state');
+      }
       const data = await res.json();
       if (data && data.registry) {
+        lastStateFetchFailed = false;
         gdfOsState = data.registry;
-        updateStatusBadges(gdfOsState);
+        showActionError(null);
+        updateStatusBadges(gdfOsState, data.proofFreshness || null);
         renderActiveTab();
+      } else {
+        throw new Error(data?.error || 'Invalid /api/gdf-os/state payload (missing registry).');
       }
     } catch (err) {
-      if (tabContent) {
-        tabContent.innerHTML = '<div style="color:#ff5252;">Failed to load GDF Operating System state.</div>';
-      }
+      // Never allow cached or previous proof results to be presented as current after a failed state fetch
+      lastStateFetchFailed = true;
+      gdfOsState = null;
+      gdfOsProofFreshness = { status: 'UNAVAILABLE', reason: err?.message || 'State request failed.' };
+      applyBadgeState('UNAVAILABLE', gdfOsProofFreshness.reason);
+      renderStateLoadError(err && err.message ? err.message : String(err));
     }
   }
 
   function renderActiveTab() {
-    if (!tabContent || !gdfOsState) return;
+    if (!tabContent) return;
+    if (!gdfOsState) {
+      if (lastStateFetchFailed) {
+        renderStateLoadError('GDF Operating System state is currently unavailable. Click Retry or switch tabs to reload.');
+      }
+      return;
+    }
     if (activeTab === 'interview') {
       const inv = (gdfOsState.interviews && gdfOsState.interviews[0]) || null;
       if (!inv) {
@@ -19670,14 +19927,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (activeTab === 'proof') {
       const prf = (gdfOsState.proofReports && gdfOsState.proofReports[0]) || null;
+      const evaluated = evaluateClientProofStatus(gdfOsState, gdfOsProofFreshness);
+      const statusColor = evaluated.status === 'PASS' ? '#00e676' : evaluated.status === 'FAIL' ? '#ff3d5a' : '#ffab00';
       tabContent.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">' +
-          '<div style="font-size:13px;font-weight:800;color:#fff;">Step 4 — Independent Proof Verification Report</div>' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:800;color:#fff;">Step 4 — Independent Executable Proof Verification Report</div>' +
+            '<div style="font-size:11px;color:' + statusColor + ';">Current Status: <b>' + escapeHtml(evaluated.status) + '</b> — ' + escapeHtml(evaluated.reason) + '</div>' +
+          '</div>' +
           '<button type="button" class="btn btn-gold" id="btnRunLiveProofNow">⚡ Execute Live Proof Suite Now</button>' +
         '</div>' +
         (prf
-          ? '<div style="border:1px solid rgba(0,230,118,0.4);border-radius:10px;padding:12px;background:rgba(8,16,26,0.9);margin-bottom:12px;font-size:11.5px;">' +
-              '<div style="margin-bottom:4px;"><b>Proof ID:</b> <code>' + escapeHtml(prf.proofId) + '</code> · <b>Timestamp:</b> <code>' + escapeHtml(prf.timestampIso) + '</code> · <b>Overall:</b> <span style="color:#00e676;font-weight:800;">' + escapeHtml(prf.overallStatus) + '</span></div>' +
+          ? '<div style="border:1px solid ' + (evaluated.status === 'PASS' ? 'rgba(0,230,118,0.4)' : 'rgba(255,171,0,0.5)') + ';border-radius:10px;padding:12px;background:rgba(8,16,26,0.9);margin-bottom:12px;font-size:11.5px;">' +
+              '<div style="margin-bottom:4px;"><b>Proof ID:</b> <code>' + escapeHtml(prf.proofId) + '</code> · <b>Timestamp:</b> <code>' + escapeHtml(prf.timestampIso) + '</code> · <b>Report Status:</b> <span style="color:' + statusColor + ';font-weight:800;">' + escapeHtml(evaluated.status) + '</span></div>' +
               '<div style="margin-bottom:4px;"><b>1. What was requested:</b> ' + escapeHtml(prf.whatWasRequested) + '</div>' +
               '<div style="margin-bottom:4px;"><b>2. What was executed:</b> ' + escapeHtml(prf.whatWasExecuted) + '</div>' +
               '<div style="margin-bottom:4px;"><b>3. What output was produced:</b> ' + escapeHtml(prf.whatOutputWasProduced) + '</div>' +
@@ -19698,27 +19960,36 @@ document.addEventListener('DOMContentLoaded', () => {
                   '</tr>'
                 )).join('') +
               '</tbody></table>'
-          : '<div>No proof report generated yet.</div>');
+          : '<div>No proof report generated yet. Click "Execute Live Proof Suite Now" to run the 7 executable verification checks.</div>');
 
       const runBtn = document.getElementById('btnRunLiveProofNow');
       if (runBtn) {
         runBtn.addEventListener('click', async () => {
           runBtn.disabled = true;
           runBtn.textContent = '⏳ Running Live Proof Checks...';
+          showActionError(null);
           try {
-            const res = await fetch('/api/gdf-os/run-proof', {
+            const authHeaders = await getOperatorAuthHeaders();
+            const res = await fetchWithBoundedTimeout('/api/gdf-os/run-proof', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              headers: authHeaders,
               body: JSON.stringify({ requestedBy: 'OPERATOR_MMI_CONSOLE' }),
-            });
+            }, 12000);
             const data = await res.json();
+            if (!res.ok || data?.status === 'ERROR') {
+              throw new Error(data?.error || data?.reason || ('HTTP ' + res.status + ' proof execution failure'));
+            }
             if (data && data.registry) {
               gdfOsState = data.registry;
-              updateStatusBadges(gdfOsState);
+              updateStatusBadges(gdfOsState, data.proofFreshness || null);
               renderActiveTab();
             }
+          } catch (err) {
+            showActionError('Proof execution failed: ' + (err && err.message ? err.message : String(err)));
           } finally {
             runBtn.disabled = false;
+            runBtn.textContent = '⚡ Execute Live Proof Suite Now';
           }
         });
       }
@@ -19768,19 +20039,29 @@ document.addEventListener('DOMContentLoaded', () => {
         auditBtn.addEventListener('click', async () => {
           auditBtn.disabled = true;
           auditBtn.textContent = '⏳ Auditing...';
+          showActionError(null);
           try {
-            const res = await fetch('/api/gdf-os/audit', {
+            const authHeaders = await getOperatorAuthHeaders();
+            const res = await fetchWithBoundedTimeout('/api/gdf-os/audit', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              headers: authHeaders,
               body: JSON.stringify({ autoLoopbackOnFindings: true }),
-            });
+            }, 12000);
             const data = await res.json();
+            if (!res.ok || data?.status === 'ERROR') {
+              throw new Error(data?.error || data?.reason || ('HTTP ' + res.status + ' audit execution failure'));
+            }
             if (data && data.registry) {
               gdfOsState = data.registry;
+              updateStatusBadges(gdfOsState, data.proofFreshness || null);
               renderActiveTab();
             }
+          } catch (err) {
+            showActionError('Audit request failed: ' + (err && err.message ? err.message : String(err)));
           } finally {
             auditBtn.disabled = false;
+            auditBtn.textContent = '🔍 Run 6-Point Audit & Auto-Loopback';
           }
         });
       }
@@ -19789,21 +20070,30 @@ document.addEventListener('DOMContentLoaded', () => {
       if (lbBtn) {
         lbBtn.addEventListener('click', async () => {
           lbBtn.disabled = true;
+          showActionError(null);
           try {
-            const res = await fetch('/api/gdf-os/loopback', {
+            const authHeaders = await getOperatorAuthHeaders();
+            const res = await fetchWithBoundedTimeout('/api/gdf-os/loopback', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              headers: authHeaders,
               body: JSON.stringify({
                 playbookId: 'PB-006',
                 reason: 'Operator verified continuous closed-loop Step 5 Loopback SOP upgrade.',
                 addedFailureModeOrStep: 'Verified SHA-256 playbook digest check and read-only External Auditor Packet boundary.',
               }),
-            });
+            }, 10000);
             const data = await res.json();
+            if (!res.ok || data?.status === 'ERROR' || data?.status === 'NOT_FOUND') {
+              throw new Error(data?.error || data?.reason || ('HTTP ' + res.status + ' loopback request failure'));
+            }
             if (data && data.registry) {
               gdfOsState = data.registry;
+              updateStatusBadges(gdfOsState, data.proofFreshness || null);
               renderActiveTab();
             }
+          } catch (err) {
+            showActionError('Loopback request failed: ' + (err && err.message ? err.message : String(err)));
           } finally {
             lbBtn.disabled = false;
           }
@@ -19813,9 +20103,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (openBtn && overlay) {
-    openBtn.addEventListener('click', () => {
+    openBtn.addEventListener('click', async () => {
       overlay.classList.remove('hidden');
-      fetchGdfOsState();
+      await fetchGdfOsState();
     });
   }
   if (closeBtn && overlay) {
@@ -19824,13 +20114,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   tabButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       tabButtons.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       activeTab = btn.getAttribute('data-gdf-os-tab') || 'interview';
-      renderActiveTab();
+      showActionError(null);
+      if (!gdfOsState || lastStateFetchFailed) {
+        await fetchGdfOsState();
+      } else {
+        updateStatusBadges(gdfOsState, null);
+        renderActiveTab();
+      }
     });
   });
+
+  // Expose controller for deterministic acceptance testing
+  window.GDFOsConsoleController = {
+    fetchGdfOsState,
+    updateStatusBadges,
+    evaluateClientProofStatus,
+    getState: () => ({
+      gdfOsState,
+      gdfOsProofFreshness,
+      lastStateFetchFailed,
+      activeTab,
+    }),
+  };
 
   // Initial background status badge sync
   setTimeout(fetchGdfOsState, 1200);

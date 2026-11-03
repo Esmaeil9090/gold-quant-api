@@ -50,6 +50,7 @@ import {
   rollbackLatentMathWriteBack,
 } from '../src/services/intelligenceAwarenessCore.js';
 import { evaluateScientificCorePipeline } from '../src/engine/scientificCore.js';
+import { runGdfProofSuite } from '../src/services/gdfOperatingSystem.js';
 
 interface ScenarioResult {
   id: number;
@@ -184,6 +185,7 @@ async function runAcceptanceSuite(): Promise<void> {
     }
     reloadArchitectureStoreFromDisk();
     resetScientificDiscoveryCycleStoreForTests();
+    runGdfProofSuite({ requestedBy: 'EIGHT_STEP_SCIENTIFIC_CYCLE_SUITE_SETUP' });
 
     const ar1Candles = buildTestCandles(72, 'AR1_MISSED_DRIFT');
     const liveMacro = buildVerifiedMacroSnapshot();

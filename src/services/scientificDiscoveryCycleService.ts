@@ -2445,6 +2445,50 @@ export function runIntegrateStage(
       `Eight-Step Scientific Cycle Step 7 (INTEGRATE) case=${caseRec.caseId} hypothesis=${hyp.hypothesisId}`,
   });
 
+  if (!wbResult.writtenBack) {
+    const blockedRec: ScientificIntegrationRecord = {
+      integrationId: `int-blocked-${caseRec.caseId}`,
+      caseId: caseRec.caseId,
+      hypothesisId: hyp.hypothesisId,
+      decisionId: dec.decisionId,
+      integratedAtIso: nowIso,
+      integrationExecuted: false,
+      integrationMode: 'BLOCKED_UNVERIFIED',
+      epistemicBadge: dec.verdict === 'REJECT' ? 'REJECTED' : dec.epistemicBadge,
+      previousWriteBackGeneration: prevWb.writeBackGeneration,
+      newWriteBackGeneration: prevWb.writeBackGeneration,
+      previousLiveArchitectureId: prevLiveArchId,
+      newLiveArchitectureId: prevLiveArchId,
+      equationDiffAscii: {
+        beforeEquation: 'x_1(τ_t) = x_1(τ_{t-1}) + γ_shrink (x_2 + β_tox (x_4/x_5) x_3 + x_6 + 0.14 e_{t-1}) Δτ_t',
+        afterEquation: 'Unchanged (integration blocked by GDF OS Dual-Control Proof Gate)',
+        addedStructuralTermAscii: null,
+      },
+      parameterDiffs: [],
+      activePathExecutionVerification: {
+        verifiedOnActiveForecastPath: false,
+        yellowForecastTerminalBeforeUsd: terminalBeforeUsd,
+        yellowForecastTerminalAfterUsd: terminalBeforeUsd,
+        attributableShiftUsd: 0,
+        structuralTermContributionUsd: 0,
+        covarianceRemainPsd: true,
+        explanationEn: wbResult.reasonEn,
+      },
+      rollbackSnapshotRef: {
+        rollbackGeneration: prevWb.writeBackGeneration,
+        canRollbackImmediately: snapBefore.canRollbackWriteBack,
+      },
+      summaryEn: wbResult.reasonEn,
+      summaryFa: wbResult.reasonFa,
+    };
+
+    caseRec.integrationRecord = blockedRec;
+    transitionCaseState(caseRec, 'COMPLETED_WITHOUT_PROMOTION', wbResult.reasonEn, dec.epistemicBadge);
+    cycleStore.activeCase = caseRec;
+    saveScientificCycleStoreToDisk();
+    return blockedRec;
+  }
+
   // Ensure the structural term is attached on the active LatentModelMathWriteBackState reference
   const snapAfter = getIntelligenceCoreStateSnapshot();
 

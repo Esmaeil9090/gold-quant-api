@@ -15,6 +15,7 @@ import {
 import {
   evaluateScientificCorePipeline,
 } from '../src/engine/scientificCore.js';
+import { runGdfProofSuite } from '../src/services/gdfOperatingSystem.js';
 
 async function main() {
   console.log('=== GDF SCIENTIFIC CORE UPGRADE VERIFICATION ===');
@@ -203,11 +204,12 @@ async function main() {
     activeTier: 'TIER_1_PRIMARY',
   });
   const prePromoCandTrack = prePromoEval.candidateEnsemble.medianTrack.map(p => p.value);
+  runGdfProofSuite({ requestedBy: 'SCIENTIFIC_CORE_TEST_SUITE' });
   const promoRes = promoteCandidateArchitecture({
     mode: 'MANUAL_MMI',
     operatorNote: 'Scientific core promotion parity test',
   });
-  assert.equal(promoRes.promoted, true, 'Manual MMI promotion must succeed');
+  assert.equal(promoRes.promoted, true, 'Manual MMI promotion must succeed when current proof report is PASS');
 
   const postPromoEval = evaluateParallelUniverseAndAwarenessCore({
     candles: wf.candles,
