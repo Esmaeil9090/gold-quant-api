@@ -1056,9 +1056,30 @@ function buildDeterministicTelemetryFallbackMarkdown(
       .join('\n');
   }
 
+  const qLower = String(question || '').toLowerCase();
+  const asksReliability = /reliab|accura|predict|trust|valid|hit rate|scorecard|gate/i.test(qLower);
+  const asksMacroOrElection = /election|midterm|dem|rep|fiscal|surge|shock|macro|yield|tips|tariff|deficit|news|geopolit/i.test(qLower);
+
   const specialistSections: string[] = [
     `### ${expert.badgeLabel} ${expert.titleEn} — Live Telemetry & Repository Synthesis`,
   ];
+
+  if (asksReliability) {
+    specialistSections.push(
+      `#### 🎯 How Reliable GDF Is Right Now in Predicting Gold (${wf.activeInterval || '15m'})`,
+      `- **8-Gate Causal Out-of-Sample (OOS) Verification**: Currently passing \`${vr.passedGatesCount ?? 0}/${vr.totalGatesCount ?? 8}\` statistical gates (\`${vr.overallStatus || 'CALIBRATING'}\`) across \`${vr.realizedOosBarsEvaluated ?? 0}/${vr.dataDrivenMinWindowBars ?? 30}\` realized OOS bars (Live OOS RMSE=\`$${Number(vr.liveRmseUsd || 0).toFixed(3)}\`, Rank IC=\`${Number(vr.liveRankIc || 0).toFixed(3)}\`, Diebold-Mariano t-stat=\`${Number(vr.dieboldMarianoTStat || 0).toFixed(3)}\`).`,
+      `- **Why GDF Avoids Overfitting**: Every forecast combines the **6D Volume-Clock Extended Kalman Filter** (\`[p, v, a, b, m, r]\`), **Student-t (\nu=4) fat-tailed uncertainty plumes**, and an **Adaptive Circuit Breaker** that freezes filter mutation if live feeds degrade.`
+    );
+  }
+
+  if (asksMacroOrElection) {
+    specialistSections.push(
+      `#### 🏛️ How GDF Models Election / Midterm & Fiscal-Deficit Gold Price Surges`,
+      `- **1. 3-Factor Orthogonal Macro Gravity (\`m_t\` state in \`quantEngine.ts\`)**: Political and fiscal shifts (such as U.S. Midterm outcomes altering deficit spending, Treasury issuance, and inflation expectations) immediately reprice **10Y TIPS Real Yields** and **DXY liquidity**. GDF's Gram-Schmidt orthogonalized macro factor engine converts real-yield compression into an upward drift force toward the upper equilibrium anchor (\`$${Number(sc.liveArchitecture?.compositeEquilibriumAnchor || 0).toFixed(2)}\`).`,
+      `- **2. Bayesian Online Changepoint Detection (\`BOCPD\`) & VPIN Toxicity**: Rather than guessing political polls, GDF detects the exact moment institutional order flow reprices a fiscal/election shock via **BOCPD hazard jumps (\`\\lambda_{jump}\`)** and **VPIN order-flow imbalance**, automatically shifting the 5-state Dirichlet regime posterior into **Breakout / High-Volatility Expansion**.`,
+      `- **3. Langevin Double-Well Breakout & Pulse-Echo Sonar**: When fiscal/election buying injects kinetic energy exceeding the local potential well barrier around \`${closeStr}\`, the Overdamped Langevin SDE projects rapid migration toward the upper **HTF Point-of-Control (POC) liquidity magnet**.`
+    );
+  }
 
   if (expert.id === 'COUNCIL_ALL' || expert.id === 'FINANCIAL_STRATEGIST') {
     specialistSections.push(
@@ -1188,7 +1209,7 @@ export async function runExpertCouncilConsultation(params: {
       },
     });
 
-    const candidateModels = ['gemini-3.8-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+    const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
     const generateWithModelFailover = async (reqContents: any[], reqConfig: any) => {
       let lastErr: any = null;
       for (let idx = 0; idx < candidateModels.length; idx++) {

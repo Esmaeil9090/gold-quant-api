@@ -1424,6 +1424,8 @@ app.get('/api/gdf-os/auditor-packet', (req: Request, res: Response) => {
 // GDF Multi-Disciplinary AI Council of Experts (Read-Only Repo & Live Telemetry)
 // =========================================================================
 app.get('/api/gdf-os/expert-council/roster', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   const interval = typeof req.query?.interval === 'string' ? req.query.interval.trim() : '15m';
   const liveTelemetry = executeGetLiveMarketAndEngineTelemetry(interval);
   const liveRoster = buildLiveExpertSpecialistRoster(interval, liveTelemetry);
@@ -1434,18 +1436,24 @@ app.get('/api/gdf-os/expert-council/roster', (req: Request, res: Response) => {
   });
 });
 
-app.post('/api/gdf-os/expert-council/chat', async (req: Request, res: Response) => {
+const handleExpertCouncilChatRequest = async (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   try {
-    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    const rawMsg = req.method === 'GET' ? req.query?.message : req.body?.message;
+    const message = typeof rawMsg === 'string' ? rawMsg.trim() : '';
     if (!message) {
       return res.status(400).json({
         status: 'ERROR',
         error: 'Message is required for Expert Council consultation.',
       });
     }
-    const expertId = typeof req.body?.expertId === 'string' ? req.body.expertId.trim() : 'COUNCIL_ALL';
-    const interval = typeof req.body?.interval === 'string' ? req.body.interval.trim() : '15m';
-    const language = req.body?.language === 'fa' ? 'fa' : 'en';
+    const rawExpert = req.method === 'GET' ? req.query?.expertId : req.body?.expertId;
+    const expertId = typeof rawExpert === 'string' && rawExpert.trim() ? rawExpert.trim() : 'COUNCIL_ALL';
+    const rawInterval = req.method === 'GET' ? req.query?.interval : req.body?.interval;
+    const interval = typeof rawInterval === 'string' && rawInterval.trim() ? rawInterval.trim() : '15m';
+    const rawLang = req.method === 'GET' ? req.query?.language : req.body?.language;
+    const language = rawLang === 'fa' ? 'fa' : 'en';
     const history = Array.isArray(req.body?.history) ? req.body.history : [];
 
     const consultation = await runExpertCouncilConsultation({
@@ -1462,7 +1470,10 @@ app.post('/api/gdf-os/expert-council/chat', async (req: Request, res: Response) 
       error: err?.message || 'Expert Council consultation failed.',
     });
   }
-});
+};
+
+app.get('/api/gdf-os/expert-council/chat', handleExpertCouncilChatRequest);
+app.post('/api/gdf-os/expert-council/chat', handleExpertCouncilChatRequest);
 
 
 // Strict API 404 JSON Guard: Never allow unknown /api/* routes to fall through to the HTML SPA catch-all
