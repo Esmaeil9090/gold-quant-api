@@ -113,6 +113,11 @@ const {
 } = await import('./src/services/gdfOperatingSystem.js');
 const { adminAuth } = await import('./src/lib/firebase-admin.js');
 const { getOrCreateUser, isCloudSqlConfigured } = await import('./src/db/gdfRepository.js');
+const {
+  EXPERT_COUNCIL_ROSTER,
+  executeGetLiveMarketAndEngineTelemetry,
+  runExpertCouncilConsultation,
+} = await import('./src/services/expertCouncilService.js');
 
 
 const app = express();
@@ -1412,6 +1417,48 @@ app.get('/api/gdf-os/auditor-packet', (req: Request, res: Response) => {
     status: 'SUCCESS',
     packet,
   });
+});
+
+// =========================================================================
+// GDF Multi-Disciplinary AI Council of Experts (Read-Only Repo & Live Telemetry)
+// =========================================================================
+app.get('/api/gdf-os/expert-council/roster', (req: Request, res: Response) => {
+  const interval = typeof req.query?.interval === 'string' ? req.query.interval.trim() : '15m';
+  res.json({
+    status: 'SUCCESS',
+    roster: EXPERT_COUNCIL_ROSTER,
+    liveTelemetry: executeGetLiveMarketAndEngineTelemetry(interval),
+  });
+});
+
+app.post('/api/gdf-os/expert-council/chat', async (req: Request, res: Response) => {
+  try {
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    if (!message) {
+      return res.status(400).json({
+        status: 'ERROR',
+        error: 'Message is required for Expert Council consultation.',
+      });
+    }
+    const expertId = typeof req.body?.expertId === 'string' ? req.body.expertId.trim() : 'COUNCIL_ALL';
+    const interval = typeof req.body?.interval === 'string' ? req.body.interval.trim() : '15m';
+    const language = req.body?.language === 'fa' ? 'fa' : 'en';
+    const history = Array.isArray(req.body?.history) ? req.body.history : [];
+
+    const consultation = await runExpertCouncilConsultation({
+      message,
+      expertId: expertId as any,
+      interval,
+      language,
+      history,
+    });
+    res.json(consultation);
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'ERROR',
+      error: err?.message || 'Expert Council consultation failed.',
+    });
+  }
 });
 
 

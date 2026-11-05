@@ -16,12 +16,26 @@ export const createPool = () => {
       password: process.env.SQL_PASSWORD,
       database: process.env.SQL_DB_NAME,
       max: 10,
+      idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 15000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 5000,
       allowExitOnIdle: true,
     });
 
-    global._postgresPool.on('error', (err) => {
-      console.error('Unexpected error on idle SQL pool client:', err);
+    global._postgresPool.on('error', (err: any) => {
+      const msg = String(err?.message || err || '');
+      // Cloud SQL Developer Edition (scale-to-zero) and proxies routinely reclaim idle connections.
+      // pg.Pool automatically evicts the closed idle client and reconnects on the next query.
+      if (
+        msg.includes('Connection terminated unexpectedly') ||
+        msg.includes('Client has encountered a connection error') ||
+        err?.code === 'ECONNRESET' ||
+        err?.code === '57P01'
+      ) {
+        return;
+      }
+      console.warn('[GDF Cloud SQL Pool] Non-fatal idle client notice:', msg);
     });
   }
   return global._postgresPool;

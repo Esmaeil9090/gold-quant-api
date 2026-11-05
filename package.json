@@ -25,6 +25,7 @@
     "start": "node server.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.32.0",
     "@types/pg": "^8.23.1",
     "archiver": "^8.0.0",
     "cors": "^2.8.5",

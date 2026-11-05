@@ -3348,6 +3348,10 @@ input:checked + .toggle-slider:before {
           <span id="btnGdfOsDrawerTxt">GDF OS · Playbooks &amp; Proof</span>
           <span id="gdfOsHeaderBadge" style="font-family: monospace; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 4px; background: rgba(0, 229, 255, 0.16); border: 1px solid rgba(0, 229, 255, 0.45); color: #00e5ff;">CHECKING</span>
         </button>
+        <button class="btn" id="btnOpenExpertCouncil" style="border-color: rgba(245, 215, 110, 0.65); color: #f5d76e; background: rgba(245, 215, 110, 0.12);" title="Open GDF Multi-Disciplinary AI Council of Experts (Financial, Math, Physics, Code, Systems & Visual Design)">
+          <span>🏛️</span>
+          <span id="btnOpenExpertCouncilTxt">AI Expert Council</span>
+        </button>
         <button class="btn" id="bugReportBtn" style="border-color: rgba(255, 171, 0, 0.55); color: #ffd740; background: rgba(255, 171, 0, 0.1);" title="Open System Bug, Error & Provider Diagnostic Report Window">
           <span>🐞</span>
           <span data-i18n="btnBugReport">System Report</span>
@@ -20143,6 +20147,307 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial background status badge sync
   setTimeout(fetchGdfOsState, 1200);
+})();
+</script>
+
+<!-- =========================================================================
+     GDF MULTI-DISCIPLINARY AI COUNCIL OF EXPERTS DRAWER
+     (Financial, Mathematician, Physicist, Code Architect, Systems & Visual Designer)
+     ========================================================================= -->
+<div id="gdfExpertCouncilOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="GDF Multi-Disciplinary AI Council of Experts">
+  <div class="modal-box" style="max-width: 1020px; width: 96%; max-height: 90vh; display: flex; flex-direction: column; border-color: rgba(245, 215, 110, 0.6);">
+    <div class="modal-header" style="background: rgba(8, 14, 26, 0.96); border-bottom: 1px solid rgba(245, 215, 110, 0.25);">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="modal-title" style="color: #f5d76e;">🏛️ GDF MULTI-DISCIPLINARY AI COUNCIL OF EXPERTS</span>
+          <span style="font-family: monospace; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px; background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676;">FULL REPO &amp; LIVE TELEMETRY ACCESS</span>
+          <span style="font-family: monospace; font-size: 10px; color: #00e5ff; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); padding: 2px 7px; border-radius: 5px;">READ-ONLY FORENSIC &amp; ADVISORY BOUNDARY</span>
+        </div>
+        <div style="font-size: 11px; color: #8fa2bf;">
+          Active Specialists: <b>📈 Financial Strategist</b> · <b>🧮 Applied Mathematician</b> · <b>⚛️ Econophysicist</b> · <b>💻 Code Architect</b> · <b>🛡️ Systems &amp; Proof Lead</b> · <b>🎨 Visual &amp; 3D Designer</b>
+        </div>
+      </div>
+      <button type="button" class="modal-close" id="btnCloseExpertCouncil" title="Close AI Expert Council">✕</button>
+    </div>
+
+    <!-- Live Telemetry Status Bar -->
+    <div id="gdfCouncilTelemetryBar" style="padding: 8px 16px; background: rgba(5, 10, 18, 0.95); border-bottom: 1px solid rgba(40, 60, 95, 0.45); font-family: monospace; font-size: 11px; color: #9cb0cc; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+      <span>⏳ Synchronizing live market, 6D Scientific Core &amp; repository telemetry...</span>
+    </div>
+
+    <!-- Specialist Persona Selector Pills -->
+    <div id="gdfCouncilPersonaStrip" style="padding: 10px 16px; background: rgba(9, 15, 26, 0.92); border-bottom: 1px solid rgba(40, 60, 95, 0.45); display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+      <button type="button" class="btn gdf-expert-pill active" data-expert-id="COUNCIL_ALL" style="font-size: 11px; padding: 5px 10px; border-color: #f5d76e; color: #f5d76e; background: rgba(245, 215, 110, 0.16);">🏛️ Full Council (All 6)</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="FINANCIAL_STRATEGIST" style="font-size: 11px; padding: 5px 10px;">📈 Financial &amp; Market</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="MATHEMATICIAN" style="font-size: 11px; padding: 5px 10px;">🧮 Mathematician</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="PHYSICIST" style="font-size: 11px; padding: 5px 10px;">⚛️ Physicist (Hydrodynamics)</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="SOFTWARE_ARCHITECT" style="font-size: 11px; padding: 5px 10px;">💻 Code &amp; Repo Architect</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="SYSTEMS_ENGINEER" style="font-size: 11px; padding: 5px 10px;">🛡️ Systems &amp; Governance</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="VISUAL_DESIGNER" style="font-size: 11px; padding: 5px 10px;">🎨 Visual &amp; 3D Designer</button>
+    </div>
+
+    <!-- Quick Prompt Suggestions -->
+    <div style="padding: 8px 16px; background: rgba(7, 12, 22, 0.9); border-bottom: 1px solid rgba(40, 60, 95, 0.35); display: flex; flex-wrap: wrap; gap: 6px;">
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Analyze current Gold/PAXG price action, cross-venue basis spread, 3-factor macro yields (TIPS/DXY), VPIN order-flow toxicity, and HTF POC attractors." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(0, 230, 118, 0.4); color: #00e676;">📈 Live Market &amp; Macro Outlook</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Inspect the 6D Kalman & Parallel Candidate symbolic equations and explain why the current 8-Gate verification scorecard is in its current state." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(0, 229, 255, 0.4); color: #00e5ff;">🧮 6D Math &amp; 8-Gate Critique</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Analyze the order-book hydrodynamic flow, Langevin potential well stability around HTF POC, and shock-damping resilience in current market conditions." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(224, 64, 251, 0.4); color: #e040fb;">⚛️ Econophysics &amp; Potential Wells</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Inspect src/services/realDataWaterfall.ts and recent provider HTTP diagnostics to analyze app performance, timeouts, and venue failover health." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(64, 196, 255, 0.4); color: #40c4ff;">💻 Repo &amp; Waterfall Performance</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Audit the current GDF Operating System state, Step 4 Proof freshness, Playbooks PB-001..006, and Cloud SQL (us-east1) persistence health." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(255, 171, 0, 0.4); color: #ffab00;">🛡️ GDF OS &amp; Cloud SQL Audit</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Evaluate the 2D uncertainty plume canvas, 3D WebGL liquidity surface, and bilingual EN/FA HUD ergonomics in index.html." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(255, 64, 129, 0.4); color: #ff4081;">🎨 Visual HUD &amp; 3D Review</button>
+    </div>
+
+    <!-- Chat Conversation Stream -->
+    <div id="gdfCouncilChatLog" style="flex: 1; min-height: 300px; max-height: 52vh; overflow-y: auto; padding: 16px 20px; background: rgba(5, 9, 16, 0.94); display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: #dbe7f6; line-height: 1.55;">
+      <div style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(245, 215, 110, 0.35); background: rgba(14, 22, 38, 0.9);">
+        <div style="font-weight: 800; color: #f5d76e; margin-bottom: 4px;">🏛️ Welcome to the GDF Multi-Disciplinary AI Council of Experts</div>
+        <div style="color: #9cb0cc; font-size: 11.5px;">
+          Select either the <b>Full Council (All 6 Specialists)</b> or any individual expert above, then ask any question about <b>live Gold/PAXG market &amp; macro structure</b>, <b>6D stochastic mathematics</b>, <b>hydrodynamic physics</b>, <b>repository source code (`src/`, `server.ts`, `playbooks/`)</b>, <b>Cloud SQL &amp; GDF OS governance</b>, or <b>2D/3D visual design</b>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div style="padding: 12px 16px; background: rgba(8, 14, 26, 0.98); border-top: 1px solid rgba(40, 60, 95, 0.55); display: flex; gap: 8px; align-items: center;">
+      <input
+        type="text"
+        id="gdfCouncilInput"
+        placeholder="Ask the GDF Council about live market action, 6D math, physics, repository code, or visual UX..."
+        style="flex: 1; background: rgba(4, 8, 15, 0.95); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 12.5px; outline: none;"
+      />
+      <button type="button" class="btn btn-gold" id="btnSendCouncilMessage" style="padding: 10px 16px; font-weight: 800;">⚡ Consult Council</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function initGdfExpertCouncilConsole() {
+  let activeExpertId = 'COUNCIL_ALL';
+  let chatHistory = [];
+  let isConsulting = false;
+
+  const overlay = document.getElementById('gdfExpertCouncilOverlay');
+  const openBtn = document.getElementById('btnOpenExpertCouncil');
+  const closeBtn = document.getElementById('btnCloseExpertCouncil');
+  const telemetryBar = document.getElementById('gdfCouncilTelemetryBar');
+  const chatLog = document.getElementById('gdfCouncilChatLog');
+  const inputEl = document.getElementById('gdfCouncilInput');
+  const sendBtn = document.getElementById('btnSendCouncilMessage');
+  const personaBtns = document.querySelectorAll('.gdf-expert-pill');
+  const quickPromptBtns = document.querySelectorAll('.gdf-council-quick-prompt');
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatCouncilMarkdown(md) {
+    const safe = escapeHtml(md || '');
+    return safe
+      .replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, '<pre style="background:rgba(3,7,14,0.95);border:1px solid rgba(0,229,255,0.28);padding:10px;border-radius:8px;overflow-x:auto;font-family:monospace;font-size:11px;color:#00e5ff;margin:8px 0;"><code>$2</code></pre>')
+      .replace(/^### (.*)$/gm, '<div style="font-size:13.5px;font-weight:800;color:#f5d76e;margin:10px 0 4px 0;">$1</div>')
+      .replace(/^## (.*)$/gm, '<div style="font-size:14.5px;font-weight:800;color:#00e5ff;margin:12px 0 6px 0;">$1</div>')
+      .replace(/\*\*([^*]+)\*\*/g, '<b style="color:#fff;">$1</b>')
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(0,229,255,0.12);color:#00e5ff;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px;">$1</code>')
+      .replace(/^- (.*)$/gm, '<div style="margin-left:12px;margin-bottom:3px;">• $1</div>')
+      .replace(/\n\n/g, '<div style="height:8px;"></div>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function renderTelemetryDigest(digest) {
+    if (!telemetryBar || !digest) return;
+    const priceTxt = digest.lastCloseUsd != null ? '$' + Number(digest.lastCloseUsd).toFixed(2) : 'N/A';
+    const proofColor = digest.proofStatus === 'PASS' ? '#00e676' : digest.proofStatus === 'FAIL' ? '#ff3d5a' : '#ffab00';
+    telemetryBar.innerHTML =
+      '<span><b>TF:</b> <code style="color:#00e5ff;">' + escapeHtml(digest.activeInterval) + '</code></span>' +
+      '<span><b>State:</b> <code style="color:#00e676;">' + escapeHtml(digest.systemState) + '</code></span>' +
+      '<span><b>Provider:</b> <code>' + escapeHtml(digest.activeProvider) + '</code></span>' +
+      '<span><b>PAXG Close:</b> <b style="color:#f5d76e;">' + escapeHtml(priceTxt) + '</b></span>' +
+      '<span><b>Live vs Cand:</b> <code>' + escapeHtml(digest.liveArchitectureVersion) + '</code> vs <code>' + escapeHtml(digest.candidateArchitectureVersion) + '</code> (<b>' + escapeHtml(digest.passedGatesCount) + '/' + escapeHtml(digest.totalGatesCount) + ' Gates</b>)</span>' +
+      '<span><b>OS Proof:</b> <b style="color:' + proofColor + ';">' + escapeHtml(digest.proofStatus) + '</b></span>' +
+      '<span><b>Cloud SQL:</b> <b style="color:' + (digest.cloudSqlActive ? '#00e676' : '#ffab00') + ';">' + (digest.cloudSqlActive ? 'ACTIVE (us-east1)' : 'LOCAL') + '</b></span>';
+  }
+
+  async function refreshCouncilRosterAndTelemetry() {
+    try {
+      const tf = (typeof currentTimeframe === 'string' && currentTimeframe) ? currentTimeframe : '15m';
+      const res = await fetch('/api/gdf-os/expert-council/roster?interval=' + encodeURIComponent(tf), {
+        headers: { 'Accept': 'application/json', 'Cache-Control': 'no-store' },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const lt = data?.liveTelemetry;
+      if (lt) {
+        renderTelemetryDigest({
+          activeInterval: lt.marketWaterfall?.activeInterval || tf,
+          systemState: lt.marketWaterfall?.systemState || 'LIVE',
+          activeProvider: lt.marketWaterfall?.activeProvider || 'NONE',
+          lastCloseUsd: lt.marketWaterfall?.lastBar?.close ?? null,
+          liveArchitectureVersion: lt.scientificCoreAndParallelUniverse?.liveArchitecture?.versionTag || 'v1.0',
+          candidateArchitectureVersion: lt.scientificCoreAndParallelUniverse?.candidateArchitecture?.versionTag || 'v2.0',
+          passedGatesCount: lt.scientificCoreAndParallelUniverse?.verificationReport?.passedGatesCount ?? 0,
+          totalGatesCount: lt.scientificCoreAndParallelUniverse?.verificationReport?.totalGatesCount ?? 8,
+          proofStatus: lt.gdfOperatingSystemAndCloudSql?.proofFreshness?.effectiveStatus || 'CHECKING',
+          cloudSqlActive: Boolean(lt.gdfOperatingSystemAndCloudSql?.cloudSqlConfigured),
+        });
+      }
+    } catch (_) {}
+  }
+
+  async function submitCouncilQuestion(rawText) {
+    const text = String(rawText || '').trim();
+    if (!text || isConsulting) return;
+    isConsulting = true;
+    if (inputEl) inputEl.value = '';
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = '⏳ Consulting...';
+    }
+
+    const lang = (typeof currentLang === 'string' && currentLang === 'fa') ? 'fa' : 'en';
+    const tf = (typeof currentTimeframe === 'string' && currentTimeframe) ? currentTimeframe : '15m';
+
+    // Append user bubble
+    const userBubble = document.createElement('div');
+    userBubble.style.cssText = 'align-self:flex-end;max-width:85%;padding:10px 14px;border-radius:10px;background:rgba(0,229,255,0.14);border:1px solid rgba(0,229,255,0.45);color:#fff;';
+    userBubble.innerHTML = '<div style="font-size:10px;color:#00e5ff;font-weight:800;margin-bottom:3px;">OPERATOR (' + escapeHtml(activeExpertId) + ')</div><div>' + escapeHtml(text) + '</div>';
+    chatLog.appendChild(userBubble);
+
+    // Append thinking placeholder
+    const loadingBubble = document.createElement('div');
+    loadingBubble.style.cssText = 'align-self:flex-start;max-width:92%;padding:12px 14px;border-radius:10px;background:rgba(14,22,38,0.92);border:1px solid rgba(245,215,110,0.4);color:#f5d76e;font-family:monospace;font-size:11.5px;';
+    loadingBubble.textContent = '⏳ GDF Expert Council is inspecting repository files & live 6D telemetry...';
+    chatLog.appendChild(loadingBubble);
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    try {
+      const res = await fetch('/api/gdf-os/expert-council/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          message: text,
+          expertId: activeExpertId,
+          interval: tf,
+          language: lang,
+          history: chatHistory.slice(-6),
+        }),
+      });
+      const data = await res.json();
+      loadingBubble.remove();
+
+      if (data && data.liveTelemetryDigest) {
+        renderTelemetryDigest(data.liveTelemetryDigest);
+      }
+
+      const toolsHtml = Array.isArray(data?.toolsInvoked) && data.toolsInvoked.length > 0
+        ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">' +
+            data.toolsInvoked.map((t) => (
+              '<span style="font-family:monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:#00e5ff;">🔍 ' +
+                escapeHtml(t.summary || t.toolName) +
+              '</span>'
+            )).join('') +
+          '</div>'
+        : '';
+
+      const replyBubble = document.createElement('div');
+      replyBubble.style.cssText = 'align-self:flex-start;width:96%;padding:14px 16px;border-radius:10px;background:rgba(11,18,32,0.95);border:1px solid rgba(245,215,110,0.45);color:#dbe7f6;';
+      replyBubble.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr');
+      replyBubble.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(40,60,95,0.5);">' +
+          '<span style="font-weight:800;color:#f5d76e;font-size:12.5px;">🏛️ ' + escapeHtml(lang === 'fa' ? (data.expertTitleFa || data.expertTitleEn) : (data.expertTitleEn || activeExpertId)) + '</span>' +
+          '<span style="font-family:monospace;font-size:10px;color:#8fa2bf;">Model: ' + escapeHtml(data.modelUsed || 'gemini-3.8-flash') + ' · ' + escapeHtml((data.timestampIso || '').slice(11, 19)) + ' UTC</span>' +
+        '</div>' +
+        toolsHtml +
+        '<div>' + formatCouncilMarkdown(data.replyMarkdown || data.error || 'No response returned.') + '</div>';
+      chatLog.appendChild(replyBubble);
+      chatLog.scrollTop = chatLog.scrollHeight;
+
+      chatHistory.push({ role: 'user', text, expertId: activeExpertId });
+      chatHistory.push({ role: 'model', text: data.replyMarkdown || '', expertId: activeExpertId });
+    } catch (err) {
+      loadingBubble.remove();
+      const errBubble = document.createElement('div');
+      errBubble.style.cssText = 'align-self:flex-start;padding:10px 14px;border-radius:8px;background:rgba(255,61,90,0.14);border:1px solid rgba(255,61,90,0.55);color:#ff8a80;';
+      errBubble.textContent = '✕ Council consultation request failed: ' + (err && err.message ? err.message : String(err));
+      chatLog.appendChild(errBubble);
+    } finally {
+      isConsulting = false;
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = '⚡ Consult Council';
+      }
+    }
+  }
+
+  if (openBtn && overlay) {
+    openBtn.addEventListener('click', () => {
+      overlay.classList.remove('hidden');
+      refreshCouncilRosterAndTelemetry();
+      if (inputEl) inputEl.focus();
+    });
+  }
+  if (closeBtn && overlay) {
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.add('hidden');
+    });
+  }
+
+  personaBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      personaBtns.forEach((b) => {
+        b.classList.remove('active');
+        b.style.borderColor = '';
+        b.style.color = '';
+        b.style.background = '';
+      });
+      btn.classList.add('active');
+      btn.style.borderColor = '#f5d76e';
+      btn.style.color = '#f5d76e';
+      btn.style.background = 'rgba(245, 215, 110, 0.16)';
+      activeExpertId = btn.getAttribute('data-expert-id') || 'COUNCIL_ALL';
+    });
+  });
+
+  quickPromptBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const promptText = btn.getAttribute('data-prompt') || '';
+      if (promptText) {
+        submitCouncilQuestion(promptText);
+      }
+    });
+  });
+
+  if (sendBtn) {
+    sendBtn.addEventListener('click', () => {
+      if (inputEl) submitCouncilQuestion(inputEl.value);
+    });
+  }
+  if (inputEl) {
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitCouncilQuestion(inputEl.value);
+      }
+    });
+  }
+
+  window.GDFExpertCouncilController = {
+    submitCouncilQuestion,
+    refreshCouncilRosterAndTelemetry,
+    setExpertPersona: (id) => {
+      activeExpertId = id;
+    },
+    getState: () => ({
+      activeExpertId,
+      chatHistoryLength: chatHistory.length,
+      isConsulting,
+    }),
+  };
 })();
 </script>
 
