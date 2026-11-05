@@ -548,6 +548,315 @@ export function executeGetLiveMarketAndEngineTelemetry(interval: string = '15m')
   };
 }
 
+export interface ExpertPendingAnalysisTask {
+  taskId: string;
+  priority: 'P0' | 'P1' | 'P2';
+  status: 'READY_TO_RUN' | 'ACTIVE_MONITORING' | 'AWAITING_OOS_BARS';
+  titleEn: string;
+  titleFa: string;
+  promptToExecute: string;
+}
+
+export interface LiveExpertSpecialistRosterItem extends ExpertPersonaDescriptor {
+  currentFocusEn: string;
+  currentFocusFa: string;
+  marketConfidencePct: number;
+  confidenceStatusLabel: 'HIGH_CONVICTION' | 'MODERATE_CALIBRATING' | 'CAUTIOUS_GUARDED';
+  confidenceRationaleEn: string;
+  confidenceRationaleFa: string;
+  pendingAnalysisTasks: ExpertPendingAnalysisTask[];
+}
+
+export function buildLiveExpertSpecialistRoster(
+  interval: string = '15m',
+  precomputedTelemetry?: Record<string, any>
+): LiveExpertSpecialistRosterItem[] {
+  const telemetry = precomputedTelemetry || executeGetLiveMarketAndEngineTelemetry(interval);
+  const wf = telemetry.marketWaterfall || {};
+  const sc = telemetry.scientificCoreAndParallelUniverse || {};
+  const vr = sc.verificationReport || {};
+  const sci = telemetry.eightStepScientificDiscoveryCycle || {};
+  const os = telemetry.gdfOperatingSystemAndCloudSql || {};
+
+  const lastClose = wf.lastBar?.close != null ? Number(wf.lastBar.close) : null;
+  const priceStr = lastClose != null ? `$${lastClose.toFixed(2)}` : 'UNAVAILABLE';
+  const oneBarDelta = Number(wf.lastBar?.oneBarChangeUsd || 0);
+  const barsCount = Number(wf.barsCount || 0);
+  const isLiveNominal = wf.systemState === 'LIVE_NOMINAL';
+  const crossSpread = wf.secondaryBenchmark?.crossVenueSpreadUsd ?? null;
+  const crossZ = wf.secondaryBenchmark?.crossVenueZScore ?? 0;
+
+  const passedGates = Number(vr.passedGatesCount ?? 0);
+  const totalGates = Number(vr.totalGatesCount ?? 8);
+  const oosBars = Number(vr.realizedOosBarsEvaluated ?? 0);
+  const minOosBars = Number(vr.dataDrivenMinWindowBars ?? 30);
+  const dmStat = Number(vr.dieboldMarianoTStat ?? 0);
+  const liveEqAnchor = Number(sc.liveArchitecture?.compositeEquilibriumAnchor ?? lastClose ?? 0);
+  const liveDrift = Number(sc.liveArchitecture?.compositeNetDriftUsdPerStep ?? 0);
+
+  const mtfVerifiedCount = Array.isArray(wf.mtfBootstrapState?.verifiedTimeframes)
+    ? wf.mtfBootstrapState.verifiedTimeframes.length
+    : 0;
+  const recentErrorsCount = Array.isArray(wf.recentSystemWarningsAndErrors)
+    ? wf.recentSystemWarningsAndErrors.filter((e: any) => e.level === 'ERROR').length
+    : 0;
+
+  const proofEffectiveStatus = String(os.proofFreshness?.effectiveStatus || 'CHECKING');
+  const cloudSqlOnline = Boolean(os.cloudSqlConfigured);
+
+  // Compute domain-specific confidence scores (bounded [35, 99])
+  const clampConf = (val: number) => Math.max(35, Math.min(99, Math.round(val)));
+
+  const finConf = clampConf(
+    (isLiveNominal ? 55 : 35) +
+      Math.min(25, (barsCount / 300) * 25) +
+      (crossSpread !== null && Math.abs(crossZ) < 2.2 ? 14 : 6)
+  );
+
+  const mathConf = clampConf(
+    42 +
+      (passedGates / Math.max(1, totalGates)) * 34 +
+      Math.min(18, (oosBars / Math.max(1, minOosBars)) * 18) +
+      (dmStat > 0 ? 4 : 0)
+  );
+
+  const anchorGapPct =
+    lastClose && liveEqAnchor > 0 ? Math.abs(lastClose - liveEqAnchor) / lastClose : 0.005;
+  const physConf = clampConf(
+    (isLiveNominal ? 52 : 38) +
+      Math.max(0, 28 - anchorGapPct * 2500) +
+      (Math.abs(oneBarDelta) < 18 ? 14 : 6)
+  );
+
+  const archConf = clampConf(
+    54 +
+      Math.min(28, (mtfVerifiedCount / 7) * 28) +
+      (recentErrorsCount === 0 ? 14 : Math.max(0, 14 - recentErrorsCount * 4))
+  );
+
+  const sysConf = clampConf(
+    (proofEffectiveStatus === 'PASS' ? 58 : proofEffectiveStatus === 'STALE' ? 44 : 36) +
+      (cloudSqlOnline ? 24 : 10) +
+      (Number(os.revision || 0) >= 1 ? 14 : 6)
+  );
+
+  const visConf = clampConf(
+    58 + Math.min(26, (barsCount / 250) * 26) + (mtfVerifiedCount >= 3 ? 12 : 6)
+  );
+
+  const councilCompositeConf = clampConf(
+    (finConf + mathConf + physConf + archConf + sysConf + visConf) / 6
+  );
+
+  const toStatusLabel = (
+    score: number
+  ): 'HIGH_CONVICTION' | 'MODERATE_CALIBRATING' | 'CAUTIOUS_GUARDED' => {
+    if (score >= 82) return 'HIGH_CONVICTION';
+    if (score >= 64) return 'MODERATE_CALIBRATING';
+    return 'CAUTIOUS_GUARDED';
+  };
+
+  return EXPERT_COUNCIL_ROSTER.map((persona): LiveExpertSpecialistRosterItem => {
+    switch (persona.id) {
+      case 'FINANCIAL_STRATEGIST':
+        return {
+          ...persona,
+          currentFocusEn: `Monitoring ${wf.activeSymbol || 'PAXG/USDT'} (${priceStr}, Δ=$${oneBarDelta.toFixed(2)}) on ${wf.activeProvider || 'Primary Feed'} vs. Equilibrium Anchor ($${liveEqAnchor.toFixed(2)}) & Cross-Venue Basis (${crossSpread !== null ? `$${crossSpread} [Z=${crossZ}]` : 'Single-Venue'}).`,
+          currentFocusFa: `پایش قیمت زنده ${wf.activeSymbol || 'PAXG/USDT'} (${priceStr}) در برابر لنگر تعادلی ($${liveEqAnchor.toFixed(2)}) و اسپرد بین‌بازاری اسپات/کامکس.`,
+          marketConfidencePct: finConf,
+          confidenceStatusLabel: toStatusLabel(finConf),
+          confidenceRationaleEn: `Feed=${wf.systemState || 'INIT'} (${barsCount} bars) · Basis Z=${crossZ} · Step Drift=$${liveDrift.toFixed(3)}/bar`,
+          confidenceRationaleFa: `وضعیت فید=${wf.systemState || 'INIT'} (${barsCount} کندل) · امتیاز Z پایه=${crossZ}`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'FIN-TASK-01',
+              priority: 'P0',
+              status: 'READY_TO_RUN',
+              titleEn: `Audit ${interval} PAXG/COMEX Cross-Venue Basis & 3-Factor Macro Gravity (TIPS/DXY)`,
+              titleFa: `بررسی اسپرد بین‌بازاری طلا/کامکس و نیروهای کلان ۳عاملی در تایم‌فریم ${interval}`,
+              promptToExecute: `As the Financial Strategist, analyze current ${interval} Gold/PAXG price (${priceStr}), cross-venue basis spread, 3-factor macro gravity (TIPS real yield & DXY), and HTF POC liquidity attractors.`,
+            },
+            {
+              taskId: 'FIN-TASK-02',
+              priority: 'P1',
+              status: 'ACTIVE_MONITORING',
+              titleEn: `Evaluate VPIN Order-Flow Toxicity & Session Liquidity Regime`,
+              titleFa: `ارزیابی سمیت جریان سفارشات (VPIN) و رژیم نقدینگی نشست معاملاتی`,
+              promptToExecute: `Evaluate the current VPIN order-flow toxicity, Kyle's lambda, and LBMA/COMEX/Asian session regime risk for Gold/PAXG.`,
+            },
+          ],
+        };
+
+      case 'MATHEMATICIAN':
+        return {
+          ...persona,
+          currentFocusEn: `Auditing 6D Volume-Clock Kalman Filter & Challenger ${sc.candidateArchitecture?.versionTag || 'v2.0'} (${passedGates}/${totalGates} OOS Gates passed, DM t-stat=${dmStat.toFixed(2)}, OOS Window=${oosBars}/${minOosBars} bars).`,
+          currentFocusFa: `ممیزی فیلتر کالمن ۶بعدی ساعت حجمی و معماری رقیب ${sc.candidateArchitecture?.versionTag || 'v2.0'} (${passedGates}/${totalGates} گیت OOS پاس شده).`,
+          marketConfidencePct: mathConf,
+          confidenceStatusLabel: toStatusLabel(mathConf),
+          confidenceRationaleEn: `8-Gate Score=${passedGates}/${totalGates} (${vr.overallStatus || 'CALIBRATING'}) · OOS Sample=${oosBars}/${minOosBars} bars · DM t=${dmStat.toFixed(2)}`,
+          confidenceRationaleFa: `امتیاز گیت=${passedGates}/${totalGates} · نمونه خارج از دید=${oosBars}/${minOosBars} کندل`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'MATH-TASK-01',
+              priority: 'P0',
+              status: oosBars >= minOosBars ? 'READY_TO_RUN' : 'AWAITING_OOS_BARS',
+              titleEn: `Inspect 8-Gate OOS Verifier & Diebold-Mariano Statistical Significance`,
+              titleFa: `بازرسی ۸ گیت تایید خارج از نمونه و معناداری آماری دیبولد-ماریانو`,
+              promptToExecute: `As the Chief Applied Mathematician, inspect the 6D Kalman & Parallel Candidate symbolic equations and explain why the 8-Gate verification scorecard is at ${passedGates}/${totalGates} gates.`,
+            },
+            {
+              taskId: 'MATH-TASK-02',
+              priority: 'P1',
+              status: 'READY_TO_RUN',
+              titleEn: `Audit SINDy Ridge Symbolic Terms & Covariance PSD Invariants in scientificCore.ts`,
+              titleFa: `ممیزی معادلات نمادین SINDy Ridge و پایداری ماتریس کوواریانس در scientificCore.ts`,
+              promptToExecute: `Inspect src/engine/scientificCore.ts and audit the 6D state transition Jacobian, covariance PSD guarantees, and active SINDy symbolic regression terms.`,
+            },
+          ],
+        };
+
+      case 'PHYSICIST':
+        return {
+          ...persona,
+          currentFocusEn: `Tracking Langevin potential-well restoring force toward Equilibrium Anchor ($${liveEqAnchor.toFixed(2)}) and Pulse-Echo hydrodynamic shock damping across ${interval} order flow.`,
+          currentFocusFa: `ردیابی نیروی بازگرداننده چاه پتانسیل لانژون به سمت لنگر تعادلی ($${liveEqAnchor.toFixed(2)}) و میرایی موج شوک.`,
+          marketConfidencePct: physConf,
+          confidenceStatusLabel: toStatusLabel(physConf),
+          confidenceRationaleEn: `Anchor Displacement=${(anchorGapPct * 100).toFixed(2)}% · Net Drift=$${liveDrift.toFixed(3)}/step · 8-Step State=${sci.activeCaseState || 'IDLE'}`,
+          confidenceRationaleFa: `فاصله از چاه پتانسیل=${(anchorGapPct * 100).toFixed(2)}% · دریفت خالص=$${liveDrift.toFixed(3)}`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'PHYS-TASK-01',
+              priority: 'P0',
+              status: 'READY_TO_RUN',
+              titleEn: `Analyze Langevin Potential Well Stability & Order-Book Hydrodynamic Viscosity`,
+              titleFa: `تحلیل پایداری چاه پتانسیل لانژون و ویسکوزیته هیدرودینامیک دفتر سفارشات`,
+              promptToExecute: `As the Lead Econophysicist, analyze the order-book hydrodynamic flow, Langevin potential well stability around $${liveEqAnchor.toFixed(2)}, and shock-damping resilience.`,
+            },
+            {
+              taskId: 'PHYS-TASK-02',
+              priority: 'P1',
+              status: 'ACTIVE_MONITORING',
+              titleEn: `Diagnose Phase-Transition & Critical Slowing Down Risk Across Regimes`,
+              titleFa: `تشخیص ریسک گذار فاز و کندشدن بحرانی پیش از شکست ساختاری رژیم`,
+              promptToExecute: `Evaluate whether current volatility and volume-clock Δτ indicate laminar trend continuity or an approaching phase transition / liquidation cascade.`,
+            },
+          ],
+        };
+
+      case 'SOFTWARE_ARCHITECT':
+        return {
+          ...persona,
+          currentFocusEn: `Inspecting provider waterfall latency (${mtfVerifiedCount}/7 MTF timeframes cached), singleflight/timeout paths in realDataWaterfall.ts, and Cloud SQL (us-east1) connection pool.`,
+          currentFocusFa: `بررسی تاخیر آبشار تامین‌کنندگان داده (${mtfVerifiedCount}/7 تایم‌فریم کش‌شده) و وضعیت استخر اتصال Cloud SQL.`,
+          marketConfidencePct: archConf,
+          confidenceStatusLabel: toStatusLabel(archConf),
+          confidenceRationaleEn: `MTF Cache=${mtfVerifiedCount}/7 verified · Recent System Errors=${recentErrorsCount} · Cloud SQL=${cloudSqlOnline ? 'ONLINE' : 'LOCAL'}`,
+          confidenceRationaleFa: `کش چندتایم‌فریمی=${mtfVerifiedCount}/7 · خطاهای اخیر سیستم=${recentErrorsCount}`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'ARCH-TASK-01',
+              priority: 'P0',
+              status: 'READY_TO_RUN',
+              titleEn: `Profile Provider Waterfall HTTP Latency & Timeout Paths in realDataWaterfall.ts`,
+              titleFa: `پروفایلینگ تاخیر HTTP تامین‌کنندگان داده و مسیرهای Timeout در realDataWaterfall.ts`,
+              promptToExecute: `As the Principal Software Architect, inspect src/services/realDataWaterfall.ts and recent provider HTTP diagnostics to analyze latency, timeouts, and failover health.`,
+            },
+            {
+              taskId: 'ARCH-TASK-02',
+              priority: 'P1',
+              status: 'READY_TO_RUN',
+              titleEn: `Audit Cloud SQL (us-east1) Drizzle Repository & Serialized Sync Queue`,
+              titleFa: `ممیزی لایه ذخیره‌سازی Cloud SQL و صف همگام‌سازی سریال در gdfRepository.ts`,
+              promptToExecute: `Inspect src/db/gdfRepository.ts and src/db/index.ts to verify Cloud SQL pool keep-alive settings and serialized registry transaction safety.`,
+            },
+          ],
+        };
+
+      case 'SYSTEMS_ENGINEER':
+        return {
+          ...persona,
+          currentFocusEn: `Enforcing Dual-Control Promotion Gate (Rule 8), Step 4 Executable Proof (${proofEffectiveStatus}), and Playbooks PB-001..006 at Registry Rev #${os.revision ?? 1}.`,
+          currentFocusFa: `اعمال گیت کنترل دوگانه ارتقا (قانون ۸)، وضعیت اثبات گام ۴ (${proofEffectiveStatus}) و بازبینی رجیستری #${os.revision ?? 1}.`,
+          marketConfidencePct: sysConf,
+          confidenceStatusLabel: toStatusLabel(sysConf),
+          confidenceRationaleEn: `Step 4 Proof=${proofEffectiveStatus} (${os.latestProofSummary?.proofId || 'NONE'}) · Registry Rev=#${os.revision ?? 1} · Cloud SQL=${cloudSqlOnline ? 'SYNCED' : 'LOCAL'}`,
+          confidenceRationaleFa: `وضعیت اثبات گام ۴=${proofEffectiveStatus} · بازبینی رجیستری=#${os.revision ?? 1}`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'SYS-TASK-01',
+              priority: 'P0',
+              status: 'READY_TO_RUN',
+              titleEn: `Verify Step 4 Proof Freshness & Dual-Control Promotion Gate Readiness`,
+              titleFa: `بررسی تازگی گواهی اثبات گام ۴ و آمادگی گیت کنترل دوگانه ارتقا`,
+              promptToExecute: `As the Systems & Governance Engineer, audit the current GDF Operating System state, Step 4 Proof freshness (${proofEffectiveStatus}), Playbooks PB-001..006, and Dual-Control Promotion Gate readiness.`,
+            },
+            {
+              taskId: 'SYS-TASK-02',
+              priority: 'P1',
+              status: 'ACTIVE_MONITORING',
+              titleEn: `Review 8-Step Scientific Discovery Cycle & Hypothesis Graveyard (${sci.graveyardRejectedCount ?? 0} rejected)`,
+              titleFa: `بازبینی چرخه ۸مرحله‌ای کشف علمی و بایگانی فرضیه‌های ردشده (${sci.graveyardRejectedCount ?? 0} مورد)`,
+              promptToExecute: `Inspect the 8-Step Scientific Discovery Cycle telemetry and explain the current state (${sci.activeCaseState || 'IDLE'}) and hypothesis governance rules.`,
+            },
+          ],
+        };
+
+      case 'VISUAL_DESIGNER':
+        return {
+          ...persona,
+          currentFocusEn: `Maintaining 2D quantile plume clarity, 3D WebGL liquidity surface (P×T×D), and non-blocking floating Council HUD ergonomics across EN/FA viewports.`,
+          currentFocusFa: `حفظ وضوح بادبزن عدم قطعیت ۲بعدی، سطح نقدینگی ۳بعدی WebGL و ارگونومی شناور کنسول دوزبانه.`,
+          marketConfidencePct: visConf,
+          confidenceStatusLabel: toStatusLabel(visConf),
+          confidenceRationaleEn: `2D/3D Render Depth=${barsCount} bars · Floating HUD=ACTIVE · Bilingual LTR/RTL=SYNCED`,
+          confidenceRationaleFa: `عمق رندر ۲بعدی/۳بعدی=${barsCount} کندل · وضعیت ویجت شناور=فعال`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'VIS-TASK-01',
+              priority: 'P1',
+              status: 'READY_TO_RUN',
+              titleEn: `Audit 2D Uncertainty Plume & 3D WebGL Surface Visual Signal-to-Noise Ratio`,
+              titleFa: `ممیزی نسبت سیگنال به نویز بصری در نمودار ۲بعدی و سطح نقدینگی ۳بعدی WebGL`,
+              promptToExecute: `As the Lead Visual & 3D Designer, evaluate the 2D uncertainty plume canvas, 3D WebGL liquidity surface, and bilingual EN/FA HUD ergonomics in index.html.`,
+            },
+          ],
+        };
+
+      case 'COUNCIL_ALL':
+      default:
+        return {
+          ...persona,
+          currentFocusEn: `Synthesizing all 6 specialists across ${interval} PAXG/Gold (${priceStr}), 6D Kalman & Parallel Universe (${passedGates}/${totalGates} Gates), Step 4 Proof (${proofEffectiveStatus}), and Cloud SQL (us-east1).`,
+          currentFocusFa: `همگام‌سازی هر ۶ متخصص پروژه روی قیمت زنده طلا/PAXG (${priceStr})، هسته علمی ۶بعدی (${passedGates}/${totalGates} گیت) و وضعیت اثبات (${proofEffectiveStatus}).`,
+          marketConfidencePct: councilCompositeConf,
+          confidenceStatusLabel: toStatusLabel(councilCompositeConf),
+          confidenceRationaleEn: `Composite Council Score=${councilCompositeConf}% across Finance (${finConf}%), Math (${mathConf}%), Physics (${physConf}%), Code (${archConf}%), Systems (${sysConf}%), UX (${visConf}%)`,
+          confidenceRationaleFa: `امتیاز ترکیبی شورا=${councilCompositeConf}% از میانگین وزنی ۶ متخصص حوزه`,
+          pendingAnalysisTasks: [
+            {
+              taskId: 'COUNCIL-TASK-01',
+              priority: 'P0',
+              status: 'READY_TO_RUN',
+              titleEn: `Run Full 6-Specialist Multi-Disciplinary Executive Briefing (${interval})`,
+              titleFa: `اجرای گزارش جامع ۶ متخصص شورا برای وضعیت لحظه‌ای بازار و سیستم (${interval})`,
+              promptToExecute: `Convene all 6 specialists of the GDF Council and provide a comprehensive executive briefing on current ${interval} Gold/PAXG market action, 6D Scientific Core & 8-Gate verification, hydrodynamic stability, waterfall performance, and GDF OS / Cloud SQL governance.`,
+            },
+            {
+              taskId: 'COUNCIL-TASK-02',
+              priority: 'P1',
+              status: 'READY_TO_RUN',
+              titleEn: `Cross-Audit Live Yellow Line (${sc.liveArchitecture?.versionTag || 'v1.0'}) vs. Parallel Candidate (${sc.candidateArchitecture?.versionTag || 'v2.0'}) Promotion Readiness`,
+              titleFa: `ممیزی متقابل خط زرد زنده (${sc.liveArchitecture?.versionTag || 'v1.0'}) در برابر کاندیدای موازی (${sc.candidateArchitecture?.versionTag || 'v2.0'})`,
+              promptToExecute: `Synthesize a multi-disciplinary evaluation comparing the Live Yellow Line (${sc.liveArchitecture?.versionTag || 'v1.0'}) against the Parallel Challenger (${sc.candidateArchitecture?.versionTag || 'v2.0'}) and state whether promotion is scientifically justified.`,
+            },
+          ],
+        };
+    }
+  });
+}
+
 export function executeLookupFinancialDictionary(searchTerm?: string): Record<string, any> {
   const q = String(searchTerm || '').trim().toLowerCase();
   const entries = Object.values(FINANCIAL_TERMINOLOGY_DICTIONARY);

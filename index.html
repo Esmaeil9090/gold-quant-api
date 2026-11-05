@@ -20151,89 +20151,254 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <!-- =========================================================================
-     GDF MULTI-DISCIPLINARY AI COUNCIL OF EXPERTS DRAWER
-     (Financial, Mathematician, Physicist, Code Architect, Systems & Visual Designer)
+     GDF MULTI-DISCIPLINARY AI COUNCIL OF EXPERTS — FLOATING DRAGGABLE WIDGET
+     (Dockable, Draggable, Persistent History, Unobstructed Dashboard Interaction)
      ========================================================================= -->
-<div id="gdfExpertCouncilOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="GDF Multi-Disciplinary AI Council of Experts">
-  <div class="modal-box" style="max-width: 1020px; width: 96%; max-height: 90vh; display: flex; flex-direction: column; border-color: rgba(245, 215, 110, 0.6);">
-    <div class="modal-header" style="background: rgba(8, 14, 26, 0.96); border-bottom: 1px solid rgba(245, 215, 110, 0.25);">
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <span class="modal-title" style="color: #f5d76e;">🏛️ GDF MULTI-DISCIPLINARY AI COUNCIL OF EXPERTS</span>
-          <span style="font-family: monospace; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px; background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676;">FULL REPO &amp; LIVE TELEMETRY ACCESS</span>
-          <span style="font-family: monospace; font-size: 10px; color: #00e5ff; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); padding: 2px 7px; border-radius: 5px;">READ-ONLY FORENSIC &amp; ADVISORY BOUNDARY</span>
+<!-- Floating Launcher Button (Bottom Right) -->
+<div id="gdfCouncilFloatingLauncher" style="position: fixed; bottom: 20px; right: 20px; z-index: 99998; display: flex; align-items: center; gap: 8px;">
+  <button
+    type="button"
+    id="btnOpenFloatingCouncil"
+    aria-label="Open AI Expert Council Chat Widget"
+    style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: linear-gradient(135deg, #111a2e 0%, #1a2846 100%); border: 1.5px solid #f5d76e; color: #f5d76e; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 16px rgba(245, 215, 110, 0.35); transition: all 0.2s ease;"
+  >
+    <span style="font-size: 17px;">🏛️</span>
+    <span>AI Expert Council</span>
+    <span id="gdfCouncilUnreadBadge" style="display: none; padding: 1px 6px; font-size: 10px; border-radius: 10px; background: #00e676; color: #040810; font-weight: 900;">0</span>
+  </button>
+</div>
+
+<!-- Floating Draggable & Resizable Chat Window -->
+<div
+  id="gdfExpertCouncilWidget"
+  class="hidden"
+  role="region"
+  aria-label="GDF AI Expert Council Floating Chat"
+  style="position: fixed; bottom: 24px; right: 24px; width: 440px; max-width: calc(100vw - 24px); height: 600px; max-height: calc(100vh - 48px); min-width: 300px; min-height: 360px; z-index: 99999; display: none; flex-direction: column; background: #090e1b; border: 1.5px solid rgba(245, 215, 110, 0.7); border-radius: 14px; box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8), 0 0 24px rgba(245, 215, 110, 0.2); overflow: hidden; backdrop-filter: blur(14px);"
+>
+  <!-- Draggable Title Bar / Header -->
+  <div
+    id="gdfCouncilWidgetHeader"
+    style="cursor: grab; user-select: none; flex-shrink: 0; padding: 10px 12px; background: rgba(14, 23, 40, 0.98); border-bottom: 1px solid rgba(245, 215, 110, 0.3); display: flex; justify-content: space-between; align-items: center; gap: 8px;"
+  >
+    <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+      <span style="font-size: 16px; flex-shrink: 0;">🏛️</span>
+      <div style="display: flex; flex-direction: column; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 12px; font-weight: 900; color: #f5d76e; letter-spacing: 0.5px; white-space: nowrap;">AI EXPERT COUNCIL</span>
+          <span id="gdfCouncilActivePersonaBadge" style="font-size: 9px; padding: 1px 5px; border-radius: 4px; background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.4); color: #00e5ff; font-weight: 800; white-space: nowrap;">ALL 6</span>
         </div>
-        <div style="font-size: 11px; color: #8fa2bf;">
-          Active Specialists: <b>📈 Financial Strategist</b> · <b>🧮 Applied Mathematician</b> · <b>⚛️ Econophysicist</b> · <b>💻 Code Architect</b> · <b>🛡️ Systems &amp; Proof Lead</b> · <b>🎨 Visual &amp; 3D Designer</b>
-        </div>
-      </div>
-      <button type="button" class="modal-close" id="btnCloseExpertCouncil" title="Close AI Expert Council">✕</button>
-    </div>
-
-    <!-- Live Telemetry Status Bar -->
-    <div id="gdfCouncilTelemetryBar" style="padding: 8px 16px; background: rgba(5, 10, 18, 0.95); border-bottom: 1px solid rgba(40, 60, 95, 0.45); font-family: monospace; font-size: 11px; color: #9cb0cc; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
-      <span>⏳ Synchronizing live market, 6D Scientific Core &amp; repository telemetry...</span>
-    </div>
-
-    <!-- Specialist Persona Selector Pills -->
-    <div id="gdfCouncilPersonaStrip" style="padding: 10px 16px; background: rgba(9, 15, 26, 0.92); border-bottom: 1px solid rgba(40, 60, 95, 0.45); display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-      <button type="button" class="btn gdf-expert-pill active" data-expert-id="COUNCIL_ALL" style="font-size: 11px; padding: 5px 10px; border-color: #f5d76e; color: #f5d76e; background: rgba(245, 215, 110, 0.16);">🏛️ Full Council (All 6)</button>
-      <button type="button" class="btn gdf-expert-pill" data-expert-id="FINANCIAL_STRATEGIST" style="font-size: 11px; padding: 5px 10px;">📈 Financial &amp; Market</button>
-      <button type="button" class="btn gdf-expert-pill" data-expert-id="MATHEMATICIAN" style="font-size: 11px; padding: 5px 10px;">🧮 Mathematician</button>
-      <button type="button" class="btn gdf-expert-pill" data-expert-id="PHYSICIST" style="font-size: 11px; padding: 5px 10px;">⚛️ Physicist (Hydrodynamics)</button>
-      <button type="button" class="btn gdf-expert-pill" data-expert-id="SOFTWARE_ARCHITECT" style="font-size: 11px; padding: 5px 10px;">💻 Code &amp; Repo Architect</button>
-      <button type="button" class="btn gdf-expert-pill" data-expert-id="SYSTEMS_ENGINEER" style="font-size: 11px; padding: 5px 10px;">🛡️ Systems &amp; Governance</button>
-      <button type="button" class="btn gdf-expert-pill" data-expert-id="VISUAL_DESIGNER" style="font-size: 11px; padding: 5px 10px;">🎨 Visual &amp; 3D Designer</button>
-    </div>
-
-    <!-- Quick Prompt Suggestions -->
-    <div style="padding: 8px 16px; background: rgba(7, 12, 22, 0.9); border-bottom: 1px solid rgba(40, 60, 95, 0.35); display: flex; flex-wrap: wrap; gap: 6px;">
-      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Analyze current Gold/PAXG price action, cross-venue basis spread, 3-factor macro yields (TIPS/DXY), VPIN order-flow toxicity, and HTF POC attractors." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(0, 230, 118, 0.4); color: #00e676;">📈 Live Market &amp; Macro Outlook</button>
-      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Inspect the 6D Kalman & Parallel Candidate symbolic equations and explain why the current 8-Gate verification scorecard is in its current state." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(0, 229, 255, 0.4); color: #00e5ff;">🧮 6D Math &amp; 8-Gate Critique</button>
-      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Analyze the order-book hydrodynamic flow, Langevin potential well stability around HTF POC, and shock-damping resilience in current market conditions." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(224, 64, 251, 0.4); color: #e040fb;">⚛️ Econophysics &amp; Potential Wells</button>
-      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Inspect src/services/realDataWaterfall.ts and recent provider HTTP diagnostics to analyze app performance, timeouts, and venue failover health." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(64, 196, 255, 0.4); color: #40c4ff;">💻 Repo &amp; Waterfall Performance</button>
-      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Audit the current GDF Operating System state, Step 4 Proof freshness, Playbooks PB-001..006, and Cloud SQL (us-east1) persistence health." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(255, 171, 0, 0.4); color: #ffab00;">🛡️ GDF OS &amp; Cloud SQL Audit</button>
-      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Evaluate the 2D uncertainty plume canvas, 3D WebGL liquidity surface, and bilingual EN/FA HUD ergonomics in index.html." style="font-size: 10.5px; padding: 3px 8px; border-color: rgba(255, 64, 129, 0.4); color: #ff4081;">🎨 Visual HUD &amp; 3D Review</button>
-    </div>
-
-    <!-- Chat Conversation Stream -->
-    <div id="gdfCouncilChatLog" style="flex: 1; min-height: 300px; max-height: 52vh; overflow-y: auto; padding: 16px 20px; background: rgba(5, 9, 16, 0.94); display: flex; flex-direction: column; gap: 12px; font-size: 12.5px; color: #dbe7f6; line-height: 1.55;">
-      <div style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(245, 215, 110, 0.35); background: rgba(14, 22, 38, 0.9);">
-        <div style="font-weight: 800; color: #f5d76e; margin-bottom: 4px;">🏛️ Welcome to the GDF Multi-Disciplinary AI Council of Experts</div>
-        <div style="color: #9cb0cc; font-size: 11.5px;">
-          Select either the <b>Full Council (All 6 Specialists)</b> or any individual expert above, then ask any question about <b>live Gold/PAXG market &amp; macro structure</b>, <b>6D stochastic mathematics</b>, <b>hydrodynamic physics</b>, <b>repository source code (`src/`, `server.ts`, `playbooks/`)</b>, <b>Cloud SQL &amp; GDF OS governance</b>, or <b>2D/3D visual design</b>.
-        </div>
+        <span style="font-size: 9.5px; color: #8fa2bf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Drag bar · 🗕 Collapse · ✕ Close to pill</span>
       </div>
     </div>
+    <!-- Window Control Actions (Isolated from Drag Handler) -->
+    <div id="gdfCouncilWindowControls" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0; position: relative; z-index: 5;">
+      <button
+        type="button"
+        id="btnResetCouncilPosition"
+        title="Reset widget to bottom-right corner"
+        style="width: 30px; height: 30px; border-radius: 7px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.18); color: #9cb0cc; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation;"
+      >⌖</button>
+      <button
+        type="button"
+        id="btnClearCouncilChat"
+        title="Clear conversation history"
+        style="width: 30px; height: 30px; border-radius: 7px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.18); color: #ff8a80; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation;"
+      >🗑</button>
+      <button
+        type="button"
+        id="btnMinimizeCouncilWidget"
+        title="Minimize / Expand chat window"
+        style="width: 30px; height: 30px; border-radius: 7px; background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.4); color: #00e5ff; font-size: 13px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation;"
+      >—</button>
+      <button
+        type="button"
+        id="btnCloseCouncilWidget"
+        title="Close chat widget"
+        style="width: 30px; height: 30px; border-radius: 7px; background: rgba(255, 61, 90, 0.18); border: 1px solid rgba(255, 61, 90, 0.55); color: #ff5252; font-size: 14px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation;"
+      >✕</button>
+    </div>
+  </div>
 
-    <!-- Input Bar -->
-    <div style="padding: 12px 16px; background: rgba(8, 14, 26, 0.98); border-top: 1px solid rgba(40, 60, 95, 0.55); display: flex; gap: 8px; align-items: center;">
+  <!-- Telemetry Glance Bar -->
+  <div
+    id="gdfCouncilTelemetryBar"
+    style="flex-shrink: 0; padding: 5px 12px; background: rgba(5, 10, 18, 0.98); border-bottom: 1px solid rgba(40, 60, 95, 0.45); font-family: monospace; font-size: 10px; color: #9cb0cc; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; overflow-x: auto;"
+  >
+    <span>⏳ Syncing live market, 6D Core &amp; Cloud SQL...</span>
+  </div>
+
+  <!-- View Switcher Bar: Live Chat vs. Expert Specialist Roster -->
+  <div
+    id="gdfCouncilViewTabs"
+    style="flex-shrink: 0; padding: 6px 10px; background: rgba(11, 18, 32, 0.98); border-bottom: 1px solid rgba(245, 215, 110, 0.25); display: flex; gap: 6px; align-items: center;"
+  >
+    <button
+      type="button"
+      id="btnCouncilTabChat"
+      style="flex: 1; padding: 6px 10px; border-radius: 7px; font-size: 11px; font-weight: 800; cursor: pointer; border: 1px solid #f5d76e; background: rgba(245, 215, 110, 0.16); color: #f5d76e; display: flex; align-items: center; justify-content: center; gap: 6px;"
+    >
+      <span>💬 Council Chat</span>
+    </button>
+    <button
+      type="button"
+      id="btnCouncilTabRoster"
+      style="flex: 1; padding: 6px 10px; border-radius: 7px; font-size: 11px; font-weight: 800; cursor: pointer; border: 1px solid rgba(0, 229, 255, 0.35); background: rgba(0, 229, 255, 0.08); color: #00e5ff; display: flex; align-items: center; justify-content: center; gap: 6px;"
+    >
+      <span>👥 Specialist Roster</span>
+      <span id="gdfRosterCompositeConfBadge" style="font-family: monospace; font-size: 9.5px; padding: 1px 5px; border-radius: 4px; background: rgba(0, 230, 118, 0.18); border: 1px solid rgba(0, 230, 118, 0.45); color: #00e676;">--%</span>
+    </button>
+  </div>
+
+  <!-- ==================== VIEW 1: CHAT PANEL ==================== -->
+  <div id="gdfCouncilChatPanel" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+    <!-- Specialist Persona Selector (Single horizontal scrollable row) -->
+    <div
+      id="gdfCouncilPersonaStrip"
+      style="flex-shrink: 0; padding: 6px 10px; background: rgba(9, 15, 26, 0.95); border-bottom: 1px solid rgba(40, 60, 95, 0.45); display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 5px; align-items: center; -webkit-overflow-scrolling: touch;"
+    >
+      <button type="button" class="btn gdf-expert-pill active" data-expert-id="COUNCIL_ALL" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; border-color: #f5d76e; color: #f5d76e; background: rgba(245, 215, 110, 0.16); flex-shrink: 0;">🏛️ All 6</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="FINANCIAL_STRATEGIST" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; flex-shrink: 0;">📈 Finance</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="MATHEMATICIAN" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; flex-shrink: 0;">🧮 Math</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="PHYSICIST" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; flex-shrink: 0;">⚛️ Physics</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="SOFTWARE_ARCHITECT" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; flex-shrink: 0;">💻 Code</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="SYSTEMS_ENGINEER" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; flex-shrink: 0;">🛡️ Systems</button>
+      <button type="button" class="btn gdf-expert-pill" data-expert-id="VISUAL_DESIGNER" style="white-space: nowrap; font-size: 10.5px; padding: 4px 8px; flex-shrink: 0;">🎨 3D/UX</button>
+    </div>
+
+    <!-- Quick Prompts (Horizontal Scroll) -->
+    <div
+      style="flex-shrink: 0; padding: 5px 10px; background: rgba(7, 12, 22, 0.92); border-bottom: 1px solid rgba(40, 60, 95, 0.35); display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 5px; -webkit-overflow-scrolling: touch;"
+    >
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Analyze current Gold/PAXG price action, cross-venue basis spread, 3-factor macro yields (TIPS/DXY), VPIN order-flow toxicity, and HTF POC attractors." style="white-space: nowrap; font-size: 9.5px; padding: 2px 7px; border-color: rgba(0, 230, 118, 0.4); color: #00e676; flex-shrink: 0;">📈 Market &amp; Macro</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Inspect the 6D Kalman & Parallel Candidate symbolic equations and explain why the current 8-Gate verification scorecard is in its current state." style="white-space: nowrap; font-size: 9.5px; padding: 2px 7px; border-color: rgba(0, 229, 255, 0.4); color: #00e5ff; flex-shrink: 0;">🧮 6D Math &amp; 8 Gates</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Analyze the order-book hydrodynamic flow, Langevin potential well stability around HTF POC, and shock-damping resilience in current market conditions." style="white-space: nowrap; font-size: 9.5px; padding: 2px 7px; border-color: rgba(224, 64, 251, 0.4); color: #e040fb; flex-shrink: 0;">⚛️ Potential Wells</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Inspect src/services/realDataWaterfall.ts and recent provider HTTP diagnostics to analyze app performance, timeouts, and venue failover health." style="white-space: nowrap; font-size: 9.5px; padding: 2px 7px; border-color: rgba(64, 196, 255, 0.4); color: #40c4ff; flex-shrink: 0;">💻 Repo Performance</button>
+      <button type="button" class="btn gdf-council-quick-prompt" data-prompt="Audit the current GDF Operating System state, Step 4 Proof freshness, Playbooks PB-001..006, and Cloud SQL (us-east1) persistence health." style="white-space: nowrap; font-size: 9.5px; padding: 2px 7px; border-color: rgba(255, 171, 0, 0.4); color: #ffab00; flex-shrink: 0;">🛡️ GDF OS &amp; SQL</button>
+    </div>
+
+    <!-- Chat Log (Scrollable, Persisted) -->
+    <div
+      id="gdfCouncilChatLog"
+      style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 12px 14px; background: rgba(5, 9, 16, 0.98); display: flex; flex-direction: column; gap: 10px; font-size: 12px; color: #dbe7f6; line-height: 1.5; -webkit-overflow-scrolling: touch;"
+    >
+      <div style="padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(245, 215, 110, 0.35); background: rgba(14, 22, 38, 0.9);">
+        <div style="font-weight: 800; color: #f5d76e; margin-bottom: 3px; font-size: 11.5px;">🏛️ GDF Multi-Disciplinary AI Council</div>
+        <div style="color: #9cb0cc; font-size: 10.5px; line-height: 1.45;">
+          This chat floats over the workspace so you can analyze live charts, 2D plumes, and 3D surfaces simultaneously. Switch to <b>👥 Specialist Roster</b> above to inspect each expert's live market confidence score, current focus, and pending analysis tasks.
+        </div>
+      </div>
+    </div>
+
+    <!-- Pinned Input Area -->
+    <div
+      style="flex-shrink: 0; padding: 8px 12px; background: rgba(8, 14, 26, 0.98); border-top: 1px solid rgba(245, 215, 110, 0.25); display: flex; gap: 6px; align-items: center;"
+    >
       <input
         type="text"
         id="gdfCouncilInput"
-        placeholder="Ask the GDF Council about live market action, 6D math, physics, repository code, or visual UX..."
-        style="flex: 1; background: rgba(4, 8, 15, 0.95); border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 12.5px; outline: none;"
+        placeholder="Ask about live market, 6D math, repo code..."
+        style="flex: 1; min-width: 0; background: rgba(4, 8, 15, 0.95); border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 7px; padding: 8px 10px; color: #fff; font-size: 12px; outline: none;"
       />
-      <button type="button" class="btn btn-gold" id="btnSendCouncilMessage" style="padding: 10px 16px; font-weight: 800;">⚡ Consult Council</button>
+      <button
+        type="button"
+        class="btn btn-gold"
+        id="btnSendCouncilMessage"
+        style="padding: 8px 12px; font-weight: 800; font-size: 11.5px; white-space: nowrap; flex-shrink: 0;"
+      >⚡ Send</button>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 2: EXPERT SPECIALIST ROSTER ==================== -->
+  <div
+    id="gdfCouncilRosterView"
+    class="hidden"
+    style="flex: 1 1 auto; min-height: 0; display: none; flex-direction: column; background: rgba(5, 9, 16, 0.98); overflow: hidden;"
+  >
+    <!-- Roster Summary Header -->
+    <div
+      style="flex-shrink: 0; padding: 8px 12px; background: rgba(10, 17, 30, 0.96); border-bottom: 1px solid rgba(40, 60, 95, 0.45); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;"
+    >
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-size: 11px; font-weight: 800; color: #f5d76e;">👥 ACTIVE SPECIALIST ROSTER &amp; TASK QUEUE</span>
+        <span id="gdfRosterSummarySubtitle" style="font-size: 9.5px; color: #8fa2bf; font-family: monospace;">Live focus, telemetry-backed confidence &amp; executable tasks</span>
+      </div>
+      <button
+        type="button"
+        id="btnRefreshCouncilRoster"
+        class="btn"
+        style="font-size: 10px; padding: 4px 8px; border-color: rgba(0, 229, 255, 0.4); color: #00e5ff;"
+      >🔄 Sync Live</button>
+    </div>
+
+    <!-- Scrollable Specialist Cards List -->
+    <div
+      id="gdfCouncilRosterCardsContainer"
+      style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch;"
+    >
+      <div style="padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.3); background: rgba(10, 18, 32, 0.9); color: #9cb0cc; font-size: 11px; font-family: monospace;">
+        ⏳ Loading live specialist focus, confidence scores, and pending analysis tasks...
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 (function initGdfExpertCouncilConsole() {
-  let activeExpertId = 'COUNCIL_ALL';
-  let chatHistory = [];
-  let isConsulting = false;
+  const STORAGE_KEY_HISTORY = 'gdf_expert_council_chat_history_v2';
+  const STORAGE_KEY_EXPERT = 'gdf_expert_council_active_persona_v2';
+  const STORAGE_KEY_WIDGET_STATE = 'gdf_expert_council_widget_state_v2';
+  const STORAGE_KEY_VIEW_MODE = 'gdf_expert_council_view_mode_v2';
 
-  const overlay = document.getElementById('gdfExpertCouncilOverlay');
-  const openBtn = document.getElementById('btnOpenExpertCouncil');
-  const closeBtn = document.getElementById('btnCloseExpertCouncil');
+  let activeExpertId = localStorage.getItem(STORAGE_KEY_EXPERT) || 'COUNCIL_ALL';
+  let activeViewMode = localStorage.getItem(STORAGE_KEY_VIEW_MODE) || 'CHAT';
+  let chatHistory = [];
+  let latestRosterItems = [];
+  let isConsulting = false;
+  let clearChatConfirmArmed = false;
+  let clearChatConfirmTimer = null;
+
+  const launcher = document.getElementById('gdfCouncilFloatingLauncher');
+  const openFloatingBtn = document.getElementById('btnOpenFloatingCouncil');
+  const headerOpenBtn = document.getElementById('btnOpenExpertCouncil');
+  const widget = document.getElementById('gdfExpertCouncilWidget');
+  const widgetHeader = document.getElementById('gdfCouncilWidgetHeader');
+  const closeBtn = document.getElementById('btnCloseCouncilWidget');
+  const minimizeBtn = document.getElementById('btnMinimizeCouncilWidget');
+  const resetPosBtn = document.getElementById('btnResetCouncilPosition');
+  const clearChatBtn = document.getElementById('btnClearCouncilChat');
   const telemetryBar = document.getElementById('gdfCouncilTelemetryBar');
+  const tabChatBtn = document.getElementById('btnCouncilTabChat');
+  const tabRosterBtn = document.getElementById('btnCouncilTabRoster');
+  const compositeConfBadge = document.getElementById('gdfRosterCompositeConfBadge');
+  const chatPanel = document.getElementById('gdfCouncilChatPanel');
+  const rosterView = document.getElementById('gdfCouncilRosterView');
+  const rosterCardsContainer = document.getElementById('gdfCouncilRosterCardsContainer');
+  const rosterSummarySubtitle = document.getElementById('gdfRosterSummarySubtitle');
+  const refreshRosterBtn = document.getElementById('btnRefreshCouncilRoster');
   const chatLog = document.getElementById('gdfCouncilChatLog');
   const inputEl = document.getElementById('gdfCouncilInput');
   const sendBtn = document.getElementById('btnSendCouncilMessage');
+  const personaBadge = document.getElementById('gdfCouncilActivePersonaBadge');
   const personaBtns = document.querySelectorAll('.gdf-expert-pill');
   const quickPromptBtns = document.querySelectorAll('.gdf-council-quick-prompt');
+
+  // Load persisted chat history
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_HISTORY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        chatHistory = parsed.slice(-20);
+      }
+    }
+  } catch (_) {}
+
+  function saveChatHistoryToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(chatHistory.slice(-25)));
+    } catch (_) {}
+  }
 
   function escapeHtml(str) {
     return String(str == null ? '' : str)
@@ -20246,14 +20411,91 @@ document.addEventListener('DOMContentLoaded', () => {
   function formatCouncilMarkdown(md) {
     const safe = escapeHtml(md || '');
     return safe
-      .replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, '<pre style="background:rgba(3,7,14,0.95);border:1px solid rgba(0,229,255,0.28);padding:10px;border-radius:8px;overflow-x:auto;font-family:monospace;font-size:11px;color:#00e5ff;margin:8px 0;"><code>$2</code></pre>')
-      .replace(/^### (.*)$/gm, '<div style="font-size:13.5px;font-weight:800;color:#f5d76e;margin:10px 0 4px 0;">$1</div>')
-      .replace(/^## (.*)$/gm, '<div style="font-size:14.5px;font-weight:800;color:#00e5ff;margin:12px 0 6px 0;">$1</div>')
+      .replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, '<pre style="background:rgba(3,7,14,0.95);border:1px solid rgba(0,229,255,0.28);padding:8px;border-radius:6px;overflow-x:auto;font-family:monospace;font-size:10.5px;color:#00e5ff;margin:6px 0;"><code>$2</code></pre>')
+      .replace(/^#### (.*)$/gm, '<div style="font-size:12px;font-weight:800;color:#00e5ff;margin:8px 0 3px 0;">$1</div>')
+      .replace(/^### (.*)$/gm, '<div style="font-size:12.5px;font-weight:800;color:#f5d76e;margin:9px 0 4px 0;">$1</div>')
+      .replace(/^## (.*)$/gm, '<div style="font-size:13.5px;font-weight:800;color:#00e5ff;margin:10px 0 5px 0;">$1</div>')
       .replace(/\*\*([^*]+)\*\*/g, '<b style="color:#fff;">$1</b>')
-      .replace(/`([^`]+)`/g, '<code style="background:rgba(0,229,255,0.12);color:#00e5ff;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:11px;">$1</code>')
-      .replace(/^- (.*)$/gm, '<div style="margin-left:12px;margin-bottom:3px;">• $1</div>')
-      .replace(/\n\n/g, '<div style="height:8px;"></div>')
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(0,229,255,0.12);color:#00e5ff;padding:1px 4px;border-radius:4px;font-family:monospace;font-size:10.5px;">$1</code>')
+      .replace(/^- (.*)$/gm, '<div style="margin-left:8px;margin-bottom:2px;">• $1</div>')
+      .replace(/\n\n/g, '<div style="height:6px;"></div>')
       .replace(/\n/g, '<br>');
+  }
+
+  function setViewMode(mode) {
+    activeViewMode = mode === 'ROSTER' ? 'ROSTER' : 'CHAT';
+    try {
+      localStorage.setItem(STORAGE_KEY_VIEW_MODE, activeViewMode);
+    } catch (_) {}
+
+    if (activeViewMode === 'ROSTER') {
+      if (chatPanel) chatPanel.style.display = 'none';
+      if (rosterView) {
+        rosterView.classList.remove('hidden');
+        rosterView.style.display = 'flex';
+      }
+      if (tabRosterBtn) {
+        tabRosterBtn.style.borderColor = '#f5d76e';
+        tabRosterBtn.style.background = 'rgba(245, 215, 110, 0.16)';
+        tabRosterBtn.style.color = '#f5d76e';
+      }
+      if (tabChatBtn) {
+        tabChatBtn.style.borderColor = 'rgba(0, 229, 255, 0.35)';
+        tabChatBtn.style.background = 'rgba(0, 229, 255, 0.08)';
+        tabChatBtn.style.color = '#00e5ff';
+      }
+    } else {
+      if (rosterView) {
+        rosterView.classList.add('hidden');
+        rosterView.style.display = 'none';
+      }
+      if (chatPanel) chatPanel.style.display = 'flex';
+      if (tabChatBtn) {
+        tabChatBtn.style.borderColor = '#f5d76e';
+        tabChatBtn.style.background = 'rgba(245, 215, 110, 0.16)';
+        tabChatBtn.style.color = '#f5d76e';
+      }
+      if (tabRosterBtn) {
+        tabRosterBtn.style.borderColor = 'rgba(0, 229, 255, 0.35)';
+        tabRosterBtn.style.background = 'rgba(0, 229, 255, 0.08)';
+        tabRosterBtn.style.color = '#00e5ff';
+      }
+    }
+  }
+
+  function updatePersonaBadge() {
+    if (!personaBadge) return;
+    const map = {
+      COUNCIL_ALL: 'ALL 6',
+      FINANCIAL_STRATEGIST: 'FINANCE',
+      MATHEMATICIAN: 'MATH',
+      PHYSICIST: 'PHYSICS',
+      SOFTWARE_ARCHITECT: 'CODE',
+      SYSTEMS_ENGINEER: 'SYSTEMS',
+      VISUAL_DESIGNER: '3D/UX',
+    };
+    personaBadge.textContent = map[activeExpertId] || activeExpertId;
+    try {
+      localStorage.setItem(STORAGE_KEY_EXPERT, activeExpertId);
+    } catch (_) {}
+
+    personaBtns.forEach((b) => {
+      if (b.getAttribute('data-expert-id') === activeExpertId) {
+        b.classList.add('active');
+        b.style.borderColor = '#f5d76e';
+        b.style.color = '#f5d76e';
+        b.style.background = 'rgba(245, 215, 110, 0.16)';
+      } else {
+        b.classList.remove('active');
+        b.style.borderColor = '';
+        b.style.color = '';
+        b.style.background = '';
+      }
+    });
+
+    if (latestRosterItems.length > 0) {
+      renderSpecialistRosterCards(latestRosterItems);
+    }
   }
 
   function renderTelemetryDigest(digest) {
@@ -20263,11 +20505,177 @@ document.addEventListener('DOMContentLoaded', () => {
     telemetryBar.innerHTML =
       '<span><b>TF:</b> <code style="color:#00e5ff;">' + escapeHtml(digest.activeInterval) + '</code></span>' +
       '<span><b>State:</b> <code style="color:#00e676;">' + escapeHtml(digest.systemState) + '</code></span>' +
-      '<span><b>Provider:</b> <code>' + escapeHtml(digest.activeProvider) + '</code></span>' +
-      '<span><b>PAXG Close:</b> <b style="color:#f5d76e;">' + escapeHtml(priceTxt) + '</b></span>' +
-      '<span><b>Live vs Cand:</b> <code>' + escapeHtml(digest.liveArchitectureVersion) + '</code> vs <code>' + escapeHtml(digest.candidateArchitectureVersion) + '</code> (<b>' + escapeHtml(digest.passedGatesCount) + '/' + escapeHtml(digest.totalGatesCount) + ' Gates</b>)</span>' +
-      '<span><b>OS Proof:</b> <b style="color:' + proofColor + ';">' + escapeHtml(digest.proofStatus) + '</b></span>' +
-      '<span><b>Cloud SQL:</b> <b style="color:' + (digest.cloudSqlActive ? '#00e676' : '#ffab00') + ';">' + (digest.cloudSqlActive ? 'ACTIVE (us-east1)' : 'LOCAL') + '</b></span>';
+      '<span><b>PAXG:</b> <b style="color:#f5d76e;">' + escapeHtml(priceTxt) + '</b></span>' +
+      '<span><b>Gates:</b> <b>' + escapeHtml(digest.passedGatesCount) + '/' + escapeHtml(digest.totalGatesCount) + '</b></span>' +
+      '<span><b>Proof:</b> <b style="color:' + proofColor + ';">' + escapeHtml(digest.proofStatus) + '</b></span>' +
+      '<span><b>SQL:</b> <b style="color:' + (digest.cloudSqlActive ? '#00e676' : '#ffab00') + ';">' + (digest.cloudSqlActive ? 'ONLINE' : 'LOCAL') + '</b></span>';
+  }
+
+  function renderSpecialistRosterCards(rosterList) {
+    if (!rosterCardsContainer || !Array.isArray(rosterList)) return;
+    const lang = (typeof currentLang === 'string' && currentLang === 'fa') ? 'fa' : 'en';
+
+    const councilEntry = rosterList.find((r) => r.id === 'COUNCIL_ALL');
+    const compositeScore = councilEntry && typeof councilEntry.marketConfidencePct === 'number'
+      ? councilEntry.marketConfidencePct
+      : 85;
+    if (compositeConfBadge) {
+      compositeConfBadge.textContent = compositeScore + '% CONF';
+    }
+
+    const totalTasks = rosterList.reduce(
+      (acc, r) => acc + (Array.isArray(r.pendingAnalysisTasks) ? r.pendingAnalysisTasks.length : 0),
+      0
+    );
+    if (rosterSummarySubtitle) {
+      rosterSummarySubtitle.textContent =
+        'Composite Confidence: ' + compositeScore + '% · ' + rosterList.length + ' Profiles · ' + totalTasks + ' Pending Analysis Tasks';
+    }
+
+    rosterCardsContainer.innerHTML = rosterList
+      .map((item) => {
+        const isSelected = item.id === activeExpertId;
+        const conf = typeof item.marketConfidencePct === 'number' ? item.marketConfidencePct : 80;
+        const confColor = conf >= 82 ? '#00e676' : conf >= 64 ? '#00e5ff' : '#ffab00';
+        const accent = item.accentColor || '#00e5ff';
+        const title = lang === 'fa' ? (item.titleFa || item.titleEn) : item.titleEn;
+        const focus = lang === 'fa' ? (item.currentFocusFa || item.currentFocusEn) : (item.currentFocusEn || item.domainFocusEn);
+        const rationale = lang === 'fa' ? (item.confidenceRationaleFa || item.confidenceRationaleEn) : (item.confidenceRationaleEn || '');
+        const tasks = Array.isArray(item.pendingAnalysisTasks) ? item.pendingAnalysisTasks : [];
+
+        const tasksHtml = tasks
+          .map((t) => {
+            const prioColor = t.priority === 'P0' ? '#ff5252' : t.priority === 'P1' ? '#ffab00' : '#00e5ff';
+            const statusColor =
+              t.status === 'READY_TO_RUN'
+                ? '#00e676'
+                : t.status === 'ACTIVE_MONITORING'
+                ? '#00e5ff'
+                : '#ffab00';
+            const taskTitle = lang === 'fa' ? (t.titleFa || t.titleEn) : t.titleEn;
+            return (
+              '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(4,8,16,0.92);border:1px solid rgba(40,60,95,0.45);">' +
+                '<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;">' +
+                  '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">' +
+                    '<span style="font-family:monospace;font-size:8.5px;font-weight:900;padding:1px 4px;border-radius:3px;background:rgba(255,82,82,0.14);border:1px solid ' + prioColor + ';color:' + prioColor + ';">' + escapeHtml(t.priority) + '</span>' +
+                    '<span style="font-family:monospace;font-size:8.5px;padding:1px 4px;border-radius:3px;background:rgba(0,229,255,0.08);color:' + statusColor + ';">' + escapeHtml(t.status) + '</span>' +
+                    '<span style="font-family:monospace;font-size:8.5px;color:#6e84a3;">' + escapeHtml(t.taskId) + '</span>' +
+                  '</div>' +
+                  '<div style="font-size:10.5px;color:#dbe7f6;line-height:1.35;">' + escapeHtml(taskTitle) + '</div>' +
+                '</div>' +
+                '<button type="button" class="btn gdf-roster-run-task-btn" data-expert-id="' + escapeHtml(item.id) + '" data-prompt="' + escapeHtml(t.promptToExecute) + '" style="flex-shrink:0;padding:4px 8px;font-size:10px;font-weight:800;border-color:' + accent + ';color:' + accent + ';background:rgba(255,255,255,0.04);">▶ Run</button>' +
+              '</div>'
+            );
+          })
+          .join('');
+
+        return (
+          '<div style="padding:10px 12px;border-radius:10px;background:rgba(11,18,32,0.96);border:' +
+          (isSelected ? '1.5px solid #f5d76e' : '1px solid rgba(45,68,105,0.55)') +
+          ';display:flex;flex-direction:column;gap:8px;box-shadow:' +
+          (isSelected ? '0 0 14px rgba(245,215,110,0.15)' : 'none') +
+          ';">' +
+            '<!-- Card Header -->' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+              '<div style="display:flex;flex-direction:column;gap:2px;min-width:0;">' +
+                '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+                  '<span style="font-family:monospace;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid ' + accent + ';color:' + accent + ';">' + escapeHtml(item.badgeLabel) + '</span>' +
+                  (isSelected ? '<span style="font-family:monospace;font-size:8.5px;font-weight:900;padding:1px 5px;border-radius:4px;background:rgba(245,215,110,0.2);color:#f5d76e;">ACTIVE IN CHAT</span>' : '') +
+                '</div>' +
+                '<div style="font-size:12px;font-weight:800;color:#fff;margin-top:2px;">' + escapeHtml(title) + '</div>' +
+              '</div>' +
+              '<button type="button" class="btn gdf-roster-select-expert-btn" data-expert-id="' + escapeHtml(item.id) + '" style="flex-shrink:0;font-size:10px;padding:4px 8px;border-color:' + (isSelected ? '#f5d76e' : 'rgba(0,229,255,0.35)') + ';color:' + (isSelected ? '#f5d76e' : '#00e5ff') + ';">' + (isSelected ? '💬 Open Chat' : '💬 Select Expert') + '</button>' +
+            '</div>' +
+            '<!-- Confidence Meter -->' +
+            '<div style="padding:6px 8px;border-radius:6px;background:rgba(6,11,20,0.9);border:1px solid rgba(40,60,95,0.4);">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:10px;margin-bottom:4px;">' +
+                '<span style="color:#9cb0cc;">Live Market &amp; Domain Confidence: <b style="color:' + confColor + ';">' + conf + '%</b></span>' +
+                '<span style="font-size:9px;color:' + confColor + ';font-weight:800;">' + escapeHtml(item.confidenceStatusLabel || 'MODERATE') + '</span>' +
+              '</div>' +
+              '<div style="width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:4px;">' +
+                '<div style="width:' + conf + '%;height:100%;background:' + confColor + ';border-radius:3px;"></div>' +
+              '</div>' +
+              (rationale ? '<div style="font-family:monospace;font-size:9px;color:#7f95b5;">' + escapeHtml(rationale) + '</div>' : '') +
+            '</div>' +
+            '<!-- Current Focus -->' +
+            '<div style="font-size:10.5px;color:#c5d6ec;line-height:1.45;">' +
+              '<b style="color:#00e5ff;">🎯 Current Live Focus:</b> ' + escapeHtml(focus) +
+            '</div>' +
+            '<!-- Pending Analysis Tasks -->' +
+            '<div style="display:flex;flex-direction:column;gap:5px;">' +
+              '<div style="font-size:9.5px;font-weight:800;color:#f5d76e;letter-spacing:0.4px;text-transform:uppercase;">📋 Pending Analysis Tasks (' + tasks.length + ')</div>' +
+              tasksHtml +
+            '</div>' +
+          '</div>'
+        );
+      })
+      .join('');
+
+    // Bind Select Expert buttons
+    rosterCardsContainer.querySelectorAll('.gdf-roster-select-expert-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const expId = btn.getAttribute('data-expert-id') || 'COUNCIL_ALL';
+        activeExpertId = expId;
+        updatePersonaBadge();
+        setViewMode('CHAT');
+        if (inputEl) inputEl.focus();
+      });
+    });
+
+    // Bind Run Task buttons
+    rosterCardsContainer.querySelectorAll('.gdf-roster-run-task-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const expId = btn.getAttribute('data-expert-id') || 'COUNCIL_ALL';
+        const promptText = btn.getAttribute('data-prompt') || '';
+        activeExpertId = expId;
+        updatePersonaBadge();
+        setViewMode('CHAT');
+        if (promptText) {
+          submitCouncilQuestion(promptText);
+        }
+      });
+    });
+  }
+
+  function appendBubbleToChat(role, text, title, toolsInvoked, timestampIso) {
+    if (!chatLog) return;
+    if (role === 'user') {
+      const userBubble = document.createElement('div');
+      userBubble.style.cssText = 'align-self:flex-end;max-width:88%;padding:8px 12px;border-radius:9px;background:rgba(0,229,255,0.14);border:1px solid rgba(0,229,255,0.45);color:#fff;';
+      userBubble.innerHTML = '<div style="font-size:9.5px;color:#00e5ff;font-weight:800;margin-bottom:2px;">OPERATOR (' + escapeHtml(title || activeExpertId) + ')</div><div>' + escapeHtml(text) + '</div>';
+      chatLog.appendChild(userBubble);
+    } else {
+      const toolsHtml = Array.isArray(toolsInvoked) && toolsInvoked.length > 0
+        ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">' +
+            toolsInvoked.map((t) => (
+              '<span style="font-family:monospace;font-size:9.5px;padding:1px 6px;border-radius:3px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:#00e5ff;">🔍 ' +
+                escapeHtml(t.summary || t.toolName) +
+              '</span>'
+            )).join('') +
+          '</div>'
+        : '';
+
+      const replyBubble = document.createElement('div');
+      replyBubble.style.cssText = 'align-self:flex-start;width:100%;box-sizing:border-box;padding:10px 12px;border-radius:9px;background:rgba(11,18,32,0.96);border:1px solid rgba(245,215,110,0.4);color:#dbe7f6;';
+      const isFa = /[\u0600-\u06FF]/.test(text || '');
+      replyBubble.setAttribute('dir', isFa ? 'rtl' : 'ltr');
+      replyBubble.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(40,60,95,0.45);">' +
+          '<span style="font-weight:800;color:#f5d76e;font-size:11.5px;">🏛️ ' + escapeHtml(title || activeExpertId) + '</span>' +
+          '<span style="font-family:monospace;font-size:9.5px;color:#8fa2bf;">' + escapeHtml((timestampIso || '').slice(11, 19) || 'UTC') + '</span>' +
+        '</div>' +
+        toolsHtml +
+        '<div style="word-break:break-word;">' + formatCouncilMarkdown(text || 'No response returned.') + '</div>';
+      chatLog.appendChild(replyBubble);
+    }
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  // Restore existing history into DOM on launch
+  if (chatHistory.length > 0) {
+    chatHistory.forEach((msg) => {
+      appendBubbleToChat(msg.role, msg.text, msg.expertTitle || msg.expertId, msg.toolsInvoked, msg.timestampIso);
+    });
   }
 
   async function refreshCouncilRosterAndTelemetry() {
@@ -20278,6 +20686,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (!res.ok) return;
       const data = await res.json();
+      if (Array.isArray(data?.roster)) {
+        latestRosterItems = data.roster;
+        renderSpecialistRosterCards(latestRosterItems);
+      }
       const lt = data?.liveTelemetry;
       if (lt) {
         renderTelemetryDigest({
@@ -20300,25 +20712,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = String(rawText || '').trim();
     if (!text || isConsulting) return;
     isConsulting = true;
+    setViewMode('CHAT');
     if (inputEl) inputEl.value = '';
     if (sendBtn) {
       sendBtn.disabled = true;
-      sendBtn.textContent = '⏳ Consulting...';
+      sendBtn.textContent = '⏳ ...';
     }
 
     const lang = (typeof currentLang === 'string' && currentLang === 'fa') ? 'fa' : 'en';
     const tf = (typeof currentTimeframe === 'string' && currentTimeframe) ? currentTimeframe : '15m';
 
-    // Append user bubble
-    const userBubble = document.createElement('div');
-    userBubble.style.cssText = 'align-self:flex-end;max-width:85%;padding:10px 14px;border-radius:10px;background:rgba(0,229,255,0.14);border:1px solid rgba(0,229,255,0.45);color:#fff;';
-    userBubble.innerHTML = '<div style="font-size:10px;color:#00e5ff;font-weight:800;margin-bottom:3px;">OPERATOR (' + escapeHtml(activeExpertId) + ')</div><div>' + escapeHtml(text) + '</div>';
-    chatLog.appendChild(userBubble);
+    // Append user bubble to UI & history
+    const userMsg = { role: 'user', text, expertId: activeExpertId, timestampIso: new Date().toISOString() };
+    chatHistory.push(userMsg);
+    saveChatHistoryToStorage();
+    appendBubbleToChat('user', text, activeExpertId);
 
-    // Append thinking placeholder
+    // Append loading placeholder
     const loadingBubble = document.createElement('div');
-    loadingBubble.style.cssText = 'align-self:flex-start;max-width:92%;padding:12px 14px;border-radius:10px;background:rgba(14,22,38,0.92);border:1px solid rgba(245,215,110,0.4);color:#f5d76e;font-family:monospace;font-size:11.5px;';
-    loadingBubble.textContent = '⏳ GDF Expert Council is inspecting repository files & live 6D telemetry...';
+    loadingBubble.id = 'gdfCouncilLoadingItem';
+    loadingBubble.style.cssText = 'align-self:flex-start;max-width:92%;padding:10px 12px;border-radius:8px;background:rgba(14,22,38,0.92);border:1px solid rgba(245,215,110,0.4);color:#f5d76e;font-family:monospace;font-size:11px;';
+    loadingBubble.textContent = '⏳ Inspecting repository files & live 6D telemetry...';
     chatLog.appendChild(loadingBubble);
     chatLog.scrollTop = chatLog.scrollHeight;
 
@@ -20334,7 +20748,7 @@ document.addEventListener('DOMContentLoaded', () => {
           expertId: activeExpertId,
           interval: tf,
           language: lang,
-          history: chatHistory.slice(-6),
+          history: chatHistory.slice(-6).map((h) => ({ role: h.role, text: h.text })),
         }),
       });
       const data = await res.json();
@@ -20344,72 +20758,273 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTelemetryDigest(data.liveTelemetryDigest);
       }
 
-      const toolsHtml = Array.isArray(data?.toolsInvoked) && data.toolsInvoked.length > 0
-        ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">' +
-            data.toolsInvoked.map((t) => (
-              '<span style="font-family:monospace;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:#00e5ff;">🔍 ' +
-                escapeHtml(t.summary || t.toolName) +
-              '</span>'
-            )).join('') +
-          '</div>'
-        : '';
+      const modelReply = data.replyMarkdown || data.error || 'No response returned.';
+      const title = lang === 'fa' ? (data.expertTitleFa || data.expertTitleEn) : (data.expertTitleEn || activeExpertId);
+      appendBubbleToChat('model', modelReply, title, data.toolsInvoked, data.timestampIso);
 
-      const replyBubble = document.createElement('div');
-      replyBubble.style.cssText = 'align-self:flex-start;width:96%;padding:14px 16px;border-radius:10px;background:rgba(11,18,32,0.95);border:1px solid rgba(245,215,110,0.45);color:#dbe7f6;';
-      replyBubble.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr');
-      replyBubble.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(40,60,95,0.5);">' +
-          '<span style="font-weight:800;color:#f5d76e;font-size:12.5px;">🏛️ ' + escapeHtml(lang === 'fa' ? (data.expertTitleFa || data.expertTitleEn) : (data.expertTitleEn || activeExpertId)) + '</span>' +
-          '<span style="font-family:monospace;font-size:10px;color:#8fa2bf;">Model: ' + escapeHtml(data.modelUsed || 'gemini-3.8-flash') + ' · ' + escapeHtml((data.timestampIso || '').slice(11, 19)) + ' UTC</span>' +
-        '</div>' +
-        toolsHtml +
-        '<div>' + formatCouncilMarkdown(data.replyMarkdown || data.error || 'No response returned.') + '</div>';
-      chatLog.appendChild(replyBubble);
-      chatLog.scrollTop = chatLog.scrollHeight;
-
-      chatHistory.push({ role: 'user', text, expertId: activeExpertId });
-      chatHistory.push({ role: 'model', text: data.replyMarkdown || '', expertId: activeExpertId });
+      chatHistory.push({
+        role: 'model',
+        text: modelReply,
+        expertId: activeExpertId,
+        expertTitle: title,
+        toolsInvoked: data.toolsInvoked,
+        timestampIso: data.timestampIso || new Date().toISOString(),
+      });
+      saveChatHistoryToStorage();
+      refreshCouncilRosterAndTelemetry();
     } catch (err) {
       loadingBubble.remove();
       const errBubble = document.createElement('div');
-      errBubble.style.cssText = 'align-self:flex-start;padding:10px 14px;border-radius:8px;background:rgba(255,61,90,0.14);border:1px solid rgba(255,61,90,0.55);color:#ff8a80;';
-      errBubble.textContent = '✕ Council consultation request failed: ' + (err && err.message ? err.message : String(err));
+      errBubble.style.cssText = 'align-self:flex-start;padding:8px 12px;border-radius:8px;background:rgba(255,61,90,0.14);border:1px solid rgba(255,61,90,0.55);color:#ff8a80;font-size:11px;';
+      errBubble.textContent = '✕ Council consultation failed: ' + (err && err.message ? err.message : String(err));
       chatLog.appendChild(errBubble);
     } finally {
       isConsulting = false;
       if (sendBtn) {
         sendBtn.disabled = false;
-        sendBtn.textContent = '⚡ Consult Council';
+        sendBtn.textContent = '⚡ Send';
       }
     }
   }
 
-  if (openBtn && overlay) {
-    openBtn.addEventListener('click', () => {
-      overlay.classList.remove('hidden');
-      refreshCouncilRosterAndTelemetry();
-      if (inputEl) inputEl.focus();
+  // Window State & Position Handling (Draggable, Minimizable, Closable)
+  let isMinimized = false;
+  const viewTabsBar = document.getElementById('gdfCouncilViewTabs');
+  const windowControls = document.getElementById('gdfCouncilWindowControls');
+
+  function applyMinimizedState(minimized) {
+    if (!widget) return;
+    isMinimized = Boolean(minimized);
+    if (isMinimized) {
+      if (telemetryBar) telemetryBar.style.display = 'none';
+      if (viewTabsBar) viewTabsBar.style.display = 'none';
+      if (chatPanel) chatPanel.style.display = 'none';
+      if (rosterView) rosterView.style.display = 'none';
+      widget.style.height = 'auto';
+      widget.style.minHeight = '0px';
+      if (minimizeBtn) {
+        minimizeBtn.textContent = '▢';
+        minimizeBtn.title = 'Expand chat window';
+      }
+    } else {
+      if (telemetryBar) telemetryBar.style.display = 'flex';
+      if (viewTabsBar) viewTabsBar.style.display = 'flex';
+      widget.style.height = '600px';
+      widget.style.minHeight = '360px';
+      if (minimizeBtn) {
+        minimizeBtn.textContent = '—';
+        minimizeBtn.title = 'Minimize chat window';
+      }
+      setViewMode(activeViewMode);
+    }
+  }
+
+  function showWidget() {
+    if (!widget) return;
+    widget.classList.remove('hidden');
+    widget.style.display = 'flex';
+    applyMinimizedState(false);
+    if (launcher) launcher.style.display = 'none';
+    refreshCouncilRosterAndTelemetry();
+    updatePersonaBadge();
+    try {
+      localStorage.setItem(STORAGE_KEY_WIDGET_STATE, 'open');
+    } catch (_) {}
+    if (activeViewMode === 'CHAT' && inputEl) inputEl.focus();
+  }
+
+  function hideWidget() {
+    if (!widget) return;
+    widget.classList.add('hidden');
+    widget.style.display = 'none';
+    if (launcher) launcher.style.display = 'flex';
+    try {
+      localStorage.setItem(STORAGE_KEY_WIDGET_STATE, 'closed');
+    } catch (_) {}
+  }
+
+  function toggleMinimizeWidget(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!widget) return;
+    applyMinimizedState(!isMinimized);
+  }
+
+  function resetWidgetPosition(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!widget) return;
+    widget.style.top = '';
+    widget.style.left = '';
+    widget.style.bottom = '24px';
+    widget.style.right = '24px';
+    widget.style.width = '440px';
+    applyMinimizedState(false);
+  }
+
+  // Prevent window control buttons from triggering header drag on mouse/touch
+  if (windowControls) {
+    ['mousedown', 'touchstart', 'pointerdown'].forEach((evtName) => {
+      windowControls.addEventListener(evtName, (e) => {
+        e.stopPropagation();
+      }, { passive: true });
     });
   }
-  if (closeBtn && overlay) {
-    closeBtn.addEventListener('click', () => {
-      overlay.classList.add('hidden');
+
+  // Dragging logic via title bar
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+
+  if (widgetHeader && widget) {
+    widgetHeader.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button') || e.target.closest('#gdfCouncilWindowControls')) return;
+      isDragging = true;
+      widgetHeader.style.cursor = 'grabbing';
+      const rect = widget.getBoundingClientRect();
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !widget) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      const newLeft = Math.max(8, Math.min(window.innerWidth - widget.offsetWidth - 8, initialLeft + dx));
+      const newTop = Math.max(8, Math.min(window.innerHeight - widget.offsetHeight - 8, initialTop + dy));
+
+      widget.style.bottom = 'auto';
+      widget.style.right = 'auto';
+      widget.style.left = newLeft + 'px';
+      widget.style.top = newTop + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        if (widgetHeader) widgetHeader.style.cursor = 'grab';
+      }
+    });
+
+    // Mobile touch drag
+    widgetHeader.addEventListener('touchstart', (e) => {
+      if (e.target.closest('button') || e.target.closest('#gdfCouncilWindowControls') || e.touches.length !== 1) return;
+      isDragging = true;
+      const touch = e.touches[0];
+      const rect = widget.getBoundingClientRect();
+      dragStartX = touch.clientX;
+      dragStartY = touch.clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || !widget || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - dragStartX;
+      const dy = touch.clientY - dragStartY;
+      const newLeft = Math.max(4, Math.min(window.innerWidth - widget.offsetWidth - 4, initialLeft + dx));
+      const newTop = Math.max(4, Math.min(window.innerHeight - widget.offsetHeight - 4, initialTop + dy));
+
+      widget.style.bottom = 'auto';
+      widget.style.right = 'auto';
+      widget.style.left = newLeft + 'px';
+      widget.style.top = newTop + 'px';
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+  }
+
+  // Button Listeners
+  if (openFloatingBtn) openFloatingBtn.addEventListener('click', showWidget);
+  if (headerOpenBtn) {
+    headerOpenBtn.addEventListener('click', () => {
+      if (widget && widget.style.display !== 'none' && !widget.classList.contains('hidden')) {
+        hideWidget();
+      } else {
+        showWidget();
+      }
+    });
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hideWidget();
+    });
+  }
+  if (minimizeBtn) {
+    minimizeBtn.addEventListener('click', toggleMinimizeWidget);
+  }
+  if (resetPosBtn) {
+    resetPosBtn.addEventListener('click', resetWidgetPosition);
+  }
+
+  // Allow Escape key to close the floating widget
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && widget && widget.style.display !== 'none') {
+      hideWidget();
+    }
+  });
+
+  if (tabChatBtn) tabChatBtn.addEventListener('click', () => setViewMode('CHAT'));
+  if (tabRosterBtn) {
+    tabRosterBtn.addEventListener('click', () => {
+      setViewMode('ROSTER');
+      refreshCouncilRosterAndTelemetry();
+    });
+  }
+  if (refreshRosterBtn) {
+    refreshRosterBtn.addEventListener('click', () => {
+      refreshCouncilRosterAndTelemetry();
+    });
+  }
+
+  if (clearChatBtn) {
+    clearChatBtn.addEventListener('click', () => {
+      if (!clearChatConfirmArmed) {
+        clearChatConfirmArmed = true;
+        clearChatBtn.textContent = '✓?';
+        clearChatBtn.title = 'Click again to confirm clearing chat history';
+        if (clearChatConfirmTimer) clearTimeout(clearChatConfirmTimer);
+        clearChatConfirmTimer = setTimeout(() => {
+          clearChatConfirmArmed = false;
+          clearChatBtn.textContent = '🗑';
+          clearChatBtn.title = 'Clear conversation history';
+        }, 3000);
+        return;
+      }
+      clearChatConfirmArmed = false;
+      clearChatBtn.textContent = '🗑';
+      clearChatBtn.title = 'Clear conversation history';
+      if (clearChatConfirmTimer) clearTimeout(clearChatConfirmTimer);
+      chatHistory = [];
+      try { localStorage.removeItem(STORAGE_KEY_HISTORY); } catch (_) {}
+      if (chatLog) {
+        chatLog.innerHTML =
+          '<div style="padding:10px 12px;border-radius:8px;border:1px solid rgba(245,215,110,0.35);background:rgba(14,22,38,0.9);">' +
+            '<div style="font-weight:800;color:#f5d76e;margin-bottom:3px;font-size:11.5px;">🏛️ Chat History Cleared</div>' +
+            '<div style="color:#9cb0cc;font-size:10.5px;">Start a fresh session with any specialist or choose a quick prompt below.</div>' +
+          '</div>';
+      }
     });
   }
 
   personaBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      personaBtns.forEach((b) => {
-        b.classList.remove('active');
-        b.style.borderColor = '';
-        b.style.color = '';
-        b.style.background = '';
-      });
-      btn.classList.add('active');
-      btn.style.borderColor = '#f5d76e';
-      btn.style.color = '#f5d76e';
-      btn.style.background = 'rgba(245, 215, 110, 0.16)';
       activeExpertId = btn.getAttribute('data-expert-id') || 'COUNCIL_ALL';
+      updatePersonaBadge();
     });
   });
 
@@ -20436,16 +21051,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Initialize state on load
+  updatePersonaBadge();
+  setViewMode(activeViewMode);
+  refreshCouncilRosterAndTelemetry();
+
+  // Expose global controller
   window.GDFExpertCouncilController = {
+    openWidget: showWidget,
+    closeWidget: hideWidget,
+    resetPosition: resetWidgetPosition,
+    setViewMode,
     submitCouncilQuestion,
     refreshCouncilRosterAndTelemetry,
     setExpertPersona: (id) => {
       activeExpertId = id;
+      updatePersonaBadge();
     },
     getState: () => ({
       activeExpertId,
+      activeViewMode,
       chatHistoryLength: chatHistory.length,
+      rosterCount: latestRosterItems.length,
       isConsulting,
+      isOpen: !widget.classList.contains('hidden'),
     }),
   };
 })();

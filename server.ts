@@ -115,6 +115,7 @@ const { adminAuth } = await import('./src/lib/firebase-admin.js');
 const { getOrCreateUser, isCloudSqlConfigured } = await import('./src/db/gdfRepository.js');
 const {
   EXPERT_COUNCIL_ROSTER,
+  buildLiveExpertSpecialistRoster,
   executeGetLiveMarketAndEngineTelemetry,
   runExpertCouncilConsultation,
 } = await import('./src/services/expertCouncilService.js');
@@ -1424,10 +1425,12 @@ app.get('/api/gdf-os/auditor-packet', (req: Request, res: Response) => {
 // =========================================================================
 app.get('/api/gdf-os/expert-council/roster', (req: Request, res: Response) => {
   const interval = typeof req.query?.interval === 'string' ? req.query.interval.trim() : '15m';
+  const liveTelemetry = executeGetLiveMarketAndEngineTelemetry(interval);
+  const liveRoster = buildLiveExpertSpecialistRoster(interval, liveTelemetry);
   res.json({
     status: 'SUCCESS',
-    roster: EXPERT_COUNCIL_ROSTER,
-    liveTelemetry: executeGetLiveMarketAndEngineTelemetry(interval),
+    roster: liveRoster,
+    liveTelemetry,
   });
 });
 
