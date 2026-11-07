@@ -3873,6 +3873,107 @@ input:checked + .toggle-slider:before {
       </div>
     </div>
 
+    <!-- Dedicated BDF-B (Bitcoin Full Brain) 6D Latent State, Pulse-Echo & Leverage Regime Console (Visible when AssetClass = BTC) -->
+    <div id="bdfBTelemetryConsole" style="display: none; margin-bottom: 12px; padding: 14px; border-radius: 8px; background: #0b0e17; border: 1px solid #1e293b;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid #1e293b;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 700; color: #f8fafc; letter-spacing: 0.3px;">BDF-B · Bitcoin Full Brain Scientific Engine (v1.0)</span>
+          <span id="bdfBHeaderSessionBadge" style="font-family: monospace; font-size: 11px; color: #06b6d4;">● CONTINUOUS_OPEN · isFuturesClosed=false</span>
+        </div>
+        <div style="font-family: monospace; font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums;">
+          <span id="bdfBHeaderPolicyText">Drift Policy: UNCHANGED · Residual Health: OK · Promotion Gate: ARMED</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px;">
+        <!-- Card 1: BDF-B 6D Latent State -->
+        <div style="background: #111827; border: 1px solid #1e293b; border-radius: 6px; padding: 12px;">
+          <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;">01. 6D Identifiable Latent State (X_t)</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: monospace; font-size: 12px; font-variant-numeric: tabular-nums;">
+            <div>
+              <div style="font-size: 10px; color: #64748b;">x1 · logLevel (Implied)</div>
+              <div id="bdfBStateLogLevel" style="color: #f8fafc; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">x2 · Drift (μ / step)</div>
+              <div id="bdfBStateDrift" style="color: #06b6d4; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">x3 · Realized Vol (σ)</div>
+              <div id="bdfBStateVol" style="color: #f59e0b; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">x4 · CEX Pressure</div>
+              <div id="bdfBStateCex" style="color: #e2e8f0; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">x5 · Leverage Stress</div>
+              <div id="bdfBStateLevStress" style="color: #e2e8f0; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">x6 · Book Resilience</div>
+              <div id="bdfBStateResilience" style="color: #10b981; font-weight: 600;">—</div>
+            </div>
+          </div>
+          <div id="bdfBStateFooter" style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #1e293b; font-family: monospace; font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums;">
+            Anchor A_t: $— · Activity Clock Δτ: 1.00
+          </div>
+        </div>
+
+        <!-- Card 2: Pulse-Echo Brain & Residual Oracle -->
+        <div style="background: #111827; border: 1px solid #1e293b; border-radius: 6px; padding: 12px;">
+          <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;">02. Residual Oracle &amp; Pulse–Echo Brain</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: monospace; font-size: 12px; font-variant-numeric: tabular-nums;">
+            <div>
+              <div style="font-size: 10px; color: #64748b;">1-Step RMSE</div>
+              <div id="bdfBOracleRmse" style="color: #f8fafc; font-weight: 600;">$—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Lag-1 Autocorr (ρ₁)</div>
+              <div id="bdfBOracleRho1" style="color: #f8fafc; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Shocks Fired (|z| ≥ 2.5)</div>
+              <div id="bdfBOracleShocks" style="color: #f59e0b; font-weight: 600;">0</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Candidate Dissent (Δ)</div>
+              <div id="bdfBCandidateDissent" style="color: #e040fb; font-weight: 600;">$—</div>
+            </div>
+          </div>
+          <div id="bdfBPulseEchoSummary" style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #1e293b; font-family: monospace; font-size: 11px; color: #cbd5e1; line-height: 1.4;">
+            Latest Pulse: None detected in active window.
+          </div>
+        </div>
+
+        <!-- Card 3: Continuous Session & Leverage / Satellite Channels -->
+        <div style="background: #111827; border: 1px solid #1e293b; border-radius: 6px; padding: 12px;">
+          <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;">03. Leverage Regime &amp; Telemetry Channels</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: monospace; font-size: 12px; font-variant-numeric: tabular-nums;">
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Leverage Regime</div>
+              <div id="bdfBLevRegime" style="color: #06b6d4; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">8h Perp Funding</div>
+              <div id="bdfBFundingRate" style="color: #f8fafc; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Mark–Spot Basis</div>
+              <div id="bdfBMarkSpotBasis" style="color: #f8fafc; font-weight: 600;">—</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: #64748b;">Chain Satellite</div>
+              <div id="bdfBChainSatellite" style="color: #94a3b8; font-weight: 600;">SATELLITE_ONLY</div>
+            </div>
+          </div>
+          <div id="bdfBChannelProvenance" style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #1e293b; font-family: monospace; font-size: 11px; color: #94a3b8;">
+            Derivatives Channel: Checking live public perp feeds...
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 3. Forecast Temporal Horizon (Immediately Under Chart Control Bar) -->
     <div class="scrubber-panel" id="panelHorizon">
       <div class="scrubber-header">
@@ -10546,6 +10647,104 @@ function renderHUD(d) {
       btcPriceEl.textContent = '$' + d.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
   }
+
+  // Render Dedicated BDF-B Telemetry Console when BTC is active
+  const bdfBConsoleEl = document.getElementById('bdfBTelemetryConsole');
+  if (bdfBConsoleEl) {
+    if (isBtcAsset && d.bdfBEngine && d.bdfBEngine.ok) {
+      bdfBConsoleEl.style.display = 'block';
+      const bdf = d.bdfBEngine;
+      const st = bdf.state || {};
+      const aw = bdf.awareness || {};
+      const ro = bdf.residualOracle || {};
+      const lc = bdf.leverageChannel || {};
+      const cs = bdf.chainSatellite || {};
+      const cd = bdf.candidateDissentSummary || {};
+
+      const setTxt = (id, val, color) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = val;
+          if (color) el.style.color = color;
+        }
+      };
+
+      const impliedUsd = Math.exp(st.logLevel || 0);
+      setTxt(
+        'bdfBHeaderSessionBadge',
+        `${aw.isThinOpen ? '▲ THIN_OPEN_PARTICIPATION' : '● CONTINUOUS_OPEN'} · ${aw.session?.sessionId || '24/7_SPOT'} · isFuturesClosed=false`,
+        aw.isThinOpen ? '#f59e0b' : '#06b6d4'
+      );
+      setTxt(
+        'bdfBHeaderPolicyText',
+        `Drift Policy: ${aw.driftPolicy || 'UNCHANGED'} · Residual Health: ${aw.residualHealth || 'OK'} · Auto-Promo: ${aw.blockAutoPromotion ? 'BLOCKED' : 'ARMED'}`
+      );
+      setTxt('bdfBStateLogLevel', `${(st.logLevel || 0).toFixed(4)} ($${impliedUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
+      setTxt('bdfBStateDrift', `${(st.drift || 0) >= 0 ? '+' : ''}${((st.drift || 0) * 100).toFixed(4)}%/step`, (st.drift || 0) >= 0 ? '#10b981' : '#f43f5e');
+      setTxt('bdfBStateVol', `${((st.vol || 0) * 100).toFixed(3)}%/bar`);
+      setTxt('bdfBStateCex', `${(st.cexPressure || 0) >= 0 ? '+' : ''}${(st.cexPressure || 0).toFixed(3)}`, (st.cexPressure || 0) >= 0 ? '#10b981' : '#f43f5e');
+      setTxt('bdfBStateLevStress', `${(st.leverageStress || 0) >= 0 ? '+' : ''}${(st.leverageStress || 0).toFixed(3)}`);
+      setTxt('bdfBStateResilience', `${((st.resilience || 0) * 100).toFixed(1)}%`);
+      setTxt(
+        'bdfBStateFooter',
+        `Anchor A_t: $${(bdf.equilibriumAnchorUsd || d.currentPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Activity Clock Δτ: ${(bdf.activityClockLatestDeltaTau || 1).toFixed(2)}`
+      );
+
+      setTxt('bdfBOracleRmse', `$${(ro.rmse || 0).toFixed(2)} (Wknd: $${(ro.weekendRmse || 0).toFixed(1)})`);
+      setTxt(
+        'bdfBOracleRho1',
+        `${(ro.lag1Autocorrelation || 0).toFixed(3)} (z=${(ro.latestZ || 0).toFixed(2)}σ)`,
+        Math.abs(ro.lag1Autocorrelation || 0) >= 0.22 ? '#f59e0b' : '#f8fafc'
+      );
+      setTxt(
+        'bdfBOracleShocks',
+        `${ro.shocksFired || 0} (Post-Shock MAE: $${(ro.meanAbsPostShockError || 0).toFixed(1)})`,
+        (ro.shocksFired || 0) > 0 ? '#f59e0b' : '#10b981'
+      );
+      setTxt(
+        'bdfBCandidateDissent',
+        `$${(cd.meanAbsTrackDissentUsd || 0).toFixed(2)} (Max: $${(cd.maxAbsTrackDissentUsd || 0).toFixed(1)})`
+      );
+
+      const pulsesArr = Array.isArray(bdf.pulses) ? bdf.pulses : [];
+      if (pulsesArr.length > 0) {
+        const lastP = pulsesArr[pulsesArr.length - 1];
+        setTxt(
+          'bdfBPulseEchoSummary',
+          `Latest Pulse: ${lastP.type} (${lastP.direction}) · Impact $${lastP.impact} · Recovery ${(lastP.recovery * 100).toFixed(0)}% · ${lastP.absorbed ? 'ABSORBED' : 'ACTIVE'}`
+        );
+      } else {
+        setTxt('bdfBPulseEchoSummary', 'Latest Pulse: Nominal continuous flow (0 impulses exceeding threshold).');
+      }
+
+      setTxt(
+        'bdfBLevRegime',
+        lc.leverageRegime || 'UNKNOWN',
+        lc.leverageRegime === 'CASCADE_RISK'
+          ? '#f43f5e'
+          : lc.leverageRegime === 'CROWDED'
+          ? '#f59e0b'
+          : '#06b6d4'
+      );
+      setTxt(
+        'bdfBFundingRate',
+        typeof lc.latestFundingRate8h === 'number'
+          ? `${(lc.latestFundingRate8h * 100).toFixed(4)}%/8h`
+          : 'UNAVAILABLE'
+      );
+      setTxt(
+        'bdfBMarkSpotBasis',
+        typeof lc.latestMarkSpotBasisBps === 'number'
+          ? `${lc.latestMarkSpotBasisBps >= 0 ? '+' : ''}${lc.latestMarkSpotBasisBps.toFixed(2)} bps`
+          : 'UNAVAILABLE'
+      );
+      setTxt('bdfBChainSatellite', `${cs.status || 'UNAVAILABLE'} (Core: false)`);
+      setTxt('bdfBChannelProvenance', `${lc.source || 'UNAVAILABLE'} · ${lc.noteEn || ''}`);
+    } else {
+      bdfBConsoleEl.style.display = 'none';
+    }
+  }
+
   const netLift = d.macroWindVector.totalNetVelocity;
   document.getElementById('headDrift').textContent = (netLift >= 0 ? '+' : '') + netLift.toFixed(2) + ' $/hr';
   document.getElementById('headVol').textContent = d.garchVolatility.currentVolPct.toFixed(2) + '%';

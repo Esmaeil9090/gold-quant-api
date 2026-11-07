@@ -1,5 +1,5 @@
 {
-  "timestampIso": "2026-11-07T17:11:37.237Z",
+  "timestampIso": "2026-11-07T18:50:12.008Z",
   "mode": "POST_REMEDIATION_VERIFICATION",
   "sampleSizeCandles": 300,
   "results": [
@@ -70,7 +70,7 @@
       "status": "PASSED",
       "severityIfFailed": "HIGH",
       "toleranceOrCriterion": "All states finite; lower05 <= lower25 <= median <= upper75 <= upper95 for all h=1..24",
-      "measuredValue": "impliedPrice=$4053.13, Δτ=4.2, finite=true",
+      "measuredValue": "impliedPrice=$4059.35, Δτ=4.2, finite=true",
       "evidenceSummary": "Filter and 24-step quantile plume remain bounded and strictly monotonic under a $65 jump + 25x volume spike."
     },
     {
@@ -110,7 +110,7 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Matched-sample walk-forward evaluation across N >= 30 origins with DM t-stat and 90% interval coverage",
-      "measuredValue": "h=1: RMSE_Y=$6.904 vs RMSE_RW=$4.8509 (DM t=-2.919, Cov90=92.5%)",
+      "measuredValue": "h=1: RMSE_Y=$6.9831 vs RMSE_RW=$4.8509 (DM t=-3.12, Cov90=91.7%)",
       "evidenceSummary": "Evaluated 253 strictly causal origins across h=1,5,15."
     },
     {
@@ -120,7 +120,7 @@
       "status": "PASSED",
       "severityIfFailed": "MEDIUM",
       "toleranceOrCriterion": "Quantify exact OOS RMSE, Hit Rate, Rank IC, and ρ_1 contribution of each 6D filter term",
-      "measuredValue": "FULL_MODEL: RMSE=$4.9928 | ABLATE_MEAN_REVERSION: RMSE=$5.0084 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8905 | ABLATE_MACRO_COUPLING: RMSE=$4.9963 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.8778",
+      "measuredValue": "FULL_MODEL: RMSE=$4.9085 | ABLATE_MEAN_REVERSION: RMSE=$4.9215 | ABLATE_TOXICITY_COUPLING: RMSE=$4.8151 | ABLATE_MACRO_COUPLING: RMSE=$4.9105 | ABLATE_DRIFT_PERSISTENCE: RMSE=$4.8764",
       "evidenceSummary": "Completed 5-way component ablation across mean reversion, toxicity coupling, macro coupling, and drift persistence."
     },
     {
@@ -170,8 +170,8 @@
       "status": "PASSED",
       "severityIfFailed": "HIGH",
       "toleranceOrCriterion": "When eligible, write-back increments generation and mutates Yellow-Line trajectory; when ineligible, fails closed with zero mutation",
-      "measuredValue": "applied=true (7/8 gates), gen=60->61, ΔStep24=$-1.89",
-      "evidenceSummary": "Write-back applied: Yellow-Line h=24 shifted from $4062.34 to $4060.45 (Δ=$-1.89)."
+      "measuredValue": "applied=false (7/8 gates), gen=61->61, ΔStep24=$0",
+      "evidenceSummary": "Write-back cleanly blocked (7/8 gates passed); incumbent parameters preserved unchanged."
     },
     {
       "testId": "AUDIT-18",
@@ -187,97 +187,97 @@
   "forecastMetricsTable": {
     "h=1": {
       "sampleSizeN": 253,
-      "yellowRmseUsd": 6.904,
+      "yellowRmseUsd": 6.9831,
       "randomWalkRmseUsd": 4.8509,
       "emaBaselineRmseUsd": 4.792,
-      "yellowMaeUsd": 4.3853,
+      "yellowMaeUsd": 4.4614,
       "randomWalkMaeUsd": 3.3361,
-      "directionalHitRate": 0.4625,
-      "empirical90IntervalCoverage": 0.9249,
-      "dieboldMarianoVsRwTStat": -2.919
+      "directionalHitRate": 0.4822,
+      "empirical90IntervalCoverage": 0.917,
+      "dieboldMarianoVsRwTStat": -3.12
     },
     "h=5": {
       "sampleSizeN": 253,
-      "yellowRmseUsd": 13.4979,
+      "yellowRmseUsd": 12.4078,
       "randomWalkRmseUsd": 8.571,
       "emaBaselineRmseUsd": 8.517,
-      "yellowMaeUsd": 9.5688,
+      "yellowMaeUsd": 9.0013,
       "randomWalkMaeUsd": 6.3169,
-      "directionalHitRate": 0.4387,
-      "empirical90IntervalCoverage": 0.9605,
-      "dieboldMarianoVsRwTStat": -4.79
+      "directionalHitRate": 0.4901,
+      "empirical90IntervalCoverage": 0.9486,
+      "dieboldMarianoVsRwTStat": -5.317
     },
     "h=15": {
       "sampleSizeN": 253,
-      "yellowRmseUsd": 18.6472,
+      "yellowRmseUsd": 16.8361,
       "randomWalkRmseUsd": 13.2359,
       "emaBaselineRmseUsd": 13.9937,
-      "yellowMaeUsd": 14.5628,
+      "yellowMaeUsd": 12.9779,
       "randomWalkMaeUsd": 10.0054,
-      "directionalHitRate": 0.3874,
-      "empirical90IntervalCoverage": 0.996,
-      "dieboldMarianoVsRwTStat": -6.65
+      "directionalHitRate": 0.4545,
+      "empirical90IntervalCoverage": 0.9565,
+      "dieboldMarianoVsRwTStat": -5.355
     }
   },
   "ablationTable": [
     {
       "id": "FULL_MODEL",
       "label": "Full 6D Latent Filter (Baseline)",
-      "oosRmseUsd": 4.9928,
-      "directionalHitRate": 0.4716,
-      "brierScore": 0.2496,
-      "rankIc": -0.031,
-      "residualLag1Autocorr": -0.1735
+      "oosRmseUsd": 4.9085,
+      "directionalHitRate": 0.505,
+      "brierScore": 0.2482,
+      "rankIc": 0.0343,
+      "residualLag1Autocorr": -0.1675
     },
     {
       "id": "ABLATE_MEAN_REVERSION",
       "label": "No Equilibrium Mean Reversion (κ_rev = 0)",
-      "oosRmseUsd": 5.0084,
-      "directionalHitRate": 0.5151,
-      "brierScore": 0.2485,
-      "rankIc": 0.0033,
-      "residualLag1Autocorr": -0.1687
+      "oosRmseUsd": 4.9215,
+      "directionalHitRate": 0.5251,
+      "brierScore": 0.2469,
+      "rankIc": 0.0754,
+      "residualLag1Autocorr": -0.1652
     },
     {
       "id": "ABLATE_TOXICITY_COUPLING",
       "label": "No Pulse-Echo Toxicity Coupling (β_tox = 0)",
-      "oosRmseUsd": 4.8905,
-      "directionalHitRate": 0.4783,
-      "brierScore": 0.2488,
-      "rankIc": -0.0119,
-      "residualLag1Autocorr": -0.1347
+      "oosRmseUsd": 4.8151,
+      "directionalHitRate": 0.5217,
+      "brierScore": 0.2475,
+      "rankIc": 0.0696,
+      "residualLag1Autocorr": -0.1261
     },
     {
       "id": "ABLATE_MACRO_COUPLING",
       "label": "No Macro Force Coupling (η_macro = 0)",
-      "oosRmseUsd": 4.9963,
-      "directionalHitRate": 0.4783,
-      "brierScore": 0.2506,
-      "rankIc": -0.0352,
-      "residualLag1Autocorr": -0.173
+      "oosRmseUsd": 4.9105,
+      "directionalHitRate": 0.5284,
+      "brierScore": 0.2496,
+      "rankIc": 0.0446,
+      "residualLag1Autocorr": -0.1667
     },
     {
       "id": "ABLATE_DRIFT_PERSISTENCE",
       "label": "Low Drift Persistence (φ_drift = 0.20)",
-      "oosRmseUsd": 4.8778,
-      "directionalHitRate": 0.5351,
-      "brierScore": 0.2471,
-      "rankIc": 0.0847,
-      "residualLag1Autocorr": -0.1629
+      "oosRmseUsd": 4.8764,
+      "directionalHitRate": 0.5418,
+      "brierScore": 0.2472,
+      "rankIc": 0.082,
+      "residualLag1Autocorr": -0.1623
     }
   ],
   "beforeAfterWriteBackDiff": {
-    "writeBackApplied": true,
+    "writeBackApplied": false,
     "gatesPassedCount": 7,
-    "generationBefore": 60,
+    "generationBefore": 61,
     "generationAfter": 61,
     "parametersBefore": {
-      "phi": 0.92,
-      "kappa": 0.169,
-      "beta": 0.435,
-      "gamma": 0.534,
+      "phi": 0.7975,
+      "kappa": 0.141,
+      "beta": 0.437,
+      "gamma": 0.4115,
       "eta": 0.25,
-      "precisionMult": 1.327
+      "precisionMult": 1.1695
     },
     "parametersAfter": {
       "phi": 0.7975,
@@ -288,12 +288,12 @@
       "precisionMult": 1.1695
     },
     "latentStateBefore": {
-      "logPriceLevel": 8.305272,
-      "localDrift": 0.00007,
+      "logPriceLevel": 8.305267,
+      "localDrift": -0.000073,
       "localVolatility": 0.00077,
-      "pressureToxicity": 0.1033,
-      "liquidityResilience": 0.6959,
-      "macroResidualForce": -0.000054
+      "pressureToxicity": 0.1034,
+      "liquidityResilience": 0.7014,
+      "macroResidualForce": -0.000022
     },
     "latentStateAfter": {
       "logPriceLevel": 8.305267,
@@ -303,12 +303,12 @@
       "liquidityResilience": 0.7014,
       "macroResidualForce": -0.000022
     },
-    "yellowLineStep1BeforeUsd": 4045.63,
+    "yellowLineStep1BeforeUsd": 4045.29,
     "yellowLineStep1AfterUsd": 4045.29,
-    "yellowLineStep24BeforeUsd": 4062.34,
+    "yellowLineStep24BeforeUsd": 4060.45,
     "yellowLineStep24AfterUsd": 4060.45,
-    "yellowLineStep24DeltaUsd": -1.89,
-    "oosRmseBeforeUsd": 4.9928,
-    "oosRmseAfterUsd": 4.9039
+    "yellowLineStep24DeltaUsd": 0,
+    "oosRmseBeforeUsd": 4.9085,
+    "oosRmseAfterUsd": 4.9085
   }
 }

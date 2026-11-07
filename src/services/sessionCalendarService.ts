@@ -30,6 +30,8 @@ import {
   type VerifiedMacroYieldResult,
   type WeekpartType,
 } from '../contracts/quantContracts.js';
+import { resolveAssetClass, type AssetClass } from './assetSessionRouter.js';
+import { evaluateCryptoSessionAndCalendar } from './cryptoSessionCalendar.js';
 
 /**
  * Computes deterministic trading calendar session context for a given UTC timestamp.
@@ -358,6 +360,9 @@ export function evaluateMarketAwareness(params: {
   currentEquilibriumAnchor: number;
   candidateSlope?: number;
   liveSlope?: number;
+  assetClass?: AssetClass;
+  symbol?: string;
+  instrumentIdentity?: string;
 }): MarketAwarenessState {
   const {
     candles,
@@ -373,12 +378,39 @@ export function evaluateMarketAwareness(params: {
     liveSlope,
   } = params;
 
+  const resolvedAssetClass = resolveAssetClass({
+    asset: params.assetClass,
+    symbol: params.symbol,
+    instrumentIdentity: params.instrumentIdentity,
+  });
+
   const n = candles.length;
   const latestBarTime = n > 0 ? candles[n - 1].time : Math.floor(Date.now() / 1000);
   const currentPrice = n > 0 ? candles[n - 1].close : 2650;
 
-  // 1. Session and Seasonal Context
-  const sessionContext = computeTradingCalendarSessionContext(latestBarTime);
+  // 1. Session and Seasonal Context (Asset-Aware: BTC uses continuous crypto calendar)
+  const cryptoCal =
+    resolvedAssetClass === 'BTC'
+      ? evaluateCryptoSessionAndCalendar({ timestampSec: latestBarTime, candles })
+      : null;
+  const sessionContext: TradingCalendarSessionContext = cryptoCal
+    ? {
+        barTimeSec: latestBarTime,
+        barTimestampIso: cryptoCal.evaluatedAtIso,
+        weekpart: 'WEEKDAY_FULL_AUCTION',
+        intradaySession: 'LONDON_NY_OVERLAP',
+        sessionId: 'LONDON_NY_OVERLAP',
+        isFuturesClosed: false,
+        isThinLiquidity: cryptoCal.isThinOpen,
+        isThinLiquiditySubSession: cryptoCal.isThinOpen,
+        sessionNameEn: cryptoCal.sessionSummaryEn,
+        sessionNameFa: cryptoCal.sessionSummaryFa,
+        sessionNotesEn: cryptoCal.weekpartSummaryEn,
+        sessionNotesFa: cryptoCal.weekpartSummaryFa,
+        hourUtc: cryptoCal.hourUtc,
+        dayOfWeekUtc: cryptoCal.dayOfWeekUtc,
+      }
+    : computeTradingCalendarSessionContext(latestBarTime);
   const seasonalCalendar = computeSeasonalCalendarContext({
     barTimeSec: latestBarTime,
     macroNews,
@@ -527,10 +559,12 @@ export function evaluateMarketAwareness(params: {
     });
   }
 
-  // Fault 6: SESSION_REGIME_VIOLATION
+  // Fault 6: SESSION_REGIME_VIOLATION (GOLD-ONLY — BTC continuous spot never closes on weekends)
   // Trending continuous-auction dynamics projected into closed futures or thin weekend
   const hasTrendingPlumeInThinSession =
-    sessionContext.isFuturesClosed && Math.abs(recentLivePredDelta) > 1.2;
+    resolvedAssetClass === 'GOLD' &&
+    sessionContext.isFuturesClosed &&
+    Math.abs(recentLivePredDelta) > 1.2;
 
   if (hasTrendingPlumeInThinSession) {
     const descEn = `Model asserts active trending drift (${recentLivePredDelta >= 0 ? '+' : ''}${recentLivePredDelta.toFixed(2)} USD) during ${sessionContext.weekpart} when COMEX/LBMA futures are closed.`;
@@ -580,8 +614,11 @@ export function evaluateMarketAwareness(params: {
   let recommendedAnchorPolicy: RecommendedAnchorPolicy = 'UNCHANGED';
   let uncertaintyBandMultiplier = 1.0;
 
-  // Rule A: Weekend / Closed Futures -> ZERO_FOR_SESSION
-  if (sessionContext.isFuturesClosed || sessionContext.weekpart === 'WEEKEND_THIN') {
+  // Rule A: Weekend / Closed Futures -> ZERO_FOR_SESSION (GOLD-ONLY)
+  if (
+    resolvedAssetClass === 'GOLD' &&
+    (sessionContext.isFuturesClosed || sessionContext.weekpart === 'WEEKEND_THIN')
+  ) {
     recommendedDriftPolicy = 'ZERO_FOR_SESSION';
     recommendedBandPolicy = 'NORMAL';
     recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
@@ -592,7 +629,7 @@ export function evaluateMarketAwareness(params: {
     Math.abs(latestResidualSigma) > 2.0 ||
     isStaleDrift
   ) {
-    recommendedDriftPolicy = 'SHOCK_RESET';
+    recommendedDriftPolicy = resolvedAssetClass === 'BTC' ? 'SHRINK' : 'SHOCK_RESET';
     recommendedBandPolicy = 'WIDEN';
     recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
     uncertaintyBandMultiplier = 1.65;
@@ -673,7 +710,8 @@ export function evaluateMarketAwareness(params: {
     ),
     candidateObligations: {
       proposeWeekendSidewaysCandidate:
-        sessionContext.isFuturesClosed || sessionContext.weekpart === 'WEEKEND_THIN',
+        resolvedAssetClass === 'GOLD' &&
+        (sessionContext.isFuturesClosed || sessionContext.weekpart === 'WEEKEND_THIN'),
       proposePostShockAbsorptionCandidate:
         activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
         activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||

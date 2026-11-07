@@ -38,6 +38,10 @@ import {
 } from '../contracts/quantContracts.js';
 import { computeCointegrationBasis } from './quantEngine.js';
 import { evaluateGoldSessionAndCalendar } from '../services/sessionCalendar.js';
+import {
+  applyResidualShockOperator,
+  type ResidualShockOperatorResult,
+} from './residualShockOperator.js';
 
 export { FaultType, type FaultClassifierMetricsInput, type FaultClassificationReport };
 
@@ -1793,6 +1797,9 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   let kappaDrift = 0.24;
   let kappaVol = 0.22;
   let kappaTox = 0.35;
+  let runningShockAnchorUsd = Math.max(100, candles[0]?.close || equilibriumAnchorPrice || 2650);
+  let shockCooldownBarsRemaining = 0;
+  let latestBarShockOperatorResult: ResidualShockOperatorResult | null = null;
 
   for (let t = 0; t < n; t++) {
     const c = candles[t];
@@ -1840,7 +1847,11 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       eqSum += candles[j].close;
       eqCnt++;
     }
-    const causalLogEq = Math.log(Math.max(100, eqSum / Math.max(1, eqCnt)));
+    const rawRollingEqUsd = Math.max(100, eqSum / Math.max(1, eqCnt));
+    if (t === 0 || shockCooldownBarsRemaining === 0) {
+      runningShockAnchorUsd = rawRollingEqUsd;
+    }
+    const causalLogEq = Math.log(Math.max(100, runningShockAnchorUsd));
 
     if (t > 0) {
       // --- STEP 1: STATE PREDICTION ON THE INFORMATION CLOCK (τ_{t-1} -> τ_t) ---
@@ -1945,6 +1956,29 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       const priceResidualUsd = parseFloat((c.close - predPriceUsd).toFixed(4));
       const standardizedResidualSigma = parseFloat((priceResidualUsd / predStdUsd).toFixed(3));
       prevLogResidual = Math.log(Math.max(100, c.close)) - X[0];
+
+      // Shared Residual Shock Operator (Engine A — Gold): mutate drift, anchor, and uncertainty on |z| >= z*
+      const shockOpOut = applyResidualShockOperator({
+        assetClass: 'GOLD',
+        barTimeSec: c.time,
+        barIndex: t,
+        realizedPrice: c.close,
+        oneStepPredictedPrice: predPriceUsd,
+        predictiveSigma: predStdUsd,
+        currentDrift: X[1],
+        currentAnchorPrice: runningShockAnchorUsd,
+        priorCooldownBarsRemaining: shockCooldownBarsRemaining,
+      });
+      shockCooldownBarsRemaining = shockOpOut.cooldownBarsRemaining;
+      if (shockOpOut.shockFired) {
+        X[1] = shockOpOut.mutatedDrift;
+        runningShockAnchorUsd = shockOpOut.mutatedAnchorPrice;
+        P[0][0] *= shockOpOut.uncertaintyMultiplier;
+        P[1][1] *= shockOpOut.uncertaintyMultiplier;
+      }
+      if (t === n - 1) {
+        latestBarShockOperatorResult = shockOpOut;
+      }
 
       residualPoints.push({
         barTime: c.time,
@@ -2440,7 +2474,8 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   }
 
   const hasShockFault = Boolean(
-    anchorPolicy === 'RECENTER_TO_POST_SHOCK' ||
+    latestBarShockOperatorResult?.shockFired ||
+      anchorPolicy === 'RECENTER_TO_POST_SHOCK' ||
       driftPolicy === 'SHOCK_RESET' ||
       faultClassification.hasWrongDirection ||
       awareness?.activeFaultCodes?.includes('EQUILIBRIUM_ANCHOR_MISMATCH') ||

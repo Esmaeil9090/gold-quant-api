@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "savedAtIso": "2026-11-07T17:11:37.116Z",
+  "savedAtIso": "2026-11-07T18:50:11.940Z",
   "generationCounter": 55,
   "autoPromotionRuntimeEnabled": false,
   "liveArchitecture": {
@@ -318,7 +318,7 @@
         "dynamicWeight": 0.1066,
         "rollingErrorVariance": 11.4541,
         "rollingRankIc": -0.022,
-        "fittedCoefficient": 0.1519,
+        "fittedCoefficient": 0.1521,
         "currentStepContributionUsd": 0.0041,
         "oosRSquared": 0.0043,
         "stabilityRatio": 0.293,
@@ -352,11 +352,11 @@
         "isEnabled": true,
         "disabledReasonEn": null,
         "dynamicWeight": 0.1726,
-        "rollingErrorVariance": 11.316,
+        "rollingErrorVariance": 11.3146,
         "rollingRankIc": 0.3462,
-        "fittedCoefficient": 0.8553,
-        "currentStepContributionUsd": 0.2482,
-        "oosRSquared": 0.0163,
+        "fittedCoefficient": 0.8474,
+        "currentStepContributionUsd": 0.2459,
+        "oosRSquared": 0.0164,
         "stabilityRatio": 0.731,
         "sampleCountN": 48,
         "timeframeScope": "CROSS_TF_HTF_LTF"
@@ -388,11 +388,11 @@
         "isEnabled": false,
         "disabledReasonEn": "Pruned by Intelligence Core: Contradictory/Unstable validation fit (Rank-IC=-0.319, Stability=0.73)",
         "dynamicWeight": 0,
-        "rollingErrorVariance": 11.6887,
+        "rollingErrorVariance": 11.6298,
         "rollingRankIc": -0.3187,
-        "fittedCoefficient": 0.1543,
+        "fittedCoefficient": 0.107,
         "currentStepContributionUsd": 0,
-        "oosRSquared": -0.0161,
+        "oosRSquared": -0.011,
         "stabilityRatio": 0.731,
         "sampleCountN": 48,
         "timeframeScope": "ACTIVE_TF"
@@ -478,11 +478,11 @@
         "isEnabled": false,
         "disabledReasonEn": "Pruned by Intelligence Core: Contradictory/Unstable validation fit (Rank-IC=0.247, Stability=0.29)",
         "dynamicWeight": 0,
-        "rollingErrorVariance": 11.8706,
+        "rollingErrorVariance": 11.8256,
         "rollingRankIc": 0.2473,
-        "fittedCoefficient": 0.9115,
+        "fittedCoefficient": 0.8094,
         "currentStepContributionUsd": 0,
-        "oosRSquared": -0.0319,
+        "oosRSquared": -0.028,
         "stabilityRatio": 0.293,
         "sampleCountN": 48,
         "timeframeScope": "CROSS_TF_HTF_LTF"
@@ -496,11 +496,11 @@
         "isEnabled": false,
         "disabledReasonEn": "Pruned by Intelligence Core: Contradictory/Unstable validation fit (Rank-IC=0.533, Stability=0.29)",
         "dynamicWeight": 0,
-        "rollingErrorVariance": 11.4105,
+        "rollingErrorVariance": 11.4096,
         "rollingRankIc": 0.533,
-        "fittedCoefficient": 0.2439,
+        "fittedCoefficient": 0.2463,
         "currentStepContributionUsd": 0,
-        "oosRSquared": 0.0081,
+        "oosRSquared": 0.0082,
         "stabilityRatio": 0.293,
         "sampleCountN": 48,
         "timeframeScope": "CROSS_TF_HTF_LTF"
@@ -513,7 +513,7 @@
       "sweepMicrostructureWeight": 0.2381,
       "mtfLiquidityWeight": 0.3096
     },
-    "compositeNetDriftUsdPerStep": 0.1313,
+    "compositeNetDriftUsdPerStep": 0.129,
     "compositeEquilibriumAnchor": 4042.05
   },
   "archivedArchitectures": [
@@ -5660,6 +5660,50 @@
   ],
   "auditTrail": [
     {
+      "auditId": "audit-1794077411940-blnyj",
+      "timestampIso": "2026-11-07T18:50:11.940Z",
+      "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+      "actor": "OPERATOR_MMI",
+      "sourceArchitectureId": "arch-cand-gen56",
+      "targetArchitectureId": "arch-live-gen55",
+      "summaryEn": "Latent-Math Write-Back rejected (7/8 gates, status=OBSERVING_CONFIRMATION_WINDOW): GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6058s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting.",
+      "summaryFa": "بازنویسی ریاضیات مدل پنهان رد شد (7/8 گیت): گیت کنترل دوگانه سیستم‌عامل GDF (قانون ۸) بازنویسی ریاضی مدل پنهان را مسدود کرد: گزارش اثبات (Proof Report) معتبر و جاری با وضعیت PASS یافت نشد (STALE).",
+      "verifiableMetrics": "Status=OBSERVING_CONFIRMATION_WINDOW | PassedGates=7/8 | Eligible=false"
+    },
+    {
+      "auditId": "audit-1794077411904-rzjrk",
+      "timestampIso": "2026-11-07T18:50:11.904Z",
+      "eventType": "LEVEL_B_MODEL_INVENTED",
+      "actor": "INTELLIGENCE_AWARENESS_CORE",
+      "sourceArchitectureId": "arch-live-gen55",
+      "targetArchitectureId": "arch-cand-gen56",
+      "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (3/8 symbolic equations active, 5 pruned in v56.0-ParallelCandidate-G55; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=14.3%, λ_ridge=1.5111) — Pre-write-back calibration.",
+      "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (3/۸ معادله نمادین فعال، 5 حذف‌شده در v56.0-ParallelCandidate-G55؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 14.3%).",
+      "verifiableMetrics": "Candidate=v56.0-ParallelCandidate-G55 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=14.3%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=14.3%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1001,w=13.1%,IC=0.055)"
+    },
+    {
+      "auditId": "audit-1794077411638-bj27s",
+      "timestampIso": "2026-11-07T18:50:11.638Z",
+      "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+      "actor": "OPERATOR_MMI",
+      "sourceArchitectureId": "arch-cand-gen56",
+      "targetArchitectureId": "arch-live-gen55",
+      "summaryEn": "Latent-Math Write-Back rejected (0/8 gates, status=HALTED_FROZEN): System is in HALTED_FROZEN state (Gate 6 Circuit Breaker Active). All latent-model mathematical write-backs are frozen while live feeds are unreachable. | GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6057s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting.",
+      "summaryFa": "بازنویسی ریاضیات مدل پنهان رد شد (0/8 گیت): سیستم در وضعیت انجماد مدار محافظتی (HALTED_FROZEN) قرار دارد. در زمان قطعی منابع داده زنده، هرگونه بازنویسی ریاضی مدل پنهان قفل است. | گیت کنترل دوگانه سیستم‌عامل GDF (قانون ۸) بازنویسی ریاضی مدل پنهان را مسدود کرد: گزارش اثبات (Proof Report) معتبر و جاری با وضعیت PASS یافت نشد (STALE).",
+      "verifiableMetrics": "Status=HALTED_FROZEN | PassedGates=0/8 | Eligible=false"
+    },
+    {
+      "auditId": "audit-1794077411598-1qmcn",
+      "timestampIso": "2026-11-07T18:50:11.598Z",
+      "eventType": "LEVEL_B_MODEL_INVENTED",
+      "actor": "INTELLIGENCE_AWARENESS_CORE",
+      "sourceArchitectureId": "arch-live-gen55",
+      "targetArchitectureId": "arch-cand-gen56",
+      "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (3/8 symbolic equations active, 5 pruned in v56.0-ParallelCandidate-G55; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=14.3%, λ_ridge=1.5111) — Independent mathematical audit discovery step.",
+      "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (3/۸ معادله نمادین فعال، 5 حذف‌شده در v56.0-ParallelCandidate-G55؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 14.3%).",
+      "verifiableMetrics": "Candidate=v56.0-ParallelCandidate-G55 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=14.3%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=14.3%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1001,w=13.1%,IC=0.055)"
+    },
+    {
       "auditId": "audit-1794071497116-zfn0b",
       "timestampIso": "2026-11-07T17:11:37.116Z",
       "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
@@ -6714,50 +6758,6 @@
       "summaryEn": "Validated Parallel Universe mathematics from v47.0-ParallelCandidate-G46 written back into 6D Latent State & Observation Model (Gen #45 → Gen #46: φ=0.9252, κ=0.1692, β_echo=0.437, γ_res=0.5344, η_macro=0.25, π_obs=1.327, activeSymbolic=4, pruned=5) · Note: Operator confirmed Direct Mathematical Write-Back after pre-write parameter inspection.",
       "summaryFa": "ریاضیات تاییدشده جهان موازی (v47.0-ParallelCandidate-G46) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #45 به #46: φ=0.9252، κ=0.1692، β=0.437، γ=0.5344، η=0.25، π_obs=1.327).",
       "verifiableMetrics": "WriteBackGen=46 | phi=0.9252->0.9252 | kappa=0.1692->0.1692 | beta=0.437->0.437 | gamma=0.5344->0.5344 | eta=0.25->0.25 | obsPrecMult=1.327->1.327"
-    },
-    {
-      "auditId": "audit-1793559133766-vff09",
-      "timestampIso": "2026-11-01T18:52:13.766Z",
-      "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
-      "actor": "INTELLIGENCE_AWARENESS_CORE",
-      "sourceArchitectureId": "arch-live-gen46",
-      "targetArchitectureId": "arch-cand-gen47",
-      "summaryEn": "Symbolic-step synthesis blocked: System is in HALTED_DEGRADED / HALTED_FROZEN state. Under STRICT_REAL_DATA_ONLY, symbolic equation fitting and ridge calibration cannot run without live verified market bars.",
-      "summaryFa": "ترکیب گام نمادین متوقف شد: سیستم در وضعیت توقف اضطراری (HALTED_DEGRADED) قرار دارد. بر اساس سیاست منع داده مصنوعی (STRICT_REAL_DATA_ONLY)، برازش معادلات نمادین بدون کندل‌های واقعی تاییدشده مجاز نیست.",
-      "verifiableMetrics": "Candidate=v47.0-ParallelCandidate-G46 | SynthesisExecuted=false | State=HALTED_FROZEN"
-    },
-    {
-      "auditId": "audit-1793559133739-v1ugx",
-      "timestampIso": "2026-11-01T18:52:13.740Z",
-      "eventType": "LEVEL_B_MODEL_INVENTED",
-      "actor": "INTELLIGENCE_AWARENESS_CORE",
-      "sourceArchitectureId": "arch-live-gen46",
-      "targetArchitectureId": "arch-cand-gen47",
-      "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (4/8 symbolic equations active, 4 pruned in v47.0-ParallelCandidate-G46; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=12.9%, λ_ridge=1.5111) — Operator-triggered Level-B symbolic synthesis & causal ridge calibration step.",
-      "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (4/۸ معادله نمادین فعال، 4 حذف‌شده در v47.0-ParallelCandidate-G46؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 12.9%).",
-      "verifiableMetrics": "Candidate=v47.0-ParallelCandidate-G46 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=12.9%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=12.9%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1187,w=11.8%,IC=0.055), LAGGED_RESIDUAL_SELF_CORRECTION(theta=0.1305,w=9.8%,IC=-0.005)"
-    },
-    {
-      "auditId": "audit-1793559130921-ikznn",
-      "timestampIso": "2026-11-01T18:52:10.921Z",
-      "eventType": "PROMOTED_MANUAL_MMI",
-      "actor": "OPERATOR_MMI",
-      "sourceArchitectureId": "arch-cand-gen46",
-      "targetArchitectureId": "arch-live-gen46",
-      "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v46.0-ParallelCandidate-G45) to Live Yellow-Line Architecture (v46.0-LivePromoted (MMI)) via MMI [Gates: 8/8] · Note: Scientific core promotion parity test.",
-      "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v46.0-ParallelCandidate-G45) را به معماری خط زرد زنده (v46.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 8/8].",
-      "verifiableMetrics": "Mode=MANUAL_MMI | Gates=8/8 | ActiveModels=8 | Discovered=4 | Archived=arch-live-gen45"
-    },
-    {
-      "auditId": "audit-1793559130690-mgwke",
-      "timestampIso": "2026-11-01T18:52:10.690Z",
-      "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
-      "actor": "OPERATOR_MMI",
-      "sourceArchitectureId": "arch-cand-gen46",
-      "targetArchitectureId": "arch-live-gen45",
-      "summaryEn": "Validated Parallel Universe mathematics from v46.0-ParallelCandidate-G45 written back into 6D Latent State & Observation Model (Gen #43 → Gen #44: φ=0.9257, κ=0.1693, β_echo=0.437, γ_res=0.5347, η_macro=0.25, π_obs=1.327, activeSymbolic=4, pruned=5) · Note: Verification test of direct mathematical write-back to 6D Latent State model.",
-      "summaryFa": "ریاضیات تاییدشده جهان موازی (v46.0-ParallelCandidate-G45) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #43 به #44: φ=0.9257، κ=0.1693، β=0.437، γ=0.5347، η=0.25، π_obs=1.327).",
-      "verifiableMetrics": "WriteBackGen=44 | phi=0.9287->0.9257 | kappa=0.17->0.1693 | beta=0.437->0.437 | gamma=0.5361->0.5347 | eta=0.25->0.25 | obsPrecMult=1.327->1.327"
     }
   ],
   "promotedCandTheta": 0.167,
@@ -7341,15 +7341,15 @@
       "outputUnits": "USD_PER_STEP",
       "dimensionallyHomogeneous": true,
       "parameterCountK": 3,
-      "fittedTheta": 0.7438,
-      "oosMseUsd2": 6.0476,
-      "incumbentOosMseUsd2": 6.1139,
-      "deltaBic": 1.0349,
+      "fittedTheta": 0.7439,
+      "oosMseUsd2": 6.0445,
+      "incumbentOosMseUsd2": 6.111,
+      "deltaBic": 1.0345,
       "passedFalsificationGate": false,
       "status": "REJECTED_ARCHIVED_IN_GRAVEYARD",
       "falsificationCriterion": "Requires θ_hat > 0, OOS MSE <= Incumbent OOS MSE, and complexity-penalized ΔBIC <= 0.50 on untouched Split 3.",
-      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=0.7438, OOS_MSE=6.0476 vs Incumbent=6.1139, ΔBIC=1.0349)",
-      "evaluatedAtIso": "2026-11-07T17:11:36.903Z"
+      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=0.7439, OOS_MSE=6.0445 vs Incumbent=6.1110, ΔBIC=1.0345)",
+      "evaluatedAtIso": "2026-11-07T18:50:11.903Z"
     },
     {
       "hypothesisId": "HYP_NONLINEAR_BASIS_ECHO_COUPLING",
@@ -7360,14 +7360,14 @@
       "dimensionallyHomogeneous": true,
       "parameterCountK": 1,
       "fittedTheta": -0.5,
-      "oosMseUsd2": 6.0375,
-      "incumbentOosMseUsd2": 6.1139,
+      "oosMseUsd2": 6.0346,
+      "incumbentOosMseUsd2": 6.111,
       "deltaBic": 0.2198,
       "passedFalsificationGate": false,
       "status": "REJECTED_ARCHIVED_IN_GRAVEYARD",
       "falsificationCriterion": "Requires θ_hat > 0, OOS MSE <= Incumbent OOS MSE, and complexity-penalized ΔBIC <= 0.50 on untouched Split 3.",
-      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=6.0375 vs Incumbent=6.1139, ΔBIC=0.2198)",
-      "evaluatedAtIso": "2026-11-07T17:11:36.903Z"
+      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=6.0346 vs Incumbent=6.1110, ΔBIC=0.2198)",
+      "evaluatedAtIso": "2026-11-07T18:50:11.903Z"
     },
     {
       "hypothesisId": "HYP_RESIDUAL_CLOCK_DAMPED_FEEDBACK",
@@ -7378,72 +7378,17 @@
       "dimensionallyHomogeneous": true,
       "parameterCountK": 1,
       "fittedTheta": -0.5,
-      "oosMseUsd2": 6.0829,
-      "incumbentOosMseUsd2": 6.1139,
-      "deltaBic": 0.3247,
+      "oosMseUsd2": 6.0799,
+      "incumbentOosMseUsd2": 6.111,
+      "deltaBic": 0.3245,
       "passedFalsificationGate": false,
       "status": "REJECTED_ARCHIVED_IN_GRAVEYARD",
       "falsificationCriterion": "Requires θ_hat > 0, OOS MSE <= Incumbent OOS MSE, and complexity-penalized ΔBIC <= 0.50 on untouched Split 3.",
-      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=6.0829 vs Incumbent=6.1139, ΔBIC=0.3247)",
-      "evaluatedAtIso": "2026-11-07T17:11:36.903Z"
+      "rejectionReason": "Falsified on untouched OOS Split 3 (θ_hat=-0.5, OOS_MSE=6.0799 vs Incumbent=6.1110, ΔBIC=0.3245)",
+      "evaluatedAtIso": "2026-11-07T18:50:11.903Z"
     }
   ],
   "persistedResidualLog": [
-    {
-      "barTime": 1793505600,
-      "tau": 413.6134,
-      "realizedPrice": 3902.59,
-      "predictedYellowPrice": 3897.46,
-      "priceResidualUsd": 5.1305,
-      "standardizedResidualSigma": 1.312,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.3397,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793491200,
-      "tau": 413.2737,
-      "realizedPrice": 3900.18,
-      "predictedYellowPrice": 3898.5,
-      "priceResidualUsd": 1.6775,
-      "standardizedResidualSigma": 0.476,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.2486,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793476800,
-      "tau": 413.0251,
-      "realizedPrice": 3899.27,
-      "predictedYellowPrice": 3897.11,
-      "priceResidualUsd": 2.1626,
-      "standardizedResidualSigma": 0.463,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.3379,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793462400,
-      "tau": 412.6872,
-      "realizedPrice": 3898,
-      "predictedYellowPrice": 3896.98,
-      "priceResidualUsd": 1.0159,
-      "standardizedResidualSigma": 0.161,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.5351,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
-    {
-      "barTime": 1793448000,
-      "tau": 412.1521,
-      "realizedPrice": 3900,
-      "predictedYellowPrice": 3895.78,
-      "priceResidualUsd": 4.2201,
-      "standardizedResidualSigma": 0.536,
-      "echoResidualUsd": 0,
-      "deltaTau": 0.6735,
-      "regime": "NORMAL_OR_QUIET_CLOCK"
-    },
     {
       "barTime": 1793433600,
       "tau": 411.4786,
@@ -9148,6 +9093,61 @@
       "echoResidualUsd": -0.144,
       "deltaTau": 0.6408,
       "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1794075300,
+      "tau": 442.2071,
+      "realizedPrice": 4064.8,
+      "predictedYellowPrice": 4064.71,
+      "priceResidualUsd": 0.0895,
+      "standardizedResidualSigma": 0.041,
+      "echoResidualUsd": -0.308,
+      "deltaTau": 0.8347,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1794074400,
+      "tau": 441.3724,
+      "realizedPrice": 4064.91,
+      "predictedYellowPrice": 4064.49,
+      "priceResidualUsd": 0.4187,
+      "standardizedResidualSigma": 0.139,
+      "echoResidualUsd": 0.068,
+      "deltaTau": 1.5843,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1794073500,
+      "tau": 439.7881,
+      "realizedPrice": 4064.79,
+      "predictedYellowPrice": 4064.53,
+      "priceResidualUsd": 0.2604,
+      "standardizedResidualSigma": 0.115,
+      "echoResidualUsd": 0.436,
+      "deltaTau": 0.9015,
+      "regime": "NORMAL_OR_QUIET_CLOCK"
+    },
+    {
+      "barTime": 1794072600,
+      "tau": 438.8866,
+      "realizedPrice": 4065.26,
+      "predictedYellowPrice": 4064.41,
+      "priceResidualUsd": 0.853,
+      "standardizedResidualSigma": 0.246,
+      "echoResidualUsd": 0,
+      "deltaTau": 2.0093,
+      "regime": "FAST_INFO_CLOCK_BURST"
+    },
+    {
+      "barTime": 1794071700,
+      "tau": 436.8773,
+      "realizedPrice": 4065.4,
+      "predictedYellowPrice": 4063.93,
+      "priceResidualUsd": 1.4678,
+      "standardizedResidualSigma": 0.499,
+      "echoResidualUsd": 0,
+      "deltaTau": 1.4923,
+      "regime": "FAST_INFO_CLOCK_BURST"
     }
   ],
   "episodicRegimeBank": [
@@ -9633,22 +9633,43 @@
         0.044,
         1.327
       ]
+    },
+    {
+      "episodeId": "ep-1794075300",
+      "recordedAtIso": "2026-11-07T18:15:00.000Z",
+      "dominantRegime": "LAMINAR_TREND",
+      "sessionId": "WEEKEND_CLOSED_THIN",
+      "weekpart": "WEEKEND_THIN",
+      "shockZScorePeak": 0.172,
+      "basisZScore": 0.25,
+      "realYieldChangeBps": 3.56,
+      "realizedPostShockDrift12BarsPct": 0.0217,
+      "optimalLearnedDriftGamma": 1,
+      "optimalLearnedBandMult": 0.9933,
+      "featureFingerprint6D": [
+        0.172,
+        0.25,
+        0.711,
+        0.043,
+        0.045,
+        1.257
+      ]
     }
   ],
   "dirichletTransitionCounts5x5": [
     [
-      0.839,
-      0.0651,
-      0.0308,
-      0.0491,
-      0.016
+      0.8283,
+      0.0742,
+      0.0313,
+      0.0499,
+      0.0162
     ],
     [
-      0.1324,
-      0.6849,
-      0.0365,
-      0.0913,
-      0.0548
+      0.1438,
+      0.6792,
+      0.0354,
+      0.0885,
+      0.0531
     ],
     [
       0.116,

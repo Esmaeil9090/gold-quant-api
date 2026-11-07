@@ -49,7 +49,11 @@ import type {
 } from '../contracts/quantContracts.js';
 import {
   evaluateGoldSessionAndCalendar,
+  type GoldSessionAndCalendarResult,
 } from './sessionCalendar.js';
+import { resolveAssetClass, type AssetClass } from './assetSessionRouter.js';
+import { evaluateCryptoSessionAndCalendar } from './cryptoSessionCalendar.js';
+import { runBtcForecastEngine } from '../engine/btcEngineEntry.js';
 import {
   AdaptiveDPObserver,
   computeCointegrationBasis,
@@ -2298,6 +2302,9 @@ export function evaluateMarketAwarenessState(params: {
   liveMacro?: VerifiedMacroYieldResult;
   macroNews?: VerifiedMacroNewsItem[];
   extensionInput?: OrderBookMicrostructureExtensionInput;
+  assetClass?: AssetClass;
+  instrumentIdentity?: string;
+  activeSymbol?: string;
 }): MarketAwarenessState {
   const {
     candles,
@@ -2311,17 +2318,61 @@ export function evaluateMarketAwarenessState(params: {
     extensionInput,
   } = params;
 
+  const resolvedAssetClass = resolveAssetClass({
+    asset: params.assetClass,
+    symbol: params.activeSymbol,
+    instrumentIdentity: params.instrumentIdentity,
+  });
+
   const lastCandle = candles.length > 0 ? candles[candles.length - 1] : null;
   const timestampSec = lastCandle ? lastCandle.time : Math.floor(Date.now() / 1000);
   const currentPrice = lastCandle ? lastCandle.close : equilibriumAnchorPrice;
   const safeAtr = Math.max(0.5, atr);
 
-  // 1. Evaluate UTC Session & Seasonal Calendar Context
-  const sessionCalendar = evaluateGoldSessionAndCalendar({
-    timestampSec,
-    macroNews,
-    extensionInput,
-  });
+  // 1. Evaluate UTC Session & Seasonal Calendar Context (Asset-Aware: GOLD -> Gold Session, BTC -> Continuous Crypto Calendar)
+  const cryptoSession =
+    resolvedAssetClass === 'BTC'
+      ? evaluateCryptoSessionAndCalendar({ timestampSec, candles })
+      : null;
+  const sessionCalendar: GoldSessionAndCalendarResult = cryptoSession
+    ? {
+        barTimeSec: timestampSec,
+        barTimestampIso: cryptoSession.evaluatedAtIso,
+        weekpart: 'WEEKDAY_FULL_AUCTION',
+        sessionId: 'LONDON_NY_OVERLAP',
+        intradaySession: 'LONDON_NY_OVERLAP',
+        isFuturesClosed: false,
+        isThinLiquidity: cryptoSession.isThinOpen,
+        isThinLiquiditySubSession: cryptoSession.isThinOpen,
+        sessionNameEn: cryptoSession.sessionSummaryEn,
+        sessionNameFa: cryptoSession.sessionSummaryFa,
+        sessionNotesEn: cryptoSession.weekpartSummaryEn,
+        sessionNotesFa: cryptoSession.weekpartSummaryFa,
+        sessionSummaryEn: cryptoSession.sessionSummaryEn,
+        sessionSummaryFa: cryptoSession.sessionSummaryFa,
+        weekpartSummaryEn: cryptoSession.weekpartSummaryEn,
+        weekpartSummaryFa: cryptoSession.weekpartSummaryFa,
+        hourUtc: cryptoSession.hourUtc,
+        dayOfWeekUtc: cryptoSession.dayOfWeekUtc,
+        utcHourDecimal: cryptoSession.utcHourDecimal,
+        evaluatedAtIso: cryptoSession.evaluatedAtIso,
+        seasonalCalendar: {
+          isTurnOfYearHolidayWindow: false,
+          isTurnOfMonth: false,
+          isHolidayWeek: false,
+          seasonalLiquidityPenalty: cryptoSession.isThinOpen ? 0.12 : 0,
+          summaryEn: cryptoSession.weekpartSummaryEn,
+          summaryFa: cryptoSession.weekpartSummaryFa,
+          notesEn: cryptoSession.weekpartSummaryEn,
+          notesFa: cryptoSession.weekpartSummaryFa,
+          activeEvents: ['NORMAL_TRADING_DAY'],
+        },
+      }
+    : evaluateGoldSessionAndCalendar({
+        timestampSec,
+        macroNews,
+        extensionInput,
+      });
 
   // 2. Compute Realized vs Forecast Metrics (including Swing Peak/Trough Excursion & Consecutive Streaks)
   const latestResidualPt =
@@ -2512,11 +2563,12 @@ export function evaluateMarketAwarenessState(params: {
     });
   }
 
-  // Fault A.6: SESSION_REGIME_VIOLATION (strong directional plume projected during WEEKEND_THIN / FUTURES_CLOSED_OVERLAP)
+  // Fault A.6: SESSION_REGIME_VIOLATION (GOLD-ONLY — strong directional plume projected during WEEKEND_THIN / FUTURES_CLOSED_OVERLAP)
   const isClosedOrWeekend =
-    sessionCalendar.weekpart === 'WEEKEND_THIN' ||
-    sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP' ||
-    sessionCalendar.sessionId === 'DAILY_ROLL_MAINTENANCE';
+    resolvedAssetClass === 'GOLD' &&
+    (sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+      sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP' ||
+      sessionCalendar.sessionId === 'DAILY_ROLL_MAINTENANCE');
   if (
     isClosedOrWeekend &&
     (Math.abs(liveTotalExcursionUsd) >= 0.35 * safeAtr ||
@@ -2591,22 +2643,27 @@ export function evaluateMarketAwarenessState(params: {
   // 3. Policy Determination (Drift, Band, Anchor)
   let recommendedDriftPolicy: RecommendedDriftPolicy = 'UNCHANGED';
   if (
-    sessionCalendar.weekpart === 'WEEKEND_THIN' ||
-    sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP'
+    resolvedAssetClass === 'GOLD' &&
+    (sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+      sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP')
   ) {
     recommendedDriftPolicy = 'ZERO_FOR_SESSION';
   } else if (
-    activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
-    activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
-    activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
-    (activeFaultCodes.includes(FaultType.NEWS_TRANSMISSION_MISMATCH) &&
-      newsTransmissionMode === 'RISK_OFF_LIQUIDATION')
+    resolvedAssetClass === 'GOLD' &&
+    (activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
+      activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
+      activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
+      (activeFaultCodes.includes(FaultType.NEWS_TRANSMISSION_MISMATCH) &&
+        newsTransmissionMode === 'RISK_OFF_LIQUIDATION'))
   ) {
     recommendedDriftPolicy = 'SHOCK_RESET';
   } else if (
     sessionCalendar.isThinLiquiditySubSession ||
     sessionCalendar.weekpart === 'FRIDAY_LATE_ROLL' ||
     sessionCalendar.weekpart === 'SUNDAY_OPEN_RISK' ||
+    activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
+    activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
+    activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
     activeFaultCodes.includes(FaultType.NEWS_TRANSMISSION_MISMATCH)
   ) {
     recommendedDriftPolicy = 'SHRINK';
@@ -2628,13 +2685,15 @@ export function evaluateMarketAwarenessState(params: {
 
   let recommendedAnchorPolicy: RecommendedAnchorPolicy = 'UNCHANGED';
   if (
-    sessionCalendar.weekpart === 'WEEKEND_THIN' ||
-    sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP'
+    resolvedAssetClass === 'GOLD' &&
+    (sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+      sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP')
   ) {
     recommendedAnchorPolicy = 'FREEZE';
   } else if (
     activeFaultCodes.includes(FaultType.EQUILIBRIUM_ANCHOR_MISMATCH) ||
-    recommendedDriftPolicy === 'SHOCK_RESET'
+    recommendedDriftPolicy === 'SHOCK_RESET' ||
+    (resolvedAssetClass === 'BTC' && activeFaultCodes.includes(FaultType.WRONG_DIRECTION))
   ) {
     recommendedAnchorPolicy = 'RECENTER_TO_POST_SHOCK';
   }
@@ -2649,8 +2708,9 @@ export function evaluateMarketAwarenessState(params: {
 
   const candidateObligations = {
     proposeWeekendSidewaysCandidate:
-      sessionCalendar.weekpart === 'WEEKEND_THIN' ||
-      sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP',
+      resolvedAssetClass === 'GOLD' &&
+      (sessionCalendar.weekpart === 'WEEKEND_THIN' ||
+        sessionCalendar.weekpart === 'FUTURES_CLOSED_OVERLAP'),
     proposePostShockAbsorptionCandidate:
       activeFaultCodes.includes(FaultType.STALE_DRIFT) ||
       activeFaultCodes.includes(FaultType.WRONG_DIRECTION) ||
@@ -3659,6 +3719,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     liveMacro,
     macroNews,
     extensionInput,
+    instrumentIdentity,
+    activeSymbol,
   });
   coreStore.lastMarketAwarenessState = marketAwarenessState;
 
@@ -3675,7 +3737,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     marketAwarenessState.candidateObligations.avoidCollinearWrongDirectionClone ||
     marketAwarenessState.candidateObligations.exploreOppositeNewsTransmission;
 
-  if (hasActivePolicyOrObligation) {
+  if (hasActivePolicyOrObligation && !isBtcAsset) {
     const seasonalMult = parseFloat(
       (1 + marketAwarenessState.seasonalCalendar.seasonalLiquidityPenalty).toFixed(4)
     );
@@ -3812,7 +3874,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   }
 
   // Update persisted residual log with latest realized OOS residual points
-  if (scientificCore.residualOracle.recentResiduals.length > 0) {
+  if (!isBtcAsset && scientificCore.residualOracle.recentResiduals.length > 0) {
     const existingTimes = new Set(coreStore.persistedResidualLog.map(r => r.barTime));
     for (const pt of scientificCore.residualOracle.recentResiduals) {
       if (!existingTimes.has(pt.barTime)) {
@@ -3843,9 +3905,38 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
 
   // 6. Yellow Line = Conditional Expectation of 6D Latent State X on Information Clock τ
   //    Magenta Dashed Line = Parallel Universe Candidate Latent State Conditional Expectation
-  let liveEnsemble: EnsemblePlume = scientificCore.yellowLineConditionalExpectation;
-  let candidateEnsemble: EnsemblePlume =
-    scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation;
+  //    When isBtcAsset is true, route strictly to BDF-B (runBtcForecastEngine) so BTC never inherits Gold weekend physics
+  const btcDedicatedOut = isBtcAsset
+    ? runBtcForecastEngine({
+        candles,
+        intervalStepSeconds,
+        horizonSteps: 24,
+      })
+    : null;
+  if (btcDedicatedOut) {
+    scientificCore = {
+      ...scientificCore,
+      schemaVersion: 'BDF-B-1.0.0',
+      instrumentIdentity,
+      latentState: {
+        logPriceLevel: btcDedicatedOut.state.logLevel,
+        localDrift: btcDedicatedOut.state.drift,
+        localVolatility: btcDedicatedOut.state.vol,
+        pressureToxicity: btcDedicatedOut.state.cexPressure,
+        liquidityResilience: btcDedicatedOut.state.resilience,
+        macroResidualForce: btcDedicatedOut.state.leverageStress,
+      },
+      impliedLatentPriceUsd: Number(Math.exp(btcDedicatedOut.state.logLevel).toFixed(2)),
+      yellowLineConditionalExpectation: btcDedicatedOut.liveEnsemblePlume,
+      candidateLatentExpectation: btcDedicatedOut.candidateEnsemblePlume,
+    };
+  }
+  let liveEnsemble: EnsemblePlume = btcDedicatedOut
+    ? btcDedicatedOut.liveEnsemblePlume
+    : scientificCore.yellowLineConditionalExpectation;
+  let candidateEnsemble: EnsemblePlume = btcDedicatedOut
+    ? btcDedicatedOut.candidateEnsemblePlume
+    : scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation;
 
   // 7. Check if Automatic Promotion is enabled AND all 8 gates passed (VERIFIED_FOR_PROMOTION)
   //    AND no blocking forecast faults are active in MarketAwarenessState

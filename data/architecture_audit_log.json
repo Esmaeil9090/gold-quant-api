@@ -1,5 +1,49 @@
 [
   {
+    "auditId": "audit-1794077411940-blnyj",
+    "timestampIso": "2026-11-07T18:50:11.940Z",
+    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen56",
+    "targetArchitectureId": "arch-live-gen55",
+    "summaryEn": "Latent-Math Write-Back rejected (7/8 gates, status=OBSERVING_CONFIRMATION_WINDOW): GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6058s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting.",
+    "summaryFa": "بازنویسی ریاضیات مدل پنهان رد شد (7/8 گیت): گیت کنترل دوگانه سیستم‌عامل GDF (قانون ۸) بازنویسی ریاضی مدل پنهان را مسدود کرد: گزارش اثبات (Proof Report) معتبر و جاری با وضعیت PASS یافت نشد (STALE).",
+    "verifiableMetrics": "Status=OBSERVING_CONFIRMATION_WINDOW | PassedGates=7/8 | Eligible=false"
+  },
+  {
+    "auditId": "audit-1794077411904-rzjrk",
+    "timestampIso": "2026-11-07T18:50:11.904Z",
+    "eventType": "LEVEL_B_MODEL_INVENTED",
+    "actor": "INTELLIGENCE_AWARENESS_CORE",
+    "sourceArchitectureId": "arch-live-gen55",
+    "targetArchitectureId": "arch-cand-gen56",
+    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (3/8 symbolic equations active, 5 pruned in v56.0-ParallelCandidate-G55; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=14.3%, λ_ridge=1.5111) — Pre-write-back calibration.",
+    "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (3/۸ معادله نمادین فعال، 5 حذف‌شده در v56.0-ParallelCandidate-G55؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 14.3%).",
+    "verifiableMetrics": "Candidate=v56.0-ParallelCandidate-G55 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=14.3%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=14.3%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1001,w=13.1%,IC=0.055)"
+  },
+  {
+    "auditId": "audit-1794077411638-bj27s",
+    "timestampIso": "2026-11-07T18:50:11.638Z",
+    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
+    "actor": "OPERATOR_MMI",
+    "sourceArchitectureId": "arch-cand-gen56",
+    "targetArchitectureId": "arch-live-gen55",
+    "summaryEn": "Latent-Math Write-Back rejected (0/8 gates, status=HALTED_FROZEN): System is in HALTED_FROZEN state (Gate 6 Circuit Breaker Active). All latent-model mathematical write-backs are frozen while live feeds are unreachable. | GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6057s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting.",
+    "summaryFa": "بازنویسی ریاضیات مدل پنهان رد شد (0/8 گیت): سیستم در وضعیت انجماد مدار محافظتی (HALTED_FROZEN) قرار دارد. در زمان قطعی منابع داده زنده، هرگونه بازنویسی ریاضی مدل پنهان قفل است. | گیت کنترل دوگانه سیستم‌عامل GDF (قانون ۸) بازنویسی ریاضی مدل پنهان را مسدود کرد: گزارش اثبات (Proof Report) معتبر و جاری با وضعیت PASS یافت نشد (STALE).",
+    "verifiableMetrics": "Status=HALTED_FROZEN | PassedGates=0/8 | Eligible=false"
+  },
+  {
+    "auditId": "audit-1794077411598-1qmcn",
+    "timestampIso": "2026-11-07T18:50:11.598Z",
+    "eventType": "LEVEL_B_MODEL_INVENTED",
+    "actor": "INTELLIGENCE_AWARENESS_CORE",
+    "sourceArchitectureId": "arch-live-gen55",
+    "targetArchitectureId": "arch-cand-gen56",
+    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (3/8 symbolic equations active, 5 pruned in v56.0-ParallelCandidate-G55; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=14.3%, λ_ridge=1.5111) — Independent mathematical audit discovery step.",
+    "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (3/۸ معادله نمادین فعال، 5 حذف‌شده در v56.0-ParallelCandidate-G55؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 14.3%).",
+    "verifiableMetrics": "Candidate=v56.0-ParallelCandidate-G55 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=14.3%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=14.3%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1001,w=13.1%,IC=0.055)"
+  },
+  {
     "auditId": "audit-1794071497116-zfn0b",
     "timestampIso": "2026-11-07T17:11:37.116Z",
     "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
@@ -834,49 +878,5 @@
     "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (4/8 symbolic equations active, 4 pruned in v49.0-ParallelCandidate-G48; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=12.9%, λ_ridge=1.5111) — Independent mathematical audit discovery step.",
     "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (4/۸ معادله نمادین فعال، 4 حذف‌شده در v49.0-ParallelCandidate-G48؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 12.9%).",
     "verifiableMetrics": "Candidate=v49.0-ParallelCandidate-G48 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=12.9%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=12.9%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1025,w=11.8%,IC=0.055), LAGGED_RESIDUAL_SELF_CORRECTION(theta=0.1043,w=9.8%,IC=-0.005)"
-  },
-  {
-    "auditId": "audit-1793562954273-92bkg",
-    "timestampIso": "2026-11-01T19:55:54.273Z",
-    "eventType": "LATENT_MATH_WRITEBACK_APPLIED",
-    "actor": "OPERATOR_MMI",
-    "sourceArchitectureId": "arch-cand-gen49",
-    "targetArchitectureId": "arch-live-gen48",
-    "summaryEn": "Validated Parallel Universe mathematics from v49.0-ParallelCandidate-G48 written back into 6D Latent State & Observation Model (Gen #50 → Gen #51: φ=0.9251, κ=0.1692, β_echo=0.437, γ_res=0.5343, η_macro=0.25, π_obs=1.327, activeSymbolic=4, pruned=5) · Note: Operator confirmed Direct Mathematical Write-Back after pre-write parameter inspection.",
-    "summaryFa": "ریاضیات تاییدشده جهان موازی (v49.0-ParallelCandidate-G48) در مدل حالت پنهان ۶بعدی و معادلات مشاهده بازنویسی شد (نسل #50 به #51: φ=0.9251، κ=0.1692، β=0.437، γ=0.5343، η=0.25، π_obs=1.327).",
-    "verifiableMetrics": "WriteBackGen=51 | phi=0.9253->0.9251 | kappa=0.1692->0.1692 | beta=0.437->0.437 | gamma=0.5345->0.5343 | eta=0.25->0.25 | obsPrecMult=1.327->1.327"
-  },
-  {
-    "auditId": "audit-1793562953693-26elj",
-    "timestampIso": "2026-11-01T19:55:53.693Z",
-    "eventType": "AUTO_PROMOTE_REJECTED_GATE_UNVERIFIED",
-    "actor": "INTELLIGENCE_AWARENESS_CORE",
-    "sourceArchitectureId": "arch-live-gen48",
-    "targetArchitectureId": "arch-cand-gen49",
-    "summaryEn": "Symbolic-step synthesis blocked: System is in HALTED_DEGRADED / HALTED_FROZEN state. Under STRICT_REAL_DATA_ONLY, symbolic equation fitting and ridge calibration cannot run without live verified market bars.",
-    "summaryFa": "ترکیب گام نمادین متوقف شد: سیستم در وضعیت توقف اضطراری (HALTED_DEGRADED) قرار دارد. بر اساس سیاست منع داده مصنوعی (STRICT_REAL_DATA_ONLY)، برازش معادلات نمادین بدون کندل‌های واقعی تاییدشده مجاز نیست.",
-    "verifiableMetrics": "Candidate=v49.0-ParallelCandidate-G48 | SynthesisExecuted=false | State=HALTED_FROZEN"
-  },
-  {
-    "auditId": "audit-1793562953661-3yhtp",
-    "timestampIso": "2026-11-01T19:55:53.661Z",
-    "eventType": "LEVEL_B_MODEL_INVENTED",
-    "actor": "INTELLIGENCE_AWARENESS_CORE",
-    "sourceArchitectureId": "arch-live-gen48",
-    "targetArchitectureId": "arch-cand-gen49",
-    "summaryEn": "Intelligence & Awareness Core executed Multi-Timeframe Level-B Symbolic Equation synthesis & ridge calibration on 300 real 15m bars (4/8 symbolic equations active, 4 pruned in v49.0-ParallelCandidate-G48; top term: BASIS_ACCELERATION_SECOND_ORDER θ̂=1.45, w=12.9%, λ_ridge=1.5111) — Operator-triggered Level-B symbolic synthesis & causal ridge calibration step.",
-    "summaryFa": "هسته هوشمندی و آگاهی ترکیب معادلات نمادین سطح B چندتایم‌فریمی و کالیبراسیون ریج را روی 300 کندل واقعی (15m) اجرا کرد (4/۸ معادله نمادین فعال، 4 حذف‌شده در v49.0-ParallelCandidate-G48؛ معادله برتر: BASIS_ACCELERATION_SECOND_ORDER با θ̂=1.45 و وزن 12.9%).",
-    "verifiableMetrics": "Candidate=v49.0-ParallelCandidate-G48 | N_bars=300 | OOS_N=48 | lambda=1.5111 | ActiveSymbolic=BASIS_ACCELERATION_SECOND_ORDER(theta=1.45,w=12.9%,IC=0.126), VOLUME_CLOCK_HAWKMOTH_RESTORING(theta=1.45,w=12.9%,IC=0.231), VOL_REGIME_NONLINEAR_INTERACTION(theta=0.1151,w=11.8%,IC=0.055), LAGGED_RESIDUAL_SELF_CORRECTION(theta=0.1257,w=9.8%,IC=-0.005)"
-  },
-  {
-    "auditId": "audit-1793562950837-46uk2",
-    "timestampIso": "2026-11-01T19:55:50.837Z",
-    "eventType": "PROMOTED_MANUAL_MMI",
-    "actor": "OPERATOR_MMI",
-    "sourceArchitectureId": "arch-cand-gen48",
-    "targetArchitectureId": "arch-live-gen48",
-    "summaryEn": "Operator manually approved & promoted Parallel Universe Candidate (v48.0-ParallelCandidate-G47) to Live Yellow-Line Architecture (v48.0-LivePromoted (MMI)) via MMI [Gates: 7/8] · Note: Scientific core promotion parity test.",
-    "summaryFa": "اپراتور از طریق رابط انسان و ماشین (MMI) معماری کاندیدای جهان موازی (v48.0-ParallelCandidate-G47) را به معماری خط زرد زنده (v48.0-LivePromoted (MMI)) ارتقا داد [گیت‌ها: 7/8].",
-    "verifiableMetrics": "Mode=MANUAL_MMI | Gates=7/8 | ActiveModels=8 | Discovered=4 | Archived=arch-live-gen47"
   }
 ]

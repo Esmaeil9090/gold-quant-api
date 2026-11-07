@@ -1,7 +1,7 @@
 {
   "schemaVersion": "2026.11.03-v2.1-GDF-OS",
-  "revision": 216,
-  "contentSha256": "b09905b177595ec19fa239b8fe3560a0666b76123c5d4fd222cf3612ba8b21be",
+  "revision": 226,
+  "contentSha256": "1cd2f5dc73f241d6796817d25bd308df0e1418d63065e39f38dd2962417ca6f4",
   "organizationHierarchy": [
     "1. Chief Scientist",
     "2. Head of Quantitative Engineering",
@@ -28,8 +28,8 @@
     "requireVerifiedProofForAutoPromotion": true,
     "requireVerifiedProofForManualMmiPromotion": true,
     "maxProofAgeMs": 900000,
-    "lastPromotionGateCheckIso": "2026-11-07T17:11:36.694Z",
-    "lastPromotionGateStatus": "PASS"
+    "lastPromotionGateCheckIso": "2026-11-07T18:50:11.612Z",
+    "lastPromotionGateStatus": "FAIL"
   },
   "interviews": [
     {
@@ -6364,19 +6364,49 @@
   ],
   "promotionDecisionLog": [
     {
-      "decisionId": "PROMO-DEC-1794071496694-909",
-      "timestampIso": "2026-11-07T17:11:36.694Z",
+      "decisionId": "PROMO-DEC-1794077411613-689",
+      "timestampIso": "2026-11-07T18:50:11.612Z",
       "mode": "MANUAL_MMI",
-      "decision": "ALLOWED",
+      "decision": "REJECTED",
       "proofReportId": "PRF-1794071354481-7230",
-      "proofStatus": "PASS",
-      "proofAgeMs": 142386,
+      "proofStatus": "STALE",
+      "proofAgeMs": 6057304,
       "candidateArchitectureId": "arch-cand-gen56",
       "candidateVersionTag": "v56.0-ParallelCandidate-G55",
       "liveArchitectureId": "arch-live-gen55",
       "operatorAuthorization": "OPERATOR_MMI_WRITEBACK_SESSION",
       "quantitativeGateStatus": "HALTED_FROZEN",
-      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794071354481-7230 (age=142s)."
+      "reason": "GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6057s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting."
+    },
+    {
+      "mode": "MANUAL_MMI",
+      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794071354481-7230 (age=143s).",
+      "decision": "ALLOWED",
+      "decisionId": "PROMO-DEC-1794071496914-909",
+      "proofAgeMs": 142606,
+      "proofStatus": "PASS",
+      "timestampIso": "2026-11-07T17:11:36.914Z",
+      "proofReportId": "PRF-1794071354481-7230",
+      "liveArchitectureId": "arch-live-gen55",
+      "candidateVersionTag": "v56.0-ParallelCandidate-G55",
+      "operatorAuthorization": "Controlled audit write-back verification",
+      "quantitativeGateStatus": "OBSERVING_CONFIRMATION_WINDOW",
+      "candidateArchitectureId": "arch-cand-gen56"
+    },
+    {
+      "mode": "MANUAL_MMI",
+      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794071354481-7230 (age=142s).",
+      "decision": "ALLOWED",
+      "decisionId": "PROMO-DEC-1794071496694-909",
+      "proofAgeMs": 142386,
+      "proofStatus": "PASS",
+      "timestampIso": "2026-11-07T17:11:36.694Z",
+      "proofReportId": "PRF-1794071354481-7230",
+      "liveArchitectureId": "arch-live-gen55",
+      "candidateVersionTag": "v56.0-ParallelCandidate-G55",
+      "operatorAuthorization": "OPERATOR_MMI_WRITEBACK_SESSION",
+      "quantitativeGateStatus": "HALTED_FROZEN",
+      "candidateArchitectureId": "arch-cand-gen56"
     },
     {
       "mode": "MANUAL_MMI",
@@ -7984,5 +8014,5 @@
     "lastRecoveredFromBackupIso": null,
     "lastRecoveryReason": null
   },
-  "lastSyncedIso": "2026-11-07T17:11:36.703Z"
+  "lastSyncedIso": "2026-11-07T18:50:11.622Z"
 }

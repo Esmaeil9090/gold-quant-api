@@ -69,6 +69,11 @@ const {
   computeOrthogonalMacroFactors,
   evaluatePureQuantPipeline,
 } = await import('./src/engine/quantEngine.js');
+const { resolveAssetClass } = await import('./src/services/assetSessionRouter.js');
+const {
+  runBtcForecastEngine,
+  fetchVerifiedBtcDerivativesSeries,
+} = await import('./src/engine/btcEngineEntry.js');
 const {
   buildDiagnosisReport,
   buildHaltedDegradedForecastPayload,
@@ -537,8 +542,10 @@ async function handleForecastRequest(req: Request, res: Response) {
   const fixtureReplay = req.query.fixtureReplay === '1' || req.query.fixtureReplay === 'true';
   const forceRefresh = req.query.forceRefresh === '1' || req.query.forceRefresh === 'true';
   const assetQuery = ((req.query.asset || req.query.symbol || '') as string).toUpperCase();
-  const activeAsset: 'GOLD' | 'BTC' =
-    req.path === '/api/btc-forecast' || assetQuery.includes('BTC') ? 'BTC' : 'GOLD';
+  const activeAsset = resolveAssetClass({
+    asset: req.path === '/api/btc-forecast' ? 'BTC' : assetQuery,
+    symbol: assetQuery,
+  });
   const cacheKey = activeAsset === 'BTC' ? `BTC:${interval}` : interval;
   const activeObserver = activeAsset === 'BTC' ? btcObserver : observer;
 
@@ -673,8 +680,26 @@ async function handleForecastRequest(req: Request, res: Response) {
     }
     parallelUniverse.scientificDiscoveryCycle = sciCycleTel;
 
+    // Dedicated BDF-B (Bitcoin Full Brain) execution when AssetClass === 'BTC'
+    let bdfBEngine = null;
+    if (activeAsset === 'BTC') {
+      const leverageSeries = !simulateFailure && !fixtureReplay
+        ? await fetchVerifiedBtcDerivativesSeries(candles)
+        : undefined;
+      bdfBEngine = runBtcForecastEngine({
+        candles,
+        intervalStepSeconds,
+        horizonSteps: 24,
+        leverageSeries,
+      });
+      parallelUniverse.liveEnsemble = bdfBEngine.liveEnsemblePlume;
+      parallelUniverse.candidateEnsemble = bdfBEngine.candidateEnsemblePlume;
+    }
+
     const activeLiveEnsemble =
-      parallelUniverse.liveEnsemble && parallelUniverse.liveEnsemble.medianTrack.length > 0
+      bdfBEngine
+        ? bdfBEngine.liveEnsemblePlume
+        : parallelUniverse.liveEnsemble && parallelUniverse.liveEnsemble.medianTrack.length > 0
         ? parallelUniverse.liveEnsemble
         : quantOut.ensemble;
 
@@ -707,6 +732,9 @@ async function handleForecastRequest(req: Request, res: Response) {
       instrumentIdentity: waterfall.instrumentIdentity || (activeAsset === 'BTC' ? 'BTC_SPOT_USD' : 'PAXG_SPOT_TOKEN'),
       asset: activeAsset,
       activeAsset,
+      assetClass: activeAsset,
+      engineId: activeAsset === 'BTC' ? 'BDF-B' : 'GDF-G',
+      bdfBEngine,
       crossAssetTickers,
       activeTier: waterfall.activeTier,
       activeProvider: waterfall.activeProvider,
@@ -722,9 +750,11 @@ async function handleForecastRequest(req: Request, res: Response) {
       timeframeStepSeconds: intervalStepSeconds,
       currentPrice: quantOut.currentPrice,
       equilibriumPrice:
-        activeAsset === 'GOLD' &&
-        parallelUniverse.liveArchitecture.promotionMode !== 'INITIAL_BASELINE' &&
-        parallelUniverse.liveArchitecture.compositeEquilibriumAnchor > 0
+        activeAsset === 'BTC' && bdfBEngine
+          ? bdfBEngine.equilibriumAnchorUsd
+          : activeAsset === 'GOLD' &&
+            parallelUniverse.liveArchitecture.promotionMode !== 'INITIAL_BASELINE' &&
+            parallelUniverse.liveArchitecture.compositeEquilibriumAnchor > 0
           ? parallelUniverse.liveArchitecture.compositeEquilibriumAnchor
           : quantOut.equilibriumPrice,
       atr: quantOut.atr,
@@ -848,6 +878,46 @@ app.get('/api/market-tickers', async (req: Request, res: Response) => {
 app.get('/api/gold-forecast', handleForecastRequest);
 app.get('/api/btc-forecast', handleForecastRequest);
 app.get('/api/forecast', handleForecastRequest);
+
+app.get('/api/btc-engine', async (req: Request, res: Response) => {
+  const intervalQuery = (req.query.interval as string) || '15m';
+  const interval = VALID_INTERVALS[intervalQuery] ? intervalQuery : '15m';
+  const intervalStepSeconds = VALID_INTERVALS[interval];
+  const simulateFailure = (req.query.simulateFailure as string) || '';
+  const fixtureReplay = req.query.fixtureReplay === '1' || req.query.fixtureReplay === 'true';
+  try {
+    const waterfall = await fetchVerifiedMarketWaterfall(interval, {
+      simulateFailure,
+      fixtureReplay,
+      asset: 'BTC',
+    });
+    if (waterfall.systemState === 'HALTED_DEGRADED' || waterfall.candles.length === 0) {
+      return res.status(503).json({
+        ok: false,
+        assetClass: 'BTC',
+        version: 'BDF-B-1.0.0',
+        error: waterfall.haltReasonEn || 'BTC spot waterfall unavailable',
+      });
+    }
+    const leverageSeries = !simulateFailure && !fixtureReplay
+      ? await fetchVerifiedBtcDerivativesSeries(waterfall.candles)
+      : undefined;
+    const out = runBtcForecastEngine({
+      candles: waterfall.candles,
+      intervalStepSeconds,
+      horizonSteps: 24,
+      leverageSeries,
+    });
+    res.json(out);
+  } catch (err: any) {
+    res.status(500).json({
+      ok: false,
+      assetClass: 'BTC',
+      version: 'BDF-B-1.0.0',
+      error: err?.message || 'BDF-B execution error',
+    });
+  }
+});
 
 // Intelligence & Awareness Core + Parallel Universe + Scientific Core MMI Endpoints
 app.get('/api/scientific-core', (req: Request, res: Response) => {
