@@ -3377,6 +3377,13 @@ input:checked + .toggle-slider:before {
     <div class="tier1-primary-ribbon" id="tier1PrimaryRibbon">
       <div class="tier1-ribbon-group">
         <span style="font-size: 9px; font-weight: 800; color: var(--cyan); letter-spacing: 0.8px; text-transform: uppercase;" data-i18n="tier1Tag">TIER 1 · PRIMARY RIBBON</span>
+        <div class="tier1-pill" id="tier1AssetPill" style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px;" title="Switch Institutional Asset: Gold (PAXG / COMEX) vs Bitcoin (BTC/USD)">
+          <span class="tier1-pill-label" data-i18n="tier1AssetLbl">ASSET:</span>
+          <div class="asset-btn-group" style="display: inline-flex; gap: 4px;">
+            <button type="button" class="btn-asset-toggle active" id="btnAssetGold" onclick="switchActiveAsset('GOLD')" style="font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245, 215, 110, 0.8); background: rgba(245, 215, 110, 0.25); color: #f5d76e; cursor: pointer;">🟡 GOLD</button>
+            <button type="button" class="btn-asset-toggle" id="btnAssetBtc" onclick="switchActiveAsset('BTC')" style="font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 229, 255, 0.3); background: rgba(0, 229, 255, 0.05); color: #80deea; cursor: pointer;">₿ BTC/USD</button>
+          </div>
+        </div>
         <div class="tier1-pill" id="tier1CircuitBreakerPill">
           <span class="tier1-pill-label" data-i18n="tier1CbLbl">CIRCUIT BREAKER:</span>
           <span id="tier1CircuitBreakerBadge" style="color: var(--green); font-weight: 800;">LIVE_NOMINAL</span>
@@ -3434,12 +3441,22 @@ input:checked + .toggle-slider:before {
         </div>
       </div>
       <div class="bar-right">
-        <div class="stat-pill">
+        <div class="stat-pill" id="headGoldPill" onclick="switchActiveAsset('GOLD')" style="cursor: pointer;" title="Click to focus 2D/3D Manifold on Gold (PAXG/USD)">
           <div style="display:flex;align-items:center;gap:4px;">
             <span class="stat-pill-label" data-i18n="spotGold">Spot Gold (PAXG)</span>
             <span class="epistemic-badge epistemic-raw" data-epistemic="RAW_OBSERVATION">[RAW OBSERVATION]</span>
           </div>
           <span class="stat-pill-val" style="color: var(--gold)" id="headPrice">$—</span>
+        </div>
+        <div class="stat-pill" id="headBtcPill" onclick="switchActiveAsset('BTC')" style="cursor: pointer;" title="Click to focus 2D/3D Manifold on Bitcoin (BTC/USD)">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span class="stat-pill-label" id="headBtcLabel">₿ Bitcoin (BTC/USD)</span>
+            <span class="epistemic-badge epistemic-raw" data-epistemic="RAW_OBSERVATION">[RAW OBSERVATION]</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="stat-pill-val" style="color: #00e5ff;" id="headBtcPrice">$—</span>
+            <span id="headBtcChangeBadge" style="font-family:monospace;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;background:rgba(0,230,118,0.12);border:1px solid rgba(0,230,118,0.4);color:#00e676;display:none;">+0.00%</span>
+          </div>
         </div>
         <div class="stat-pill" data-model-spec="MACRO_FACTOR_DRIFT" style="cursor: pointer;" title="Click to inspect Model Spec: Linear Macro Factor Drift Proxy">
           <div style="display:flex;align-items:center;gap:4px;">
@@ -4090,29 +4107,77 @@ input:checked + .toggle-slider:before {
       </div>
       <div class="panel-accordion-body">
         <div class="news-timeline-panel">
-          <div class="news-ribbon-header">
-            <div class="news-ribbon-title">
-              <span>📰</span>
-              <span data-i18n="newsTitle">Macro Events Timeline · Gold Econometric Impact</span>
+          <!-- Top Sub-Navigation View Bar -->
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:rgba(11,18,32,0.85);border-bottom:1px solid rgba(40,60,95,0.45);border-radius:8px 8px 0 0;">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;" id="macroSubViewButtons">
+              <button type="button" class="btn active-macro-subtab" data-macro-view="calendar" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;border:1px solid #00e5ff;background:rgba(0,229,255,0.18);color:#00e5ff;cursor:pointer;">📅 Economic Calendar (15)</button>
+              <button type="button" class="btn" data-macro-view="political" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;border:1px solid rgba(45,68,105,0.55);background:rgba(255,255,255,0.03);color:#9cb0cc;cursor:pointer;">🏛️ Political &amp; Midterms Awareness</button>
+              <button type="button" class="btn" data-macro-view="transmission" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;border:1px solid rgba(45,68,105,0.55);background:rgba(255,255,255,0.03);color:#9cb0cc;cursor:pointer;">⚡ Transmission Mechanisms</button>
+              <button type="button" class="btn" data-macro-view="headlines" style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;border:1px solid rgba(45,68,105,0.55);background:rgba(255,255,255,0.03);color:#9cb0cc;cursor:pointer;">📰 Market Headlines</button>
             </div>
-            <div class="news-filter-tabs">
-              <button class="filter-tab active" data-filter="all" data-i18n="filterAll">All Catalysts</button>
-              <button class="filter-tab" data-filter="bullish" data-i18n="filterBullish">Positive Drift ↗</button>
-              <button class="filter-tab" data-filter="bearish" data-i18n="filterBearish">Negative Drift ↘</button>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#8fa2bf;font-family:monospace;">
+              <span>EPISTEMIC:</span>
+              <span class="epistemic-badge epistemic-raw" style="font-size:9px;padding:1px 5px;">[RAW OBSERVATION]</span>
+              <span class="epistemic-badge epistemic-model" style="font-size:9px;padding:1px 5px;background:rgba(0,229,255,0.15);border:1px solid #00e5ff;color:#00e5ff;">[MODEL INFERENCE]</span>
+              <span class="epistemic-badge epistemic-forecast" style="font-size:9px;padding:1px 5px;background:rgba(245,215,110,0.15);border:1px solid #f5d76e;color:#f5d76e;">[FORECAST]</span>
             </div>
           </div>
 
-          <!-- Country Flag Pins Strip -->
-          <div class="news-flags-strip" id="newsFlagsStrip"></div>
-
-          <!-- Active News Transmission Detail Drawer -->
-          <div class="news-detail-drawer" id="newsDetailDrawer">
-            <div class="detail-header">
-              <span class="detail-source" id="drawerSource">—</span>
-              <span class="pin-impact-badge" id="drawerBadge">—</span>
+          <!-- Subview 1: Structured Economic Calendar View -->
+          <div id="macroCalendarContainer" style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;">
+              <div style="font-size:11.5px;color:#dbe7f6;font-weight:700;">
+                Official Economic Releases (BLS, BEA, Federal Reserve, U.S. Treasury, Census Bureau, DOL, ISM)
+              </div>
+              <div style="display:flex;gap:4px;font-size:10px;" id="calendarCategoryFilters">
+                <button type="button" class="btn cal-cat-btn active" data-cat="ALL" style="padding:2px 8px;font-size:10px;border-color:#00e5ff;color:#00e5ff;background:rgba(0,229,255,0.12);">All</button>
+                <button type="button" class="btn cal-cat-btn" data-cat="EMPLOYMENT" style="padding:2px 8px;font-size:10px;border-color:rgba(45,68,105,0.55);color:#9cb0cc;">Employment</button>
+                <button type="button" class="btn cal-cat-btn" data-cat="INFLATION" style="padding:2px 8px;font-size:10px;border-color:rgba(45,68,105,0.55);color:#9cb0cc;">Inflation</button>
+                <button type="button" class="btn cal-cat-btn" data-cat="CENTRAL_BANK" style="padding:2px 8px;font-size:10px;border-color:rgba(45,68,105,0.55);color:#9cb0cc;">Fed / FOMC</button>
+                <button type="button" class="btn cal-cat-btn" data-cat="TREASURY_AUCTION" style="padding:2px 8px;font-size:10px;border-color:rgba(45,68,105,0.55);color:#9cb0cc;">Treasury</button>
+              </div>
             </div>
-            <div class="detail-title" id="drawerTitle">—</div>
-            <div class="detail-transmission" id="drawerTransmission">—</div>
+            <div id="macroCalendarTableWrapper" style="overflow-x:auto;">
+              <!-- Calendar items injected dynamically -->
+            </div>
+            <!-- Calendar Event Detailed Drawer -->
+            <div id="calendarEventDrawer" style="display:none;padding:12px;border-radius:8px;background:rgba(8,14,26,0.95);border:1px solid rgba(0,229,255,0.4);margin-top:6px;">
+              <!-- Injected by renderCalendarEventDetail -->
+            </div>
+          </div>
+
+          <!-- Subview 2: Political & Election Intelligence View -->
+          <div id="macroPoliticalContainer" style="padding:10px 12px;display:none;flex-direction:column;gap:12px;">
+            <!-- Injected by renderPoliticalIntelligence -->
+          </div>
+
+          <!-- Subview 3: Transmission Mechanisms View -->
+          <div id="macroTransmissionContainer" style="padding:10px 12px;display:none;flex-direction:column;gap:12px;">
+            <!-- Injected by renderTransmissionMechanisms -->
+          </div>
+
+          <!-- Subview 4: RSS Market Headlines View -->
+          <div id="macroHeadlinesContainer" style="display:none;">
+            <div class="news-ribbon-header">
+              <div class="news-ribbon-title">
+                <span>📰</span>
+                <span data-i18n="newsTitle">Market Headlines &amp; Geopolitics</span>
+              </div>
+              <div class="news-filter-tabs">
+                <button class="filter-tab active" data-filter="all" data-i18n="filterAll">All Catalysts</button>
+                <button class="filter-tab" data-filter="bullish" data-i18n="filterBullish">Positive Drift ↗</button>
+                <button class="filter-tab" data-filter="bearish" data-i18n="filterBearish">Negative Drift ↘</button>
+              </div>
+            </div>
+            <div class="news-flags-strip" id="newsFlagsStrip"></div>
+            <div class="news-detail-drawer" id="newsDetailDrawer">
+              <div class="detail-header">
+                <span class="detail-source" id="drawerSource">—</span>
+                <span class="pin-impact-badge" id="drawerBadge">—</span>
+              </div>
+              <div class="detail-title" id="drawerTitle">—</div>
+              <div class="detail-transmission" id="drawerTransmission">—</div>
+            </div>
           </div>
         </div>
       </div>
@@ -5693,6 +5758,7 @@ const i18n = {
     valVolRegimeTitle: 'Regime Partition A · GARCH(1,1) Conditional Volatility (h=5)',
     valMacroRegimeTitle: 'Regime Partition B · Real-Yield & Dollar Macro Pressure (h=5)',
     tier1Tag: 'TIER 1 · PRIMARY RIBBON',
+    tier1AssetLbl: 'Active Asset:',
     tier1CbLbl: 'Circuit Breaker:',
     tier1QuorumLbl: 'Market-Data Feed Integrity (Quorum):',
     tier1TfLbl: 'Active Timeframe:',
@@ -5946,6 +6012,7 @@ const i18n = {
     valVolRegimeTitle: 'تفکیک رژیم الف · نوسان‌پذیری شرطی GARCH(1,1) (در افق h=5)',
     valMacroRegimeTitle: 'تفکیک رژیم ب · فشار کلان بازده حقیقی و دلار (در افق h=5)',
     tier1Tag: 'سطح ۱ · نوار وضعیت اصلی',
+    tier1AssetLbl: 'دارایی فعال:',
     tier1CbLbl: 'مدارشکن ایمنی:',
     tier1QuorumLbl: 'یکپارچگی جریان داده‌های بازار (حدنصاب):',
     tier1TfLbl: 'تایم‌فریم فعال:',
@@ -8664,6 +8731,54 @@ function updateBarCountdown() {
 setInterval(updateBarCountdown, 1000);
 updateBarCountdown();
 
+// Unified Asset Switching Controller (Gold vs Bitcoin)
+let currentAsset = (new URLSearchParams(window.location.search).get('asset') || '').toUpperCase() === 'BTC' ? 'BTC' : 'GOLD';
+
+function updateAssetToggleUI(asset) {
+  const btnGold = document.getElementById('btnAssetGold');
+  const btnBtc = document.getElementById('btnAssetBtc');
+  if (btnGold && btnBtc) {
+    if (asset === 'GOLD') {
+      btnGold.classList.add('active');
+      btnGold.style.background = 'rgba(245, 215, 110, 0.25)';
+      btnGold.style.borderColor = 'rgba(245, 215, 110, 0.8)';
+      btnGold.style.color = '#f5d76e';
+      btnBtc.classList.remove('active');
+      btnBtc.style.background = 'rgba(0, 229, 255, 0.05)';
+      btnBtc.style.borderColor = 'rgba(0, 229, 255, 0.3)';
+      btnBtc.style.color = '#80deea';
+    } else {
+      btnBtc.classList.add('active');
+      btnBtc.style.background = 'rgba(0, 229, 255, 0.25)';
+      btnBtc.style.borderColor = 'rgba(0, 229, 255, 0.8)';
+      btnBtc.style.color = '#00e5ff';
+      btnGold.classList.remove('active');
+      btnGold.style.background = 'rgba(245, 215, 110, 0.05)';
+      btnGold.style.borderColor = 'rgba(245, 215, 110, 0.3)';
+      btnGold.style.color = '#d4af37';
+    }
+  }
+}
+
+function switchActiveAsset(newAsset) {
+  if (newAsset !== 'GOLD' && newAsset !== 'BTC') return;
+  currentAsset = newAsset;
+  updateAssetToggleUI(newAsset);
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('asset', newAsset);
+  window.history.replaceState({}, '', url.toString());
+
+  const atmSub = document.getElementById('atmSubLabel');
+  if (atmSub) {
+    atmSub.textContent = currentLang === 'fa'
+      ? `در حال دریافت کندل‌های واقعی ${newAsset === 'BTC' ? 'بیت‌کوین (BTC/USD)' : 'طلا (PAXG)'}...`
+      : `Syncing verified live ${newAsset === 'BTC' ? 'Bitcoin (BTC/USD)' : 'Gold (PAXG)'} waterfall...`;
+  }
+
+  fetchQuantData(currentTimeframe, true);
+}
+
 // Unified Timeframe Switching Controller (Instant UI + 2D/3D Sync + Non-blocking Live Fetch)
 function changeTimeframe(newTf) {
   if (!newTf || !TIMEFRAME_STEPS[newTf]) return;
@@ -9548,6 +9663,7 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     const simFail = urlParams.get('simulateFailure') || '';
     const fixReplay = urlParams.get('fixtureReplay') || '';
     let apiPath = `/api/gold-forecast?interval=${encodeURIComponent(targetInterval)}&_t=${Date.now()}`;
+    if (typeof currentAsset !== 'undefined' && currentAsset === 'BTC') apiPath += '&asset=BTC';
     if (force) apiPath += '&forceRefresh=1';
     if (simFail) apiPath += `&simulateFailure=${encodeURIComponent(simFail)}`;
     if (fixReplay) apiPath += `&fixtureReplay=${encodeURIComponent(fixReplay)}`;
@@ -9632,6 +9748,9 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
         updateThreeWorldData(data);
       }
       renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
+      if (data.macroCalendar) renderMacroCalendar(data.macroCalendar, data.macroCalendarStatus);
+      if (data.politicalIntelligence) renderPoliticalIntelligence(data.politicalIntelligence);
+      if (data.macroTransmission) renderMacroTransmission(data.macroTransmission);
       return;
     }
 
@@ -9640,6 +9759,9 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
       renderHUD(data);
       updateTimelineSliderLabels(data);
       renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
+      if (data.macroCalendar) renderMacroCalendar(data.macroCalendar, data.macroCalendarStatus);
+      if (data.politicalIntelligence) renderPoliticalIntelligence(data.politicalIntelligence);
+      if (data.macroTransmission) renderMacroTransmission(data.macroTransmission);
       updateActiveIndicatorBadges();
       return;
     }
@@ -9970,19 +10092,458 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
   });
 });
 
+// ============================================================================
+// VERIFIED MACROECONOMIC CALENDAR, POLITICAL AWARENESS & TRANSMISSION ENGINE
+// ============================================================================
+let activeMacroSubView = 'calendar';
+let activeCalendarCategory = 'ALL';
+let selectedCalendarEventId = null;
+
+function setMacroSubView(viewId) {
+  activeMacroSubView = viewId;
+  const calCont = document.getElementById('macroCalendarContainer');
+  const polCont = document.getElementById('macroPoliticalContainer');
+  const transCont = document.getElementById('macroTransmissionContainer');
+  const headCont = document.getElementById('macroHeadlinesContainer');
+
+  if (calCont) calCont.style.display = viewId === 'calendar' ? 'flex' : 'none';
+  if (polCont) polCont.style.display = viewId === 'political' ? 'flex' : 'none';
+  if (transCont) transCont.style.display = viewId === 'transmission' ? 'flex' : 'none';
+  if (headCont) headCont.style.display = viewId === 'headlines' ? 'block' : 'none';
+
+  document.querySelectorAll('#macroSubViewButtons button').forEach((btn) => {
+    const isAct = btn.getAttribute('data-macro-view') === viewId;
+    btn.style.border = isAct ? '1px solid #00e5ff' : '1px solid rgba(45,68,105,0.55)';
+    btn.style.background = isAct ? 'rgba(0,229,255,0.18)' : 'rgba(255,255,255,0.03)';
+    btn.style.color = isAct ? '#00e5ff' : '#9cb0cc';
+  });
+}
+
+document.querySelectorAll('#macroSubViewButtons button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const v = btn.getAttribute('data-macro-view') || 'calendar';
+    setMacroSubView(v);
+  });
+});
+
+document.querySelectorAll('.cal-cat-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cal-cat-btn').forEach((b) => {
+      b.style.borderColor = 'rgba(45,68,105,0.55)';
+      b.style.color = '#9cb0cc';
+      b.style.background = 'transparent';
+    });
+    btn.style.borderColor = '#00e5ff';
+    btn.style.color = '#00e5ff';
+    btn.style.background = 'rgba(0,229,255,0.12)';
+    activeCalendarCategory = btn.getAttribute('data-cat') || 'ALL';
+    if (forecastData && forecastData.macroCalendar) {
+      renderMacroCalendar(forecastData.macroCalendar, forecastData.macroCalendarStatus);
+    }
+  });
+});
+
+function renderMacroCalendar(eventsList, statusObj) {
+  const tableWrap = document.getElementById('macroCalendarTableWrapper');
+  if (!tableWrap) return;
+
+  const events = Array.isArray(eventsList) ? eventsList : [];
+  if (events.length === 0) {
+    tableWrap.innerHTML = `
+      <div style="font-size:11px;color:#ff5252;padding:12px;background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.3);border-radius:6px;">
+        ⚠️ ${currentLang === 'fa' ? 'داده‌های تقویم اقتصادی رسمی در دسترس نیست.' : 'Official structured economic calendar data is unavailable.'}
+      </div>
+    `;
+    return;
+  }
+
+  const filtered = events.filter((ev) => {
+    if (activeCalendarCategory === 'ALL') return true;
+    return ev.category === activeCalendarCategory;
+  });
+
+  const rowsHtml = filtered.map((ev) => {
+    const isSelected = selectedCalendarEventId === ev.eventId;
+    const isFa = currentLang === 'fa';
+    const evTitle = isFa ? ev.eventNameFa : ev.eventName;
+    const catLabel = ev.category.replace(/_/g, ' ');
+    const schedDate = new Date(ev.scheduledTimestampSec * 1000);
+    const localTimeStr = schedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const utcTimeStr = (ev.scheduledTimeUtc || '').replace('T', ' ').replace(':00Z', ' UTC');
+    const impColor = ev.importance === 'HIGH' ? '#ff5252' : ev.importance === 'MEDIUM' ? '#ffab00' : '#00e5ff';
+    const statusColor = ev.releaseStatus === 'RELEASED' ? '#00e676' : ev.releaseStatus === 'SCHEDULED' ? '#00e5ff' : '#ffab00';
+
+    let surpriseColor = '#8fa2bf';
+    let surpriseLabel = '—';
+    if (ev.surpriseValue !== null && ev.surpriseValue !== undefined) {
+      const sVal = ev.surpriseValue > 0 ? `+${ev.surpriseValue}` : `${ev.surpriseValue}`;
+      const sDir = ev.surpriseDirection === 'DOVISH_FOR_USD'
+        ? (isFa ? 'داویش (صعود طلا)' : 'Dovish / Bullish Gold')
+        : ev.surpriseDirection === 'HAWKISH_FOR_USD'
+        ? (isFa ? 'هاکیش (نزول طلا)' : 'Hawkish / Bearish Gold')
+        : (isFa ? 'مطابق اجماع' : 'In Line');
+      surpriseColor = ev.surpriseDirection === 'DOVISH_FOR_USD' ? '#00e676' : ev.surpriseDirection === 'HAWKISH_FOR_USD' ? '#ff5252' : '#8fa2bf';
+      surpriseLabel = `${sVal} ${ev.unit || ''} (${sDir})`;
+    }
+
+    return `
+      <tr class="macro-cal-row" data-event-id="${escapeHtml(ev.eventId)}" style="cursor:pointer;border-bottom:1px solid rgba(40,60,95,0.3);background:${isSelected ? 'rgba(0,229,255,0.08)' : 'transparent'};transition:background 0.2s;">
+        <td style="padding:8px 10px;white-space:nowrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:14px;">${ev.flag || '🇺🇸'}</span>
+            <div style="display:flex;flex-direction:column;">
+              <span style="font-family:monospace;font-size:10.5px;color:#fff;font-weight:700;">${localTimeStr}</span>
+              <span style="font-family:monospace;font-size:8.5px;color:#6e84a3;">${utcTimeStr}</span>
+            </div>
+          </div>
+        </td>
+        <td style="padding:8px 10px;">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <span style="font-family:monospace;font-size:8.5px;font-weight:800;padding:1px 4px;border-radius:3px;border:1px solid ${impColor};color:${impColor};background:rgba(255,255,255,0.03);">${ev.importance}</span>
+              <span style="font-family:monospace;font-size:8.5px;padding:1px 4px;border-radius:3px;background:rgba(0,229,255,0.08);color:#00e5ff;">${catLabel}</span>
+              <span style="font-family:monospace;font-size:8.5px;color:${statusColor};">● ${ev.releaseStatus}</span>
+            </div>
+            <span style="font-size:11px;color:#dbe7f6;font-weight:700;">${escapeHtml(evTitle)}</span>
+            <span style="font-size:9px;color:#7e95b5;">Source: ${escapeHtml(ev.officialSource)}</span>
+          </div>
+        </td>
+        <td style="padding:8px 10px;font-family:monospace;font-size:10px;color:#9cb0cc;white-space:nowrap;">
+          <div>Prev: <b style="color:#fff;">${ev.previousValueDisplay || '—'}</b>${ev.revisedPreviousValue !== null && ev.revisedPreviousValue !== undefined ? ` <span style="font-size:8.5px;color:#ffab00;">(rev ${ev.revisedPreviousValue})</span>` : ''}</div>
+          <div>Cons: <b style="color:#00e5ff;">${ev.consensusEstimateDisplay || '—'}</b></div>
+        </td>
+        <td style="padding:8px 10px;font-family:monospace;font-size:10px;white-space:nowrap;">
+          <div style="font-size:11.5px;font-weight:900;color:${ev.actualValue !== null ? '#fff' : '#6e84a3'};">${ev.actualValueDisplay || 'Pending'}</div>
+          <div style="font-size:9.5px;font-weight:700;color:${surpriseColor};">${surpriseLabel}</div>
+        </td>
+        <td style="padding:8px 10px;white-space:nowrap;text-align:right;">
+          <button type="button" class="btn btn-sm btn-cal-inspect" data-event-id="${escapeHtml(ev.eventId)}" style="padding:3px 7px;font-size:9.5px;border-color:rgba(0,229,255,0.4);color:#00e5ff;">Details ▶</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tableWrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:650px;">
+      <thead>
+        <tr style="border-bottom:1.5px solid rgba(40,60,95,0.6);color:#7e95b5;font-family:monospace;font-size:9.5px;text-align:left;">
+          <th style="padding:6px 10px;">TIME (LOCAL / UTC)</th>
+          <th style="padding:6px 10px;">EVENT &amp; SOURCE</th>
+          <th style="padding:6px 10px;">PREVIOUS / CONSENSUS</th>
+          <th style="padding:6px 10px;">ACTUAL / SURPRISE</th>
+          <th style="padding:6px 10px;text-align:right;">ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+      </tbody>
+    </table>
+  `;
+
+  tableWrap.querySelectorAll('.macro-cal-row, .btn-cal-inspect').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const evId = el.getAttribute('data-event-id');
+      const item = events.find((x) => x.eventId === evId);
+      if (item) {
+        selectedCalendarEventId = evId;
+        renderCalendarEventDetail(item);
+        renderMacroCalendar(events, statusObj);
+      }
+    });
+  });
+
+  if (!selectedCalendarEventId && events.length > 0) {
+    selectedCalendarEventId = events[0].eventId;
+    renderCalendarEventDetail(events[0]);
+  }
+}
+
+function renderCalendarEventDetail(ev) {
+  const drawer = document.getElementById('calendarEventDrawer');
+  if (!drawer) return;
+  drawer.style.display = 'block';
+
+  const isFa = currentLang === 'fa';
+  const evTitle = isFa ? ev.eventNameFa : ev.eventName;
+  const trans = ev.expectedGoldTransmission || {};
+  const transDesc = isFa ? (trans.mechanismDescriptionFa || trans.mechanismDescriptionEn) : trans.mechanismDescriptionEn;
+  const pathway = isFa ? (trans.primaryPathwayFa || trans.primaryPathway) : trans.primaryPathway;
+  const biasColor = trans.directionalBias === 'BULLISH' ? '#00e676' : trans.directionalBias === 'BEARISH' ? '#ff5252' : '#8fa2bf';
+
+  drawer.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-bottom:1px solid rgba(40,60,95,0.45);padding-bottom:8px;margin-bottom:8px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
+          <span class="epistemic-badge epistemic-raw">[RAW OBSERVATION: OFFICIAL RELEASE]</span>
+          <span style="font-family:monospace;font-size:9.5px;color:#00e5ff;font-weight:700;">${ev.category}</span>
+          <span style="font-family:monospace;font-size:9.5px;color:#6e84a3;">${ev.eventId}</span>
+        </div>
+        <div style="font-size:13px;font-weight:800;color:#fff;">${ev.flag || '🇺🇸'} ${escapeHtml(evTitle)}</div>
+        <div style="font-size:10px;color:#7e95b5;">Official Issuer: <a href="${ev.officialSourceUrl}" target="_blank" rel="noopener noreferrer" style="color:#00e5ff;text-decoration:underline;">${escapeHtml(ev.officialSource)}</a></div>
+      </div>
+      <button type="button" class="btn btn-sm" id="closeCalDrawerBtn" style="padding:2px 6px;font-size:10px;">✕ Close</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:8px;margin-bottom:10px;">
+      <div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(40,60,95,0.4);">
+        <div style="font-size:9px;color:#7e95b5;font-family:monospace;">PREVIOUS VALUE</div>
+        <div style="font-size:12px;font-weight:800;color:#fff;">${ev.previousValueDisplay || '—'}</div>
+        ${ev.revisedPreviousValue !== null && ev.revisedPreviousValue !== undefined ? `<div style="font-size:8.5px;color:#ffab00;">Revised: ${ev.revisedPreviousValue}</div>` : ''}
+      </div>
+      <div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(40,60,95,0.4);">
+        <div style="font-size:9px;color:#7e95b5;font-family:monospace;">CONSENSUS ESTIMATE</div>
+        <div style="font-size:12px;font-weight:800;color:#00e5ff;">${ev.consensusEstimateDisplay || '—'}</div>
+        <div style="font-size:8.5px;color:#6e84a3;">Src: ${escapeHtml(ev.consensusSource || 'Surveys')}</div>
+      </div>
+      <div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(40,60,95,0.4);">
+        <div style="font-size:9px;color:#7e95b5;font-family:monospace;">ACTUAL RELEASE</div>
+        <div style="font-size:12px;font-weight:800;color:#fff;">${ev.actualValueDisplay || 'Pending'}</div>
+        <div style="font-size:8.5px;color:${ev.releaseStatus === 'RELEASED' ? '#00e676' : '#ffab00'};">Status: ${ev.releaseStatus}</div>
+      </div>
+      <div style="padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(40,60,95,0.4);">
+        <div style="font-size:9px;color:#7e95b5;font-family:monospace;">SURPRISE / STD DEV</div>
+        <div style="font-size:12px;font-weight:800;color:${biasColor};">${ev.surpriseValue !== null ? (ev.surpriseValue > 0 ? `+${ev.surpriseValue}` : `${ev.surpriseValue}`) : '—'} (${ev.surpriseStdDev !== null ? `${ev.surpriseStdDev}σ` : '—'})</div>
+        <div style="font-size:8.5px;color:${biasColor};">${ev.surpriseDirection || '—'}</div>
+      </div>
+    </div>
+
+    <div style="padding:8px 10px;border-radius:6px;background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.3);margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:10px;font-weight:800;color:#f5d76e;text-transform:uppercase;">⚡ Expected Econometric Transmission Pathway</span>
+        <span style="font-family:monospace;font-size:9px;font-weight:800;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,0.05);border:1px solid ${biasColor};color:${biasColor};">${trans.directionalBias || 'NEUTRAL'} (${trans.expectedImpactBps ? `${trans.expectedImpactBps} bps` : '—'})</span>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:3px;">${escapeHtml(pathway || 'Macro Transmission')}</div>
+      <div style="font-size:10.5px;color:#c5d6ec;line-height:1.45;">${escapeHtml(transDesc || 'Awaiting transmission analysis.')}</div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;font-family:monospace;font-size:9px;color:#6e84a3;">
+      <span>Provenance: ${escapeHtml(ev.provenance?.verificationMethod || 'OFFICIAL_INGESTION')}</span>
+      <span>Retrieved: ${escapeHtml(ev.provenance?.retrievedAtIso || '—')}</span>
+    </div>
+  `;
+
+  const closeBtn = drawer.querySelector('#closeCalDrawerBtn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      drawer.style.display = 'none';
+      selectedCalendarEventId = null;
+    });
+  }
+}
+
+function renderPoliticalIntelligence(polData) {
+  const container = document.getElementById('macroPoliticalContainer');
+  if (!container) return;
+
+  if (!polData) {
+    container.innerHTML = `<div style="font-size:11px;color:#8fa2bf;">No political event intelligence currently ingested.</div>`;
+    return;
+  }
+
+  const isFa = currentLang === 'fa';
+  const latestSnap = polData.latestProbabilitySnapshot || {};
+  const demProb = (latestSnap.democratSenateWinProb * 0.5 + latestSnap.democratHouseWinProb * 0.5) * 100;
+  const repProb = 100 - demProb;
+  const policy = latestSnap.majorPolicyImplications || {};
+  const goldSumm = isFa ? (policy.goldTransmissionSummaryFa || policy.goldTransmissionSummaryEn) : policy.goldTransmissionSummaryEn;
+
+  const pollsHtml = (polData.historicalPollingObservations || []).map((p) => {
+    return `
+      <div style="padding:6px 8px;border-radius:6px;background:rgba(11,18,32,0.85);border:1px solid rgba(40,60,95,0.4);display:flex;justify-content:space-between;align-items:center;gap:6px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="font-family:monospace;font-size:8.5px;font-weight:800;padding:1px 4px;border-radius:3px;background:rgba(0,230,118,0.12);color:#00e676;border:1px solid #00e676;">Grade ${p.pollsterRating}</span>
+            <span style="font-size:10.5px;color:#fff;font-weight:700;">${escapeHtml(p.pollster)}</span>
+          </div>
+          <div style="font-size:9px;color:#7e95b5;">N=${p.sampleSize} ${p.populationType} · Dates: ${p.fieldworkStartIso.slice(5, 10)} to ${p.fieldworkEndIso.slice(5, 10)}</div>
+        </div>
+        <div style="text-align:right;font-family:monospace;font-size:10.5px;">
+          <span style="color:#00e5ff;font-weight:800;">Dem ${p.democratSharePct}%</span> vs <span style="color:#ff5252;font-weight:800;">Rep ${p.republicanSharePct}%</span>
+          <div style="font-size:9px;color:#f5d76e;font-weight:700;">+${p.spreadPct}% Dem Lead</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const snapsHtml = (polData.probabilitySnapshotsOverTime || []).map((s) => {
+    const sDemProb = Math.round((s.democratSenateWinProb * 0.5 + s.democratHouseWinProb * 0.5) * 100);
+    const dateStr = s.asOfIso ? s.asOfIso.slice(0, 10) : '—';
+    return `
+      <div style="padding:8px 10px;border-radius:6px;background:rgba(8,14,26,0.9);border:1px solid rgba(40,60,95,0.5);display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:monospace;font-size:10px;color:#00e5ff;font-weight:800;">📅 ${dateStr} (${s.snapshotId})</span>
+          <span style="font-family:monospace;font-size:9.5px;color:#f5d76e;font-weight:800;">P(Dem Unified) = ${sDemProb}%</span>
+        </div>
+        <div style="font-size:9.5px;color:#c5d6ec;line-height:1.35;">
+          ${escapeHtml(isFa ? (s.majorPolicyImplications?.goldTransmissionSummaryFa || s.majorPolicyImplications?.goldTransmissionSummaryEn) : s.majorPolicyImplications?.goldTransmissionSummaryEn)}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <!-- Top Banner: 2026 Midterm Outcome & Fiscal Expansion -->
+    <div style="padding:10px 12px;border-radius:8px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.4);display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="epistemic-badge epistemic-raw">[RAW OBSERVATION: HISTORICAL RESULT]</span>
+          <span style="font-size:12px;font-weight:800;color:#fff;">🏛️ U.S. November 2026 Midterm Elections</span>
+        </div>
+        <span style="font-family:monospace;font-size:10px;font-weight:800;color:#00e676;padding:2px 6px;border-radius:4px;background:rgba(0,230,118,0.12);border:1px solid #00e676;">CONFIRMED OUTCOME: UNIFIED DEMOCRATIC MAJORITY</span>
+      </div>
+      <div style="font-size:11px;color:#dbe7f6;line-height:1.45;">
+        ${escapeHtml(goldSumm)}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;font-family:monospace;font-size:10px;margin-top:4px;">
+        <span>Fiscal Trajectory: <b style="color:#f5d76e;">${policy.fiscalDeficitTrajectory || 'EXPANSION ($1.9T+)'}</b></span>
+        <span>Treasury Supply: <b style="color:#ff5252;">${policy.treasurySupplyPressure || 'ELEVATED ISSUANCE'}</b></span>
+        <span>Real-Yield Impact: <b style="color:#00e676;">2.82% → 2.65% (COMPRESSION)</b></span>
+      </div>
+    </div>
+
+    <!-- Polling Averages & Individual Observations -->
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;font-weight:800;color:#00e5ff;text-transform:uppercase;">📊 Institutional Polling Record (RealClearPolitics / 538 Verified)</span>
+        <span style="font-family:monospace;font-size:9px;color:#8fa2bf;">Zero Look-Ahead Ingestion</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:6px;">
+        ${pollsHtml}
+      </div>
+    </div>
+
+    <!-- Chronological Election Probability Evolution (Anti-Lookahead) -->
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-size:11px;font-weight:800;color:#f5d76e;text-transform:uppercase;">⏳ Historical Probability Evolution &amp; Scenario Unfolding</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:6px;">
+        ${snapsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function renderMacroTransmission(transData) {
+  const container = document.getElementById('macroTransmissionContainer');
+  if (!container) return;
+
+  if (!transData) {
+    container.innerHTML = `<div style="font-size:11px;color:#8fa2bf;">Macro transmission matrix is evaluating...</div>`;
+    return;
+  }
+
+  const isFa = currentLang === 'fa';
+  const channels = transData.channels || [];
+  const dominant = isFa ? (transData.dominantChannelFa || transData.dominantChannel) : transData.dominantChannel;
+  const netDrift = transData.netAttributableDriftUsdPerStep || 0;
+
+  const channelsHtml = channels.map((ch) => {
+    const chName = isFa ? ch.nameFa : ch.nameEn;
+    const chRat = isFa ? ch.transmissionRationaleFa : ch.transmissionRationaleEn;
+    const driftColor = ch.activeDriftForceUsdPerStep >= 0 ? '#00e676' : '#ff5252';
+    return `
+      <div style="padding:10px 12px;border-radius:8px;background:rgba(11,18,32,0.9);border:1px solid rgba(40,60,95,0.5);display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <span style="font-family:monospace;font-size:8.5px;color:#00e5ff;font-weight:700;">${ch.channelId}</span>
+            <div style="font-size:11.5px;font-weight:800;color:#fff;">${escapeHtml(chName)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:monospace;font-size:12px;font-weight:900;color:${driftColor};">${ch.activeDriftForceUsdPerStep >= 0 ? '+' : ''}$${ch.activeDriftForceUsdPerStep.toFixed(3)}/step</div>
+            <div style="font-size:8.5px;color:#8fa2bf;font-family:monospace;">Lag: ~${ch.expectedDelayMinutes}m</div>
+          </div>
+        </div>
+        <div style="font-family:monospace;font-size:9.5px;padding:3px 6px;border-radius:4px;background:rgba(0,0,0,0.3);color:#f5d76e;border:1px solid rgba(245,215,110,0.2);">
+          ${escapeHtml(ch.transmissionEquationAscii)}
+        </div>
+        <div style="font-size:10px;color:#c5d6ec;line-height:1.4;">
+          ${escapeHtml(chRat)}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <!-- Dominant Channel Header -->
+    <div style="padding:10px 12px;border-radius:8px;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.4);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+          <span class="epistemic-badge epistemic-model">[MODEL INFERENCE: TRANSMISSION MATRIX]</span>
+          <span style="font-size:10px;color:#00e676;font-weight:800;text-transform:uppercase;">Dominant Economic Driver</span>
+        </div>
+        <div style="font-size:13px;font-weight:800;color:#fff;">🎯 ${escapeHtml(dominant)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9.5px;color:#8fa2bf;font-family:monospace;">NET MACRO ATTRIBUTABLE DRIFT</div>
+        <div style="font-family:monospace;font-size:15px;font-weight:900;color:#00e676;">+${netDrift.toFixed(3)} USD/step</div>
+      </div>
+    </div>
+
+    <!-- Active Channels Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:8px;">
+      ${channelsHtml}
+    </div>
+  `;
+}
+
 // Update HUD & Telemetry Metrics
 function renderHUD(d) {
   if (window.GDFClientCore && d.modelSpecRegistry) {
     window.GDFClientCore.syncModelSpecRegistry(d.modelSpecRegistry);
   }
-  document.getElementById('headPrice').textContent = '$' + d.currentPrice.toFixed(2);
+  const isBtcAsset = d.asset === 'BTC' || d.instrumentIdentity === 'BTC_SPOT_USD' || d.instrumentIdentity === 'BTC_USD_SPOT' || (d.activeSymbol && d.activeSymbol.includes('BTC'));
+  if (typeof updateAssetToggleUI === 'function') {
+    updateAssetToggleUI(isBtcAsset ? 'BTC' : 'GOLD');
+  }
+  document.getElementById('headPrice').textContent = '$' + d.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const spotLabelEl = document.querySelector('[data-i18n="spotGold"]');
   if (spotLabelEl) {
     if (d.instrumentIdentity === 'COMEX_GOLD_FUTURES') {
       spotLabelEl.textContent = currentLang === 'fa' ? 'آتی طلای کامکس (GC=F)' : 'COMEX Gold Futures (GC=F)';
+    } else if (isBtcAsset) {
+      const sym = d.activeSymbol || 'BTC/USD';
+      spotLabelEl.textContent = currentLang === 'fa' ? `اسپات بیت‌کوین (${sym})` : `Bitcoin Spot (${sym})`;
     } else {
       const sym = d.activeSymbol || 'PAXG';
       spotLabelEl.textContent = currentLang === 'fa' ? `طلای توکنیزه‌شده (${sym})` : `Spot Gold Token (${sym})`;
+    }
+  }
+
+  // Update live cross-asset BTC/USD pill in the top bar
+  const btcPriceEl = document.getElementById('headBtcPrice');
+  const btcLabelEl = document.getElementById('headBtcLabel');
+  const btcBadgeEl = document.getElementById('headBtcChangeBadge');
+  if (btcPriceEl) {
+    const btcQuote = d.crossAssetTickers && d.crossAssetTickers.btc ? d.crossAssetTickers.btc : null;
+    const goldQuote = d.crossAssetTickers && d.crossAssetTickers.gold ? d.crossAssetTickers.gold : null;
+    if (isBtcAsset && goldQuote && goldQuote.price > 100) {
+      if (btcLabelEl) btcLabelEl.textContent = currentLang === 'fa' ? `🥇 طلا (${goldQuote.symbol})` : `🥇 Spot Gold (${goldQuote.symbol})`;
+      btcPriceEl.style.color = 'var(--gold)';
+      btcPriceEl.textContent = '$' + goldQuote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (btcBadgeEl && Number.isFinite(goldQuote.changePct)) {
+        const up = goldQuote.changePct >= 0;
+        btcBadgeEl.style.display = 'inline-block';
+        btcBadgeEl.style.color = up ? '#00e676' : '#ff5252';
+        btcBadgeEl.style.borderColor = up ? 'rgba(0,230,118,0.4)' : 'rgba(255,82,82,0.4)';
+        btcBadgeEl.style.background = up ? 'rgba(0,230,118,0.12)' : 'rgba(255,82,82,0.12)';
+        btcBadgeEl.textContent = `${up ? '▲ +' : '▼ '}${goldQuote.changePct.toFixed(2)}%`;
+      }
+    } else if (btcQuote && btcQuote.price > 100) {
+      if (btcLabelEl) btcLabelEl.textContent = currentLang === 'fa' ? `₿ بیت‌کوین (BTC/USD)` : `₿ Bitcoin (BTC/USD)`;
+      btcPriceEl.style.color = '#00e5ff';
+      btcPriceEl.textContent = '$' + btcQuote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (btcBadgeEl && Number.isFinite(btcQuote.changePct)) {
+        const up = btcQuote.changePct >= 0;
+        btcBadgeEl.style.display = 'inline-block';
+        btcBadgeEl.style.color = up ? '#00e676' : '#ff5252';
+        btcBadgeEl.style.borderColor = up ? 'rgba(0,230,118,0.4)' : 'rgba(255,82,82,0.4)';
+        btcBadgeEl.style.background = up ? 'rgba(0,230,118,0.12)' : 'rgba(255,82,82,0.12)';
+        btcBadgeEl.textContent = `${up ? '▲ +' : '▼ '}${btcQuote.changePct.toFixed(2)}%`;
+      }
+    } else if (isBtcAsset && d.currentPrice > 100) {
+      if (btcLabelEl) btcLabelEl.textContent = currentLang === 'fa' ? `₿ بیت‌کوین (BTC/USD)` : `₿ Bitcoin (BTC/USD)`;
+      btcPriceEl.style.color = '#00e5ff';
+      btcPriceEl.textContent = '$' + d.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
   }
   const netLift = d.macroWindVector.totalNetVelocity;
@@ -21104,8 +21665,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Restore existing history into DOM on launch; if last message was an unanswered user question, auto-answer it
+  // Restore existing history into DOM on launch; sanitize and auto-answer unanswered queries
   if (chatHistory.length > 0) {
+    chatHistory = chatHistory.filter((msg) => {
+      const txt = String((msg && msg.text) || '');
+      return (
+        !txt.includes('Council consultation failed') &&
+        !txt.includes('<!DOCTYPE') &&
+        !txt.includes('<!doctype') &&
+        !txt.includes('<html')
+      );
+    });
     chatHistory.forEach((msg) => {
       appendBubbleToChat(msg.role, msg.text, msg.expertTitle || msg.expertId, msg.toolsInvoked, msg.timestampIso);
     });
@@ -21221,7 +21791,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '/api/gdf-os/expert-council/chat?message=' + encodeURIComponent(text) +
         '&expertId=' + encodeURIComponent(activeExpertId) +
         '&interval=' + encodeURIComponent(tf) +
-        '&language=' + encodeURIComponent(lang);
+        '&language=' + encodeURIComponent(lang) +
+        '&asset=' + encodeURIComponent(currentAsset || 'GOLD');
 
       const data = await fetchCouncilEndpointSafe(
         '/api/gdf-os/expert-council/chat',
@@ -21236,6 +21807,7 @@ document.addEventListener('DOMContentLoaded', () => {
             expertId: activeExpertId,
             interval: tf,
             language: lang,
+            asset: currentAsset || 'GOLD',
             history: chatHistory.slice(-6).map((h) => ({ role: h.role, text: h.text })),
           }),
         },

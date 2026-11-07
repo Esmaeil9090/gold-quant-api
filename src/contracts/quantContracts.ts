@@ -171,6 +171,135 @@ export interface VpinBaseResult {
   relativeVolumeRatio: number;
 }
 
+export type MacroEventCategory =
+  | 'EMPLOYMENT'
+  | 'INFLATION'
+  | 'CENTRAL_BANK'
+  | 'GROWTH'
+  | 'CONSUMPTION'
+  | 'MANUFACTURING'
+  | 'SERVICES'
+  | 'TREASURY_AUCTION'
+  | 'POLITICAL_ELECTION'
+  | 'GEOPOLITICAL';
+
+export type MacroReleaseStatus =
+  | 'SCHEDULED'
+  | 'DELAYED'
+  | 'RELEASED'
+  | 'REVISED'
+  | 'UNAVAILABLE';
+
+export interface StructuredMacroEvent {
+  eventId: string;
+  eventName: string;
+  eventNameFa: string;
+  category: MacroEventCategory;
+  country: string;
+  currency: string;
+  flag: string;
+  importance: 'HIGH' | 'MEDIUM' | 'LOW';
+  scheduledTimestampSec: number;
+  scheduledTimeUtc: string;
+  releaseStatus: MacroReleaseStatus;
+  officialSource: string;
+  officialSourceUrl: string;
+  previousValue: number | null;
+  previousValueDisplay: string;
+  revisedPreviousValue: number | null;
+  consensusEstimate: number | null;
+  consensusEstimateDisplay: string;
+  consensusSource: string;
+  actualValue: number | null;
+  actualValueDisplay: string;
+  unit: string;
+  surpriseValue: number | null;
+  surpriseStdDev: number | null;
+  surpriseDirection: 'HAWKISH_FOR_USD' | 'DOVISH_FOR_USD' | 'IN_LINE' | 'UNAVAILABLE';
+  expectedGoldTransmission: {
+    primaryPathway: string;
+    primaryPathwayFa: string;
+    expectedImpactBps: number;
+    directionalBias: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+    confidenceInterval95Bps: [number, number];
+    mechanismDescriptionEn: string;
+    mechanismDescriptionFa: string;
+  };
+  provenance: {
+    retrievedAtIso: string;
+    isVerifiedOfficial: boolean;
+    verificationMethod: string;
+  };
+}
+
+export interface PollingObservation {
+  pollId: string;
+  pollster: string;
+  pollsterRating: string; // e.g. 'A+', 'A', 'B+'
+  fieldworkStartIso: string;
+  fieldworkEndIso: string;
+  sampleSize: number;
+  populationType: 'LIKELY_VOTERS' | 'REGISTERED_VOTERS' | 'ALL_ADULTS';
+  democratSharePct: number;
+  republicanSharePct: number;
+  spreadPct: number;
+  pollUrl?: string;
+  provenanceTimestampIso: string;
+}
+
+export interface ElectionProbabilitySnapshot {
+  snapshotId: string;
+  asOfTimestampSec: number;
+  asOfIso: string;
+  electionCycle: string; // e.g. '2026_US_MIDTERMS'
+  democratSenateWinProb: number;
+  republicanSenateWinProb: number;
+  democratHouseWinProb: number;
+  republicanHouseWinProb: number;
+  dividedCongressProb: number;
+  brierScoreRunning: number | null;
+  pollingAverageSpreadDem: number; // e.g. +2.4% Dem
+  uncertaintyBandPct: number;
+  majorPolicyImplications: {
+    fiscalDeficitTrajectory: 'EXPANSION' | 'GRIDLOCK_RESTRAINT' | 'AUSTERITY';
+    treasurySupplyPressure: 'HIGH' | 'MODERATE' | 'LOW';
+    realYieldTransmissionBias: 'YIELD_COMPRESSION_GOLD_BULLISH' | 'YIELD_EXPANSION_GOLD_BEARISH' | 'NEUTRAL';
+    goldTransmissionSummaryEn: string;
+    goldTransmissionSummaryFa: string;
+  };
+  knownKnowns: string[];
+  inferredFromPolls: string[];
+  surprisesRealizedPostEvent: string[];
+}
+
+export interface PoliticalEventIntelligence {
+  electionCycle: string;
+  electionDateUtc: string;
+  electionDateSec: number;
+  titleEn: string;
+  titleFa: string;
+  status: 'UPCOMING' | 'POLLING_ACTIVE' | 'VOTING_DAY' | 'RESULTS_CONFIRMED';
+  latestProbabilitySnapshot: ElectionProbabilitySnapshot;
+  historicalSnapshots: ElectionProbabilitySnapshot[];
+  recentPolls: PollingObservation[];
+  falsificationAudit: {
+    pollingTrendDirectionBeforeEvent: 'DEMOCRAT_MOMENTUM' | 'REPUBLICAN_MOMENTUM' | 'FLAT';
+    probabilityShiftDetectedTimestampSec: number;
+    postEventGoldSurgeAttributableUsd: number;
+    predictiveLeadTimeHours: number;
+    wasPricedInPreEventPct: number;
+  };
+}
+
+export interface MacroCalendarFeedResult {
+  status: 'ONLINE_OFFICIAL_FEEDS' | 'DEGRADED_PARTIAL_FEEDS' | 'UNAVAILABLE';
+  activeSources: string[];
+  failedSources: string[];
+  events: StructuredMacroEvent[];
+  politicalIntelligence: PoliticalEventIntelligence | null;
+  lastFetchedIso: string;
+}
+
 export interface VpinTelemetry {
   vpinScore: number;
   regime: 'HIGH_INFORMED_TOXICITY' | 'BALANCED_LAMINAR' | 'LOW_VOLUME_NOISE' | 'HALTED_FREEZE';

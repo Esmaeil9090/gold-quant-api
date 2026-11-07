@@ -52,6 +52,7 @@ const {
 const {
   assertVerifiedProvenance,
   bootstrapMultiTimeframeWaterfallCache,
+  fetchCrossAssetTickerSummary,
   fetchVerifiedMacroNews,
   fetchVerifiedMacroWaterfall,
   fetchVerifiedMarketWaterfall,
@@ -119,6 +120,14 @@ const {
   executeGetLiveMarketAndEngineTelemetry,
   runExpertCouncilConsultation,
 } = await import('./src/services/expertCouncilService.js');
+const {
+  getVerifiedMacroCalendarFeed,
+  OFFICIAL_STRUCTURED_MACRO_CALENDAR_EVENTS,
+  VERIFIED_2026_POLITICAL_INTELLIGENCE,
+} = await import('./src/services/macroCalendarService.js');
+const {
+  evaluateMacroTransmissionMechanisms,
+} = await import('./src/services/macroTransmissionEngine.js');
 
 
 const app = express();
@@ -454,6 +463,7 @@ app.get('/index.html', (req: Request, res: Response) => {
 });
 
 const observer = new AdaptiveDPObserver();
+const btcObserver = new AdaptiveDPObserver();
 
 const VALID_INTERVALS: Record<string, number> = {
   '1m': 60,
@@ -519,22 +529,27 @@ app.get('/api/diagnosis', async (req: Request, res: Response) => {
   });
 });
 
-app.get('/api/gold-forecast', async (req: Request, res: Response) => {
+async function handleForecastRequest(req: Request, res: Response) {
   const intervalQuery = (req.query.interval as string) || '15m';
   const interval = VALID_INTERVALS[intervalQuery] ? intervalQuery : '15m';
   const intervalStepSeconds = VALID_INTERVALS[interval];
   const simulateFailure = (req.query.simulateFailure as string) || '';
   const fixtureReplay = req.query.fixtureReplay === '1' || req.query.fixtureReplay === 'true';
   const forceRefresh = req.query.forceRefresh === '1' || req.query.forceRefresh === 'true';
+  const assetQuery = ((req.query.asset || req.query.symbol || '') as string).toUpperCase();
+  const activeAsset: 'GOLD' | 'BTC' =
+    req.path === '/api/btc-forecast' || assetQuery.includes('BTC') ? 'BTC' : 'GOLD';
+  const cacheKey = activeAsset === 'BTC' ? `BTC:${interval}` : interval;
+  const activeObserver = activeAsset === 'BTC' ? btcObserver : observer;
 
-  const cached = forecastCache.get(interval);
+  const cached = forecastCache.get(cacheKey);
   if (!simulateFailure && !fixtureReplay && !forceRefresh && cached && Date.now() - cached.timestamp < 10000) {
     return res.json(cached.data);
   }
 
   try {
     const [waterfall, liveMacro, realNewsFeed] = await Promise.all([
-      fetchVerifiedMarketWaterfall(interval, { simulateFailure, fixtureReplay }),
+      fetchVerifiedMarketWaterfall(interval, { simulateFailure, fixtureReplay, asset: activeAsset }),
       fetchVerifiedMacroWaterfall({ simulateFailure }),
       fetchVerifiedMacroNews({ simulateFailure }),
     ]);
@@ -545,12 +560,14 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
           waterfall,
           liveMacro,
           realNewsFeed,
-          observerInst: observer,
+          observerInst: activeObserver,
           interval,
           intervalStepSeconds,
           appVersion: APP_VERSION,
           cachedData: cached?.data,
         }),
+        asset: activeAsset,
+        activeAsset,
         buildTime: BUILD_TIME,
         systemWarningsErrors: getSystemWarningErrorLog().slice(0, 40),
       };
@@ -570,13 +587,15 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       liveMacro,
       waterfall.secondaryBenchmark,
       intervalStepSeconds,
-      observer,
+      activeObserver,
       waterfall.systemState,
       waterfall.activeTier,
       waterfall.htfDailyCandles
     );
 
-    lastVerifiedCalibration = quantOut.calibration;
+    if (activeAsset === 'GOLD') {
+      lastVerifiedCalibration = quantOut.calibration;
+    }
 
     const validationScorecard = evaluateCausalWalkForwardValidation({
       candles,
@@ -587,7 +606,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
 
     const dataReliability = computeDataReliability(
       waterfall,
-      observer,
+      activeObserver,
       quantOut.vpinTelemetry,
       quantOut.pcaFactors,
       liveMacro,
@@ -597,7 +616,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       intervalStepSeconds
     );
 
-    if (!simulateFailure) {
+    if (!simulateFailure && activeAsset === 'GOLD') {
       triggerNonBlockingMultiTimeframeBootstrap({ fixtureReplay });
     }
 
@@ -610,8 +629,8 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       htfDailyCandles: waterfall.htfDailyCandles,
       interval,
       intervalStepSeconds,
-      snapshotId: waterfall.snapshotId || `gdf-snap-${interval}-${Date.now()}`,
-      instrumentIdentity: waterfall.instrumentIdentity || 'PAXG_SPOT_TOKEN',
+      snapshotId: waterfall.snapshotId || `gdf-snap-${activeAsset === 'BTC' ? 'btc-' : ''}${interval}-${Date.now()}`,
+      instrumentIdentity: waterfall.instrumentIdentity || (activeAsset === 'BTC' ? 'BTC_SPOT_USD' : 'PAXG_SPOT_TOKEN'),
       systemState: waterfall.systemState,
       activeProvider: waterfall.activeProvider,
       activeSymbol: waterfall.activeSymbol,
@@ -621,33 +640,35 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
 
     // Ensure Eight-Step Scientific Discovery Cycle telemetry is populated on the active snapshot
     let sciCycleTel = getScientificDiscoveryCycleTelemetry();
-    if (!sciCycleTel.activeCase && candles.length >= 25) {
-      try {
-        sciCycleTel = executeEightStepScientificDiscoveryCycle({
-          timeframe: interval,
-          candles,
-          liveMacro,
-          secondaryBenchmark: waterfall.secondaryBenchmark,
-          verifiedVenueCameras: waterfall.verifiedVenueCameras,
-          systemState: waterfall.systemState,
-          authorizeIntegrationMode: 'NONE',
-        }).telemetry;
-      } catch {
-        sciCycleTel = getScientificDiscoveryCycleTelemetry();
-      }
-    } else if (sciCycleTel.machineState === 'MONITORING' && candles.length >= 25) {
-      try {
-        runMonitorStage(sciCycleTel.activeCase, {
-          timeframe: interval,
-          candles,
-          liveMacro,
-          secondaryBenchmark: waterfall.secondaryBenchmark,
-          verifiedVenueCameras: waterfall.verifiedVenueCameras,
-          systemState: waterfall.systemState,
-        });
-        sciCycleTel = getScientificDiscoveryCycleTelemetry();
-      } catch {
-        // Keep current telemetry
+    if (activeAsset === 'GOLD') {
+      if (!sciCycleTel.activeCase && candles.length >= 25) {
+        try {
+          sciCycleTel = executeEightStepScientificDiscoveryCycle({
+            timeframe: interval,
+            candles,
+            liveMacro,
+            secondaryBenchmark: waterfall.secondaryBenchmark,
+            verifiedVenueCameras: waterfall.verifiedVenueCameras,
+            systemState: waterfall.systemState,
+            authorizeIntegrationMode: 'NONE',
+          }).telemetry;
+        } catch {
+          sciCycleTel = getScientificDiscoveryCycleTelemetry();
+        }
+      } else if (sciCycleTel.machineState === 'MONITORING' && candles.length >= 25) {
+        try {
+          runMonitorStage(sciCycleTel.activeCase, {
+            timeframe: interval,
+            candles,
+            liveMacro,
+            secondaryBenchmark: waterfall.secondaryBenchmark,
+            verifiedVenueCameras: waterfall.verifiedVenueCameras,
+            systemState: waterfall.systemState,
+          });
+          sciCycleTel = getScientificDiscoveryCycleTelemetry();
+        } catch {
+          // Keep current telemetry
+        }
       }
     }
     parallelUniverse.scientificDiscoveryCycle = sciCycleTel;
@@ -657,6 +678,24 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
         ? parallelUniverse.liveEnsemble
         : quantOut.ensemble;
 
+    const macroCalendar = getVerifiedMacroCalendarFeed();
+    const macroTransmission = evaluateMacroTransmissionMechanisms({
+      currentGoldPriceUsd: quantOut.currentPrice,
+      currentTipsRealYield10Y: liveMacro ? liveMacro.tipsRealYield10Y : 2.65,
+      currentDxyIndex: liveMacro ? liveMacro.dxyIndex : 103.42,
+      events: macroCalendar.events,
+      politicalIntelligence: macroCalendar.politicalIntelligence,
+    });
+
+    let crossAssetTickers: { gold: any; btc: any } | null = null;
+    if (!simulateFailure && !fixtureReplay) {
+      try {
+        crossAssetTickers = await fetchCrossAssetTickerSummary(interval);
+      } catch {
+        crossAssetTickers = null;
+      }
+    }
+
     const payload = {
       status: 'SUCCESS',
       snapshotId: waterfall.snapshotId,
@@ -665,7 +704,10 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       isHalted: false,
       isSynthetic: false,
       isFixtureReplay: Boolean(waterfall.isFixtureReplay || waterfall.systemState === 'FIXTURE_REPLAY'),
-      instrumentIdentity: waterfall.instrumentIdentity || 'PAXG_SPOT_TOKEN',
+      instrumentIdentity: waterfall.instrumentIdentity || (activeAsset === 'BTC' ? 'BTC_SPOT_USD' : 'PAXG_SPOT_TOKEN'),
+      asset: activeAsset,
+      activeAsset,
+      crossAssetTickers,
       activeTier: waterfall.activeTier,
       activeProvider: waterfall.activeProvider,
       activeSymbol: waterfall.activeSymbol,
@@ -680,6 +722,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       timeframeStepSeconds: intervalStepSeconds,
       currentPrice: quantOut.currentPrice,
       equilibriumPrice:
+        activeAsset === 'GOLD' &&
         parallelUniverse.liveArchitecture.promotionMode !== 'INITIAL_BASELINE' &&
         parallelUniverse.liveArchitecture.compositeEquilibriumAnchor > 0
           ? parallelUniverse.liveArchitecture.compositeEquilibriumAnchor
@@ -709,6 +752,10 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
       ensemble: activeLiveEnsemble,
       macroNews: realNewsFeed.events,
       macroNewsStatus: realNewsFeed,
+      macroCalendar: macroCalendar.events,
+      macroCalendarStatus: macroCalendar,
+      politicalIntelligence: macroCalendar.politicalIntelligence,
+      macroTransmission,
       candles,
       dataReliability,
       validationScorecard,
@@ -718,7 +765,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
     };
 
     if (!simulateFailure && !fixtureReplay) {
-      forecastCache.set(interval, { timestamp: Date.now(), data: payload });
+      forecastCache.set(cacheKey, { timestamp: Date.now(), data: payload });
     }
     res.json(payload);
   } catch (err: any) {
@@ -762,7 +809,7 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
         unavailableMessageEn: 'News feed unavailable during system halt.',
         unavailableMessageFa: 'جریان اخبار در زمان توقف سیستم در دسترس نیست.',
       },
-      observerInst: observer,
+      observerInst: activeObserver,
       interval,
       intervalStepSeconds,
       appVersion: APP_VERSION,
@@ -770,11 +817,37 @@ app.get('/api/gold-forecast', async (req: Request, res: Response) => {
     });
     res.status(503).json({
       ...fallbackHalted,
+      asset: activeAsset,
+      activeAsset,
       buildTime: BUILD_TIME,
       systemWarningsErrors: getSystemWarningErrorLog().slice(0, 40),
     });
   }
+}
+
+app.get('/api/market-tickers', async (req: Request, res: Response) => {
+  const intervalQuery = (req.query.interval as string) || '15m';
+  const interval = VALID_INTERVALS[intervalQuery] ? intervalQuery : '15m';
+  try {
+    const summary = await fetchCrossAssetTickerSummary(interval);
+    res.json({
+      status: 'SUCCESS',
+      timeframe: interval,
+      gold: summary.gold,
+      btc: summary.btc,
+      timestampIso: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'ERROR',
+      error: err?.message || 'Failed to fetch cross-asset tickers',
+    });
+  }
 });
+
+app.get('/api/gold-forecast', handleForecastRequest);
+app.get('/api/btc-forecast', handleForecastRequest);
+app.get('/api/forecast', handleForecastRequest);
 
 // Intelligence & Awareness Core + Parallel Universe + Scientific Core MMI Endpoints
 app.get('/api/scientific-core', (req: Request, res: Response) => {
@@ -1454,6 +1527,8 @@ const handleExpertCouncilChatRequest = async (req: Request, res: Response) => {
     const interval = typeof rawInterval === 'string' && rawInterval.trim() ? rawInterval.trim() : '15m';
     const rawLang = req.method === 'GET' ? req.query?.language : req.body?.language;
     const language = rawLang === 'fa' ? 'fa' : 'en';
+    const rawAsset = req.method === 'GET' ? req.query?.asset : req.body?.asset;
+    const asset: 'GOLD' | 'BTC' = typeof rawAsset === 'string' && rawAsset.toUpperCase().includes('BTC') ? 'BTC' : 'GOLD';
     const history = Array.isArray(req.body?.history) ? req.body.history : [];
 
     const consultation = await runExpertCouncilConsultation({
@@ -1462,6 +1537,7 @@ const handleExpertCouncilChatRequest = async (req: Request, res: Response) => {
       interval,
       language,
       history,
+      asset,
     });
     res.json(consultation);
   } catch (err: any) {

@@ -3051,7 +3051,7 @@ function runStrictEightGateVerification(params: {
   const gate4Passed = regimesObservedCount >= 2 && regimesPassedCount === regimesObservedCount;
 
   // Gate 5: Full Data-Provenance and Instrument-Identity Checks Pass
-  const validInstruments = ['PAXG_SPOT_TOKEN', 'COMEX_GOLD_FUTURES', 'XAUUSD_SPOT'];
+  const validInstruments = ['PAXG_SPOT_TOKEN', 'COMEX_GOLD_FUTURES', 'XAUUSD_SPOT', 'BTC_USD_SPOT', 'BTC_SPOT_USD'];
   const gate5Passed =
     !isSynthetic &&
     candles.length >= 25 &&
@@ -3214,7 +3214,7 @@ function runStrictEightGateVerification(params: {
  * symbolic primitives into the 6D filter state transitions and observation precision.
  */
 function buildCandidateLatentTuningOverrides(arch: ArchitectureState, genCounter: number) {
-  const gOffset = Math.min(4, Math.max(0, genCounter - 1));
+  const gOffset = ((Math.max(1, genCounter) - 1) % 6) + 0.5;
   const getCoeff = (id: SymbolicPrimitiveId, fallback: number) => {
     const m = arch.models.find(item => item.modelId === id);
     if (!m || !m.isEnabled) return 0;
@@ -3352,11 +3352,32 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   } = params;
 
   const flags = getFeatureFlags();
-  const hadPendingPromotionAck = Boolean(coreStore.pendingManualPromotionCycleAck);
-  coreStore.pendingManualPromotionCycleAck = false;
-  if (!hadPendingPromotionAck) {
-    coreStore.lastPromotionBannerEn = null;
-    coreStore.lastPromotionBannerFa = null;
+  const isBtcAsset = instrumentIdentity === 'BTC_SPOT_USD' || instrumentIdentity === 'CME_BTC_FUTURES';
+  const savedGoldCoreSnapshot = isBtcAsset
+    ? {
+        liveArchitecture: JSON.parse(JSON.stringify(coreStore.liveArchitecture)),
+        candidateArchitecture: JSON.parse(JSON.stringify(coreStore.candidateArchitecture)),
+        latentMathWriteBack: JSON.parse(JSON.stringify(coreStore.latentMathWriteBack)),
+        lastVerifiedEvalParams: coreStore.lastVerifiedEvalParams,
+        lastVerificationReport: coreStore.lastVerificationReport,
+        lastScientificCore: coreStore.lastScientificCore,
+        lastMarketAwarenessState: coreStore.lastMarketAwarenessState,
+        lastLevel5MetaCognition: coreStore.lastLevel5MetaCognition,
+        lastFindings: coreStore.lastFindings,
+        persistedResidualLog: [...coreStore.persistedResidualLog],
+      }
+    : null;
+  if (isBtcAsset) {
+    coreStore.liveArchitecture = createDefaultLiveArchitecture();
+    coreStore.candidateArchitecture = createDefaultCandidateArchitecture();
+  }
+  const hadPendingPromotionAck = !isBtcAsset && Boolean(coreStore.pendingManualPromotionCycleAck);
+  if (!isBtcAsset) {
+    coreStore.pendingManualPromotionCycleAck = false;
+    if (!hadPendingPromotionAck) {
+      coreStore.lastPromotionBannerEn = null;
+      coreStore.lastPromotionBannerFa = null;
+    }
   }
 
   if (systemState === 'HALTED_DEGRADED' || candles.length < 10) {
@@ -3918,8 +3939,28 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
   coreStore.lastMarketAwarenessState = marketAwarenessState;
   coreStore.lastLevel5MetaCognition = level5MetaCognition;
 
-  // Persist updated weights, fitted coefficients, residual log, episodic shock bank, and write-back state atomically
-  persistCoreStoreToDisk(coreStore);
+  const resultLiveArch = coreStore.liveArchitecture;
+  const resultCandArch = coreStore.candidateArchitecture;
+  const resultStrictOos = coreStore.lastStrictOosSplitAudit || undefined;
+  const resultCritiques = coreStore.lastComponentCritiques;
+  const resultCompLab = coreStore.lastCompositionalDiscoveryLab || undefined;
+  const resultCouplingAudit = coreStore.lastCandidateStructuralCouplingAudit || undefined;
+
+  if (isBtcAsset && savedGoldCoreSnapshot) {
+    coreStore.liveArchitecture = savedGoldCoreSnapshot.liveArchitecture;
+    coreStore.candidateArchitecture = savedGoldCoreSnapshot.candidateArchitecture;
+    coreStore.latentMathWriteBack = savedGoldCoreSnapshot.latentMathWriteBack;
+    coreStore.lastVerifiedEvalParams = savedGoldCoreSnapshot.lastVerifiedEvalParams;
+    coreStore.lastVerificationReport = savedGoldCoreSnapshot.lastVerificationReport;
+    coreStore.lastScientificCore = savedGoldCoreSnapshot.lastScientificCore;
+    coreStore.lastMarketAwarenessState = savedGoldCoreSnapshot.lastMarketAwarenessState;
+    coreStore.lastLevel5MetaCognition = savedGoldCoreSnapshot.lastLevel5MetaCognition;
+    coreStore.lastFindings = savedGoldCoreSnapshot.lastFindings;
+    coreStore.persistedResidualLog = savedGoldCoreSnapshot.persistedResidualLog;
+  } else {
+    // Persist updated weights, fitted coefficients, residual log, episodic shock bank, and write-back state atomically
+    persistCoreStoreToDisk(coreStore);
+  }
 
   return {
     enabled: flags.ENABLE_PARALLEL_UNIVERSE_CORE,
@@ -3932,8 +3973,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     instrumentIdentity,
     persistenceHealth: coreStore.persistenceHealth,
     mtfDiscoveryContext,
-    liveArchitecture: coreStore.liveArchitecture,
-    candidateArchitecture: coreStore.candidateArchitecture,
+    liveArchitecture: resultLiveArch,
+    candidateArchitecture: resultCandArch,
     liveEnsemble,
     candidateEnsemble,
     findings,
@@ -3946,10 +3987,10 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     lastPromotionBannerFa: coreStore.lastPromotionBannerFa,
     scientificCore,
     latentMathWriteBack: coreStore.latentMathWriteBack,
-    strictOosSplitAudit: coreStore.lastStrictOosSplitAudit || undefined,
-    scientificComponentCritiques: coreStore.lastComponentCritiques,
-    compositionalDiscoveryLab: coreStore.lastCompositionalDiscoveryLab || undefined,
-    candidateStructuralCouplingAudit: coreStore.lastCandidateStructuralCouplingAudit || undefined,
+    strictOosSplitAudit: resultStrictOos,
+    scientificComponentCritiques: resultCritiques,
+    compositionalDiscoveryLab: resultCompLab,
+    candidateStructuralCouplingAudit: resultCouplingAudit,
     canRollbackWriteBack: coreStore.writeBackVersionHistory.length > 0,
     writeBackVersionHistory: coreStore.writeBackVersionHistory,
   };
@@ -4367,9 +4408,10 @@ export function writeBackValidatedMathToLatentModel(params?: {
       : null,
   };
 
-  const candTuning =
-    coreStore.lastCandTuningOverrides ||
-    buildCandidateLatentTuningOverrides(cand, coreStore.generationCounter);
+  const candTuning = buildCandidateLatentTuningOverrides(
+    cand,
+    Math.max(coreStore.generationCounter, previousWriteBack.writeBackGeneration + 1)
+  );
   const nowIso = new Date().toISOString();
 
   const activeSymbolicModels = cand.models.filter(

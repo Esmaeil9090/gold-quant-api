@@ -372,8 +372,11 @@ export function executeSearchRepositoryCode(query: string, directory?: string): 
   };
 }
 
-export function executeGetLiveMarketAndEngineTelemetry(interval: string = '15m'): Record<string, any> {
-  const wf = getLatestWaterfallSnapshot(interval) || getLatestWaterfallSnapshot('15m');
+export function executeGetLiveMarketAndEngineTelemetry(
+  interval: string = '15m',
+  asset: 'GOLD' | 'BTC' = 'GOLD'
+): Record<string, any> {
+  const wf = getLatestWaterfallSnapshot(interval, asset) || getLatestWaterfallSnapshot('15m', asset) || getLatestWaterfallSnapshot(interval, 'GOLD');
   const allWf = getAllCachedWaterfallSnapshots();
   const mtfState = getMultiTimeframeBootstrapState();
   const httpDiag = getProviderHttpDiagnostics().slice(0, 12);
@@ -1127,22 +1130,24 @@ export async function runExpertCouncilConsultation(params: {
   interval?: string;
   language?: 'en' | 'fa';
   history?: ExpertCouncilChatTurn[];
+  asset?: 'GOLD' | 'BTC';
 }): Promise<ExpertCouncilResponse> {
   const nowIso = new Date().toISOString();
   const expertId: ExpertPersonaId =
     EXPERT_COUNCIL_ROSTER.find((e) => e.id === params.expertId)?.id || 'COUNCIL_ALL';
   const expert = EXPERT_COUNCIL_ROSTER.find((e) => e.id === expertId) || EXPERT_COUNCIL_ROSTER[0];
   const interval = (params.interval || '15m').trim();
+  const asset: 'GOLD' | 'BTC' = params.asset === 'BTC' ? 'BTC' : 'GOLD';
   const lang: 'en' | 'fa' = params.language === 'fa' ? 'fa' : 'en';
   const userMessage = String(params.message || '').trim();
 
   const toolsInvoked: ExpertToolInvocationRecord[] = [];
   // Always capture a baseline live telemetry digest so every council response is grounded in real-time state
-  const liveTelemetry = executeGetLiveMarketAndEngineTelemetry(interval);
+  const liveTelemetry = executeGetLiveMarketAndEngineTelemetry(interval, asset);
   toolsInvoked.push({
     toolName: 'get_live_market_and_engine_telemetry',
-    args: { interval },
-    summary: `Live Telemetry Snapshot (${interval}: state=${liveTelemetry.marketWaterfall?.systemState}, proof=${liveTelemetry.gdfOperatingSystemAndCloudSql?.proofFreshness?.effectiveStatus})`,
+    args: { interval, asset },
+    summary: `Live Telemetry Snapshot (${asset} ${interval}: state=${liveTelemetry.marketWaterfall?.systemState}, proof=${liveTelemetry.gdfOperatingSystemAndCloudSql?.proofFreshness?.effectiveStatus})`,
   });
 
   const digest = {
@@ -1209,20 +1214,21 @@ export async function runExpertCouncilConsultation(params: {
       },
     });
 
-    const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+    const candidateModels = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'];
     const generateWithModelFailover = async (reqContents: any[], reqConfig: any) => {
       let lastErr: any = null;
       for (let idx = 0; idx < candidateModels.length; idx++) {
         const candidateModel = candidateModels[idx];
         try {
-          if (idx > 0) {
-            await new Promise((r) => setTimeout(r, 450 * idx));
-          }
-          const res = await ai.models.generateContent({
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`Timeout on model ${candidateModel}`)), 7500)
+          );
+          const generatePromise = ai.models.generateContent({
             model: candidateModel,
             contents: reqContents,
             config: reqConfig,
           });
+          const res: any = await Promise.race([generatePromise, timeoutPromise]);
           activeModelUsed = candidateModel;
           return res;
         } catch (e: any) {

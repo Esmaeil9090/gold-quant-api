@@ -13,7 +13,7 @@ export interface VerifiedCandle {
 
 export type ProviderTier = 'TIER_1_PRIMARY' | 'TIER_2_SECONDARY' | 'TIER_3_TERTIARY' | 'FIXTURE_TEST_REPLAY';
 export type TerminalSystemState = 'LIVE_NOMINAL' | 'DEGRADED_FALLBACK' | 'HALTED_DEGRADED' | 'FIXTURE_REPLAY';
-export type InstrumentIdentity = 'PAXG_SPOT_TOKEN' | 'COMEX_GOLD_FUTURES' | 'NONE';
+export type InstrumentIdentity = 'PAXG_SPOT_TOKEN' | 'COMEX_GOLD_FUTURES' | 'BTC_SPOT_USD' | 'CME_BTC_FUTURES' | 'NONE';
 
 export interface ProviderAttemptDiagnostic {
   tier: ProviderTier;
@@ -437,15 +437,15 @@ const INTERVAL_STEP_SECONDS_MAP: Record<string, number> = {
 
 export function inferVenueGroupId(providerName: string, endpoint: string = ''): string {
   const lower = `${providerName} ${endpoint}`.toLowerCase();
-  if (lower.includes('binance')) return 'binance_paxg';
-  if (lower.includes('bybit')) return 'bybit_paxg';
-  if (lower.includes('kucoin')) return 'kucoin_paxg';
-  if (lower.includes('yahoo') || lower.includes('gc=f') || lower.includes('gc%3df')) return 'yahoo_comex_gcf';
-  if (lower.includes('htx') || lower.includes('huobi')) return 'htx_paxg';
-  if (lower.includes('okx')) return 'okx_paxg';
-  if (lower.includes('kraken')) return 'kraken_paxg';
-  if (lower.includes('coinbase')) return 'coinbase_paxg';
-  if (lower.includes('gate.io') || lower.includes('gateio')) return 'gateio_paxg';
+  if (lower.includes('binance')) return 'binance_spot';
+  if (lower.includes('bybit')) return 'bybit_spot';
+  if (lower.includes('kucoin')) return 'kucoin_spot';
+  if (lower.includes('yahoo') || lower.includes('gc=f') || lower.includes('gc%3df') || lower.includes('btc-usd')) return 'yahoo_finance';
+  if (lower.includes('htx') || lower.includes('huobi')) return 'htx_spot';
+  if (lower.includes('okx')) return 'okx_spot';
+  if (lower.includes('kraken')) return 'kraken_spot';
+  if (lower.includes('coinbase')) return 'coinbase_spot';
+  if (lower.includes('gate.io') || lower.includes('gateio')) return 'gateio_spot';
   if (lower.includes('fixture')) return 'fixture_replay';
   return providerName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 }
@@ -463,12 +463,12 @@ export function evaluateProviderQuorum(diagnostics: ProviderAttemptDiagnostic[])
     const group = d.venueGroupId || inferVenueGroupId(d.providerName, d.endpoint);
     const inst = d.instrumentIdentity || (d.symbol === 'GC=F' ? 'COMEX_GOLD_FUTURES' : 'PAXG_SPOT_TOKEN');
     allVenueGroups.add(group);
-    if (inst === 'PAXG_SPOT_TOKEN') {
+    if (inst === 'PAXG_SPOT_TOKEN' || inst === 'BTC_SPOT_USD') {
       paxgVenueGroups.add(group);
     }
     if (d.status === 'SUCCESS' && !d.isStaleBar) {
       activeVenueGroups.add(group);
-      if (inst === 'PAXG_SPOT_TOKEN') {
+      if (inst === 'PAXG_SPOT_TOKEN' || inst === 'BTC_SPOT_USD') {
         activePaxgVenueGroups.add(group);
       }
     }
@@ -526,9 +526,9 @@ async function runIsolatedProvider(
     });
     const lastBarTimeSec = cleanCandles[cleanCandles.length - 1].time;
     const barStalenessSec = Math.max(0, Math.floor(Date.now() / 1000) - lastBarTimeSec);
-    // 24/7 PAXG spot venues are stale if > 2.0x timeframe step; COMEX futures allow weekend closure window
+    // 24/7 PAXG & BTC spot venues are stale if > 2.0x timeframe step; COMEX/CME futures allow weekend closure window
     const isStaleBar =
-      instrumentIdentity === 'PAXG_SPOT_TOKEN'
+      instrumentIdentity === 'PAXG_SPOT_TOKEN' || instrumentIdentity === 'BTC_SPOT_USD'
         ? barStalenessSec > stepSec * 2.0
         : barStalenessSec > Math.max(stepSec * 4.0, 216000);
     return {
@@ -639,7 +639,12 @@ export function alignBenchmarkCandlesByTimestamp(
 // ============================================================================
 // TIER 1 INDEPENDENT PROVIDERS (Binance Vision, Binance Spot, Bybit V5, KuCoin)
 // ============================================================================
-async function fetchBinanceHostCandles(baseHost: string, providerName: string, interval: string) {
+async function fetchBinanceHostCandles(
+  baseHost: string,
+  providerName: string,
+  interval: string,
+  symbol: string = 'PAXGUSDT'
+) {
   const validIntervals: Record<string, string> = {
     '1m': '1m',
     '5m': '5m',
@@ -650,7 +655,7 @@ async function fetchBinanceHostCandles(baseHost: string, providerName: string, i
     '1d': '1d',
   };
   const binanceInt = validIntervals[interval] || '15m';
-  const endpoint = `${baseHost}/api/v3/klines?symbol=PAXGUSDT&interval=${binanceInt}&limit=300`;
+  const endpoint = `${baseHost}/api/v3/klines?symbol=${symbol}&interval=${binanceInt}&limit=300`;
   const { data: raw, httpStatus, contentType } = await fetchSafeJson<any[]>(endpoint, providerName, 3000);
   if (!Array.isArray(raw) || raw.length < 25) throw new Error('Insufficient Binance klines array');
   const candles: VerifiedCandle[] = [];
@@ -668,7 +673,11 @@ async function fetchBinanceHostCandles(baseHost: string, providerName: string, i
   return { endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
-async function fetchBybitSpotPaxgCandles(interval: string) {
+async function fetchBybitSpotPaxgCandles(
+  interval: string,
+  symbol: string = 'PAXGUSDT',
+  providerNameOverride?: string
+) {
   const bybitMap: Record<string, string> = {
     '1m': '1',
     '5m': '5',
@@ -679,8 +688,8 @@ async function fetchBybitSpotPaxgCandles(interval: string) {
     '1d': 'D',
   };
   const bInt = bybitMap[interval] || '15';
-  const providerName = 'Bybit V5 Institutional Spot (PAXG/USDT)';
-  const endpoint = `https://api.bybit.com/v5/market/kline?category=spot&symbol=PAXGUSDT&interval=${bInt}&limit=300`;
+  const providerName = providerNameOverride || 'Bybit V5 Institutional Spot (PAXG/USDT)';
+  const endpoint = `https://api.bybit.com/v5/market/kline?category=spot&symbol=${symbol}&interval=${bInt}&limit=300`;
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const list = data?.result?.list;
   if (!Array.isArray(list) || list.length < 25) throw new Error('Insufficient Bybit kline list');
@@ -696,10 +705,14 @@ async function fetchBybitSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row[5])),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXGUSDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
+  return { providerName, symbol, endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
-async function fetchKucoinSpotPaxgCandles(interval: string) {
+async function fetchKucoinSpotPaxgCandles(
+  interval: string,
+  symbol: string = 'PAXG-USDT',
+  providerNameOverride?: string
+) {
   const kcMap: Record<string, string> = {
     '1m': '1min',
     '5m': '5min',
@@ -710,8 +723,8 @@ async function fetchKucoinSpotPaxgCandles(interval: string) {
     '1d': '1day',
   };
   const kcInt = kcMap[interval] || '15min';
-  const providerName = 'KuCoin Institutional Spot (PAXG-USDT)';
-  const endpoint = `https://api.kucoin.com/api/v1/market/candles?type=${kcInt}&symbol=PAXG-USDT`;
+  const providerName = providerNameOverride || 'KuCoin Institutional Spot (PAXG-USDT)';
+  const endpoint = `https://api.kucoin.com/api/v1/market/candles?type=${kcInt}&symbol=${symbol}`;
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const rows = data?.data;
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Insufficient KuCoin candle rows');
@@ -727,11 +740,11 @@ async function fetchKucoinSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row[5])),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXG-USDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
+  return { providerName, symbol, endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 // ============================================================================
-// TIER 2 INDEPENDENT PROVIDERS (Yahoo COMEX GC=F, HTX PAXG/USDT, OKX PAXG-USDT)
+// TIER 2 INDEPENDENT PROVIDERS (Yahoo COMEX GC=F / BTC-USD, HTX, OKX)
 // ============================================================================
 async function fetchYahooGoldSingle(
   host: string,
@@ -784,7 +797,12 @@ async function fetchYahooGoldSingle(
   return { providerName, symbol: displaySym, endpoint, candles, httpStatus, contentType };
 }
 
-async function fetchHtxSpotPaxgCandles(interval: string) {
+async function fetchHtxSpotPaxgCandles(
+  interval: string,
+  symbolLower: string = 'paxgusdt',
+  displaySym: string = 'PAXGUSDT',
+  providerNameOverride?: string
+) {
   const htxMap: Record<string, string> = {
     '1m': '1min',
     '5m': '5min',
@@ -795,8 +813,8 @@ async function fetchHtxSpotPaxgCandles(interval: string) {
     '1d': '1day',
   };
   const period = htxMap[interval] || '15min';
-  const providerName = 'HTX Global Institutional Spot (PAXG/USDT)';
-  const endpoint = `https://api.huobi.pro/market/history/kline?symbol=paxgusdt&period=${period}&size=300`;
+  const providerName = providerNameOverride || 'HTX Global Institutional Spot (PAXG/USDT)';
+  const endpoint = `https://api.huobi.pro/market/history/kline?symbol=${symbolLower}&period=${period}&size=300`;
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const rows = data?.data;
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Insufficient HTX kline rows');
@@ -812,10 +830,14 @@ async function fetchHtxSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row.amount || row.vol || '1')),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXGUSDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
+  return { providerName, symbol: displaySym, endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
-async function fetchOkxSpotPaxgCandles(interval: string) {
+async function fetchOkxSpotPaxgCandles(
+  interval: string,
+  instId: string = 'PAXG-USDT',
+  providerNameOverride?: string
+) {
   const okxMap: Record<string, string> = {
     '1m': '1m',
     '5m': '5m',
@@ -826,8 +848,8 @@ async function fetchOkxSpotPaxgCandles(interval: string) {
     '1d': '1Dutc',
   };
   const bar = okxMap[interval] || '15m';
-  const providerName = 'OKX Institutional Spot (PAXG-USDT)';
-  const endpoint = `https://www.okx.com/api/v5/market/candles?instId=PAXG-USDT&bar=${bar}&limit=300`;
+  const providerName = providerNameOverride || 'OKX Institutional Spot (PAXG-USDT)';
+  const endpoint = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=${bar}&limit=300`;
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const rows = data?.data;
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Insufficient OKX candle rows');
@@ -843,13 +865,17 @@ async function fetchOkxSpotPaxgCandles(interval: string) {
       volume: Math.max(0.01, parseFloat(row[5])),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXG-USDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
+  return { providerName, symbol: instId, endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 // ============================================================================
-// TIER 3 INDEPENDENT PROVIDERS (Kraken PAXGUSD, Coinbase PAXG-USD, Gate.io PAXG_USDT)
+// TIER 3 INDEPENDENT PROVIDERS (Kraken, Coinbase, Gate.io)
 // ============================================================================
-async function fetchKrakenSpotPaxgCandles(interval: string) {
+async function fetchKrakenSpotPaxgCandles(
+  interval: string,
+  pair: string = 'PAXGUSD',
+  providerNameOverride?: string
+) {
   const krakenIntervals: Record<string, number> = {
     '1m': 1,
     '5m': 5,
@@ -860,8 +886,8 @@ async function fetchKrakenSpotPaxgCandles(interval: string) {
     '1d': 1440,
   };
   const kInt = krakenIntervals[interval] || 15;
-  const providerName = 'Kraken Institutional Spot (PAXG/USD)';
-  const endpoint = `https://api.kraken.com/0/public/OHLC?pair=PAXGUSD&interval=${kInt}`;
+  const providerName = providerNameOverride || 'Kraken Institutional Spot (PAXG/USD)';
+  const endpoint = `https://api.kraken.com/0/public/OHLC?pair=${pair}&interval=${kInt}`;
   const { data, httpStatus, contentType } = await fetchSafeJson<any>(endpoint, providerName, 3200);
   const pairKey = Object.keys(data?.result || {}).find(k => k !== 'last');
   const rows = pairKey ? data.result[pairKey] : [];
@@ -875,10 +901,14 @@ async function fetchKrakenSpotPaxgCandles(interval: string) {
     close: parseFloat(item[4]),
     volume: Math.max(0.01, parseFloat(item[6])),
   }));
-  return { providerName, symbol: 'PAXGUSD', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
+  return { providerName, symbol: pair, endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
-export async function fetchCoinbaseSpotPaxgCandles(interval: string) {
+export async function fetchCoinbaseSpotPaxgCandles(
+  interval: string,
+  productId: string = 'PAXG-USD',
+  providerNameOverride?: string
+) {
   // Coinbase Exchange only supports native granularities: 60, 300, 900, 3600, 21600, 86400.
   // For 30m (1800s) we fetch 900s (15m) and aggregate to 1800s.
   // For 4h (14400s) we fetch 3600s (1h) and aggregate to 14400s.
@@ -892,8 +922,8 @@ export async function fetchCoinbaseSpotPaxgCandles(interval: string) {
     '1d': { fetchGranularity: 86400 },
   };
   const cfg = cbConfigMap[interval] || cbConfigMap['15m'];
-  const providerName = 'Coinbase Exchange Spot (PAXG-USD)';
-  const endpoint = `https://api.exchange.coinbase.com/products/PAXG-USD/candles?granularity=${cfg.fetchGranularity}`;
+  const providerName = providerNameOverride || 'Coinbase Exchange Spot (PAXG-USD)';
+  const endpoint = `https://api.exchange.coinbase.com/products/${productId}/candles?granularity=${cfg.fetchGranularity}`;
   const { data: rows2, httpStatus, contentType } = await fetchSafeJson<any[]>(endpoint, providerName, 3200);
   if (!Array.isArray(rows2) || rows2.length < 25) throw new Error('Coinbase insufficient candles');
 
@@ -913,10 +943,14 @@ export async function fetchCoinbaseSpotPaxgCandles(interval: string) {
   if (cfg.aggregateToSec) {
     candles = aggregateCandlesToStep(candles, cfg.aggregateToSec);
   }
-  return { providerName, symbol: 'PAXG-USD', endpoint, candles, httpStatus, contentType };
+  return { providerName, symbol: productId, endpoint, candles, httpStatus, contentType };
 }
 
-async function fetchGateIoSpotPaxgCandles(interval: string) {
+async function fetchGateIoSpotPaxgCandles(
+  interval: string,
+  currencyPair: string = 'PAXG_USDT',
+  providerNameOverride?: string
+) {
   const gateMap: Record<string, string> = {
     '1m': '1m',
     '5m': '5m',
@@ -927,8 +961,8 @@ async function fetchGateIoSpotPaxgCandles(interval: string) {
     '1d': '1d',
   };
   const gInt = gateMap[interval] || '15m';
-  const providerName = 'Gate.io Institutional Spot (PAXG_USDT)';
-  const endpoint = `https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=PAXG_USDT&interval=${gInt}&limit=300`;
+  const providerName = providerNameOverride || 'Gate.io Institutional Spot (PAXG_USDT)';
+  const endpoint = `https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=${currencyPair}&interval=${gInt}&limit=300`;
   const { data: rows, httpStatus, contentType } = await fetchSafeJson<any[]>(endpoint, providerName, 3200);
   if (!Array.isArray(rows) || rows.length < 25) throw new Error('Gate.io insufficient candlesticks');
   const candles: VerifiedCandle[] = rows
@@ -942,20 +976,94 @@ async function fetchGateIoSpotPaxgCandles(interval: string) {
       open: parseFloat(item[6]),
     }))
     .filter((c: VerifiedCandle) => Number.isFinite(c.close) && c.close > 100);
-  return { providerName, symbol: 'PAXG_USDT', endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
+  return { providerName, symbol: currencyPair, endpoint, candles: normalizeAndDeduplicateCandles(candles), httpStatus, contentType };
 }
 
 const marketWaterfallCache = new Map<string, { timestamp: number; data: VerifiedMarketWaterfallResult }>();
 const lastVerifiedRealSnapshotCache = new Map<string, { timestamp: number; data: VerifiedMarketWaterfallResult }>();
 let latestGlobalWaterfallSnapshot: VerifiedMarketWaterfallResult | null = null;
 let cachedHtfDailyCandles: { timestamp: number; candles: VerifiedCandle[] } | null = null;
+let cachedBtcHtfDailyCandles: { timestamp: number; candles: VerifiedCandle[] } | null = null;
 
-export function getLatestWaterfallSnapshot(interval: string = '15m'): VerifiedMarketWaterfallResult | null {
+export function getLatestWaterfallSnapshot(interval: string = '15m', asset: 'GOLD' | 'BTC' = 'GOLD'): VerifiedMarketWaterfallResult | null {
+  const cacheKey = asset === 'BTC' ? `BTC:${interval}` : interval;
   return (
-    marketWaterfallCache.get(interval)?.data ||
-    lastVerifiedRealSnapshotCache.get(interval)?.data ||
-    latestGlobalWaterfallSnapshot
+    marketWaterfallCache.get(cacheKey)?.data ||
+    lastVerifiedRealSnapshotCache.get(cacheKey)?.data ||
+    (asset === 'BTC' ? null : latestGlobalWaterfallSnapshot)
   );
+}
+
+export interface CrossAssetTickerQuote {
+  asset: 'GOLD' | 'BTC';
+  displayName: string;
+  symbol: string;
+  provider: string;
+  price: number;
+  changeUsd: number;
+  changePct: number;
+  high24h: number;
+  low24h: number;
+  systemState: TerminalSystemState;
+  updatedIso: string;
+}
+
+export async function fetchCrossAssetTickerSummary(interval: string = '15m'): Promise<{
+  gold: CrossAssetTickerQuote | null;
+  btc: CrossAssetTickerQuote | null;
+}> {
+  const buildQuote = (asset: 'GOLD' | 'BTC', snap: VerifiedMarketWaterfallResult | null): CrossAssetTickerQuote | null => {
+    if (!snap || !Array.isArray(snap.candles) || snap.candles.length < 2) return null;
+    const candles = snap.candles;
+    const last = candles[candles.length - 1];
+    const lookbackIdx = Math.max(0, candles.length - 96); // ~24h on 15m
+    const refBar = candles[lookbackIdx] || candles[0];
+    const windowBars = candles.slice(lookbackIdx);
+    const high24h = Math.max(...windowBars.map(c => c.high));
+    const low24h = Math.min(...windowBars.map(c => c.low));
+    const changeUsd = parseFloat((last.close - refBar.open).toFixed(2));
+    const changePct = refBar.open > 0 ? parseFloat((((last.close - refBar.open) / refBar.open) * 100).toFixed(2)) : 0;
+    return {
+      asset,
+      displayName: asset === 'BTC' ? 'Spot Bitcoin (BTC/USD)' : 'Spot Gold Token (PAXG/USD)',
+      symbol: snap.activeSymbol || (asset === 'BTC' ? 'BTCUSDT' : 'PAXGUSDT'),
+      provider: snap.activeProvider,
+      price: parseFloat(last.close.toFixed(2)),
+      changeUsd,
+      changePct,
+      high24h: parseFloat(high24h.toFixed(2)),
+      low24h: parseFloat(low24h.toFixed(2)),
+      systemState: snap.systemState,
+      updatedIso: snap.snapshotTimestampIso || new Date().toISOString(),
+    };
+  };
+
+  let goldSnap = getLatestWaterfallSnapshot(interval, 'GOLD');
+  let btcSnap = getLatestWaterfallSnapshot(interval, 'BTC');
+
+  const tasks: Promise<void>[] = [];
+  if (!goldSnap || goldSnap.candles.length < 2) {
+    tasks.push(
+      fetchVerifiedMarketWaterfall(interval, { asset: 'GOLD' })
+        .then(r => { goldSnap = r; })
+        .catch(() => {})
+    );
+  }
+  if (!btcSnap || btcSnap.candles.length < 2) {
+    tasks.push(
+      fetchVerifiedMarketWaterfall(interval, { asset: 'BTC' })
+        .then(r => { btcSnap = r; })
+        .catch(() => {})
+    );
+  }
+  if (tasks.length > 0) {
+    await Promise.allSettled(tasks);
+  }
+
+  return {
+    gold: buildQuote('GOLD', goldSnap),
+    btc: buildQuote('BTC', btcSnap),
+  };
 }
 
 export const REQUIRED_DISCOVERY_TIMEFRAMES = ['5m', '15m', '1h', '4h', '1d'] as const;
@@ -968,11 +1076,13 @@ const mtfBootstrapFailures = new Map<string, string>();
 export function getAllCachedWaterfallSnapshots(): Record<string, VerifiedMarketWaterfallResult> {
   const out: Record<string, VerifiedMarketWaterfallResult> = {};
   for (const [tf, entry] of lastVerifiedRealSnapshotCache.entries()) {
+    if (tf.startsWith('BTC:')) continue;
     if (entry.data && entry.data.systemState !== 'HALTED_DEGRADED' && entry.data.candles.length >= 20) {
       out[tf] = entry.data;
     }
   }
   for (const [tf, entry] of marketWaterfallCache.entries()) {
+    if (tf.startsWith('BTC:')) continue;
     if (entry.data && entry.data.systemState !== 'HALTED_DEGRADED' && entry.data.candles.length >= 20) {
       out[tf] = entry.data;
     }
@@ -1104,7 +1214,34 @@ export function triggerNonBlockingMultiTimeframeBootstrap(options?: {
 }
 
 
-async function getOrFetchHtfDailyCandles(): Promise<VerifiedCandle[]> {
+async function getOrFetchHtfDailyCandles(asset: 'GOLD' | 'BTC' = 'GOLD'): Promise<VerifiedCandle[]> {
+  if (asset === 'BTC') {
+    if (cachedBtcHtfDailyCandles && Date.now() - cachedBtcHtfDailyCandles.timestamp < 300000) {
+      return cachedBtcHtfDailyCandles.candles;
+    }
+    const dailyCache = marketWaterfallCache.get('BTC:1d') || lastVerifiedRealSnapshotCache.get('BTC:1d');
+    if (dailyCache && dailyCache.data.candles.length >= 30) {
+      cachedBtcHtfDailyCandles = { timestamp: Date.now(), candles: dailyCache.data.candles };
+      return dailyCache.data.candles;
+    }
+    try {
+      const dailyPromises = await Promise.allSettled([
+        fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision BTC 1D HTF', '1d', 'BTCUSDT').then(r => r.candles),
+        fetchBybitSpotPaxgCandles('1d', 'BTCUSDT', 'Bybit BTC 1D HTF').then(r => r.candles),
+        fetchKucoinSpotPaxgCandles('1d', 'BTC-USDT', 'KuCoin BTC 1D HTF').then(r => r.candles),
+        fetchKrakenSpotPaxgCandles('1d', 'XBTUSD', 'Kraken BTC 1D HTF').then(r => r.candles),
+        fetchYahooGoldSingle('query1.finance.yahoo.com', 'BTC-USD', 'BTC-USD', 'Yahoo BTC 1D HTF', '1d').then(r => r.candles),
+      ]);
+      for (const p of dailyPromises) {
+        if (p.status === 'fulfilled' && Array.isArray(p.value) && p.value.length >= 30) {
+          cachedBtcHtfDailyCandles = { timestamp: Date.now(), candles: p.value };
+          return p.value;
+        }
+      }
+    } catch (_) {}
+    return cachedBtcHtfDailyCandles?.candles || [];
+  }
+
   if (cachedHtfDailyCandles && Date.now() - cachedHtfDailyCandles.timestamp < 300000) {
     return cachedHtfDailyCandles.candles;
   }
@@ -1134,29 +1271,33 @@ async function getOrFetchHtfDailyCandles(): Promise<VerifiedCandle[]> {
 /**
  * Executes the 3-Tier Real Market Data Waterfall concurrently across 10 independent public providers
  * with full per-provider isolation, cross-venue outlier checks, and Circuit Breaker halting.
+ * Supports both GOLD (PAXG/USDT + COMEX GC=F) and BTC (BTC/USDT + BTC/USD).
  */
 export async function fetchVerifiedMarketWaterfall(
   interval: string = '15m',
   options?: {
     simulateFailure?: string;
     fixtureReplay?: boolean;
+    asset?: 'GOLD' | 'BTC';
   }
 ): Promise<VerifiedMarketWaterfallResult> {
   const flags = getFeatureFlags();
   const simFail = (options?.simulateFailure || '').toLowerCase();
+  const isBtc = options?.asset === 'BTC';
+  const cacheKey = isBtc ? `BTC:${interval}` : interval;
   const stepSec = INTERVAL_STEP_SECONDS_MAP[interval] || 900;
 
   if (!simFail && !options?.fixtureReplay) {
-    const cached = marketWaterfallCache.get(interval);
+    const cached = marketWaterfallCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < 15000) {
       return cached.data;
     }
   }
 
   const snapshotTimestampIso = new Date().toISOString();
-  const snapshotId = `gdf-snap-${interval}-${Date.now()}`;
+  const snapshotId = `gdf-snap-${isBtc ? 'btc-' : ''}${interval}-${Date.now()}`;
 
-  if (options?.fixtureReplay) {
+  if (options?.fixtureReplay && !isBtc) {
     if (!flags.ALLOW_VERIFIED_FIXTURE_REPLAY_IN_TEST) {
       return {
         snapshotId,
@@ -1285,139 +1426,248 @@ export async function fetchVerifiedMarketWaterfall(
   const skipT3 = simFail.includes('all') || simFail.includes('tier3');
 
   // Execute all 10 provider endpoints in parallel with complete fault isolation
-  const providerOutcomes = await Promise.all([
-    // Tier 1 Primary Venues (4 endpoints across 3 independent PAXG spot venues: Binance [2 hosts], Bybit, KuCoin)
-    runIsolatedProvider(
-      'TIER_1_PRIMARY',
-      'Binance Vision Public Node (PAXG/USDT)',
-      'PAXGUSDT',
-      `https://data-api.binance.vision/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
-      'PAXG_SPOT_TOKEN',
-      skipT1,
-      () => fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision Public Node (PAXG/USDT)', interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_1_PRIMARY',
-      'Binance Spot Primary Core (PAXG/USDT)',
-      'PAXGUSDT',
-      `https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
-      'PAXG_SPOT_TOKEN',
-      skipT1,
-      () => fetchBinanceHostCandles('https://api.binance.com', 'Binance Spot Primary Core (PAXG/USDT)', interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_1_PRIMARY',
-      'Bybit V5 Institutional Spot (PAXG/USDT)',
-      'PAXGUSDT',
-      `https://api.bybit.com/v5/market/kline?category=spot&symbol=PAXGUSDT`,
-      'PAXG_SPOT_TOKEN',
-      skipT1,
-      () => fetchBybitSpotPaxgCandles(interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_1_PRIMARY',
-      'KuCoin Institutional Spot (PAXG-USDT)',
-      'PAXG-USDT',
-      `https://api.kucoin.com/api/v1/market/candles?symbol=PAXG-USDT`,
-      'PAXG_SPOT_TOKEN',
-      skipT1,
-      () => fetchKucoinSpotPaxgCandles(interval),
-      interval
-    ),
+  const providerOutcomes = isBtc
+    ? await Promise.all([
+        // Tier 1 Primary BTC Venues (Binance Vision, Binance Spot, Bybit V5, KuCoin)
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'Binance Vision Public Node (BTC/USDT)',
+          'BTCUSDT',
+          `https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=${interval}`,
+          'BTC_SPOT_USD',
+          skipT1,
+          () => fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision Public Node (BTC/USDT)', interval, 'BTCUSDT'),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'Binance Spot Primary Core (BTC/USDT)',
+          'BTCUSDT',
+          `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${interval}`,
+          'BTC_SPOT_USD',
+          skipT1,
+          () => fetchBinanceHostCandles('https://api.binance.com', 'Binance Spot Primary Core (BTC/USDT)', interval, 'BTCUSDT'),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'Bybit V5 Institutional Spot (BTC/USDT)',
+          'BTCUSDT',
+          `https://api.bybit.com/v5/market/kline?category=spot&symbol=BTCUSDT`,
+          'BTC_SPOT_USD',
+          skipT1,
+          () => fetchBybitSpotPaxgCandles(interval, 'BTCUSDT', 'Bybit V5 Institutional Spot (BTC/USDT)'),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'KuCoin Institutional Spot (BTC-USDT)',
+          'BTC-USDT',
+          `https://api.kucoin.com/api/v1/market/candles?symbol=BTC-USDT`,
+          'BTC_SPOT_USD',
+          skipT1,
+          () => fetchKucoinSpotPaxgCandles(interval, 'BTC-USDT', 'KuCoin Institutional Spot (BTC-USDT)'),
+          interval
+        ),
 
-    // Tier 2 Secondary Venues (3 independent sources: Yahoo COMEX GC=F, HTX PAXG/USDT, OKX PAXG-USDT)
-    runIsolatedProvider(
-      'TIER_2_SECONDARY',
-      'Yahoo Finance COMEX Gold Futures (GC=F)',
-      'GC=F',
-      'https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF',
-      'COMEX_GOLD_FUTURES',
-      skipT2,
-      () => fetchYahooGoldSingle('query1.finance.yahoo.com', 'GC%3DF', 'GC=F', 'Yahoo Finance COMEX Gold Futures (GC=F)', interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_2_SECONDARY',
-      'HTX Global Institutional Spot (PAXG/USDT)',
-      'PAXGUSDT',
-      'https://api.huobi.pro/market/history/kline?symbol=paxgusdt',
-      'PAXG_SPOT_TOKEN',
-      skipT2,
-      () => fetchHtxSpotPaxgCandles(interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_2_SECONDARY',
-      'OKX Institutional Spot (PAXG-USDT)',
-      'PAXG-USDT',
-      'https://www.okx.com/api/v5/market/candles?instId=PAXG-USDT',
-      'PAXG_SPOT_TOKEN',
-      skipT2,
-      () => fetchOkxSpotPaxgCandles(interval),
-      interval
-    ),
+        // Tier 2 Secondary BTC Venues (Yahoo Finance BTC-USD, HTX BTC/USDT, OKX BTC-USDT)
+        runIsolatedProvider(
+          'TIER_2_SECONDARY',
+          'Yahoo Finance Spot Bitcoin (BTC-USD)',
+          'BTC-USD',
+          'https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD',
+          'BTC_SPOT_USD',
+          skipT2,
+          () => fetchYahooGoldSingle('query1.finance.yahoo.com', 'BTC-USD', 'BTC-USD', 'Yahoo Finance Spot Bitcoin (BTC-USD)', interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_2_SECONDARY',
+          'HTX Global Institutional Spot (BTC/USDT)',
+          'BTCUSDT',
+          'https://api.huobi.pro/market/history/kline?symbol=btcusdt',
+          'BTC_SPOT_USD',
+          skipT2,
+          () => fetchHtxSpotPaxgCandles(interval, 'btcusdt', 'BTCUSDT', 'HTX Global Institutional Spot (BTC/USDT)'),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_2_SECONDARY',
+          'OKX Institutional Spot (BTC-USDT)',
+          'BTC-USDT',
+          'https://www.okx.com/api/v5/market/candles?instId=BTC-USDT',
+          'BTC_SPOT_USD',
+          skipT2,
+          () => fetchOkxSpotPaxgCandles(interval, 'BTC-USDT', 'OKX Institutional Spot (BTC-USDT)'),
+          interval
+        ),
 
-    // Tier 3 Tertiary Venues (3 independent PAXG spot sources)
-    runIsolatedProvider(
-      'TIER_3_TERTIARY',
-      'Kraken Institutional Spot (PAXG/USD)',
-      'PAXGUSD',
-      'https://api.kraken.com/0/public/OHLC?pair=PAXGUSD',
-      'PAXG_SPOT_TOKEN',
-      skipT3,
-      () => fetchKrakenSpotPaxgCandles(interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_3_TERTIARY',
-      'Coinbase Exchange Spot (PAXG-USD)',
-      'PAXG-USD',
-      'https://api.exchange.coinbase.com/products/PAXG-USD/candles',
-      'PAXG_SPOT_TOKEN',
-      skipT3,
-      () => fetchCoinbaseSpotPaxgCandles(interval),
-      interval
-    ),
-    runIsolatedProvider(
-      'TIER_3_TERTIARY',
-      'Gate.io Institutional Spot (PAXG_USDT)',
-      'PAXG_USDT',
-      'https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=PAXG_USDT',
-      'PAXG_SPOT_TOKEN',
-      skipT3,
-      () => fetchGateIoSpotPaxgCandles(interval),
-      interval
-    ),
-  ]);
+        // Tier 3 Tertiary BTC Venues (Kraken XBTUSD, Coinbase BTC-USD, Gate.io BTC_USDT)
+        runIsolatedProvider(
+          'TIER_3_TERTIARY',
+          'Kraken Institutional Spot (BTC/USD)',
+          'XBTUSD',
+          'https://api.kraken.com/0/public/OHLC?pair=XBTUSD',
+          'BTC_SPOT_USD',
+          skipT3,
+          () => fetchKrakenSpotPaxgCandles(interval, 'XBTUSD', 'Kraken Institutional Spot (BTC/USD)'),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_3_TERTIARY',
+          'Coinbase Exchange Spot (BTC-USD)',
+          'BTC-USD',
+          'https://api.exchange.coinbase.com/products/BTC-USD/candles',
+          'BTC_SPOT_USD',
+          skipT3,
+          () => fetchCoinbaseSpotPaxgCandles(interval, 'BTC-USD', 'Coinbase Exchange Spot (BTC-USD)'),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_3_TERTIARY',
+          'Gate.io Institutional Spot (BTC_USDT)',
+          'BTC_USDT',
+          'https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=BTC_USDT',
+          'BTC_SPOT_USD',
+          skipT3,
+          () => fetchGateIoSpotPaxgCandles(interval, 'BTC_USDT', 'Gate.io Institutional Spot (BTC_USDT)'),
+          interval
+        ),
+      ])
+    : await Promise.all([
+        // Tier 1 Primary Venues (4 endpoints across 3 independent PAXG spot venues: Binance [2 hosts], Bybit, KuCoin)
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'Binance Vision Public Node (PAXG/USDT)',
+          'PAXGUSDT',
+          `https://data-api.binance.vision/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
+          'PAXG_SPOT_TOKEN',
+          skipT1,
+          () => fetchBinanceHostCandles('https://data-api.binance.vision', 'Binance Vision Public Node (PAXG/USDT)', interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'Binance Spot Primary Core (PAXG/USDT)',
+          'PAXGUSDT',
+          `https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${interval}`,
+          'PAXG_SPOT_TOKEN',
+          skipT1,
+          () => fetchBinanceHostCandles('https://api.binance.com', 'Binance Spot Primary Core (PAXG/USDT)', interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'Bybit V5 Institutional Spot (PAXG/USDT)',
+          'PAXGUSDT',
+          `https://api.bybit.com/v5/market/kline?category=spot&symbol=PAXGUSDT`,
+          'PAXG_SPOT_TOKEN',
+          skipT1,
+          () => fetchBybitSpotPaxgCandles(interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_1_PRIMARY',
+          'KuCoin Institutional Spot (PAXG-USDT)',
+          'PAXG-USDT',
+          `https://api.kucoin.com/api/v1/market/candles?symbol=PAXG-USDT`,
+          'PAXG_SPOT_TOKEN',
+          skipT1,
+          () => fetchKucoinSpotPaxgCandles(interval),
+          interval
+        ),
+
+        // Tier 2 Secondary Venues (3 independent sources: Yahoo COMEX GC=F, HTX PAXG/USDT, OKX PAXG-USDT)
+        runIsolatedProvider(
+          'TIER_2_SECONDARY',
+          'Yahoo Finance COMEX Gold Futures (GC=F)',
+          'GC=F',
+          'https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF',
+          'COMEX_GOLD_FUTURES',
+          skipT2,
+          () => fetchYahooGoldSingle('query1.finance.yahoo.com', 'GC%3DF', 'GC=F', 'Yahoo Finance COMEX Gold Futures (GC=F)', interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_2_SECONDARY',
+          'HTX Global Institutional Spot (PAXG/USDT)',
+          'PAXGUSDT',
+          'https://api.huobi.pro/market/history/kline?symbol=paxgusdt',
+          'PAXG_SPOT_TOKEN',
+          skipT2,
+          () => fetchHtxSpotPaxgCandles(interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_2_SECONDARY',
+          'OKX Institutional Spot (PAXG-USDT)',
+          'PAXG-USDT',
+          'https://www.okx.com/api/v5/market/candles?instId=PAXG-USDT',
+          'PAXG_SPOT_TOKEN',
+          skipT2,
+          () => fetchOkxSpotPaxgCandles(interval),
+          interval
+        ),
+
+        // Tier 3 Tertiary Venues (3 independent PAXG spot sources)
+        runIsolatedProvider(
+          'TIER_3_TERTIARY',
+          'Kraken Institutional Spot (PAXG/USD)',
+          'PAXGUSD',
+          'https://api.kraken.com/0/public/OHLC?pair=PAXGUSD',
+          'PAXG_SPOT_TOKEN',
+          skipT3,
+          () => fetchKrakenSpotPaxgCandles(interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_3_TERTIARY',
+          'Coinbase Exchange Spot (PAXG-USD)',
+          'PAXG-USD',
+          'https://api.exchange.coinbase.com/products/PAXG-USD/candles',
+          'PAXG_SPOT_TOKEN',
+          skipT3,
+          () => fetchCoinbaseSpotPaxgCandles(interval),
+          interval
+        ),
+        runIsolatedProvider(
+          'TIER_3_TERTIARY',
+          'Gate.io Institutional Spot (PAXG_USDT)',
+          'PAXG_USDT',
+          'https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=PAXG_USDT',
+          'PAXG_SPOT_TOKEN',
+          skipT3,
+          () => fetchGateIoSpotPaxgCandles(interval),
+          interval
+        ),
+      ]);
 
   const diagnostics: ProviderAttemptDiagnostic[] = providerOutcomes.map(o => o.diag);
   const successfulResults = providerOutcomes
     .map(o => o.res)
     .filter((r): r is NonNullable<ProviderFetchOutcome['res']> => r !== null && r.candles.length >= 20);
 
-  // Prioritize fresh (non-stale) same-instrument PAXG_SPOT_TOKEN within each tier before falling back
+  // Prioritize fresh (non-stale) same-instrument spot within each tier before falling back
   const freshResults = successfulResults.filter(r => !r.isStaleBar);
   const pool = freshResults.length > 0 ? freshResults : successfulResults;
 
+  const preferredIdentity: InstrumentIdentity = isBtc ? 'BTC_SPOT_USD' : 'PAXG_SPOT_TOKEN';
   const tier1Success = pool.find(r => r.tier === 'TIER_1_PRIMARY');
   const tier2Success =
-    pool.find(r => r.tier === 'TIER_2_SECONDARY' && r.instrumentIdentity === 'PAXG_SPOT_TOKEN') ||
+    pool.find(r => r.tier === 'TIER_2_SECONDARY' && r.instrumentIdentity === preferredIdentity) ||
     pool.find(r => r.tier === 'TIER_2_SECONDARY');
   const tier3Success = pool.find(r => r.tier === 'TIER_3_TERTIARY');
   const primaryWinner = tier1Success || tier2Success || tier3Success || null;
 
   if (!primaryWinner) {
     if (!simFail) {
-      const recentVerified = lastVerifiedRealSnapshotCache.get(interval);
+      const recentVerified = lastVerifiedRealSnapshotCache.get(cacheKey);
       if (recentVerified && Date.now() - recentVerified.timestamp < 300000 && recentVerified.data.candles.length >= 20) {
         recordSystemWarningOrError({
           level: 'WARNING',
           subsystem: 'MARKET_WATERFALL',
           providerOrComponent: 'Verified Real Snapshot Cache',
-          message: `All 10 live venues timed out transiently; serving verified real snapshot (${recentVerified.data.activeProvider}) in DEGRADED_FALLBACK.`,
+          message: `All 10 live ${isBtc ? 'BTC' : 'Gold'} venues timed out transiently; serving verified real snapshot (${recentVerified.data.activeProvider}) in DEGRADED_FALLBACK.`,
         });
         const fallbackResult: VerifiedMarketWaterfallResult = {
           ...recentVerified.data,
@@ -1433,7 +1683,7 @@ export async function fetchVerifiedMarketWaterfall(
           haltReasonEn: `DEGRADED FALLBACK MODE: Transient upstream rate-limit; preserving verified real bars from ${recentVerified.data.activeProvider}.`,
           haltReasonFa: `وضعیت جایگزین (Degraded Fallback): محدودیت موقت شبکه؛ حفظ کندل‌های واقعی تاییدشده از ${recentVerified.data.activeProvider}.`,
         };
-        latestGlobalWaterfallSnapshot = fallbackResult;
+        if (!isBtc) latestGlobalWaterfallSnapshot = fallbackResult;
         return fallbackResult;
       }
     }
@@ -1441,8 +1691,8 @@ export async function fetchVerifiedMarketWaterfall(
     recordSystemWarningOrError({
       level: 'ERROR',
       subsystem: 'CIRCUIT_BREAKER',
-      providerOrComponent: 'All 10 External Gold Venues',
-      message: 'CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1, Tier-2, and Tier-3 live external gold providers failed.',
+      providerOrComponent: isBtc ? 'All 10 External BTC Venues' : 'All 10 External Gold Venues',
+      message: `CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1, Tier-2, and Tier-3 live external ${isBtc ? 'BTC' : 'gold'} providers failed.`,
     });
 
     const haltedResult: VerifiedMarketWaterfallResult = {
@@ -1461,11 +1711,11 @@ export async function fetchVerifiedMarketWaterfall(
       diagnostics,
       freshnessAgeSec: -1,
       haltReasonEn:
-        'CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1 (Binance/Bybit/KuCoin), Tier-2 (Yahoo COMEX/HTX/OKX), and Tier-3 (Kraken/Coinbase/Gate.io) live gold feeds failed. Filter covariance, volume-clock, and GARCH mutations are frozen. Zero synthetic data generated.',
+        'CIRCUIT BREAKER TRIPPED (HALTED_DEGRADED): All Tier-1 (Binance/Bybit/KuCoin), Tier-2 (Yahoo/HTX/OKX), and Tier-3 (Kraken/Coinbase/Gate.io) live feeds failed. Filter covariance, volume-clock, and GARCH mutations are frozen. Zero synthetic data generated.',
       haltReasonFa:
-        'مدار محافظتی فعال شد (توقف در وضعیت اضطراری): تمامی منابع زنده سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (کامکس یاهو/HTX/OKX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) قطع شده‌اند. به‌روزرسانی فیلتر کالمن و نوسانات متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.',
+        'مدار محافظتی فعال شد (توقف در وضعیت اضطراری): تمامی منابع زنده سطح ۱ (بایننس/بای‌بیت/کوکوین)، سطح ۲ (یاهو/HTX/OKX) و سطح ۳ (کراکن/کوین‌بیس/Gate.io) قطع شده‌اند. به‌روزرسانی فیلتر کالمن و نوسانات متوقف شد. هیچ داده مصنوعی تولید نمی‌شود.',
     };
-    latestGlobalWaterfallSnapshot = haltedResult;
+    if (!isBtc) latestGlobalWaterfallSnapshot = haltedResult;
     return haltedResult;
   }
 
@@ -1524,7 +1774,7 @@ export async function fetchVerifiedMarketWaterfall(
     }
   }
 
-  const htfDailyCandles = interval === '1d' ? primaryCandles : await getOrFetchHtfDailyCandles();
+  const htfDailyCandles = interval === '1d' ? primaryCandles : await getOrFetchHtfDailyCandles(isBtc ? 'BTC' : 'GOLD');
   const lastBarTime = primaryCandles[primaryCandles.length - 1].time;
   const freshnessAgeSec = Math.max(0, Math.floor(Date.now() / 1000) - lastBarTime);
   const isWinnerStale = freshnessAgeSec > stepSec * 2.0;
@@ -1562,10 +1812,12 @@ export async function fetchVerifiedMarketWaterfall(
     haltReasonFa,
   };
 
-  latestGlobalWaterfallSnapshot = result;
+  if (!isBtc) {
+    latestGlobalWaterfallSnapshot = result;
+  }
   if (!simFail && !options?.fixtureReplay) {
-    marketWaterfallCache.set(interval, { timestamp: Date.now(), data: result });
-    lastVerifiedRealSnapshotCache.set(interval, { timestamp: Date.now(), data: result });
+    marketWaterfallCache.set(cacheKey, { timestamp: Date.now(), data: result });
+    lastVerifiedRealSnapshotCache.set(cacheKey, { timestamp: Date.now(), data: result });
   }
   return result;
 }
