@@ -9759,11 +9759,12 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
   if (refreshBtn) refreshBtn.disabled = true;
 
   let timeoutId = null;
+  const endpointRoute = (typeof currentAsset !== 'undefined' && currentAsset === 'BTC') ? '/api/btc-forecast' : '/api/gold-forecast';
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const simFail = urlParams.get('simulateFailure') || '';
     const fixReplay = urlParams.get('fixtureReplay') || '';
-    let apiPath = `/api/gold-forecast?interval=${encodeURIComponent(targetInterval)}&_t=${Date.now()}`;
+    let apiPath = `${endpointRoute}?interval=${encodeURIComponent(targetInterval)}&_t=${Date.now()}`;
     if (typeof currentAsset !== 'undefined' && currentAsset === 'BTC') apiPath += '&asset=BTC';
     if (force) apiPath += '&forceRefresh=1';
     if (simFail) apiPath += `&simulateFailure=${encodeURIComponent(simFail)}`;
@@ -9803,67 +9804,73 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
 
     if (!res.ok && res.status !== 503) throw new Error('API HTTP ' + res.status);
     if (!contentType.includes('application/json') && !contentType.includes('text/json')) {
-      console.warn(`[GDF Client Transport Guard] Non-JSON Content-Type received from /api/gold-forecast: status=${res.status}, content-type=${contentType || 'none'}`);
+      console.warn(`[GDF Client Transport Guard] Non-JSON Content-Type received from ${endpointRoute}: status=${res.status}, content-type=${contentType || 'none'}`);
       throw new Error(`Upstream non-JSON response (HTTP ${res.status}, Content-Type=${contentType || 'none'})`);
     }
     const rawText = await res.text();
     const trimmedBody = rawText.trim();
     if (trimmedBody.startsWith('<') || trimmedBody.toLowerCase().startsWith('<!doctype')) {
-      console.warn(`[GDF Client Transport Guard] HTML error page received instead of JSON from /api/gold-forecast: status=${res.status}`);
+      console.warn(`[GDF Client Transport Guard] HTML error page received instead of JSON from ${endpointRoute}: status=${res.status}`);
       throw new Error(`Upstream gateway returned HTML page (HTTP ${res.status})`);
     }
     const data = JSON.parse(trimmedBody);
 
     if (reqId !== latestQuantReqId || targetInterval !== currentTimeframe) return;
 
-    updateCircuitBreakerBanner(data);
+    try {
+      updateCircuitBreakerBanner(data);
 
-    if (data && (data.systemState === 'HALTED_DEGRADED' || data.isHalted)) {
-      forecastData = data;
-      const atmLabel = document.getElementById('atmStateLabel');
-      const atmSub = document.getElementById('atmSubLabel');
-      const pulse = document.getElementById('statusPulse');
-      const cleanSubEn = window.GDFClientCore?.sanitizeClientHaltMessage
-        ? window.GDFClientCore.sanitizeClientHaltMessage(data.haltReasonEn, 'en')
-        : 'All live market providers unreachable · Filter mutations frozen · Zero synthetic data generated';
-      const cleanSubFa = window.GDFClientCore?.sanitizeClientHaltMessage
-        ? window.GDFClientCore.sanitizeClientHaltMessage(data.haltReasonFa, 'fa')
-        : 'منابع داده زنده در دسترس نیستند · ماتریس کوواریانس و ساعت حجمی متوقف شدند · بدون داده مصنوعی';
-      if (atmLabel) {
-        atmLabel.textContent = currentLang === 'fa'
-          ? 'توقف اضطراری (HALTED_DEGRADED) — قطعی منابع داده زنده'
-          : 'HALTED / DEGRADED — ALL LIVE MARKET FEEDS UNREACHABLE';
-        atmLabel.style.color = '#ff1744';
+      if (data && (data.systemState === 'HALTED_DEGRADED' || data.isHalted)) {
+        forecastData = data;
+        const atmLabel = document.getElementById('atmStateLabel');
+        const atmSub = document.getElementById('atmSubLabel');
+        const pulse = document.getElementById('statusPulse');
+        const cleanSubEn = window.GDFClientCore?.sanitizeClientHaltMessage
+          ? window.GDFClientCore.sanitizeClientHaltMessage(data.haltReasonEn, 'en')
+          : 'All live market providers unreachable · Filter mutations frozen · Zero synthetic data generated';
+        const cleanSubFa = window.GDFClientCore?.sanitizeClientHaltMessage
+          ? window.GDFClientCore.sanitizeClientHaltMessage(data.haltReasonFa, 'fa')
+          : 'منابع داده زنده در دسترس نیستند · ماتریس کوواریانس و ساعت حجمی متوقف شدند · بدون داده مصنوعی';
+        if (atmLabel) {
+          atmLabel.textContent = currentLang === 'fa'
+            ? 'توقف اضطراری (HALTED_DEGRADED) — قطعی منابع داده زنده'
+            : 'HALTED / DEGRADED — ALL LIVE MARKET FEEDS UNREACHABLE';
+          atmLabel.style.color = '#ff1744';
+        }
+        if (atmSub) {
+          atmSub.textContent = currentLang === 'fa' ? cleanSubFa : cleanSubEn;
+        }
+        if (pulse) {
+          pulse.style.background = '#ff1744';
+          pulse.style.boxShadow = '0 0 12px #ff1744';
+        }
+        if (data.dataReliability) updateDataReliabilityUI(data.dataReliability);
+        if (data.validationScorecard) renderValidationScorecard(data.validationScorecard);
+        if (data.parallelUniverse) renderParallelUniverseTelemetry(data.parallelUniverse);
+        if (typeof updateThreeWorldData === 'function' && threeWorldState && threeWorldState.isInitialized) {
+          updateThreeWorldData(data);
+        }
+        renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
+        if (data.macroCalendar) renderMacroCalendar(data.macroCalendar, data.macroCalendarStatus);
+        if (data.politicalIntelligence) renderPoliticalIntelligence(data.politicalIntelligence);
+        if (data.macroTransmission) renderMacroTransmission(data.macroTransmission);
+        return;
       }
-      if (atmSub) {
-        atmSub.textContent = currentLang === 'fa' ? cleanSubFa : cleanSubEn;
-      }
-      if (pulse) {
-        pulse.style.background = '#ff1744';
-        pulse.style.boxShadow = '0 0 12px #ff1744';
-      }
-      if (data.dataReliability) updateDataReliabilityUI(data.dataReliability);
-      if (data.validationScorecard) renderValidationScorecard(data.validationScorecard);
-      if (data.parallelUniverse) renderParallelUniverseTelemetry(data.parallelUniverse);
-      if (typeof updateThreeWorldData === 'function' && threeWorldState && threeWorldState.isInitialized) {
-        updateThreeWorldData(data);
-      }
-      renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
-      if (data.macroCalendar) renderMacroCalendar(data.macroCalendar, data.macroCalendarStatus);
-      if (data.politicalIntelligence) renderPoliticalIntelligence(data.politicalIntelligence);
-      if (data.macroTransmission) renderMacroTransmission(data.macroTransmission);
-      return;
-    }
 
-    if (data && data.currentPrice && data.currentPrice > 100) {
-      forecastData = data;
-      renderHUD(data);
-      updateTimelineSliderLabels(data);
-      renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
-      if (data.macroCalendar) renderMacroCalendar(data.macroCalendar, data.macroCalendarStatus);
-      if (data.politicalIntelligence) renderPoliticalIntelligence(data.politicalIntelligence);
-      if (data.macroTransmission) renderMacroTransmission(data.macroTransmission);
-      updateActiveIndicatorBadges();
+      if (data && data.currentPrice && data.currentPrice > 100) {
+        forecastData = data;
+        renderHUD(data);
+        updateTimelineSliderLabels(data);
+        renderNewsTimeline(data.macroNews || [], data.macroNewsStatus);
+        if (data.macroCalendar) renderMacroCalendar(data.macroCalendar, data.macroCalendarStatus);
+        if (data.politicalIntelligence) renderPoliticalIntelligence(data.politicalIntelligence);
+        if (data.macroTransmission) renderMacroTransmission(data.macroTransmission);
+        updateActiveIndicatorBadges();
+        return;
+      }
+    } catch (uiRenderErr) {
+      console.error('[GDF UI Render Guard] Non-transport UI rendering error after valid JSON payload:', uiRenderErr);
+      logClientWarningOrError('WARN', 'UI_RENDER_GUARD', `UI render fault after valid API response: ${uiRenderErr && uiRenderErr.message ? uiRenderErr.message : String(uiRenderErr)}`);
       return;
     }
   } catch (err) {
@@ -9873,8 +9880,8 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     if (abortReason.includes('Superseded')) return;
 
     const errDesc = (err && err.message) ? err.message : (abortReason || 'Timeout');
-    console.warn('[GDF Client Transport Guard] Could not fetch JSON from /api/gold-forecast. Preserving last verified snapshot without synthetic data:', errDesc);
-    logClientWarningOrError('ERROR', 'CLIENT_API_TRANSPORT', `Client fetch to /api/gold-forecast (${targetInterval}) failed: ${errDesc}`);
+    console.warn(`[GDF Client Transport Guard] Could not fetch JSON from ${endpointRoute}. Preserving last verified snapshot without synthetic data:`, errDesc);
+    logClientWarningOrError('ERROR', 'CLIENT_API_TRANSPORT', `Client fetch to ${endpointRoute} (${targetInterval}) failed: ${errDesc}`);
 
     const prevData = (forecastData && Array.isArray(forecastData.candles) && forecastData.candles.length > 0) ? forecastData : null;
     const prevRel = prevData?.dataReliability || null;
@@ -9886,9 +9893,9 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
     const actualStalenessRatio = actualStalenessSec !== null ? parseFloat((actualStalenessSec / stepSec).toFixed(3)) : null;
 
     const cleanHaltEn =
-      `Client API transport error while requesting /api/gold-forecast (${errDesc}). Filter mutations are FROZEN. Zero synthetic data generated.`;
+      `Client API transport error while requesting ${endpointRoute} (${errDesc}). Filter mutations are FROZEN. Zero synthetic data generated.`;
     const cleanHaltFa =
-      `خطای ارتباط کلاینت با سرور در دریافت /api/gold-forecast (${errDesc}). به‌روزرسانی فیلترها متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.`;
+      `خطای ارتباط کلاینت با سرور در دریافت ${endpointRoute} (${errDesc}). به‌روزرسانی فیلترها متوقف (Frozen) شد. هیچ داده مصنوعی تولید نمی‌شود.`;
 
     const transportReliability = {
       integrityState: 'HALTED_DEGRADED',
@@ -10243,6 +10250,16 @@ document.querySelectorAll('.cal-cat-btn').forEach((btn) => {
     }
   });
 });
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+window.escapeHtml = escapeHtml;
 
 function renderMacroCalendar(eventsList, statusObj) {
   const tableWrap = document.getElementById('macroCalendarTableWrapper');
