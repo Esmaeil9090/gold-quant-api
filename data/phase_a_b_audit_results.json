@@ -1,0 +1,302 @@
+{
+  "generatedAtIso": "2026-11-09T16:52:51.811Z",
+  "phaseATests": {
+    "testA1_NamespaceAndEngineRouting": true,
+    "testA2_NeffHacAndBrier": true,
+    "testA3_PointInTimeMacroPerturbationInvariance": true,
+    "testA4_MacroAndMidtermQuarantine": true,
+    "testA5_IntervalMultiplierAndCoverage": false,
+    "testA6_AppendOnlyForecastLedger": true
+  },
+  "phaseBStudy": {
+    "rows": [
+      {
+        "componentId": "INCUMBENT_OU_EQUILIBRIUM_PULL_DRIFT",
+        "componentName": "Incumbent 40-Bar OU Equilibrium Pull (Ungated)",
+        "category": "DIRECTIONAL_DRIFT",
+        "datasetLabel": "GOLD PAXG 1h (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Zero-Drift Random Walk",
+        "metricName": "RMSE_USD",
+        "baselineScore": 9.5519,
+        "candidateScore": 12.2321,
+        "deltaScore": 2.6802,
+        "dmOrHacTStat": 1.069,
+        "pValueRaw": 0.142427,
+        "directionalCheck": {
+          "hacTStat": 1.069,
+          "nonOverlappingHitRate": 0.4632,
+          "nonOverlappingCi95": [
+            0.3663,
+            0.5629
+          ],
+          "netReturnBpsPerBar": -1.637
+        },
+        "rationale": "Ungated 40-bar equilibrium pull increases 1h RMSE ($12.2321 vs RW $9.5519); HAC t=1.069, net PnL=-1.637 bps/bar.",
+        "pValueHolmAdjusted": 0.854562,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "PHASE_B_A_VR_GATE_SHRUNK_EQ_PULL_1H",
+        "componentName": "Variance-Ratio Gate (Shrinks Equilibrium Pull in Trends, 1h)",
+        "category": "DIRECTIONAL_DRIFT",
+        "datasetLabel": "GOLD PAXG 1h (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Incumbent Ungated OU Pull",
+        "metricName": "RMSE_USD",
+        "baselineScore": 12.2321,
+        "candidateScore": 9.5574,
+        "deltaScore": -2.6747,
+        "dmOrHacTStat": 5.0503,
+        "pValueRaw": 0,
+        "directionalCheck": {
+          "hacTStat": 0.516,
+          "nonOverlappingHitRate": 0.3579,
+          "nonOverlappingCi95": [
+            0.2688,
+            0.4581
+          ],
+          "netReturnBpsPerBar": -1.139
+        },
+        "rationale": "Shrinking OU pull via VR gate cuts error vs incumbent ($9.5574 vs $12.2321), converging to Random Walk ($9.5519), confirming zero-drift RW dominates nonzero pull.",
+        "pValueHolmAdjusted": 0,
+        "decision": "KEEP"
+      },
+      {
+        "componentId": "PHASE_B_A_VR_GATE_SHRUNK_EQ_PULL_1D",
+        "componentName": "Variance-Ratio Gate (Shrinks Equilibrium Pull in Trends, 1d)",
+        "category": "DIRECTIONAL_DRIFT",
+        "datasetLabel": "GOLD PAXG 1d (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1d",
+        "horizonBars": 1,
+        "baselineName": "Incumbent Ungated OU Pull",
+        "metricName": "RMSE_USD",
+        "baselineScore": 53.7597,
+        "candidateScore": 51.0098,
+        "deltaScore": -2.7499,
+        "dmOrHacTStat": 1.6996,
+        "pValueRaw": 0.044603,
+        "directionalCheck": {
+          "hacTStat": 0.947,
+          "nonOverlappingHitRate": 0.2526,
+          "nonOverlappingCi95": [
+            0.176,
+            0.3484
+          ],
+          "netReturnBpsPerBar": 6.407
+        },
+        "rationale": "On 1d bars, shrinking OU pull reduces RMSE from $53.7597 toward RW ($50.998), but does not beat Zero-Drift RW (51.0098 vs 50.998).",
+        "pValueHolmAdjusted": 0.356824,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "INCUMBENT_PCA_MACRO_DRIFT",
+        "componentName": "Point-in-Time 3-Factor PCA Macro Drift Term",
+        "category": "DIRECTIONAL_DRIFT",
+        "datasetLabel": "GOLD PAXG 1h + FRED Dated Series",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Zero-Drift Random Walk",
+        "metricName": "RANK_IC_AND_NET_PNL",
+        "baselineScore": 0,
+        "candidateScore": -0.0175,
+        "deltaScore": -0.0175,
+        "dmOrHacTStat": -0.167,
+        "pValueRaw": 0.566248,
+        "directionalCheck": {
+          "hacTStat": -0.167,
+          "nonOverlappingHitRate": 0.4211,
+          "nonOverlappingCi95": [
+            0.3267,
+            0.5215
+          ],
+          "netReturnBpsPerBar": -2.612
+        },
+        "rationale": "Daily macro yields do not predict 1h bar direction: Rank-IC=-0.0175, HAC t=-0.167, CI=[0.3267, 0.5215].",
+        "pValueHolmAdjusted": 1,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "INCUMBENT_KALMAN_OBSERVER_DRIFT",
+        "componentName": "AdaptiveDPObserver Kalman Velocity + VPIN Shrunk Bias",
+        "category": "DIRECTIONAL_DRIFT",
+        "datasetLabel": "GOLD PAXG 1h (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Zero-Drift Random Walk",
+        "metricName": "RANK_IC_AND_NET_PNL",
+        "baselineScore": 0,
+        "candidateScore": -0.1643,
+        "deltaScore": -0.1643,
+        "dmOrHacTStat": -1.713,
+        "pValueRaw": 0.956667,
+        "directionalCheck": {
+          "hacTStat": -1.713,
+          "nonOverlappingHitRate": 0.4421,
+          "nonOverlappingCi95": [
+            0.3464,
+            0.5423
+          ],
+          "netReturnBpsPerBar": -3.025
+        },
+        "rationale": "Kalman local velocity + VPIN bias fails pre-registered directional gate: IC=-0.1643, HAC t=-1.713, net PnL=-3.025 bps.",
+        "pValueHolmAdjusted": 1,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "INCUMBENT_SWEEP_LOG_ODDS_DISCRIMINATOR",
+        "componentName": "8-Feature Dealer Sweep Log-Odds Discriminator",
+        "category": "DIRECTIONAL_DRIFT",
+        "datasetLabel": "GOLD PAXG 1h (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Zero-Drift Random Walk",
+        "metricName": "RANK_IC_AND_NET_PNL",
+        "baselineScore": 0,
+        "candidateScore": 0.1875,
+        "deltaScore": 0.1875,
+        "dmOrHacTStat": 2.036,
+        "pValueRaw": 0.020853,
+        "directionalCheck": {
+          "hacTStat": 2.036,
+          "nonOverlappingHitRate": 0.6,
+          "nonOverlappingCi95": [
+            0.4995,
+            0.6928
+          ],
+          "netReturnBpsPerBar": -0.157
+        },
+        "rationale": "Heuristic 8-weight sweep log-odds has no directional skill: IC=0.1875, HAC t=2.036, CI=[0.4995, 0.6928].",
+        "pValueHolmAdjusted": 0.187677,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "PHASE_B_B_HAR_RV_FHS_CONFORMAL_15M",
+        "componentName": "HAR-RV + Parkinson Vol + FHS Quantiles + Adaptive Conformal (15m)",
+        "category": "VOLATILITY_INTERVAL",
+        "datasetLabel": "GOLD PAXG 15m (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "15m",
+        "horizonBars": 1,
+        "baselineName": "Incumbent Interval Projector",
+        "metricName": "PINBALL_USD",
+        "baselineScore": 1.249,
+        "candidateScore": 1.157,
+        "deltaScore": -0.09196277157978705,
+        "dmOrHacTStat": 2.6512,
+        "pValueRaw": 0.00401,
+        "rationale": "Reduces 5-quantile pinball loss (1.157 vs 1.249) and CRPS (0.000641 vs 0.00068); 50%/90% coverage=59.0%/88.4%.",
+        "pValueHolmAdjusted": 0.0401,
+        "decision": "KEEP"
+      },
+      {
+        "componentId": "PHASE_B_B_HAR_RV_FHS_CONFORMAL_1H",
+        "componentName": "HAR-RV + Parkinson Vol + FHS Quantiles + Adaptive Conformal (1h)",
+        "category": "VOLATILITY_INTERVAL",
+        "datasetLabel": "GOLD PAXG 1h (N=300)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Incumbent Interval Projector",
+        "metricName": "PINBALL_USD",
+        "baselineScore": 2.2935,
+        "candidateScore": 2.2102,
+        "deltaScore": -0.08329466701317889,
+        "dmOrHacTStat": 1.3369,
+        "pValueRaw": 0.090627,
+        "rationale": "Improves 1h interval pinball loss (2.2102 vs 2.2935) and CRPS (0.001198 vs 0.00125); 50%/90% coverage=46.3%/90.5%.",
+        "pValueHolmAdjusted": 0.634389,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "PHASE_B_C_BTC_DERIVATIVES_DIRECTIONAL_DRIFT",
+        "componentName": "BTC Historical Funding + OI + Mark-Spot Basis Drift Term",
+        "category": "BTC_DERIVATIVES",
+        "datasetLabel": "BTC Bybit Spot+Perp 1h (N=200)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Spot-Only Zero-Drift Baseline (Net of 4 bps Cost)",
+        "metricName": "RANK_IC_AND_NET_PNL",
+        "baselineScore": 0,
+        "candidateScore": -0.229,
+        "deltaScore": -0.229,
+        "dmOrHacTStat": -1.728,
+        "pValueRaw": 0.958048,
+        "directionalCheck": {
+          "hacTStat": -1.728,
+          "nonOverlappingHitRate": 0.4921,
+          "nonOverlappingCi95": [
+            0.3727,
+            0.6124
+          ],
+          "netReturnBpsPerBar": 2.252
+        },
+        "rationale": "BTC perp funding/OI/basis directional drift fails pre-registered gate after 4 bps cost: IC=-0.229, HAC t=-1.728, net PnL=2.252 bps/bar.",
+        "pValueHolmAdjusted": 1,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "PHASE_B_C_BTC_DERIVATIVES_VOL_SCALING",
+        "componentName": "BTC Historical Leverage Stress Volatility Scaling",
+        "category": "BTC_DERIVATIVES",
+        "datasetLabel": "BTC Bybit Spot+Perp 1h (N=200)",
+        "dataClassification": "REAL-FIXTURE",
+        "timeframe": "1h",
+        "horizonBars": 1,
+        "baselineName": "Spot-Only Realized Volatility Baseline",
+        "metricName": "QLIKE_VOL",
+        "baselineScore": -8.0096,
+        "candidateScore": -8.9839,
+        "deltaScore": -0.9742253680866515,
+        "dmOrHacTStat": 0.977,
+        "pValueRaw": 0.164286,
+        "rationale": "QLIKE delta=-0.9742 (DM t=0.977, raw p=0.164286).",
+        "pValueHolmAdjusted": 0.854562,
+        "decision": "DROP (NO DEMONSTRATED SKILL)"
+      },
+      {
+        "componentId": "PHASE_B_D_EVENT_WINDOW_VARIANCE_MULTIPLIER",
+        "componentName": "Scheduled Macro Event Window Variance Multiplier (Non-Directional)",
+        "category": "EVENT_VARIANCE",
+        "datasetLabel": "BLS / BEA / FOMC Historical Release Archive",
+        "dataClassification": "NOT VERIFIED",
+        "timeframe": "15m",
+        "horizonBars": 1,
+        "baselineName": "HAR-RV + GARCH Unconditional Window Variance",
+        "metricName": "QLIKE_VOL",
+        "baselineScore": 0,
+        "candidateScore": 0,
+        "deltaScore": 0,
+        "dmOrHacTStat": 0,
+        "pValueRaw": 1,
+        "rationale": "Hardcoded Oct/Nov 2026 macro events were quarantined in Phase A.4; verified historical BLS/BEA/Fed release-timestamp + consensus archives are not yet ingested.",
+        "pValueHolmAdjusted": 1,
+        "decision": "DROP (NOT VERIFIED - MISSING DATA)"
+      }
+    ],
+    "keptComponents": [
+      "PHASE_B_A_VR_GATE_SHRUNK_EQ_PULL_1H",
+      "PHASE_B_B_HAR_RV_FHS_CONFORMAL_15M"
+    ],
+    "droppedComponents": [
+      "INCUMBENT_OU_EQUILIBRIUM_PULL_DRIFT",
+      "PHASE_B_A_VR_GATE_SHRUNK_EQ_PULL_1D",
+      "INCUMBENT_PCA_MACRO_DRIFT",
+      "INCUMBENT_KALMAN_OBSERVER_DRIFT",
+      "INCUMBENT_SWEEP_LOG_ODDS_DISCRIMINATOR",
+      "PHASE_B_B_HAR_RV_FHS_CONFORMAL_1H",
+      "PHASE_B_C_BTC_DERIVATIVES_DIRECTIONAL_DRIFT",
+      "PHASE_B_C_BTC_DERIVATIVES_VOL_SCALING",
+      "PHASE_B_D_EVENT_WINDOW_VARIANCE_MULTIPLIER"
+    ]
+  }
+}

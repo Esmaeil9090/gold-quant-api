@@ -6,6 +6,7 @@ import type {
   VerifiedVenueCameraObservation,
   VerifiedMarketWaterfallResult,
   VerifiedMacroYieldResult,
+  MacroObservationEpistemicState,
   VerifiedMacroNewsItem,
   VerifiedMacroNewsFeedResult,
 } from '../services/realDataWaterfall.js';
@@ -28,6 +29,7 @@ export type {
   VerifiedVenueCameraObservation,
   VerifiedMarketWaterfallResult,
   VerifiedMacroYieldResult,
+  MacroObservationEpistemicState,
   VerifiedMacroNewsItem,
   VerifiedMacroNewsFeedResult,
   EmpiricalCalibrationBundle,
@@ -228,7 +230,9 @@ export interface StructuredMacroEvent {
   provenance: {
     retrievedAtIso: string;
     isVerifiedOfficial: boolean;
+    verificationStatus?: 'UNVERIFIED_PLACEHOLDER' | 'VERIFIED_OFFICIAL_RELEASE';
     verificationMethod: string;
+    releaseTimestampSec?: number | null;
   };
 }
 
@@ -245,6 +249,7 @@ export interface PollingObservation {
   spreadPct: number;
   pollUrl?: string;
   provenanceTimestampIso: string;
+  isUnverifiedPlaceholder?: boolean;
 }
 
 export interface ElectionProbabilitySnapshot {
@@ -270,6 +275,7 @@ export interface ElectionProbabilitySnapshot {
   knownKnowns: string[];
   inferredFromPolls: string[];
   surprisesRealizedPostEvent: string[];
+  isUnverifiedPlaceholder?: boolean;
 }
 
 export interface PoliticalEventIntelligence {
@@ -278,21 +284,16 @@ export interface PoliticalEventIntelligence {
   electionDateSec: number;
   titleEn: string;
   titleFa: string;
-  status: 'UPCOMING' | 'POLLING_ACTIVE' | 'VOTING_DAY' | 'RESULTS_CONFIRMED';
+  status: 'UNVERIFIED_PLACEHOLDER_QUARANTINED' | 'UPCOMING' | 'POLLING_ACTIVE' | 'VOTING_DAY' | 'RESULTS_CONFIRMED';
+  verificationStatus?: 'UNVERIFIED_PLACEHOLDER' | 'VERIFIED_OFFICIAL_RELEASE';
   latestProbabilitySnapshot: ElectionProbabilitySnapshot;
   historicalSnapshots: ElectionProbabilitySnapshot[];
   recentPolls: PollingObservation[];
-  falsificationAudit: {
-    pollingTrendDirectionBeforeEvent: 'DEMOCRAT_MOMENTUM' | 'REPUBLICAN_MOMENTUM' | 'FLAT';
-    probabilityShiftDetectedTimestampSec: number;
-    postEventGoldSurgeAttributableUsd: number;
-    predictiveLeadTimeHours: number;
-    wasPricedInPreEventPct: number;
-  };
+  quarantineNoticeEn?: string;
 }
 
 export interface MacroCalendarFeedResult {
-  status: 'ONLINE_OFFICIAL_FEEDS' | 'DEGRADED_PARTIAL_FEEDS' | 'UNAVAILABLE';
+  status: 'UNVERIFIED_PLACEHOLDER_QUARANTINED' | 'DEGRADED_PARTIAL_FEEDS' | 'UNAVAILABLE';
   activeSources: string[];
   failedSources: string[];
   events: StructuredMacroEvent[];
@@ -441,15 +442,31 @@ export interface WalkForwardHorizonMetrics {
   horizonLabelEn: string;
   horizonLabelFa: string;
   sampleSizeN: number;
+  effectiveSampleSizeNeff?: number;
+  nonOverlappingSampleSizeN?: number;
   status: 'CALIBRATED_ACTIVE' | 'PROVISIONAL_LOW_SAMPLE' | 'INSUFFICIENT_WARMUP';
   spearmanRankIc: number | null;
   rankIcRollingStd: number | null;
   icIr: number | null;
   rankIcTStat: number | null;
+  rankIcHacStdErr?: number | null;
+  rankIcHacTStat?: number | null;
   directionalHitRate: number | null;
+  nonOverlappingHitRate?: number | null;
+  nonOverlappingHitRateCi95?: [number, number] | null;
   payoffAsymmetryRatio: number | null;
   meanWinReturnBps: number | null;
   meanLossReturnBps: number | null;
+  directionalBrierScore?: number | null;
+  directionalBaseRateP?: number | null;
+  directionalBaseRateBrier?: number | null;
+  directionalBrierSkillScore?: number | null;
+  wickExcursionMetricLabel?: string;
+  wickExcursionPrecision?: number | null;
+  wickExcursionRecall?: number | null;
+  wickExcursionF1Score?: number | null;
+  wickExcursionBrierScore?: number | null;
+  wickExcursionBaseRateBrier?: number | null;
   sweepPrecision: number | null;
   sweepRecall: number | null;
   sweepF1Score: number | null;
@@ -474,6 +491,10 @@ export interface RegimeConditionalValidationMetrics {
 
 export interface WalkForwardValidationScorecard {
   schemaVersion: string;
+  namespaceKey?: string;
+  assetClass?: 'GOLD' | 'BTC';
+  instrumentIdentity?: string;
+  engineId?: 'GDF-G' | 'BDF-B';
   timeframe: string;
   causalityEnforced: true;
   zeroLookaheadVerified: true;
@@ -1018,7 +1039,19 @@ export interface MultiTimeframeDiscoveryContext {
 }
 
 export interface EnsemblePlume {
+  /** Predictive Median Track Q_{0.50}(P_{t+h} | F_t) */
   medianTrack: { time: number; value: number }[];
+  /** Explicit Predictive Median Track alias for strict expectation vs median separation */
+  predictiveMedianTrack?: { time: number; value: number }[];
+  /** Conditional Expected Trajectory E[P_{t+h} | F_t] computed via empirical Duan smearing moment factor */
+  conditionalExpectationTrack?: { time: number; value: number }[];
+  /** Legacy alias for conditional expected trajectory */
+  experimentalDriftTrack?: { time: number; value: number }[];
+  /** Skewness-induced wedge E[P_{t+H}] - Q_{0.50}(P_{t+H}) at terminal horizon */
+  meanMedianSkewWedgeUsd?: number;
+  /** Method used for multi-horizon empirical predictive quantiles */
+  horizonDistributionMethod?: 'DIRECT_HORIZON_EMPIRICAL_FHS_ACI' | 'PATHWISE_BLOCK_BOOTSTRAP_FHS_ACI';
+  directionalGatePassed?: boolean;
   upper95: { time: number; value: number }[];
   upper75: { time: number; value: number }[];
   lower25: { time: number; value: number }[];
@@ -1908,6 +1941,7 @@ export interface ParallelUniverseTelemetry {
   scientificDiscoveryCycle?: ScientificDiscoveryCycleTelemetry;
   marketAwarenessState?: MarketAwarenessState;
   level5MetaCognition?: Level5MetaCognitionTelemetry;
+  pulseIntelligence?: PulseIntelligenceTelemetry;
 }
 
 // ============================================================================
@@ -2034,3 +2068,287 @@ export interface Level5MetaCognitionTelemetry {
   openEndedCausalDiscovery: OpenEndedCausalDiscoveryTelemetry;
   episodicRegimeMemory: EpisodicRegimeMemoryTelemetry;
 }
+
+// ============================================================================
+// GDF PULSE — PROBABILISTIC UNDERSTANDING, LEARNING & SCENARIO ENGINE CONTRACTS
+// ============================================================================
+
+export type PulseEpistemicBadge =
+  | 'REAL_DATA'
+  | 'REAL_FIXTURE'
+  | 'FILTERED_ESTIMATE'
+  | 'INFERRED'
+  | 'HEURISTIC_PROXY'
+  | 'UNVALIDATED_DRIFT'
+  | 'CALIBRATED_ACTIVE'
+  | 'PROVISIONAL_LOW_SAMPLE'
+  | 'INSUFFICIENT_WARMUP'
+  | 'UNVERIFIED_PLACEHOLDER_QUARANTINED'
+  | 'NO_DEMONSTRATED_DIRECTIONAL_SKILL';
+
+export interface InformationClockStamp {
+  wallClockUtcIso: string;
+  barCloseTimeSec: number;
+  intrinsicTau: number;
+  deltaTauStep: number;
+  latestMacroObservationTimestampSec: number | null;
+  macroEpistemicState: MacroObservationEpistemicState;
+  latestVenueTickAgeSec: number;
+  informationCutoffVerified: boolean;
+}
+
+export interface PulseHorizonProbabilityPoint {
+  horizonBars: number;
+  horizonLabelEn: string;
+  horizonLabelFa: string;
+  targetTimestampSec: number;
+  /** 1. Conditional Expected Price E[P_{t+h} | F_t] */
+  conditionalExpectedPriceUsd: number;
+  /** 2. Predictive Median Price Q_{0.50}(P_{t+h} | F_t) */
+  predictiveMedianPriceUsd: number;
+  meanMedianSkewWedgeUsd: number;
+  /** 3. Full Predictive Quantiles */
+  quantilesUsd: {
+    q05: number;
+    q10: number;
+    q25: number;
+    q50: number;
+    q75: number;
+    q90: number;
+    q95: number;
+  };
+  /** 4. Directional Probability + Wilson 95% CI + Skill Gate */
+  directionalProbability: {
+    probUp: number;
+    probDown: number;
+    probFlatWithinNoise: number;
+    wilsonCi95Lower: number;
+    wilsonCi95Upper: number;
+    directionalGatePassed: boolean;
+    epistemicLabel: 'VALIDATED_DIRECTIONAL_SKILL' | 'NO DEMONSTRATED DIRECTIONAL SKILL';
+  };
+  /** 5. Magnitude Distribution (Expected Shortfall / Conditional Tail Expectation) */
+  magnitudeDistribution: {
+    expectedAbsMoveUsd: number;
+    expectedAbsMoveBps: number;
+    upsideExpectedShortfall90Usd: number;
+    downsideExpectedShortfall90Usd: number;
+    tailAsymmetryRatio: number;
+  };
+  /** 6. Volatility & Excursion Distribution (First-Passage Barrier Touch) */
+  excursionDistribution: {
+    horizonSigmaPct: number;
+    probTouchPlus1Atr: number;
+    probTouchMinus1Atr: number;
+    probTouchUpperLiquidityWall: number;
+    probTouchLowerLiquidityPool: number;
+  };
+  /** 7. Model Confidence & Calibration Quality */
+  calibrationQuality: {
+    sampleSizeN: number;
+    effectiveSampleSizeNeff: number;
+    interval90EmpiricalCoverage: number;
+    interval50EmpiricalCoverage: number;
+    aciConformalOffsetQHat: number;
+    pinballLossQ90: number;
+    epistemicBadge: PulseEpistemicBadge;
+  };
+}
+
+export type PulseScenarioBranchId =
+  | 'BRANCH_1_BULLISH_CONTINUATION'
+  | 'BRANCH_2_BEARISH_CONTINUATION'
+  | 'BRANCH_3_LIQUIDITY_SWEEP_REVERSAL'
+  | 'BRANCH_4_RANGE_EQUILIBRIUM_ABSORPTION'
+  | 'BRANCH_5_TAIL_SHOCK_DISLOCATION';
+
+export interface PulseScenarioBranch {
+  branchId: PulseScenarioBranchId;
+  titleEn: string;
+  titleFa: string;
+  posteriorProbability: number;
+  priorBaseRateProbability: number;
+  ShrinkageLambdaApplied: number;
+  triggerPriceThresholdUsd: number;
+  invalidationPriceThresholdUsd: number;
+  targetHorizon4hUsd: number;
+  conditionalExpectedReturnBps: number;
+  conditionalTailRiskQ05Usd: number;
+  confirmingSignalsEn: string[];
+  confirmingSignalsFa: string[];
+  invalidatingSignalsEn: string[];
+  invalidatingSignalsFa: string[];
+  epistemicBadge: PulseEpistemicBadge;
+}
+
+export interface PulseExpectationGapVector {
+  eventId: string;
+  eventNameEn: string;
+  eventNameFa: string;
+  category: MacroEventCategory;
+  releaseStatus: MacroReleaseStatus;
+  /** 6-Dimensional Expectation-Gap Vector */
+  headlineSurpriseZ: number | null;
+  coreSubcomponentSurpriseZ: number | null;
+  priorRevisionSurpriseZ: number | null;
+  guidancePolicyPathSurpriseZ: number | null;
+  positioningVsConsensusSkewZ: number;
+  reactionVsExpectationDivergenceZ: number;
+  compositeExpectationGapSigma: number;
+  dominantReactionArchetype:
+    | 'FUNDAMENTAL_REPRICING_EXTENSION'
+    | 'BUY_THE_RUMOR_SELL_THE_NEWS_EXHAUSTION'
+    | 'STOP_HUNT_WHIPSAW_REVERSAL'
+    | 'MUTED_ABSORPTION_IN_LINE'
+    | 'PRE_RELEASE_COILING_ANTICIPATION';
+  epistemicProvenanceNoteEn: string;
+  epistemicProvenanceNoteFa: string;
+}
+
+export type PulseVulnerabilityAxisId =
+  | 'AXIS_1_CROWDING_EXTENSION'
+  | 'AXIS_2_STOP_CLUSTER_PROXIMITY'
+  | 'AXIS_3_LIQUIDITY_VACUUM_LVN'
+  | 'AXIS_4_VOLATILITY_COMPRESSION_COIL'
+  | 'AXIS_5_ABSORPTION_EXHAUSTION'
+  | 'AXIS_6_CROSS_ASSET_MACRO_DIVERGENCE';
+
+export interface PulseVulnerabilityAxis {
+  axisId: PulseVulnerabilityAxisId;
+  labelEn: string;
+  labelFa: string;
+  score0To100: number;
+  zScore: number;
+  directionVulnerability: 'UPSIDE_SQUEEZE_PRONE' | 'DOWNSIDE_FLUSH_PRONE' | 'SYMMETRIC_FRAGILITY' | 'RESILIENT';
+  /** Mandatory Provenance Metadata per Critique IV.F */
+  dataSourceProvenance: string;
+  freshnessAgeSec: number;
+  derivationStatus: 'DIRECT_OBSERVATION' | 'FILTERED_STATE_ESTIMATE' | 'OHLCV_HEURISTIC_PROXY';
+  knownLimitationsEn: string;
+  knownLimitationsFa: string;
+  validatedUsefulnessStatus: 'EMPIRICALLY_CALIBRATED_ON_WICK_F1' | 'PROVISIONAL_STRUCTURAL_PROXY' | 'UNVALIDATED_DIAGNOSTIC';
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface PulseVulnerabilityRadar {
+  compositeFragilityScore0To100: number;
+  fragilityRegime: 'CRITICAL_COILED_FRAGILITY' | 'ELEVATED_ASYMMETRIC_RISK' | 'NORMAL_AUCTION_DEPTH' | 'RESILIENT_EQUILIBRIUM';
+  axes: PulseVulnerabilityAxis[];
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface PulseTransmissionChannelShare {
+  channelId: string;
+  channelNameEn: string;
+  channelNameFa: string;
+  assetClass: 'GOLD' | 'BTC';
+  explanatorySharePct: number;
+  prior24hSharePct: number;
+  shiftDeltaPct: number;
+  currentForceUsdPerStep: number;
+  rollingPartialR2: number;
+  epistemicBadge: PulseEpistemicBadge;
+}
+
+export interface PulseTransmissionDominance {
+  assetClass: 'GOLD' | 'BTC';
+  dominantChannelId: string;
+  dominantChannelNameEn: string;
+  dominantChannelNameFa: string;
+  dominanceRegimeShiftDetected: boolean;
+  ledoitWolfShrinkageDelta: number;
+  jointCovarianceConditionNumber: number;
+  channels: PulseTransmissionChannelShare[];
+  summaryEn: string;
+  summaryFa: string;
+}
+
+export interface PulseProbabilityMigrationEntry {
+  migrationId: string;
+  fromTimestampSec: number;
+  toTimestampSec: number;
+  jensenShannonDivergenceBits: number;
+  probUpBefore: number;
+  probUpAfter: number;
+  q90WidthBeforeUsd: number;
+  q90WidthAfterUsd: number;
+  expectedPriceShiftUsd: number;
+  medianPriceShiftUsd: number;
+  primaryDriverChannel: string;
+  driverAttributionEn: string;
+  driverAttributionFa: string;
+}
+
+export interface PulseEventMemoryRecord {
+  recordId: string;
+  eventId: string;
+  eventTitleEn: string;
+  eventTitleFa: string;
+  category: MacroEventCategory;
+  timestampSec: number;
+  stageStatus: 'PRE_EVENT_T_MINUS_24H' | 'PRE_EVENT_T_MINUS_1H' | 'RELEASE_INSTANT' | 'POST_EVENT_SCORED';
+  preEventProbUp: number;
+  preEventInterval90WidthUsd: number;
+  realizedMove4hBps: number | null;
+  brierScoreRealized: number | null;
+  interval90CoveredRealized: boolean | null;
+  residualBlindspotFlagged: boolean;
+  lessonSummaryEn: string;
+  lessonSummaryFa: string;
+}
+
+export interface PulseUncertaintySeparation {
+  /** 1. Data Uncertainty: Missing feeds, stale ticks, cross-venue dispersion */
+  dataUncertaintyScore0To100: number;
+  dataUncertaintyLabelEn: string;
+  /** 2. Model Uncertainty: Live vs Candidate disagreement, parameter variance */
+  modelUncertaintyScore0To100: number;
+  modelUncertaintyLabelEn: string;
+  /** 3. Regime Uncertainty: BOCPD change-point probability & Markov entropy */
+  regimeUncertaintyScore0To100: number;
+  regimeUncertaintyLabelEn: string;
+  /** 4. Event Uncertainty: Upcoming scheduled macro catalyst or expectation gap */
+  eventUncertaintyScore0To100: number;
+  eventUncertaintyLabelEn: string;
+  /** 5. Execution/Liquidity Uncertainty: VPIN toxicity, LVN vacuum, thin session */
+  executionLiquidityUncertaintyScore0To100: number;
+  executionLiquidityUncertaintyLabelEn: string;
+}
+
+export interface PulseIntelligenceTelemetry {
+  schemaVersion: string;
+  assetClass: 'GOLD' | 'BTC';
+  instrumentIdentity: string;
+  timeframe: string;
+  informationClock: InformationClockStamp;
+  hybridMode: 'SCENARIO_DOMINANT' | 'ANTICIPATORY_PRE_EVENT' | 'FUSED_PROBABILISTIC_EQUILIBRIUM';
+  anticipatoryShrinkageWeightWPre: number;
+  /** 7-Component Separated Probability Field across Horizons */
+  probabilityFieldByHorizon: PulseHorizonProbabilityPoint[];
+  /** 5-Branch Scenario Tree (Sub-Engine A + C) */
+  scenarioBranches: PulseScenarioBranch[];
+  /** 6-Dimensional Expectation-Gap Vector (Sub-Engine B) */
+  activeExpectationGaps: PulseExpectationGapVector[];
+  /** 6-Axis Vulnerability Radar with full provenance metadata */
+  vulnerabilityRadar: PulseVulnerabilityRadar;
+  /** Dynamic Transmission Dominance Engine (Gold 7 channels / BTC 5 channels) */
+  transmissionDominance: PulseTransmissionDominance;
+  /** Probability Migration Audit Log (JSD + Driver Attribution) */
+  probabilityMigrationLedger: PulseProbabilityMigrationEntry[];
+  /** Event Memory Laboratory & Post-Event Scoring */
+  eventMemoryLab: {
+    records: PulseEventMemoryRecord[];
+    cumulativeBrierScore: number | null;
+    cumulativeInterval90Coverage: number;
+    unexplainedExogenousImpulseActive: boolean;
+    blindspotSummaryEn: string;
+    blindspotSummaryFa: string;
+  };
+  /** 5-Type Explicit Uncertainty Separation */
+  uncertaintySeparation: PulseUncertaintySeparation;
+  executiveBriefEn: string;
+  executiveBriefFa: string;
+}
+

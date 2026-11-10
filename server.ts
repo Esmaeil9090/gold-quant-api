@@ -133,6 +133,14 @@ const {
 const {
   evaluateMacroTransmissionMechanisms,
 } = await import('./src/services/macroTransmissionEngine.js');
+const {
+  appendPointInTimeForecastLedgerEntry,
+  evaluateLedgerLiveAccuracy,
+  segregateFixtureEntriesFromLiveLedger,
+} = await import('./src/services/pointInTimeForecastLedger.js');
+const {
+  liveMicrostructureRecorder,
+} = await import('./src/services/liveMicrostructureRecorder.js');
 
 
 const app = express();
@@ -161,6 +169,17 @@ app.use((req, res, next) => {
     res.setHeader('Expires', '0');
   }
   next();
+});
+
+app.get(['/api/health', '/healthz'], (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.status(200).json({
+    status: 'OK',
+    appName: 'GDF',
+    serverVersion: APP_VERSION,
+    port: PORT,
+    timestamp: Date.now(),
+  });
 });
 
 app.get('/api/app-version', (req: Request, res: Response) => {
@@ -407,16 +426,21 @@ app.get('/api/provider-diagnostics', async (req: Request, res: Response) => {
 app.get('/api/validation-scorecard', async (req: Request, res: Response) => {
   const intervalQuery = (req.query.interval as string) || '15m';
   const interval = VALID_INTERVALS[intervalQuery] ? intervalQuery : '15m';
-  let scorecard = getLatestValidationScorecard(interval);
+  const assetQuery = ((req.query.asset || req.query.symbol || '') as string).toUpperCase();
+  const activeAsset = resolveAssetClass({ asset: assetQuery, symbol: assetQuery });
+  let scorecard = getLatestValidationScorecard(interval, activeAsset);
   if (!scorecard) {
     const [wf, macro] = await Promise.all([
-      fetchVerifiedMarketWaterfall(interval),
+      fetchVerifiedMarketWaterfall(interval, { asset: activeAsset }),
       fetchVerifiedMacroWaterfall(),
     ]);
     if (wf.candles.length >= 26) {
       scorecard = evaluateCausalWalkForwardValidation({
         candles: wf.candles,
         liveMacro: macro,
+        assetClass: activeAsset,
+        instrumentIdentity:
+          wf.instrumentIdentity || (activeAsset === 'BTC' ? 'BTC_SPOT_USD' : 'PAXG_SPOT_TOKEN'),
         timeframe: interval,
         intervalStepSeconds: VALID_INTERVALS[interval],
       });
@@ -425,6 +449,7 @@ app.get('/api/validation-scorecard', async (req: Request, res: Response) => {
   res.json({
     status: 'SUCCESS',
     version: APP_VERSION,
+    assetClass: activeAsset,
     timeframe: interval,
     scorecard,
   });
@@ -604,9 +629,14 @@ async function handleForecastRequest(req: Request, res: Response) {
       lastVerifiedCalibration = quantOut.calibration;
     }
 
+    const resolvedInstrumentIdentity =
+      waterfall.instrumentIdentity || (activeAsset === 'BTC' ? 'BTC_SPOT_USD' : 'PAXG_SPOT_TOKEN');
+
     const validationScorecard = evaluateCausalWalkForwardValidation({
       candles,
       liveMacro,
+      assetClass: activeAsset,
+      instrumentIdentity: resolvedInstrumentIdentity,
       timeframe: interval,
       intervalStepSeconds,
     });
@@ -703,6 +733,66 @@ async function handleForecastRequest(req: Request, res: Response) {
         ? parallelUniverse.liveEnsemble
         : quantOut.ensemble;
 
+    // Append point-in-time live forecast to immutable append-only ledger (Phase A.6)
+    try {
+      const originBar = candles[candles.length - 1];
+      if (originBar && activeLiveEnsemble?.medianTrack?.length > 0) {
+        const snapId =
+          waterfall.snapshotId ||
+          `gdf-snap-${activeAsset === 'BTC' ? 'btc-' : ''}${interval}-${originBar.time}`;
+        for (const hStep of [1, 5, 15]) {
+          const idx = hStep - 1;
+          if (idx < activeLiveEnsemble.medianTrack.length) {
+            const q50 = activeLiveEnsemble.medianTrack[idx]?.value ?? originBar.close;
+            const q05 = activeLiveEnsemble.lower05[idx]?.value ?? q50 * 0.99;
+            const q25 = activeLiveEnsemble.lower25[idx]?.value ?? q50 * 0.995;
+            const q75 = activeLiveEnsemble.upper75[idx]?.value ?? q50 * 1.005;
+            const q95 = activeLiveEnsemble.upper95[idx]?.value ?? q50 * 1.01;
+            const meanLogReturn = Math.log(Math.max(1e-6, q50) / Math.max(1e-6, originBar.close));
+            const stdLogReturn = Math.max(
+              1e-6,
+              Math.log(Math.max(1e-6, q75) / Math.max(1e-6, q25)) / (2 * 0.6744897501960817)
+            );
+            appendPointInTimeForecastLedgerEntry({
+              originTimestampSec: originBar.time,
+              horizonBars: hStep,
+              horizonStepSeconds: intervalStepSeconds,
+              assetClass: activeAsset,
+              instrumentIdentity: resolvedInstrumentIdentity,
+              timeframe: interval,
+              dataSnapshotId: snapId,
+              modelVersion: APP_VERSION,
+              trackRole: 'INCUMBENT_LIVE',
+              entrySourceType:
+                fixtureReplay || simulateFailure || waterfall.isFixtureReplay || waterfall.systemState === 'FIXTURE_REPLAY'
+                  ? 'FIXTURE_OR_BACKTEST'
+                  : 'LIVE_PROSPECTIVE',
+              originClose: originBar.close,
+              predictiveDistribution: {
+                meanLogReturn: 0,
+                stdLogReturn,
+                degreesOfFreedom: null,
+                pointPrice: originBar.close,
+                q05,
+                q25,
+                q50: originBar.close,
+                q75,
+                q95,
+                probUp: 0.5,
+              },
+            });
+          }
+        }
+      }
+    } catch {
+      // Non-fatal ledger write guard
+    }
+
+    const prospectiveLedgerAccuracy = evaluateLedgerLiveAccuracy({
+      namespaceKey: `${activeAsset}:${resolvedInstrumentIdentity}:${interval}`,
+      enforceMinSamplePublicationGate: true,
+    }).scorecard;
+
     const macroCalendar = getVerifiedMacroCalendarFeed();
     const macroTransmission = evaluateMacroTransmissionMechanisms({
       currentGoldPriceUsd: quantOut.currentPrice,
@@ -789,6 +879,14 @@ async function handleForecastRequest(req: Request, res: Response) {
       candles,
       dataReliability,
       validationScorecard,
+      prospectiveLedgerAccuracy,
+      liveRecorderStatus: liveMicrostructureRecorder.getStatus(),
+      productHonestyPolicy: {
+        defaultLiveDrift: 0,
+        directionalCallsEnabled: false,
+        accuracySource: 'PROSPECTIVE_LIVE_LEDGER_ONLY',
+        minRequiredLiveSamplePerCell: 197,
+      },
       parallelUniverse,
       scientificCore: parallelUniverse.scientificCore,
       scientificScoreboard: parallelUniverse.scientificCore?.scientificScoreboard,
@@ -931,6 +1029,19 @@ app.get('/api/scientific-core', (req: Request, res: Response) => {
     scientificScoreboard: snapshot.scientificCore?.scientificScoreboard || null,
     latentMathWriteBack: snapshot.latentMathWriteBack,
     persistedResidualCount: snapshot.persistedResidualCount,
+  });
+});
+
+app.get('/api/pulse-intelligence', (_req: Request, res: Response) => {
+  const snapshot = getIntelligenceCoreStateSnapshot();
+  res.json({
+    status: 'SUCCESS',
+    version: APP_VERSION,
+    buildTime: BUILD_TIME,
+    timestampIso: new Date().toISOString(),
+    pulseIntelligence: snapshot.pulseIntelligence || null,
+    scientificCore: snapshot.scientificCore || null,
+    marketAwarenessState: snapshot.marketAwarenessState || null,
   });
 });
 
@@ -1622,6 +1733,24 @@ app.get('/api/gdf-os/expert-council/chat', handleExpertCouncilChatRequest);
 app.post('/api/gdf-os/expert-council/chat', handleExpertCouncilChatRequest);
 
 
+app.get('/api/recorder-status', (_req: Request, res: Response) => {
+  res.json({
+    status: 'SUCCESS',
+    recorder: liveMicrostructureRecorder.getStatus(),
+  });
+});
+
+app.get('/api/phase-c-evidence', (_req: Request, res: Response) => {
+  const reportPath = path.join(__dirname, 'data/phase_c_evidence_and_calibration_report.json');
+  if (!fs.existsSync(reportPath)) {
+    return res.status(404).json({
+      status: 'NOT_FOUND',
+      error: 'Phase C evidence report not found.',
+    });
+  }
+  res.json(JSON.parse(fs.readFileSync(reportPath, 'utf-8')));
+});
+
 // Strict API 404 JSON Guard: Never allow unknown /api/* routes to fall through to the HTML SPA catch-all
 app.all('/api/*', (req: Request, res: Response) => {
   res.status(404).json({
@@ -1647,6 +1776,12 @@ app.listen(PORT, '0.0.0.0', () => {
     if (ph.remediationInstructionsEn) {
       console.warn(`[GDF Persistence] ${ph.remediationInstructionsEn}`);
     }
+  }
+  try {
+    segregateFixtureEntriesFromLiveLedger();
+    liveMicrostructureRecorder.start();
+  } catch {
+    // Non-fatal startup guard
   }
   if (isCloudSqlConfigured()) {
     hydrateGdfOsRegistryFromCloudSqlIfAvailable()

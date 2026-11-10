@@ -1,5 +1,5 @@
 {
-  "verifiedAtIso": "2026-11-06T09:36:13.663Z",
+  "verifiedAtIso": "2026-11-10T18:30:06.025Z",
   "totalScenarios": 18,
   "passedScenarios": 18,
   "allPassed": true,
@@ -44,7 +44,7 @@
       "id": 7,
       "name": "Matched-Sample 6-Challenger Scoreboard & Multiple-Testing Accounting in Step 5 (CHALLENGE)",
       "passed": true,
-      "details": "challengers=6, N_oos=20, K_search=3, candRmse=$1.349 vs incRmse=$3.289"
+      "details": "challengers=6, N_oos=20, K_search=3, candRmse=$1.766 vs incRmse=$3.169"
     },
     {
       "id": 8,
@@ -74,7 +74,7 @@
       "id": 12,
       "name": "Active Execution Path Verification (Yellow-Line Forecast Shifts Attributably)",
       "passed": true,
-      "details": "terminalBefore=$2749.6800, terminalAfter=$2748.3800, attributableShift=$-1.3000, covPSD=true"
+      "details": "terminalBefore=$2707.8500, terminalAfter=$2725.6300, attributableShift=$17.7800, covPSD=true"
     },
     {
       "id": 13,
@@ -110,7 +110,7 @@
       "id": 18,
       "name": "Deterministic Experiment Replay (Identical Inputs -> Identical Seed, Parameters & Metrics)",
       "passed": true,
-      "details": "seed=32c8a8dc521eae2a, form=AR1_RESIDUAL_ERROR_CORRECTION, θ_A=0.85 === θ_B=0.85, RMSE_A=$1.3489 === RMSE_B=$1.3489"
+      "details": "seed=32c8a8dc521eae2a, form=AR1_RESIDUAL_ERROR_CORRECTION, θ_A=0.85 === θ_B=0.85, RMSE_A=$1.766 === RMSE_B=$1.766"
     }
   ]
 }

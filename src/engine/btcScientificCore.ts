@@ -271,7 +271,18 @@ export function evaluateChainSatellitePlaceboTest(params: {
   for (let i = 0; i < res.length - 1; i++) {
     const rBar = res[i];
     const nextBar = res[i + 1];
-    const matched = obs.find(o => Math.abs(o.timestampSec - rBar.timestampSec) <= 3600);
+    // Strictly causal backward matching: observation must have arrived at or before rBar.timestampSec
+    let matched: BtcChainSatelliteObservation | undefined;
+    let bestDist = Infinity;
+    for (const o of obs) {
+      if (o.timestampSec <= rBar.timestampSec && rBar.timestampSec - o.timestampSec <= 3600) {
+        const dist = rBar.timestampSec - o.timestampSec;
+        if (dist < bestDist) {
+          bestDist = dist;
+          matched = o;
+        }
+      }
+    }
     if (matched && Number.isFinite(matched.exchangeNetflowBtc)) {
       pairs.push({ flow: matched.exchangeNetflowBtc, nextRes: nextBar.residual });
     }
@@ -355,6 +366,7 @@ export function evaluateBtcScientificCore(params: {
   leverageSeries?: BtcDerivativesObservationPoint[];
   chainSatellite?: BtcChainSatelliteObservation[];
   shockCalibration?: Partial<ResidualShockCalibration>;
+  directionalGatePassed?: boolean;
 }): BtcScientificCoreOutput {
   const {
     candles,
@@ -363,6 +375,7 @@ export function evaluateBtcScientificCore(params: {
     leverageSeries,
     chainSatellite,
     shockCalibration,
+    directionalGatePassed = false,
   } = params;
 
   const diagnosticsEn: string[] = [];
@@ -460,6 +473,7 @@ export function evaluateBtcScientificCore(params: {
   }
 
   const n = candles.length;
+  const originTimeSec = candles[n - 1].time;
   const parkinsonConst = 1 / (4 * Math.LN2);
   const barRangesLog: number[] = new Array(n).fill(0.0025);
   const barVolumes: number[] = new Array(n).fill(1);
@@ -496,10 +510,17 @@ export function evaluateBtcScientificCore(params: {
     deltaTauSeries[i] = Number(Math.max(0.28, Math.min(2.75, rawTau)).toFixed(4));
   }
 
-  // Helper to resolve optional verified derivatives observation at bar timestamp
+  // Helper to resolve optional verified derivatives observation at bar timestamp (strictly causal: timestampSec <= originTimeSec)
   const validLeverageSeries = Array.isArray(leverageSeries)
-    ? leverageSeries.filter(pt => pt && typeof pt.timestampSec === 'number')
+    ? leverageSeries.filter(
+        pt => pt && typeof pt.timestampSec === 'number' && pt.timestampSec <= originTimeSec
+      )
     : [];
+  const causalChainSatellite = Array.isArray(chainSatellite)
+    ? chainSatellite.filter(
+        pt => pt && typeof pt.timestampSec === 'number' && pt.timestampSec <= originTimeSec
+      )
+    : undefined;
   const hasVerifiedLeverageChannel = validLeverageSeries.length > 0;
 
   const findLeverageObsAt = (barTimeSec: number): BtcDerivativesObservationPoint | null => {
@@ -508,14 +529,13 @@ export function evaluateBtcScientificCore(params: {
     let bestDist = Infinity;
     const maxTol = Math.max(3600, intervalStepSeconds * 4);
     for (const pt of validLeverageSeries) {
-      const dist = Math.abs(pt.timestampSec - barTimeSec);
-      if (dist <= maxTol && dist < bestDist) {
-        best = pt;
-        bestDist = dist;
+      if (pt.timestampSec <= barTimeSec) {
+        const dist = barTimeSec - pt.timestampSec;
+        if (dist <= maxTol && dist < bestDist) {
+          best = pt;
+          bestDist = dist;
+        }
       }
-    }
-    if (!best && barTimeSec >= candles[n - 2].time) {
-      return validLeverageSeries[validLeverageSeries.length - 1];
     }
     return best;
   };
@@ -599,8 +619,11 @@ export function evaluateBtcScientificCore(params: {
     const thinOpenDriftScale = sessionAtBar.isThinOpen ? sessionAtBar.driftScaleFactor : 1.0;
 
     // 1. One-step prediction of logLevel from drift + cexPressure + leverageStress
+    const anchorPullCooldownScale = cooldownBarsRemaining > 0 ? 0.15 : 1.0;
     const anchorPullLog =
-      0.08 * (Math.log(Math.max(1, equilibriumAnchorUsd)) - state.logLevel);
+      anchorPullCooldownScale *
+      0.08 *
+      (Math.log(Math.max(1, equilibriumAnchorUsd)) - state.logLevel);
     const cexContributionLog = 0.24 * (state.cexPressure / Math.max(0.25, state.resilience)) * state.vol;
     // Crowded leverageStress (> 0.45) creates fragility squeeze / mean-reversion pressure, moderate leverage aligns with flow
     const levContributionLog =
@@ -650,16 +673,19 @@ export function evaluateBtcScientificCore(params: {
       equilibriumAnchorUsd = 0.92 * equilibriumAnchorUsd + 0.08 * realizedPrice;
     }
 
-    // Kalman measurement update on logLevel
+    // Kalman measurement update on logLevel (inflate prior state uncertainty on structural shock so filter snaps to post-shock price)
     const obsLogP = Math.log(realizedPrice);
     const obsNoiseVar = Math.max(1e-8, (barRangesLog[t] * barRangesLog[t] * 0.22) / Math.max(0.3, dt));
-    const kalmanGain = predVarLog / (predVarLog + obsNoiseVar);
+    const effectivePredVarLog = shockOut.shockFired
+      ? Math.max(predVarLog * shockOut.uncertaintyMultiplier * 3.5, obsNoiseVar * 3.5)
+      : predVarLog;
+    const kalmanGain = effectivePredVarLog / (effectivePredVarLog + obsNoiseVar);
     const logInnovation = obsLogP - predLogLevel;
 
     state.logLevel = predLogLevel + kalmanGain * logInnovation;
     stateVarLog = Math.max(
       1e-8,
-      (1 - kalmanGain) * predVarLog * (shockOut.shockFired ? shockOut.uncertaintyMultiplier : 1.0)
+      (1 - kalmanGain) * effectivePredVarLog
     );
 
     // Update drift, vol, cexPressure, leverageStress, resilience
@@ -956,7 +982,7 @@ export function evaluateBtcScientificCore(params: {
 
   const chainSatelliteStatus = evaluateChainSatellitePlaceboTest({
     residuals: residualBars,
-    chainObservations: chainSatellite,
+    chainObservations: causalChainSatellite,
   });
 
   // 6. B7 BTC Awareness Brain
@@ -1011,17 +1037,129 @@ export function evaluateBtcScientificCore(params: {
     summaryEn: `BDF-B Awareness [${latestSession.weekpart} · ${latestSession.sessionId}] | isFuturesClosed=false | DriftPolicy=${latestSession.driftPolicy} | ResidualHealth=${residualHealth} | LeverageRegime=${leverageRegime} | Faults=${awarenessFaults.join(', ') || 'NONE'}`,
   };
 
-  // 7. B6 Dual Plume Generation (Live Yellow #f5d76e vs. Dissenting Candidate Magenta #e040fb)
+  // 7. B6 Dual Plume Generation:
+  // Independently compute Conditional Expectation E[P_{t+h}|F_t] (Duan smearing) and Predictive Median Q_{0.50}(P_{t+h}|F_t)
+  // for both Live (World A) and Parallel Candidate (World B), with Direct Horizon-h Empirical FHS + ACI quantiles.
   const liveForecast: BtcForecastTrackPoint[] = [];
+  const liveExperimentalForecast: BtcForecastTrackPoint[] = [];
   const candidateForecast: BtcForecastTrackPoint[] = [];
+  const candidateExperimentalForecast: BtcForecastTrackPoint[] = [];
   const confidenceBand: BtcConfidenceBandPoint[] = [];
+  const candidateBand: BtcConfidenceBandPoint[] = [];
 
   const currentSpot = Math.max(1, lastCandle.close);
   let simLiveLog = Math.log(currentSpot);
   let simLiveDrift = state.drift;
   let simLiveCex = state.cexPressure;
   let simLiveLev = state.leverageStress;
-  let simLiveVar = Math.max(1e-7, stateVarLog);
+  let simLiveVar = 0;
+  let simCandVar = 0;
+
+  // Causal empirical close-to-close log return variance and Direct Horizon-h FHS standardized residuals
+  const trailingBtcRets = logReturns.slice(Math.max(1, n - 120), n);
+  const meanBtcRet =
+    trailingBtcRets.length > 0
+      ? trailingBtcRets.reduce((a, b) => a + b, 0) / trailingBtcRets.length
+      : 0;
+  const empBtcCloseVar =
+    trailingBtcRets.length > 1
+      ? trailingBtcRets.reduce((a, r) => a + (r - meanBtcRet) ** 2, 0) /
+        (trailingBtcRets.length - 1)
+      : state.vol * state.vol;
+  const empBtcCloseStd = Math.sqrt(Math.max(1e-10, empBtcCloseVar));
+
+  const pickBtcQuantile = (sorted: number[], q: number, fallback: number): number => {
+    if (sorted.length < 10) return fallback;
+    const pos = Math.max(0, Math.min(sorted.length - 1, q * (sorted.length - 1)));
+    const lo = Math.floor(pos);
+    const hi = Math.ceil(pos);
+    const frac = pos - lo;
+    return sorted[lo] * (1 - frac) + sorted[hi] * frac;
+  };
+
+  const signedStdBtc1 = trailingBtcRets.map(r => (r - meanBtcRet) / empBtcCloseStd);
+  const sortedSignedBtc1 = [...signedStdBtc1].sort((a, b) => a - b);
+
+  let btcAciOffset90 = 0;
+  if (residualBars.length >= 16) {
+    const recentBtcRes = residualBars.slice(-48);
+    let misses90 = 0;
+    for (const rBar of recentBtcRes) {
+      if (Math.abs(rBar.z) > 1.6448536) {
+        misses90++;
+      }
+    }
+    const empMissRate = misses90 / recentBtcRes.length;
+    btcAciOffset90 = Math.max(-0.12, Math.min(0.35, (empMissRate - 0.10) * 1.25));
+  }
+
+  const computeBtcDirectHorizonStats = (h: number, predStdH: number) => {
+    const hRets: number[] = [];
+    const startIdx = Math.max(h, n - 120);
+    for (let idx = startIdx; idx < n; idx++) {
+      hRets.push(
+        Math.log(Math.max(1e-6, candles[idx].close) / Math.max(1e-6, candles[idx - h].close))
+      );
+    }
+    const scaleH = Math.max(1e-10, Math.sqrt(h) * empBtcCloseStd);
+    let stdResH: number[];
+    if (hRets.length >= 14) {
+      const meanH = hRets.reduce((a, b) => a + b, 0) / hRets.length;
+      stdResH = hRets.map(r => (r - meanH) / scaleH);
+    } else {
+      stdResH = signedStdBtc1.length > 0 ? signedStdBtc1 : [-1.645, -0.674, 0, 0.674, 1.645];
+    }
+    const sortedH = [...stdResH].sort((a, b) => a - b);
+    const q05Raw = pickBtcQuantile(sortedH, 0.05, -1.6448536269514722);
+    const q25Raw = pickBtcQuantile(sortedH, 0.25, -0.6744897501960817);
+    const q50Raw = pickBtcQuantile(sortedH, 0.50, 0.0);
+    const q75Raw = pickBtcQuantile(sortedH, 0.75, 0.6744897501960817);
+    const q95Raw = pickBtcQuantile(sortedH, 0.95, 1.6448536269514722);
+
+    const q50 = Math.max(-0.35, Math.min(0.35, q50Raw));
+    const q75 = Math.max(q50 + 0.25, q75Raw + 0.5 * btcAciOffset90);
+    const q25 = Math.min(q50 - 0.25, q25Raw - 0.5 * btcAciOffset90);
+    const q95 = Math.max(q75 + 0.35, q95Raw + btcAciOffset90);
+    const q05 = Math.min(q25 - 0.35, q05Raw - btcAciOffset90);
+
+    let smearingSum = 0;
+    const sampleArr = stdResH.length >= 8 ? stdResH : sortedSignedBtc1;
+    if (sampleArr.length >= 8) {
+      for (let i = 0; i < sampleArr.length; i++) {
+        const clampedE = Math.max(-6, Math.min(6, sampleArr[i]));
+        smearingSum += Math.exp(predStdH * clampedE);
+      }
+      smearingSum /= sampleArr.length;
+    } else {
+      smearingSum = Math.exp(0.5 * predStdH * predStdH);
+    }
+    const duanSmearingFactor = Math.max(0.95, Math.min(1.15, smearingSum));
+    return { q05, q25, q50, q75, q95, duanSmearingFactor };
+  };
+
+  // Variance-ratio-gated OU pull strictly restricted to 1h (3600s) and 4h (14400s) per Critique #3
+  let vr4Btc = 1.0;
+  if (trailingBtcRets.length >= 16 && empBtcCloseVar > 1e-12) {
+    const r4List: number[] = [];
+    for (let i = 3; i < trailingBtcRets.length; i++) {
+      r4List.push(
+        trailingBtcRets[i] +
+          trailingBtcRets[i - 1] +
+          trailingBtcRets[i - 2] +
+          trailingBtcRets[i - 3]
+      );
+    }
+    const m4 = r4List.reduce((a, b) => a + b, 0) / r4List.length;
+    const var4 =
+      r4List.reduce((a, r) => a + (r - m4) ** 2, 0) / Math.max(1, r4List.length - 1);
+    vr4Btc = var4 / (4 * empBtcCloseVar);
+  }
+  const isBtc1hOr4h = intervalStepSeconds === 3600 || intervalStepSeconds === 14400;
+  const btcVrOuPullGate = isBtc1hOr4h
+    ? vr4Btc < 0.85
+      ? Math.max(0, Math.min(1, (0.85 - vr4Btc) / 0.35))
+      : 0
+    : 0;
 
   // Candidate challenger track dissents after shock or structured residual (absorption / mean-reversion / faster de-stress)
   const recentShockBars = residualBars.slice(-4);
@@ -1038,9 +1176,10 @@ export function evaluateBtcScientificCore(params: {
   const latestResSign = Math.sign(latestResBar?.residual || state.drift || -1);
   // If shock or structured residual occurred, candidate models liquidity absorption & mean-reversion counter-hypothesis
   let simCandDrift = shouldCandidateDissent
-    ? -0.45 * simLiveDrift - 0.32 * latestResSign * state.vol
-    : 0.65 * simLiveDrift;
+    ? -0.45 * state.drift - 0.32 * latestResSign * state.vol
+    : 0.65 * state.drift;
   let simCandCex = shouldCandidateDissent ? -0.35 * state.cexPressure : 0.5 * state.cexPressure;
+  let simCandVol = shouldCandidateDissent ? state.vol * 1.12 : state.vol * 0.96;
   const candAnchorLog = Math.log(
     Math.max(
       1,
@@ -1050,6 +1189,16 @@ export function evaluateBtcScientificCore(params: {
     )
   );
   const liveAnchorLog = Math.log(Math.max(1, equilibriumAnchorUsd));
+  const candOuGate = isBtc1hOr4h ? btcVrOuPullGate : shouldCandidateDissent ? 0.45 : 0;
+
+  let prevLiveUp75 = 0;
+  let prevLiveLo25 = 0;
+  let prevLiveUp95 = 0;
+  let prevLiveLo05 = 0;
+  let prevCandUp75 = 0;
+  let prevCandLo25 = 0;
+  let prevCandUp95 = 0;
+  let prevCandLo05 = 0;
 
   for (let h = 1; h <= horizonSteps; h++) {
     const stepTime = lastCandle.time + h * intervalStepSeconds;
@@ -1062,8 +1211,8 @@ export function evaluateBtcScientificCore(params: {
     const stepDriftScale = stepSession.isThinOpen ? stepSession.driftScaleFactor : 1.0;
     const stepTau = stepSession.isThinOpen ? 0.78 : 1.0;
 
-    // Live track step evolution
-    const liveEqPull = 0.075 * (liveAnchorLog - simLiveLog);
+    // Live track evolution (with variance-ratio-gated OU pull strictly on 1h/4h)
+    const liveEqPull = 0.075 * btcVrOuPullGate * (liveAnchorLog - simLiveLog);
     const liveFlowTerm =
       0.22 * (simLiveCex / Math.max(0.25, state.resilience)) * state.vol +
       0.12 * simLiveLev * state.vol;
@@ -1075,8 +1224,9 @@ export function evaluateBtcScientificCore(params: {
     simLiveCex *= 0.76;
     simLiveLev *= 0.84;
 
-    // Candidate track step evolution (absorption / mean-reversion / de-leveraging hypothesis)
-    const candEqPull = (shouldCandidateDissent ? 0.19 : 0.12) * (candAnchorLog - simCandLog);
+    // Candidate track step evolution (independent state ownership & dynamics)
+    const candEqPull =
+      (shouldCandidateDissent ? 0.19 : 0.12) * candOuGate * (candAnchorLog - simCandLog);
     const candAutocorrCorrection =
       isStructuredResidual && latestResBar
         ? -0.25 * lag1Autocorrelation * (latestResBar.residual / currentSpot) * Math.exp(-0.22 * h)
@@ -1084,7 +1234,7 @@ export function evaluateBtcScientificCore(params: {
     const candStepLogMove =
       stepDriftScale *
       (simCandDrift +
-        0.16 * simCandCex * state.vol +
+        0.16 * simCandCex * simCandVol +
         candEqPull +
         candAutocorrCorrection) *
       stepTau;
@@ -1092,26 +1242,66 @@ export function evaluateBtcScientificCore(params: {
     simCandLog += candStepLogMove;
     simCandDrift = 0.72 * simCandDrift + 0.28 * candEqPull;
     simCandCex *= 0.68;
+    simCandVol = 0.88 * simCandVol + 0.12 * empBtcCloseStd;
 
-    // Confidence band from state uncertainty + leverageStress
-    const levStressVarBoost = 1 + 0.45 * Math.abs(state.leverageStress);
-    simLiveVar += state.vol * state.vol * stepTau * levStressVarBoost * 0.55;
-    const effStdLog =
-      Math.sqrt(Math.max(1e-8, simLiveVar)) * latestBandInflationMult;
+    // Independent Live vs Candidate predictive variances + Direct-h FHS quantiles
+    const blendedLiveStepVar = 0.80 * empBtcCloseVar + 0.20 * (state.vol * state.vol);
+    const blendedCandStepVar = 0.75 * empBtcCloseVar + 0.25 * (simCandVol * simCandVol);
+    simLiveVar += Math.max(1e-8, blendedLiveStepVar);
+    simCandVar += Math.max(1e-8, blendedCandStepVar);
+    const effLiveStdLog = Math.sqrt(Math.max(1e-8, simLiveVar));
+    const effCandStdLog = Math.sqrt(Math.max(1e-8, simCandVar));
 
-    const liveVal = Number(Math.exp(simLiveLog).toFixed(2));
-    const candVal = Number(Math.exp(simCandLog).toFixed(2));
+    const empLiveH = computeBtcDirectHorizonStats(h, effLiveStdLog);
+    const empCandH = computeBtcDirectHorizonStats(h, effCandStdLog);
 
-    liveForecast.push({ step: h, time: stepTime, value: liveVal });
-    candidateForecast.push({ step: h, time: stepTime, value: candVal });
+    const liveMedLog = simLiveLog + empLiveH.q50 * effLiveStdLog;
+    const candMedLog = simCandLog + empCandH.q50 * effCandStdLog;
+
+    const liveMedVal = Number(Math.exp(liveMedLog).toFixed(2));
+    const liveExpVal = Number((Math.exp(simLiveLog) * empLiveH.duanSmearingFactor).toFixed(2));
+    const candMedVal = Number(Math.exp(candMedLog).toFixed(2));
+    const candExpVal = Number((Math.exp(simCandLog) * empCandH.duanSmearingFactor).toFixed(2));
+
+    liveForecast.push({ step: h, time: stepTime, value: liveMedVal });
+    liveExperimentalForecast.push({ step: h, time: stepTime, value: liveExpVal });
+    candidateForecast.push({ step: h, time: stepTime, value: candMedVal });
+    candidateExperimentalForecast.push({ step: h, time: stepTime, value: candExpVal });
+
+    const liveUp75Off = Math.max(prevLiveUp75 + 1e-5, Math.max(0.15 * effLiveStdLog, (empLiveH.q75 - empLiveH.q50) * effLiveStdLog));
+    const liveLo25Off = Math.max(prevLiveLo25 + 1e-5, Math.max(0.15 * effLiveStdLog, (empLiveH.q50 - empLiveH.q25) * effLiveStdLog));
+    const liveUp95Off = Math.max(prevLiveUp95 + 1e-5, Math.max(liveUp75Off + 0.15 * effLiveStdLog, (empLiveH.q95 - empLiveH.q50) * effLiveStdLog));
+    const liveLo05Off = Math.max(prevLiveLo05 + 1e-5, Math.max(liveLo25Off + 0.15 * effLiveStdLog, (empLiveH.q50 - empLiveH.q05) * effLiveStdLog));
+    prevLiveUp75 = liveUp75Off;
+    prevLiveLo25 = liveLo25Off;
+    prevLiveUp95 = liveUp95Off;
+    prevLiveLo05 = liveLo05Off;
 
     confidenceBand.push({
       step: h,
       time: stepTime,
-      upper95: Number((liveVal * Math.exp(1.96 * effStdLog)).toFixed(2)),
-      upper75: Number((liveVal * Math.exp(0.674 * effStdLog)).toFixed(2)),
-      lower25: Number((liveVal * Math.exp(-0.674 * effStdLog)).toFixed(2)),
-      lower05: Number((liveVal * Math.exp(-1.96 * effStdLog)).toFixed(2)),
+      upper95: Number(Math.exp(liveMedLog + liveUp95Off).toFixed(2)),
+      upper75: Number(Math.exp(liveMedLog + liveUp75Off).toFixed(2)),
+      lower25: Number(Math.exp(liveMedLog - liveLo25Off).toFixed(2)),
+      lower05: Number(Math.exp(liveMedLog - liveLo05Off).toFixed(2)),
+    });
+
+    const candUp75Off = Math.max(prevCandUp75 + 1e-5, Math.max(0.15 * effCandStdLog, (empCandH.q75 - empCandH.q50) * effCandStdLog));
+    const candLo25Off = Math.max(prevCandLo25 + 1e-5, Math.max(0.15 * effCandStdLog, (empCandH.q50 - empCandH.q25) * effCandStdLog));
+    const candUp95Off = Math.max(prevCandUp95 + 1e-5, Math.max(candUp75Off + 0.15 * effCandStdLog, (empCandH.q95 - empCandH.q50) * effCandStdLog));
+    const candLo05Off = Math.max(prevCandLo05 + 1e-5, Math.max(candLo25Off + 0.15 * effCandStdLog, (empCandH.q50 - empCandH.q05) * effCandStdLog));
+    prevCandUp75 = candUp75Off;
+    prevCandLo25 = candLo25Off;
+    prevCandUp95 = candUp95Off;
+    prevCandLo05 = candLo05Off;
+
+    candidateBand.push({
+      step: h,
+      time: stepTime,
+      upper95: Number(Math.exp(candMedLog + candUp95Off).toFixed(2)),
+      upper75: Number(Math.exp(candMedLog + candUp75Off).toFixed(2)),
+      lower25: Number(Math.exp(candMedLog - candLo25Off).toFixed(2)),
+      lower05: Number(Math.exp(candMedLog - candLo05Off).toFixed(2)),
     });
   }
 
@@ -1130,40 +1320,51 @@ export function evaluateBtcScientificCore(params: {
   const quantileMultipliers = [-1.35, -0.75, -0.25, 0.25, 0.75, 1.35];
   const buildEnsemblePlume = (
     medianPts: BtcForecastTrackPoint[],
+    condExpPts: BtcForecastTrackPoint[],
     bandPts: BtcConfidenceBandPoint[]
-  ): EnsemblePlume => ({
-    medianTrack: medianPts.map(p => ({ time: p.time, value: p.value })),
-    upper95: bandPts.map(b => ({ time: b.time, value: b.upper95 })),
-    upper75: bandPts.map(b => ({ time: b.time, value: b.upper75 })),
-    lower25: bandPts.map(b => ({ time: b.time, value: b.lower25 })),
-    lower05: bandPts.map(b => ({ time: b.time, value: b.lower05 })),
-    sampleTracks: quantileMultipliers.map((qMult, idx) => ({
-      id: idx,
-      path: medianPts.map((p, sIdx) => {
-        const b = bandPts[sIdx];
-        const halfSpread = b ? Math.max(1, (b.upper75 - b.lower25) * 0.5) : currentSpot * 0.005;
-        return {
-          time: p.time,
-          value: Number((p.value + qMult * halfSpread).toFixed(2)),
-        };
-      }),
-    })),
-  });
-
-  const liveEnsemblePlume = buildEnsemblePlume(liveForecast, confidenceBand);
-  const candidateBand: BtcConfidenceBandPoint[] = candidateForecast.map((pt, idx) => {
-    const b = confidenceBand[idx];
-    const ratio = pt.value / Math.max(1, liveForecast[idx]?.value || pt.value);
+  ): EnsemblePlume => {
+    const medTrack = medianPts.map(p => ({ time: p.time, value: p.value }));
+    const expTrack = condExpPts.map(p => ({ time: p.time, value: p.value }));
+    const wedge =
+      expTrack.length > 0 && medTrack.length > 0
+        ? Number((expTrack[expTrack.length - 1].value - medTrack[medTrack.length - 1].value).toFixed(4))
+        : 0;
     return {
-      step: pt.step,
-      time: pt.time,
-      upper95: Number((b.upper95 * ratio).toFixed(2)),
-      upper75: Number((b.upper75 * ratio).toFixed(2)),
-      lower25: Number((b.lower25 * ratio).toFixed(2)),
-      lower05: Number((b.lower05 * ratio).toFixed(2)),
+      medianTrack: medTrack,
+      predictiveMedianTrack: medTrack,
+      conditionalExpectationTrack: expTrack,
+      experimentalDriftTrack: expTrack,
+      meanMedianSkewWedgeUsd: wedge,
+      horizonDistributionMethod: 'DIRECT_HORIZON_EMPIRICAL_FHS_ACI',
+      directionalGatePassed,
+      upper95: bandPts.map(b => ({ time: b.time, value: b.upper95 })),
+      upper75: bandPts.map(b => ({ time: b.time, value: b.upper75 })),
+      lower25: bandPts.map(b => ({ time: b.time, value: b.lower25 })),
+      lower05: bandPts.map(b => ({ time: b.time, value: b.lower05 })),
+      sampleTracks: quantileMultipliers.map((qMult, idx) => ({
+        id: idx,
+        path: medianPts.map((p, sIdx) => {
+          const b = bandPts[sIdx];
+          const halfSpread = b ? Math.max(1, (b.upper75 - b.lower25) * 0.5) : currentSpot * 0.005;
+          return {
+            time: p.time,
+            value: Number((p.value + qMult * halfSpread).toFixed(2)),
+          };
+        }),
+      })),
     };
-  });
-  const candidateEnsemblePlume = buildEnsemblePlume(candidateForecast, candidateBand);
+  };
+
+  const liveEnsemblePlume = buildEnsemblePlume(
+    liveForecast,
+    liveExperimentalForecast,
+    confidenceBand
+  );
+  const candidateEnsemblePlume = buildEnsemblePlume(
+    candidateForecast,
+    candidateExperimentalForecast,
+    candidateBand
+  );
 
   diagnosticsEn.push(
     `BDF-B v1.0 evaluated ${n} spot BTC bars on 24/7 continuous calendar (${latestSession.weekpart}, isFuturesClosed=false).`,

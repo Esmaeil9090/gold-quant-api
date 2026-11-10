@@ -1,0 +1,3812 @@
+{
+  "dataClassification": "REAL-FIXTURE",
+  "timeframe": "15m",
+  "source": "Bybit V5 Public Spot Kline + Linear Perp Mark/Index Kline + Open Interest + Funding History",
+  "retrievedAtIso": "2026-11-09T03:55:25.371Z",
+  "candlesCount": 200,
+  "derivativesCount": 200,
+  "candles": [
+    {
+      "time": 1794016800,
+      "open": 76035.2,
+      "high": 76098.5,
+      "low": 76035.2,
+      "close": 76098.5,
+      "volume": 22.495684
+    },
+    {
+      "time": 1794017700,
+      "open": 76098.5,
+      "high": 76098.5,
+      "low": 76051.6,
+      "close": 76062.7,
+      "volume": 22.349969
+    },
+    {
+      "time": 1794018600,
+      "open": 76062.7,
+      "high": 76069.7,
+      "low": 76024.3,
+      "close": 76045.8,
+      "volume": 19.806405
+    },
+    {
+      "time": 1794019500,
+      "open": 76045.8,
+      "high": 76093.4,
+      "low": 76011.9,
+      "close": 76040.6,
+      "volume": 30.085015
+    },
+    {
+      "time": 1794020400,
+      "open": 76040.6,
+      "high": 76101.9,
+      "low": 76040.5,
+      "close": 76075.6,
+      "volume": 15.224875
+    },
+    {
+      "time": 1794021300,
+      "open": 76075.6,
+      "high": 76075.7,
+      "low": 76000,
+      "close": 76000,
+      "volume": 21.643818
+    },
+    {
+      "time": 1794022200,
+      "open": 76000,
+      "high": 76017.8,
+      "low": 75791.4,
+      "close": 75796,
+      "volume": 53.588235
+    },
+    {
+      "time": 1794023100,
+      "open": 75796,
+      "high": 75899.1,
+      "low": 75794.6,
+      "close": 75899.1,
+      "volume": 30.547683
+    },
+    {
+      "time": 1794024000,
+      "open": 75899.1,
+      "high": 75909.1,
+      "low": 75861.7,
+      "close": 75861.8,
+      "volume": 27.057352
+    },
+    {
+      "time": 1794024900,
+      "open": 75861.8,
+      "high": 75894.9,
+      "low": 75845.5,
+      "close": 75859.1,
+      "volume": 35.922625
+    },
+    {
+      "time": 1794025800,
+      "open": 75859.1,
+      "high": 75911.5,
+      "low": 75859.1,
+      "close": 75884,
+      "volume": 21.75011
+    },
+    {
+      "time": 1794026700,
+      "open": 75884,
+      "high": 75917.6,
+      "low": 75851.4,
+      "close": 75902.8,
+      "volume": 29.272209
+    },
+    {
+      "time": 1794027600,
+      "open": 75902.8,
+      "high": 75932,
+      "low": 75890.1,
+      "close": 75923.8,
+      "volume": 24.94189
+    },
+    {
+      "time": 1794028500,
+      "open": 75923.8,
+      "high": 76052.5,
+      "low": 75923.7,
+      "close": 76021.8,
+      "volume": 26.242747
+    },
+    {
+      "time": 1794029400,
+      "open": 76021.8,
+      "high": 76047.5,
+      "low": 76000.9,
+      "close": 76006.8,
+      "volume": 27.309926
+    },
+    {
+      "time": 1794030300,
+      "open": 76006.8,
+      "high": 76047.3,
+      "low": 76006.7,
+      "close": 76033.1,
+      "volume": 22.535012
+    },
+    {
+      "time": 1794031200,
+      "open": 76033.1,
+      "high": 76050.3,
+      "low": 76009.8,
+      "close": 76048.7,
+      "volume": 28.565051
+    },
+    {
+      "time": 1794032100,
+      "open": 76048.7,
+      "high": 76059.9,
+      "low": 76027.8,
+      "close": 76059.7,
+      "volume": 29.372955
+    },
+    {
+      "time": 1794033000,
+      "open": 76059.7,
+      "high": 76065.7,
+      "low": 76031.8,
+      "close": 76042.8,
+      "volume": 13.29582
+    },
+    {
+      "time": 1794033900,
+      "open": 76042.8,
+      "high": 76049.7,
+      "low": 76036.6,
+      "close": 76049.6,
+      "volume": 8.211711
+    },
+    {
+      "time": 1794034800,
+      "open": 76049.6,
+      "high": 76072.3,
+      "low": 76012.7,
+      "close": 76015.5,
+      "volume": 27.383545
+    },
+    {
+      "time": 1794035700,
+      "open": 76015.5,
+      "high": 76027.7,
+      "low": 75998.8,
+      "close": 76015.9,
+      "volume": 26.088964
+    },
+    {
+      "time": 1794036600,
+      "open": 76015.9,
+      "high": 76031.1,
+      "low": 76005.2,
+      "close": 76030.9,
+      "volume": 13.090218
+    },
+    {
+      "time": 1794037500,
+      "open": 76030.9,
+      "high": 76115.4,
+      "low": 76030.8,
+      "close": 76091.8,
+      "volume": 33.009195
+    },
+    {
+      "time": 1794038400,
+      "open": 76091.8,
+      "high": 76130.7,
+      "low": 76080.1,
+      "close": 76110.7,
+      "volume": 51.870668
+    },
+    {
+      "time": 1794039300,
+      "open": 76110.7,
+      "high": 76136.2,
+      "low": 76106.6,
+      "close": 76117.4,
+      "volume": 29.528314
+    },
+    {
+      "time": 1794040200,
+      "open": 76117.4,
+      "high": 76132.1,
+      "low": 76113.3,
+      "close": 76132,
+      "volume": 10.994326
+    },
+    {
+      "time": 1794041100,
+      "open": 76132,
+      "high": 76198.1,
+      "low": 76132,
+      "close": 76198.1,
+      "volume": 33.750961
+    },
+    {
+      "time": 1794042000,
+      "open": 76198.1,
+      "high": 76241.5,
+      "low": 76147,
+      "close": 76192.4,
+      "volume": 54.786841
+    },
+    {
+      "time": 1794042900,
+      "open": 76192.4,
+      "high": 76192.4,
+      "low": 76069.6,
+      "close": 76074.4,
+      "volume": 42.384384
+    },
+    {
+      "time": 1794043800,
+      "open": 76074.4,
+      "high": 76123.7,
+      "low": 76065.5,
+      "close": 76084,
+      "volume": 35.586362
+    },
+    {
+      "time": 1794044700,
+      "open": 76084,
+      "high": 76094.4,
+      "low": 76013.9,
+      "close": 76048.8,
+      "volume": 27.277613
+    },
+    {
+      "time": 1794045600,
+      "open": 76048.8,
+      "high": 76074.8,
+      "low": 76031.5,
+      "close": 76037.5,
+      "volume": 17.472546
+    },
+    {
+      "time": 1794046500,
+      "open": 76037.5,
+      "high": 76048.4,
+      "low": 75956.7,
+      "close": 75967.9,
+      "volume": 33.978056
+    },
+    {
+      "time": 1794047400,
+      "open": 75967.9,
+      "high": 75996.1,
+      "low": 75950,
+      "close": 75975.2,
+      "volume": 31.992365
+    },
+    {
+      "time": 1794048300,
+      "open": 75975.2,
+      "high": 75994.6,
+      "low": 75958.6,
+      "close": 75993,
+      "volume": 18.149329
+    },
+    {
+      "time": 1794049200,
+      "open": 75993,
+      "high": 76037.4,
+      "low": 75972.5,
+      "close": 75981.7,
+      "volume": 35.156372
+    },
+    {
+      "time": 1794050100,
+      "open": 75981.7,
+      "high": 75984.5,
+      "low": 75931.5,
+      "close": 75968.3,
+      "volume": 25.313667
+    },
+    {
+      "time": 1794051000,
+      "open": 75968.3,
+      "high": 76029.4,
+      "low": 75968.3,
+      "close": 76020.3,
+      "volume": 18.25058
+    },
+    {
+      "time": 1794051900,
+      "open": 76020.3,
+      "high": 76032.1,
+      "low": 75980.9,
+      "close": 75980.9,
+      "volume": 19.300279
+    },
+    {
+      "time": 1794052800,
+      "open": 75980.9,
+      "high": 76012.5,
+      "low": 75974.4,
+      "close": 76002.9,
+      "volume": 21.176153
+    },
+    {
+      "time": 1794053700,
+      "open": 76002.9,
+      "high": 76006.8,
+      "low": 75993.7,
+      "close": 76004.5,
+      "volume": 16.830017
+    },
+    {
+      "time": 1794054600,
+      "open": 76004.5,
+      "high": 76004.6,
+      "low": 75825.4,
+      "close": 75842.7,
+      "volume": 68.042798
+    },
+    {
+      "time": 1794055500,
+      "open": 75842.7,
+      "high": 75898.9,
+      "low": 75829.2,
+      "close": 75894.7,
+      "volume": 28.46233
+    },
+    {
+      "time": 1794056400,
+      "open": 75894.7,
+      "high": 75916.3,
+      "low": 75836.5,
+      "close": 75846.7,
+      "volume": 21.188
+    },
+    {
+      "time": 1794057300,
+      "open": 75846.7,
+      "high": 75900.7,
+      "low": 75840.6,
+      "close": 75900.7,
+      "volume": 31.955094
+    },
+    {
+      "time": 1794058200,
+      "open": 75900.7,
+      "high": 75941.8,
+      "low": 75897.1,
+      "close": 75941.8,
+      "volume": 19.745
+    },
+    {
+      "time": 1794059100,
+      "open": 75941.8,
+      "high": 75988.8,
+      "low": 75934.3,
+      "close": 75940.7,
+      "volume": 20.807264
+    },
+    {
+      "time": 1794060000,
+      "open": 75940.7,
+      "high": 75955.9,
+      "low": 75935,
+      "close": 75951.6,
+      "volume": 14.526156
+    },
+    {
+      "time": 1794060900,
+      "open": 75951.6,
+      "high": 75951.7,
+      "low": 75930.7,
+      "close": 75936.5,
+      "volume": 16.222927
+    },
+    {
+      "time": 1794061800,
+      "open": 75936.5,
+      "high": 75977,
+      "low": 75936.5,
+      "close": 75954.3,
+      "volume": 28.537168
+    },
+    {
+      "time": 1794062700,
+      "open": 75954.3,
+      "high": 75984.1,
+      "low": 75941.4,
+      "close": 75952.8,
+      "volume": 24.690787
+    },
+    {
+      "time": 1794063600,
+      "open": 75952.8,
+      "high": 75952.9,
+      "low": 75870.1,
+      "close": 75873.4,
+      "volume": 28.424036
+    },
+    {
+      "time": 1794064500,
+      "open": 75873.4,
+      "high": 75893.7,
+      "low": 75848.2,
+      "close": 75864.5,
+      "volume": 26.658136
+    },
+    {
+      "time": 1794065400,
+      "open": 75864.5,
+      "high": 75864.5,
+      "low": 75766.9,
+      "close": 75813,
+      "volume": 34.216206
+    },
+    {
+      "time": 1794066300,
+      "open": 75813,
+      "high": 75813,
+      "low": 75615.3,
+      "close": 75758.9,
+      "volume": 97.926842
+    },
+    {
+      "time": 1794067200,
+      "open": 75758.9,
+      "high": 75786.5,
+      "low": 75739.2,
+      "close": 75785,
+      "volume": 39.341105
+    },
+    {
+      "time": 1794068100,
+      "open": 75785,
+      "high": 75809.6,
+      "low": 75692.1,
+      "close": 75693.4,
+      "volume": 34.104767
+    },
+    {
+      "time": 1794069000,
+      "open": 75693.4,
+      "high": 75790,
+      "low": 75693.4,
+      "close": 75777.1,
+      "volume": 31.9232
+    },
+    {
+      "time": 1794069900,
+      "open": 75777.1,
+      "high": 75786.4,
+      "low": 75721.6,
+      "close": 75740.6,
+      "volume": 25.477867
+    },
+    {
+      "time": 1794070800,
+      "open": 75740.6,
+      "high": 75815.1,
+      "low": 75740.6,
+      "close": 75811.2,
+      "volume": 25.385326
+    },
+    {
+      "time": 1794071700,
+      "open": 75811.2,
+      "high": 75821.5,
+      "low": 75783.2,
+      "close": 75795.4,
+      "volume": 25.822086
+    },
+    {
+      "time": 1794072600,
+      "open": 75795.4,
+      "high": 75871.1,
+      "low": 75794.1,
+      "close": 75855.9,
+      "volume": 20.051276
+    },
+    {
+      "time": 1794073500,
+      "open": 75855.9,
+      "high": 75857.9,
+      "low": 75842.6,
+      "close": 75842.6,
+      "volume": 12.994427
+    },
+    {
+      "time": 1794074400,
+      "open": 75842.6,
+      "high": 75868.7,
+      "low": 75838.2,
+      "close": 75867.3,
+      "volume": 13.90491
+    },
+    {
+      "time": 1794075300,
+      "open": 75867.3,
+      "high": 75892.3,
+      "low": 75804.4,
+      "close": 75805,
+      "volume": 27.668604
+    },
+    {
+      "time": 1794076200,
+      "open": 75805,
+      "high": 75832.3,
+      "low": 75802.5,
+      "close": 75832.2,
+      "volume": 18.283887
+    },
+    {
+      "time": 1794077100,
+      "open": 75832.2,
+      "high": 75837.5,
+      "low": 75800.1,
+      "close": 75800.1,
+      "volume": 17.05363
+    },
+    {
+      "time": 1794078000,
+      "open": 75800.1,
+      "high": 75828.3,
+      "low": 75794.6,
+      "close": 75794.7,
+      "volume": 14.074324
+    },
+    {
+      "time": 1794078900,
+      "open": 75794.7,
+      "high": 75810.8,
+      "low": 75778.9,
+      "close": 75796.6,
+      "volume": 25.45154
+    },
+    {
+      "time": 1794079800,
+      "open": 75796.6,
+      "high": 75800,
+      "low": 75754,
+      "close": 75756.2,
+      "volume": 29.023081
+    },
+    {
+      "time": 1794080700,
+      "open": 75756.2,
+      "high": 75799.7,
+      "low": 75754,
+      "close": 75798.2,
+      "volume": 34.114093
+    },
+    {
+      "time": 1794081600,
+      "open": 75798.2,
+      "high": 75804.6,
+      "low": 75777.9,
+      "close": 75799.3,
+      "volume": 15.933283
+    },
+    {
+      "time": 1794082500,
+      "open": 75799.3,
+      "high": 75799.3,
+      "low": 75753.9,
+      "close": 75757.8,
+      "volume": 22.253958
+    },
+    {
+      "time": 1794083400,
+      "open": 75757.8,
+      "high": 75757.8,
+      "low": 75727.1,
+      "close": 75727.2,
+      "volume": 27.399534
+    },
+    {
+      "time": 1794084300,
+      "open": 75727.2,
+      "high": 75727.8,
+      "low": 75608.5,
+      "close": 75696.7,
+      "volume": 67.113967
+    },
+    {
+      "time": 1794085200,
+      "open": 75696.7,
+      "high": 75716,
+      "low": 75613.8,
+      "close": 75621.4,
+      "volume": 50.76592
+    },
+    {
+      "time": 1794086100,
+      "open": 75621.4,
+      "high": 75650,
+      "low": 75613.8,
+      "close": 75638.1,
+      "volume": 35.478128
+    },
+    {
+      "time": 1794087000,
+      "open": 75638.1,
+      "high": 75704.9,
+      "low": 75565.7,
+      "close": 75704.9,
+      "volume": 51.999124
+    },
+    {
+      "time": 1794087900,
+      "open": 75704.9,
+      "high": 75746.3,
+      "low": 75688.1,
+      "close": 75746.2,
+      "volume": 15.492784
+    },
+    {
+      "time": 1794088800,
+      "open": 75746.2,
+      "high": 75781.8,
+      "low": 75739.4,
+      "close": 75746.3,
+      "volume": 37.709711
+    },
+    {
+      "time": 1794089700,
+      "open": 75746.3,
+      "high": 75820.7,
+      "low": 75725,
+      "close": 75725,
+      "volume": 35.089525
+    },
+    {
+      "time": 1794090600,
+      "open": 75725,
+      "high": 75813,
+      "low": 75722.4,
+      "close": 75803.6,
+      "volume": 35.989487
+    },
+    {
+      "time": 1794091500,
+      "open": 75803.6,
+      "high": 75803.6,
+      "low": 75739.9,
+      "close": 75783,
+      "volume": 23.371137
+    },
+    {
+      "time": 1794092400,
+      "open": 75783,
+      "high": 75785.9,
+      "low": 75731.8,
+      "close": 75785.9,
+      "volume": 44.874177
+    },
+    {
+      "time": 1794093300,
+      "open": 75785.9,
+      "high": 75840.8,
+      "low": 75747.4,
+      "close": 75790.1,
+      "volume": 51.193904
+    },
+    {
+      "time": 1794094200,
+      "open": 75790.1,
+      "high": 75875.1,
+      "low": 75790,
+      "close": 75865.8,
+      "volume": 31.409801
+    },
+    {
+      "time": 1794095100,
+      "open": 75865.8,
+      "high": 75935.2,
+      "low": 75860.4,
+      "close": 75870.5,
+      "volume": 32.162067
+    },
+    {
+      "time": 1794096000,
+      "open": 75870.5,
+      "high": 75870.6,
+      "low": 75818.7,
+      "close": 75818.8,
+      "volume": 16.403824
+    },
+    {
+      "time": 1794096900,
+      "open": 75818.8,
+      "high": 75828.1,
+      "low": 75800,
+      "close": 75800.1,
+      "volume": 14.039729
+    },
+    {
+      "time": 1794097800,
+      "open": 75800.1,
+      "high": 75800.1,
+      "low": 75732.1,
+      "close": 75762,
+      "volume": 26.091771
+    },
+    {
+      "time": 1794098700,
+      "open": 75762,
+      "high": 75806.5,
+      "low": 75761.9,
+      "close": 75806.4,
+      "volume": 15.701097
+    },
+    {
+      "time": 1794099600,
+      "open": 75806.4,
+      "high": 75831.1,
+      "low": 75797.3,
+      "close": 75831.1,
+      "volume": 37.013913
+    },
+    {
+      "time": 1794100500,
+      "open": 75831.1,
+      "high": 75831.1,
+      "low": 75781.5,
+      "close": 75788.8,
+      "volume": 24.544708
+    },
+    {
+      "time": 1794101400,
+      "open": 75788.8,
+      "high": 75816.1,
+      "low": 75779.4,
+      "close": 75786.4,
+      "volume": 40.110165
+    },
+    {
+      "time": 1794102300,
+      "open": 75786.4,
+      "high": 75786.4,
+      "low": 75751.2,
+      "close": 75751.2,
+      "volume": 20.125319
+    },
+    {
+      "time": 1794103200,
+      "open": 75751.2,
+      "high": 75751.4,
+      "low": 75691.7,
+      "close": 75691.8,
+      "volume": 31.080505
+    },
+    {
+      "time": 1794104100,
+      "open": 75691.8,
+      "high": 75760.4,
+      "low": 75658.3,
+      "close": 75733.3,
+      "volume": 40.841658
+    },
+    {
+      "time": 1794105000,
+      "open": 75733.3,
+      "high": 75759.4,
+      "low": 75697.9,
+      "close": 75698,
+      "volume": 24.924612
+    },
+    {
+      "time": 1794105900,
+      "open": 75698,
+      "high": 75794.3,
+      "low": 75677.2,
+      "close": 75792.4,
+      "volume": 33.614906
+    },
+    {
+      "time": 1794106800,
+      "open": 75792.4,
+      "high": 75937,
+      "low": 75792.4,
+      "close": 75911.1,
+      "volume": 39.375144
+    },
+    {
+      "time": 1794107700,
+      "open": 75911.1,
+      "high": 75929.6,
+      "low": 75876.9,
+      "close": 75876.9,
+      "volume": 23.979235
+    },
+    {
+      "time": 1794108600,
+      "open": 75876.9,
+      "high": 75885.5,
+      "low": 75850.6,
+      "close": 75880.1,
+      "volume": 13.707582
+    },
+    {
+      "time": 1794109500,
+      "open": 75880.1,
+      "high": 75937.5,
+      "low": 75880.1,
+      "close": 75927.2,
+      "volume": 24.48237
+    },
+    {
+      "time": 1794110400,
+      "open": 75927.2,
+      "high": 75937.5,
+      "low": 75923.4,
+      "close": 75932.8,
+      "volume": 10.988147
+    },
+    {
+      "time": 1794111300,
+      "open": 75932.8,
+      "high": 75981.4,
+      "low": 75932.8,
+      "close": 75952.9,
+      "volume": 17.535073
+    },
+    {
+      "time": 1794112200,
+      "open": 75952.9,
+      "high": 75955.8,
+      "low": 75909,
+      "close": 75909,
+      "volume": 11.065658
+    },
+    {
+      "time": 1794113100,
+      "open": 75909,
+      "high": 75909.1,
+      "low": 75848.7,
+      "close": 75865.5,
+      "volume": 17.982745
+    },
+    {
+      "time": 1794114000,
+      "open": 75865.5,
+      "high": 75914.5,
+      "low": 75865.5,
+      "close": 75914.5,
+      "volume": 13.411278
+    },
+    {
+      "time": 1794114900,
+      "open": 75914.5,
+      "high": 75914.5,
+      "low": 75870.5,
+      "close": 75885.4,
+      "volume": 13.727836
+    },
+    {
+      "time": 1794115800,
+      "open": 75885.4,
+      "high": 75885.5,
+      "low": 75814.6,
+      "close": 75814.7,
+      "volume": 15.780826
+    },
+    {
+      "time": 1794116700,
+      "open": 75814.7,
+      "high": 75836.6,
+      "low": 75811.6,
+      "close": 75836.6,
+      "volume": 16.083047
+    },
+    {
+      "time": 1794117600,
+      "open": 75836.6,
+      "high": 75836.6,
+      "low": 75794.3,
+      "close": 75794.4,
+      "volume": 18.612754
+    },
+    {
+      "time": 1794118500,
+      "open": 75794.4,
+      "high": 75858.4,
+      "low": 75794.3,
+      "close": 75855,
+      "volume": 27.833164
+    },
+    {
+      "time": 1794119400,
+      "open": 75855,
+      "high": 75855.1,
+      "low": 75783.7,
+      "close": 75787.5,
+      "volume": 19.728332
+    },
+    {
+      "time": 1794120300,
+      "open": 75787.5,
+      "high": 75869,
+      "low": 75787.5,
+      "close": 75840.5,
+      "volume": 35.905705
+    },
+    {
+      "time": 1794121200,
+      "open": 75840.5,
+      "high": 75877.1,
+      "low": 75840.4,
+      "close": 75864.4,
+      "volume": 23.385192
+    },
+    {
+      "time": 1794122100,
+      "open": 75864.4,
+      "high": 75878.3,
+      "low": 75858.9,
+      "close": 75859.3,
+      "volume": 24.843051
+    },
+    {
+      "time": 1794123000,
+      "open": 75859.3,
+      "high": 75914,
+      "low": 75848.7,
+      "close": 75913.9,
+      "volume": 19.405391
+    },
+    {
+      "time": 1794123900,
+      "open": 75913.9,
+      "high": 76003.4,
+      "low": 75913.8,
+      "close": 75976.3,
+      "volume": 58.916028
+    },
+    {
+      "time": 1794124800,
+      "open": 75976.3,
+      "high": 75976.4,
+      "low": 75928.1,
+      "close": 75928.1,
+      "volume": 18.672185
+    },
+    {
+      "time": 1794125700,
+      "open": 75928.1,
+      "high": 75928.2,
+      "low": 75876,
+      "close": 75897.8,
+      "volume": 16.414082
+    },
+    {
+      "time": 1794126600,
+      "open": 75897.8,
+      "high": 75957.1,
+      "low": 75889.7,
+      "close": 75930.3,
+      "volume": 25.939911
+    },
+    {
+      "time": 1794127500,
+      "open": 75930.3,
+      "high": 75961.9,
+      "low": 75930.3,
+      "close": 75941.9,
+      "volume": 19.479872
+    },
+    {
+      "time": 1794128400,
+      "open": 75941.9,
+      "high": 75943.9,
+      "low": 75894.5,
+      "close": 75894.5,
+      "volume": 32.344379
+    },
+    {
+      "time": 1794129300,
+      "open": 75894.5,
+      "high": 75931.7,
+      "low": 75882.4,
+      "close": 75905,
+      "volume": 53.943338
+    },
+    {
+      "time": 1794130200,
+      "open": 75905,
+      "high": 75970.2,
+      "low": 75897.7,
+      "close": 75963.7,
+      "volume": 29.363269
+    },
+    {
+      "time": 1794131100,
+      "open": 75963.7,
+      "high": 75963.8,
+      "low": 75923.3,
+      "close": 75934.5,
+      "volume": 16.382273
+    },
+    {
+      "time": 1794132000,
+      "open": 75934.5,
+      "high": 75937.6,
+      "low": 75887.5,
+      "close": 75892.8,
+      "volume": 31.900082
+    },
+    {
+      "time": 1794132900,
+      "open": 75892.8,
+      "high": 75910.5,
+      "low": 75881.7,
+      "close": 75882.9,
+      "volume": 20.863793
+    },
+    {
+      "time": 1794133800,
+      "open": 75882.9,
+      "high": 75901.9,
+      "low": 75811.9,
+      "close": 75895.5,
+      "volume": 30.385816
+    },
+    {
+      "time": 1794134700,
+      "open": 75895.5,
+      "high": 75912.2,
+      "low": 75889.8,
+      "close": 75897.5,
+      "volume": 14.015694
+    },
+    {
+      "time": 1794135600,
+      "open": 75897.5,
+      "high": 75959.8,
+      "low": 75897.4,
+      "close": 75959.7,
+      "volume": 10.644757
+    },
+    {
+      "time": 1794136500,
+      "open": 75959.7,
+      "high": 76034.8,
+      "low": 75959.7,
+      "close": 75981.7,
+      "volume": 23.556842
+    },
+    {
+      "time": 1794137400,
+      "open": 75981.7,
+      "high": 75999.3,
+      "low": 75970,
+      "close": 75991.5,
+      "volume": 21.383929
+    },
+    {
+      "time": 1794138300,
+      "open": 75991.5,
+      "high": 75995.4,
+      "low": 75969.3,
+      "close": 75976.9,
+      "volume": 18.101824
+    },
+    {
+      "time": 1794139200,
+      "open": 75976.9,
+      "high": 75997.3,
+      "low": 75954.5,
+      "close": 75962.1,
+      "volume": 24.020911
+    },
+    {
+      "time": 1794140100,
+      "open": 75962.1,
+      "high": 75982.9,
+      "low": 75954.2,
+      "close": 75982.8,
+      "volume": 18.5803
+    },
+    {
+      "time": 1794141000,
+      "open": 75982.8,
+      "high": 75996.1,
+      "low": 75932.2,
+      "close": 75932.2,
+      "volume": 28.763944
+    },
+    {
+      "time": 1794141900,
+      "open": 75932.2,
+      "high": 75983.9,
+      "low": 75932.2,
+      "close": 75980.2,
+      "volume": 28.923434
+    },
+    {
+      "time": 1794142800,
+      "open": 75980.2,
+      "high": 76125.9,
+      "low": 75980.2,
+      "close": 76125.9,
+      "volume": 53.755661
+    },
+    {
+      "time": 1794143700,
+      "open": 76125.9,
+      "high": 76200,
+      "low": 76061.4,
+      "close": 76066.5,
+      "volume": 48.084851
+    },
+    {
+      "time": 1794144600,
+      "open": 76066.5,
+      "high": 76086.9,
+      "low": 75910.4,
+      "close": 75938.7,
+      "volume": 59.92611
+    },
+    {
+      "time": 1794145500,
+      "open": 75938.7,
+      "high": 75967,
+      "low": 75898,
+      "close": 75934.4,
+      "volume": 34.975021
+    },
+    {
+      "time": 1794146400,
+      "open": 75934.4,
+      "high": 75984.9,
+      "low": 75910.6,
+      "close": 75973.8,
+      "volume": 60.656016
+    },
+    {
+      "time": 1794147300,
+      "open": 75973.8,
+      "high": 75985,
+      "low": 75897.5,
+      "close": 75955,
+      "volume": 61.434478
+    },
+    {
+      "time": 1794148200,
+      "open": 75955,
+      "high": 76036.9,
+      "low": 75955,
+      "close": 76009.1,
+      "volume": 39.002431
+    },
+    {
+      "time": 1794149100,
+      "open": 76009.1,
+      "high": 76056.8,
+      "low": 76009.1,
+      "close": 76045.6,
+      "volume": 30.908975
+    },
+    {
+      "time": 1794150000,
+      "open": 76045.6,
+      "high": 76076.3,
+      "low": 76029.5,
+      "close": 76032.7,
+      "volume": 35.290191
+    },
+    {
+      "time": 1794150900,
+      "open": 76032.7,
+      "high": 76075.8,
+      "low": 76003.7,
+      "close": 76067.5,
+      "volume": 42.064147
+    },
+    {
+      "time": 1794151800,
+      "open": 76067.5,
+      "high": 76097.8,
+      "low": 76045.8,
+      "close": 76084.5,
+      "volume": 36.892792
+    },
+    {
+      "time": 1794152700,
+      "open": 76084.5,
+      "high": 76084.5,
+      "low": 76060.6,
+      "close": 76076.5,
+      "volume": 22.946191
+    },
+    {
+      "time": 1794153600,
+      "open": 76076.5,
+      "high": 76103.8,
+      "low": 76035.8,
+      "close": 76035.9,
+      "volume": 50.498216
+    },
+    {
+      "time": 1794154500,
+      "open": 76035.9,
+      "high": 76079.9,
+      "low": 76024.5,
+      "close": 76057.7,
+      "volume": 30.027145
+    },
+    {
+      "time": 1794155400,
+      "open": 76057.7,
+      "high": 76057.7,
+      "low": 75976.1,
+      "close": 76003.5,
+      "volume": 44.702945
+    },
+    {
+      "time": 1794156300,
+      "open": 76003.5,
+      "high": 76014.3,
+      "low": 75738.8,
+      "close": 75781.2,
+      "volume": 96.08946
+    },
+    {
+      "time": 1794157200,
+      "open": 75781.2,
+      "high": 75856.9,
+      "low": 75690.8,
+      "close": 75694.9,
+      "volume": 70.101053
+    },
+    {
+      "time": 1794158100,
+      "open": 75694.9,
+      "high": 75774.6,
+      "low": 75669.5,
+      "close": 75698.2,
+      "volume": 62.250109
+    },
+    {
+      "time": 1794159000,
+      "open": 75698.2,
+      "high": 75769.5,
+      "low": 75673.3,
+      "close": 75769.5,
+      "volume": 60.66499
+    },
+    {
+      "time": 1794159900,
+      "open": 75769.5,
+      "high": 75813.8,
+      "low": 75757.3,
+      "close": 75757.3,
+      "volume": 36.843201
+    },
+    {
+      "time": 1794160800,
+      "open": 75757.3,
+      "high": 75896.5,
+      "low": 75737.8,
+      "close": 75896.4,
+      "volume": 56.554896
+    },
+    {
+      "time": 1794161700,
+      "open": 75896.4,
+      "high": 75955.2,
+      "low": 75896.4,
+      "close": 75913.8,
+      "volume": 35.6035
+    },
+    {
+      "time": 1794162600,
+      "open": 75913.8,
+      "high": 75970.5,
+      "low": 75913.7,
+      "close": 75936.6,
+      "volume": 30.986463
+    },
+    {
+      "time": 1794163500,
+      "open": 75936.6,
+      "high": 75966.6,
+      "low": 75929.3,
+      "close": 75948.4,
+      "volume": 33.3387
+    },
+    {
+      "time": 1794164400,
+      "open": 75948.4,
+      "high": 75948.5,
+      "low": 75833.8,
+      "close": 75846.8,
+      "volume": 45.744978
+    },
+    {
+      "time": 1794165300,
+      "open": 75846.8,
+      "high": 75884.7,
+      "low": 75846.8,
+      "close": 75884.6,
+      "volume": 24.667664
+    },
+    {
+      "time": 1794166200,
+      "open": 75884.6,
+      "high": 75934.8,
+      "low": 75874.1,
+      "close": 75904.1,
+      "volume": 18.625599
+    },
+    {
+      "time": 1794167100,
+      "open": 75904.1,
+      "high": 75935.5,
+      "low": 75904,
+      "close": 75926.4,
+      "volume": 8.100687
+    },
+    {
+      "time": 1794168000,
+      "open": 75926.4,
+      "high": 75948.4,
+      "low": 75866.9,
+      "close": 75893.2,
+      "volume": 37.994147
+    },
+    {
+      "time": 1794168900,
+      "open": 75893.2,
+      "high": 75900,
+      "low": 75855.7,
+      "close": 75899.9,
+      "volume": 34.715236
+    },
+    {
+      "time": 1794169800,
+      "open": 75899.9,
+      "high": 75903.6,
+      "low": 75766.9,
+      "close": 75844.6,
+      "volume": 52.113282
+    },
+    {
+      "time": 1794170700,
+      "open": 75844.6,
+      "high": 75844.8,
+      "low": 75750.8,
+      "close": 75750.8,
+      "volume": 35.666453
+    },
+    {
+      "time": 1794171600,
+      "open": 75750.8,
+      "high": 75787,
+      "low": 75687.7,
+      "close": 75742.4,
+      "volume": 53.344765
+    },
+    {
+      "time": 1794172500,
+      "open": 75742.4,
+      "high": 75783.9,
+      "low": 75684.8,
+      "close": 75708.4,
+      "volume": 47.650282
+    },
+    {
+      "time": 1794173400,
+      "open": 75708.4,
+      "high": 75745.8,
+      "low": 75603.9,
+      "close": 75603.9,
+      "volume": 56.614689
+    },
+    {
+      "time": 1794174300,
+      "open": 75603.9,
+      "high": 75603.9,
+      "low": 73468,
+      "close": 74143,
+      "volume": 923.084635
+    },
+    {
+      "time": 1794175200,
+      "open": 74143,
+      "high": 74751,
+      "low": 74032.7,
+      "close": 74513.2,
+      "volume": 323.318218
+    },
+    {
+      "time": 1794176100,
+      "open": 74513.2,
+      "high": 74648.9,
+      "low": 74436.2,
+      "close": 74462.3,
+      "volume": 111.564407
+    },
+    {
+      "time": 1794177000,
+      "open": 74462.3,
+      "high": 74523,
+      "low": 74194.9,
+      "close": 74429.9,
+      "volume": 139.452544
+    },
+    {
+      "time": 1794177900,
+      "open": 74429.9,
+      "high": 74542.6,
+      "low": 74254,
+      "close": 74472.2,
+      "volume": 79.740505
+    },
+    {
+      "time": 1794178800,
+      "open": 74472.2,
+      "high": 75302.6,
+      "low": 74443.7,
+      "close": 75201.8,
+      "volume": 289.404207
+    },
+    {
+      "time": 1794179700,
+      "open": 75201.8,
+      "high": 75731.7,
+      "low": 75200,
+      "close": 75409.4,
+      "volume": 223.488249
+    },
+    {
+      "time": 1794180600,
+      "open": 75409.4,
+      "high": 75470.7,
+      "low": 75040,
+      "close": 75043.7,
+      "volume": 146.507956
+    },
+    {
+      "time": 1794181500,
+      "open": 75043.7,
+      "high": 75060.9,
+      "low": 74596.8,
+      "close": 74855.9,
+      "volume": 172.980565
+    },
+    {
+      "time": 1794182400,
+      "open": 74855.9,
+      "high": 74906.6,
+      "low": 74484.3,
+      "close": 74899.7,
+      "volume": 191.289525
+    },
+    {
+      "time": 1794183300,
+      "open": 74899.7,
+      "high": 75191.8,
+      "low": 74684.5,
+      "close": 75036.8,
+      "volume": 176.496979
+    },
+    {
+      "time": 1794184200,
+      "open": 75036.8,
+      "high": 75159.5,
+      "low": 74819.4,
+      "close": 74951.4,
+      "volume": 139.739742
+    },
+    {
+      "time": 1794185100,
+      "open": 74951.4,
+      "high": 75275.5,
+      "low": 74951.4,
+      "close": 75239,
+      "volume": 185.944245
+    },
+    {
+      "time": 1794186000,
+      "open": 75239,
+      "high": 75496.6,
+      "low": 75045.3,
+      "close": 75098.7,
+      "volume": 188.196036
+    },
+    {
+      "time": 1794186900,
+      "open": 75098.7,
+      "high": 75123,
+      "low": 74745.7,
+      "close": 74761.7,
+      "volume": 215.030384
+    },
+    {
+      "time": 1794187800,
+      "open": 74761.7,
+      "high": 75182.9,
+      "low": 74692.1,
+      "close": 75182.9,
+      "volume": 161.37554
+    },
+    {
+      "time": 1794188700,
+      "open": 75182.9,
+      "high": 75336.7,
+      "low": 75055.4,
+      "close": 75162.1,
+      "volume": 117.1025
+    },
+    {
+      "time": 1794189600,
+      "open": 75162.1,
+      "high": 75373.2,
+      "low": 75118.2,
+      "close": 75249,
+      "volume": 161.620911
+    },
+    {
+      "time": 1794190500,
+      "open": 75249,
+      "high": 75575,
+      "low": 75211.9,
+      "close": 75518.2,
+      "volume": 131.698414
+    },
+    {
+      "time": 1794191400,
+      "open": 75518.2,
+      "high": 75603.4,
+      "low": 75400,
+      "close": 75402.1,
+      "volume": 107.145927
+    },
+    {
+      "time": 1794192300,
+      "open": 75402.1,
+      "high": 75457.8,
+      "low": 75235.1,
+      "close": 75275.8,
+      "volume": 105.608961
+    },
+    {
+      "time": 1794193200,
+      "open": 75275.8,
+      "high": 75316.3,
+      "low": 75002.9,
+      "close": 75002.9,
+      "volume": 125.231779
+    },
+    {
+      "time": 1794194100,
+      "open": 75002.9,
+      "high": 75133.2,
+      "low": 74858.1,
+      "close": 75074.5,
+      "volume": 148.580057
+    },
+    {
+      "time": 1794195000,
+      "open": 75074.5,
+      "high": 75134.3,
+      "low": 74994,
+      "close": 75102.1,
+      "volume": 88.049698
+    },
+    {
+      "time": 1794195900,
+      "open": 75102.1,
+      "high": 75102.1,
+      "low": 74921.6,
+      "close": 74934.8,
+      "volume": 73.362526
+    }
+  ],
+  "derivativesSeries": [
+    {
+      "timestampSec": 1794016800,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70543.61199999,
+      "openInterestChangePct": null,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.7609,
+      "markPriceUsd": 76063.1,
+      "spotPriceUsd": 76098.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794017700,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70546.883,
+      "openInterestChangePct": 0.0046,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -5.1299,
+      "markPriceUsd": 76024.9,
+      "spotPriceUsd": 76062.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794018600,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70500.543,
+      "openInterestChangePct": -0.0657,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3499,
+      "markPriceUsd": 76014.22,
+      "spotPriceUsd": 76045.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794019500,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70458.437,
+      "openInterestChangePct": -0.0597,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1319,
+      "markPriceUsd": 76010.22,
+      "spotPriceUsd": 76040.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794020400,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70478.147,
+      "openInterestChangePct": 0.028,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.2549,
+      "markPriceUsd": 76044.3,
+      "spotPriceUsd": 76075.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794021300,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70479.41499999,
+      "openInterestChangePct": 0.0018,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.6052,
+      "markPriceUsd": 75965.87,
+      "spotPriceUsd": 76000,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794022200,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70455.74,
+      "openInterestChangePct": -0.0336,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1374,
+      "markPriceUsd": 75764.2,
+      "spotPriceUsd": 75796,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794023100,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70394.258,
+      "openInterestChangePct": -0.0873,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1676,
+      "markPriceUsd": 75864,
+      "spotPriceUsd": 75899.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794024000,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70382.16499999,
+      "openInterestChangePct": -0.0172,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -5.0933,
+      "markPriceUsd": 75825.24,
+      "spotPriceUsd": 75861.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794024900,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70397.565,
+      "openInterestChangePct": 0.0219,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1999,
+      "markPriceUsd": 75826.8,
+      "spotPriceUsd": 75859.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794025800,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70383.27099999,
+      "openInterestChangePct": -0.0203,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4489,
+      "markPriceUsd": 75849.4,
+      "spotPriceUsd": 75884,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794026700,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70405.277,
+      "openInterestChangePct": 0.0313,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -5.0958,
+      "markPriceUsd": 75866.77,
+      "spotPriceUsd": 75902.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794027600,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70382.43799999,
+      "openInterestChangePct": -0.0324,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9959,
+      "markPriceUsd": 75884.7,
+      "spotPriceUsd": 75923.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794028500,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70391.024,
+      "openInterestChangePct": 0.0122,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9025,
+      "markPriceUsd": 75985,
+      "spotPriceUsd": 76021.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794029400,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70370.751,
+      "openInterestChangePct": -0.0288,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8866,
+      "markPriceUsd": 75975.6,
+      "spotPriceUsd": 76006.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794030300,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70387.545,
+      "openInterestChangePct": 0.0239,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.2402,
+      "markPriceUsd": 76001.4,
+      "spotPriceUsd": 76033.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794031200,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70376.371,
+      "openInterestChangePct": -0.0159,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.6353,
+      "markPriceUsd": 76012.13,
+      "spotPriceUsd": 76048.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794032100,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70320.471,
+      "openInterestChangePct": -0.0794,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1758,
+      "markPriceUsd": 76026.4,
+      "spotPriceUsd": 76059.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794033000,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70306.66099999,
+      "openInterestChangePct": -0.0196,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3948,
+      "markPriceUsd": 76010.76,
+      "spotPriceUsd": 76042.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794033900,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70325.617,
+      "openInterestChangePct": 0.027,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4129,
+      "markPriceUsd": 76016.92,
+      "spotPriceUsd": 76049.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794034800,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70321.477,
+      "openInterestChangePct": -0.0059,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.8899,
+      "markPriceUsd": 75977.42,
+      "spotPriceUsd": 76015.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794035700,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70149.811,
+      "openInterestChangePct": -0.2441,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -5.3962,
+      "markPriceUsd": 75975.81,
+      "spotPriceUsd": 76015.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794036600,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70149.393,
+      "openInterestChangePct": -0.0006,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -5.8155,
+      "markPriceUsd": 75993.76,
+      "spotPriceUsd": 76030.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794037500,
+      "fundingRate8h": 0.00007609,
+      "openInterestContracts": 70089.061,
+      "openInterestChangePct": -0.086,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.6573,
+      "markPriceUsd": 76059.5,
+      "spotPriceUsd": 76091.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794038400,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 70041.322,
+      "openInterestChangePct": -0.0681,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9346,
+      "markPriceUsd": 76078.77,
+      "spotPriceUsd": 76110.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794039300,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 70010.289,
+      "openInterestChangePct": -0.0443,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.845,
+      "markPriceUsd": 76083.59,
+      "spotPriceUsd": 76117.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794040200,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 70031.215,
+      "openInterestChangePct": 0.0299,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9753,
+      "markPriceUsd": 76098.38,
+      "spotPriceUsd": 76132,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794041100,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 70030.158,
+      "openInterestChangePct": -0.0015,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.3348,
+      "markPriceUsd": 76170.1,
+      "spotPriceUsd": 76198.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794042000,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69958.363,
+      "openInterestChangePct": -0.1025,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1198,
+      "markPriceUsd": 76161.36,
+      "spotPriceUsd": 76192.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794042900,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69766.679,
+      "openInterestChangePct": -0.274,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.7359,
+      "markPriceUsd": 76042.5,
+      "spotPriceUsd": 76074.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794043800,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69772.677,
+      "openInterestChangePct": 0.0086,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.6183,
+      "markPriceUsd": 76054.2,
+      "spotPriceUsd": 76084,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794044700,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69779.16899999,
+      "openInterestChangePct": 0.0093,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3417,
+      "markPriceUsd": 76020,
+      "spotPriceUsd": 76048.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794045600,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69752.42999999,
+      "openInterestChangePct": -0.0383,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9803,
+      "markPriceUsd": 76001.9,
+      "spotPriceUsd": 76037.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794046500,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69721.709,
+      "openInterestChangePct": -0.044,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9519,
+      "markPriceUsd": 75933.81,
+      "spotPriceUsd": 75967.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794047400,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69704.649,
+      "openInterestChangePct": -0.0245,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3065,
+      "markPriceUsd": 75945,
+      "spotPriceUsd": 75975.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794048300,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69697.579,
+      "openInterestChangePct": -0.0101,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4805,
+      "markPriceUsd": 75961.52,
+      "spotPriceUsd": 75993,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794049200,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69708.417,
+      "openInterestChangePct": 0.0156,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4208,
+      "markPriceUsd": 75947.54,
+      "spotPriceUsd": 75981.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794050100,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69721.926,
+      "openInterestChangePct": 0.0194,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1752,
+      "markPriceUsd": 75941.2,
+      "spotPriceUsd": 75968.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794051000,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69611.046,
+      "openInterestChangePct": -0.159,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.874,
+      "markPriceUsd": 75990.5,
+      "spotPriceUsd": 76020.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794051900,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69602.1,
+      "openInterestChangePct": -0.0129,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3997,
+      "markPriceUsd": 75949.8,
+      "spotPriceUsd": 75980.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794052800,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69630.312,
+      "openInterestChangePct": 0.0405,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.6562,
+      "markPriceUsd": 75970.9,
+      "spotPriceUsd": 76002.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794053700,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69643.808,
+      "openInterestChangePct": 0.0194,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8772,
+      "markPriceUsd": 75978.1,
+      "spotPriceUsd": 76004.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794054600,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69634.743,
+      "openInterestChangePct": -0.013,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0767,
+      "markPriceUsd": 75813.86,
+      "spotPriceUsd": 75842.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794055500,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69583.292,
+      "openInterestChangePct": -0.0739,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0462,
+      "markPriceUsd": 75867.2,
+      "spotPriceUsd": 75894.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794056400,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69525.308,
+      "openInterestChangePct": -0.0833,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1611,
+      "markPriceUsd": 75813.4,
+      "spotPriceUsd": 75846.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794057300,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69495.888,
+      "openInterestChangePct": -0.0423,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9458,
+      "markPriceUsd": 75873.18,
+      "spotPriceUsd": 75900.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794058200,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69535.72599999,
+      "openInterestChangePct": 0.0573,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6132,
+      "markPriceUsd": 75915.82,
+      "spotPriceUsd": 75941.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794059100,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69563.746,
+      "openInterestChangePct": 0.0403,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0362,
+      "markPriceUsd": 75907.3,
+      "spotPriceUsd": 75940.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794060000,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69558.081,
+      "openInterestChangePct": -0.0081,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.0481,
+      "markPriceUsd": 75925.1,
+      "spotPriceUsd": 75951.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794060900,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69550.591,
+      "openInterestChangePct": -0.0108,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3443,
+      "markPriceUsd": 75905,
+      "spotPriceUsd": 75936.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794061800,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69539.902,
+      "openInterestChangePct": -0.0154,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3368,
+      "markPriceUsd": 75922.1,
+      "spotPriceUsd": 75954.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794062700,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69580.392,
+      "openInterestChangePct": 0.0582,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.3153,
+      "markPriceUsd": 75925.5,
+      "spotPriceUsd": 75952.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794063600,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69562.709,
+      "openInterestChangePct": -0.0254,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9987,
+      "markPriceUsd": 75843.6,
+      "spotPriceUsd": 75873.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794064500,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69589.354,
+      "openInterestChangePct": 0.0383,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7252,
+      "markPriceUsd": 75833.7,
+      "spotPriceUsd": 75864.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794065400,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69582.186,
+      "openInterestChangePct": -0.0103,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4569,
+      "markPriceUsd": 75781.09,
+      "spotPriceUsd": 75813,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794066300,
+      "fundingRate8h": 0.00002339,
+      "openInterestContracts": 69486.158,
+      "openInterestChangePct": -0.138,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0655,
+      "markPriceUsd": 75729.3,
+      "spotPriceUsd": 75758.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794067200,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69347.765,
+      "openInterestChangePct": -0.1992,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3321,
+      "markPriceUsd": 75750.53,
+      "spotPriceUsd": 75785,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794068100,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69381.316,
+      "openInterestChangePct": 0.0484,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5259,
+      "markPriceUsd": 75670.12,
+      "spotPriceUsd": 75693.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794069000,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69410.508,
+      "openInterestChangePct": 0.0421,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8745,
+      "markPriceUsd": 75748.94,
+      "spotPriceUsd": 75777.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794069900,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69431.713,
+      "openInterestChangePct": 0.0306,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5792,
+      "markPriceUsd": 75716.3,
+      "spotPriceUsd": 75740.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794070800,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69434.175,
+      "openInterestChangePct": 0.0035,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5376,
+      "markPriceUsd": 75786.82,
+      "spotPriceUsd": 75811.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794071700,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69455.25199999,
+      "openInterestChangePct": 0.0304,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.0146,
+      "markPriceUsd": 75774.3,
+      "spotPriceUsd": 75795.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794072600,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69541.64999999,
+      "openInterestChangePct": 0.1244,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.38,
+      "markPriceUsd": 75832.03,
+      "spotPriceUsd": 75855.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794073500,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69567.65399999,
+      "openInterestChangePct": 0.0374,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4491,
+      "markPriceUsd": 75819,
+      "spotPriceUsd": 75842.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794074400,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69580.323,
+      "openInterestChangePct": 0.0182,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.2161,
+      "markPriceUsd": 75843.6,
+      "spotPriceUsd": 75867.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794075300,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69594.676,
+      "openInterestChangePct": 0.0206,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.0341,
+      "markPriceUsd": 75782.2,
+      "spotPriceUsd": 75805,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794076200,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69634.124,
+      "openInterestChangePct": 0.0567,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.7825,
+      "markPriceUsd": 75811.2,
+      "spotPriceUsd": 75832.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794077100,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69645.432,
+      "openInterestChangePct": 0.0162,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5513,
+      "markPriceUsd": 75775.73,
+      "spotPriceUsd": 75800.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794078000,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69652.071,
+      "openInterestChangePct": 0.0095,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4831,
+      "markPriceUsd": 75761.41,
+      "spotPriceUsd": 75794.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794078900,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69657.514,
+      "openInterestChangePct": 0.0078,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5502,
+      "markPriceUsd": 75771.12,
+      "spotPriceUsd": 75796.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794079800,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69680.644,
+      "openInterestChangePct": 0.0332,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.514,
+      "markPriceUsd": 75727.7,
+      "spotPriceUsd": 75756.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794080700,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69691.212,
+      "openInterestChangePct": 0.0152,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.823,
+      "markPriceUsd": 75774.58,
+      "spotPriceUsd": 75798.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794081600,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69720.471,
+      "openInterestChangePct": 0.042,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.839,
+      "markPriceUsd": 75771.1,
+      "spotPriceUsd": 75799.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794082500,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69712.048,
+      "openInterestChangePct": -0.0121,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.7958,
+      "markPriceUsd": 75734.92,
+      "spotPriceUsd": 75757.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794083400,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69699.75599999,
+      "openInterestChangePct": -0.0176,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.046,
+      "markPriceUsd": 75697.6,
+      "spotPriceUsd": 75727.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794084300,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69716.467,
+      "openInterestChangePct": 0.024,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.2339,
+      "markPriceUsd": 75673.88,
+      "spotPriceUsd": 75696.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794085200,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69640.594,
+      "openInterestChangePct": -0.1088,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.086,
+      "markPriceUsd": 75592.29,
+      "spotPriceUsd": 75621.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794086100,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69643.69,
+      "openInterestChangePct": 0.0044,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4964,
+      "markPriceUsd": 75605.1,
+      "spotPriceUsd": 75638.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794087000,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69675.534,
+      "openInterestChangePct": 0.0457,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0407,
+      "markPriceUsd": 75673.4,
+      "spotPriceUsd": 75704.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794087900,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69708.52,
+      "openInterestChangePct": 0.0473,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4984,
+      "markPriceUsd": 75722.8,
+      "spotPriceUsd": 75746.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794088800,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69702.85,
+      "openInterestChangePct": -0.0081,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.2176,
+      "markPriceUsd": 75715.2,
+      "spotPriceUsd": 75746.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794089700,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69685.744,
+      "openInterestChangePct": -0.0245,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8508,
+      "markPriceUsd": 75695.2,
+      "spotPriceUsd": 75725,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794090600,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69687.21799999,
+      "openInterestChangePct": 0.0021,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7784,
+      "markPriceUsd": 75770.5,
+      "spotPriceUsd": 75803.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794091500,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69713.609,
+      "openInterestChangePct": 0.0379,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.782,
+      "markPriceUsd": 75751.3,
+      "spotPriceUsd": 75783,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794092400,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69722.176,
+      "openInterestChangePct": 0.0123,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6459,
+      "markPriceUsd": 75755.1,
+      "spotPriceUsd": 75785.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794093300,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69689.28999999,
+      "openInterestChangePct": -0.0472,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1668,
+      "markPriceUsd": 75757.85,
+      "spotPriceUsd": 75790.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794094200,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69685.00199999,
+      "openInterestChangePct": -0.0062,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8345,
+      "markPriceUsd": 75834.47,
+      "spotPriceUsd": 75865.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794095100,
+      "fundingRate8h": 0.00006287,
+      "openInterestContracts": 69664.774,
+      "openInterestChangePct": -0.029,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.3914,
+      "markPriceUsd": 75842.72,
+      "spotPriceUsd": 75870.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794096000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69653.36599999,
+      "openInterestChangePct": -0.0164,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0347,
+      "markPriceUsd": 75785.99,
+      "spotPriceUsd": 75818.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794096900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69657.011,
+      "openInterestChangePct": 0.0052,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4513,
+      "markPriceUsd": 75772.08,
+      "spotPriceUsd": 75800.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794097800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69602.921,
+      "openInterestChangePct": -0.0777,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.9673,
+      "markPriceUsd": 75736.26,
+      "spotPriceUsd": 75762,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794098700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69600.89,
+      "openInterestChangePct": -0.0029,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.8007,
+      "markPriceUsd": 75781.1,
+      "spotPriceUsd": 75806.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794099600,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69615.172,
+      "openInterestChangePct": 0.0205,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9154,
+      "markPriceUsd": 75799.12,
+      "spotPriceUsd": 75831.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794100500,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69602.448,
+      "openInterestChangePct": -0.0183,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6116,
+      "markPriceUsd": 75755.3,
+      "spotPriceUsd": 75788.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794101400,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69566.64,
+      "openInterestChangePct": -0.0514,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1673,
+      "markPriceUsd": 75749.8,
+      "spotPriceUsd": 75786.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794102300,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69564.11599999,
+      "openInterestChangePct": -0.0036,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7651,
+      "markPriceUsd": 75720.1,
+      "spotPriceUsd": 75751.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794103200,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69575.844,
+      "openInterestChangePct": 0.0169,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4534,
+      "markPriceUsd": 75660.7,
+      "spotPriceUsd": 75691.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794104100,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69566.07799999,
+      "openInterestChangePct": -0.014,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9322,
+      "markPriceUsd": 75703.53,
+      "spotPriceUsd": 75733.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794105000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69584.045,
+      "openInterestChangePct": 0.0258,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.5166,
+      "markPriceUsd": 75663.76,
+      "spotPriceUsd": 75698,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794105900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69595.39599999,
+      "openInterestChangePct": 0.0163,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4266,
+      "markPriceUsd": 75763.3,
+      "spotPriceUsd": 75792.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794106800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 69628.245,
+      "openInterestChangePct": 0.0472,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.412,
+      "markPriceUsd": 75882.12,
+      "spotPriceUsd": 75911.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794107700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70348.5,
+      "openInterestChangePct": 1.0344,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8918,
+      "markPriceUsd": 75848.4,
+      "spotPriceUsd": 75876.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794108600,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70723.393,
+      "openInterestChangePct": 0.5329,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.1447,
+      "markPriceUsd": 75849.3,
+      "spotPriceUsd": 75880.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794109500,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70752.584,
+      "openInterestChangePct": 0.0413,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.7002,
+      "markPriceUsd": 75901.2,
+      "spotPriceUsd": 75927.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794110400,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70957.546,
+      "openInterestChangePct": 0.2897,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.3794,
+      "markPriceUsd": 75904.2,
+      "spotPriceUsd": 75932.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794111300,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70969.744,
+      "openInterestChangePct": 0.0172,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.4004,
+      "markPriceUsd": 75928.5,
+      "spotPriceUsd": 75952.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794112200,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70955.181,
+      "openInterestChangePct": -0.0205,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.2752,
+      "markPriceUsd": 75879.41,
+      "spotPriceUsd": 75909,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794113100,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70919.69899999,
+      "openInterestChangePct": -0.05,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.4451,
+      "markPriceUsd": 75846.07,
+      "spotPriceUsd": 75865.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794114000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70907.145,
+      "openInterestChangePct": -0.0177,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.8639,
+      "markPriceUsd": 75888.41,
+      "spotPriceUsd": 75914.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794114900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70934.374,
+      "openInterestChangePct": 0.0384,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.6568,
+      "markPriceUsd": 75859.43,
+      "spotPriceUsd": 75885.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794115800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70950.716,
+      "openInterestChangePct": 0.023,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6103,
+      "markPriceUsd": 75783.8,
+      "spotPriceUsd": 75814.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794116700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70969.156,
+      "openInterestChangePct": 0.026,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1328,
+      "markPriceUsd": 75801.3,
+      "spotPriceUsd": 75836.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794117600,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70977.228,
+      "openInterestChangePct": 0.0114,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.2313,
+      "markPriceUsd": 75770,
+      "spotPriceUsd": 75794.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794118500,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70958.081,
+      "openInterestChangePct": -0.027,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.8767,
+      "markPriceUsd": 75827.91,
+      "spotPriceUsd": 75855,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794119400,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70958.379,
+      "openInterestChangePct": 0.0004,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.0402,
+      "markPriceUsd": 75760.9,
+      "spotPriceUsd": 75787.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794120300,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70943.35799999,
+      "openInterestChangePct": -0.0212,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.1173,
+      "markPriceUsd": 75810.9,
+      "spotPriceUsd": 75840.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794121200,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71048.795,
+      "openInterestChangePct": 0.1486,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.9211,
+      "markPriceUsd": 75840.6,
+      "spotPriceUsd": 75864.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794122100,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71016.016,
+      "openInterestChangePct": -0.0461,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.657,
+      "markPriceUsd": 75825.8,
+      "spotPriceUsd": 75859.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794123000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71030.886,
+      "openInterestChangePct": 0.0209,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6449,
+      "markPriceUsd": 75885.85,
+      "spotPriceUsd": 75913.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794123900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71045.512,
+      "openInterestChangePct": 0.0206,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.142,
+      "markPriceUsd": 75945.7,
+      "spotPriceUsd": 75976.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794124800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71023.477,
+      "openInterestChangePct": -0.031,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5944,
+      "markPriceUsd": 75897.1,
+      "spotPriceUsd": 75928.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794125700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71015.25999999,
+      "openInterestChangePct": -0.0116,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.5062,
+      "markPriceUsd": 75860.41,
+      "spotPriceUsd": 75897.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794126600,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71056.447,
+      "openInterestChangePct": 0.058,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6823,
+      "markPriceUsd": 75902.1,
+      "spotPriceUsd": 75930.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794127500,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71078.363,
+      "openInterestChangePct": 0.0308,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7503,
+      "markPriceUsd": 75912.77,
+      "spotPriceUsd": 75941.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794128400,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71075.609,
+      "openInterestChangePct": -0.0039,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.2598,
+      "markPriceUsd": 75868.78,
+      "spotPriceUsd": 75894.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794129300,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71028.641,
+      "openInterestChangePct": -0.0661,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.0856,
+      "markPriceUsd": 75877.9,
+      "spotPriceUsd": 75905,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794130200,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71047.395,
+      "openInterestChangePct": 0.0264,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5743,
+      "markPriceUsd": 75932.34,
+      "spotPriceUsd": 75963.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794131100,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71031.935,
+      "openInterestChangePct": -0.0218,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4899,
+      "markPriceUsd": 75906.28,
+      "spotPriceUsd": 75934.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794132000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71049.679,
+      "openInterestChangePct": 0.025,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9307,
+      "markPriceUsd": 75860.83,
+      "spotPriceUsd": 75892.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794132900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71055.937,
+      "openInterestChangePct": 0.0088,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4979,
+      "markPriceUsd": 75846.2,
+      "spotPriceUsd": 75882.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794133800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71047.293,
+      "openInterestChangePct": -0.0122,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.2637,
+      "markPriceUsd": 75871.65,
+      "spotPriceUsd": 75895.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794134700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71026.27,
+      "openInterestChangePct": -0.0296,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0002,
+      "markPriceUsd": 75866.05,
+      "spotPriceUsd": 75897.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794135600,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71005.499,
+      "openInterestChangePct": -0.0292,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.3639,
+      "markPriceUsd": 75928.4,
+      "spotPriceUsd": 75959.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794136500,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70971.051,
+      "openInterestChangePct": -0.0485,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.9315,
+      "markPriceUsd": 75943.5,
+      "spotPriceUsd": 75981.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794137400,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70923.421,
+      "openInterestChangePct": -0.0671,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1835,
+      "markPriceUsd": 75958.12,
+      "spotPriceUsd": 75991.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794138300,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70914.247,
+      "openInterestChangePct": -0.0129,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9024,
+      "markPriceUsd": 75949.9,
+      "spotPriceUsd": 75976.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794139200,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70916.303,
+      "openInterestChangePct": 0.0029,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.081,
+      "markPriceUsd": 75931.43,
+      "spotPriceUsd": 75962.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794140100,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70915.14999999,
+      "openInterestChangePct": -0.0016,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5758,
+      "markPriceUsd": 75956.13,
+      "spotPriceUsd": 75982.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794141000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70926.423,
+      "openInterestChangePct": 0.0159,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.271,
+      "markPriceUsd": 75897.9,
+      "spotPriceUsd": 75932.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794141900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70915.91099999,
+      "openInterestChangePct": -0.0148,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4403,
+      "markPriceUsd": 75954.7,
+      "spotPriceUsd": 75980.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794142800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70960.617,
+      "openInterestChangePct": 0.063,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5087,
+      "markPriceUsd": 76097.8,
+      "spotPriceUsd": 76125.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794143700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71041.59299999,
+      "openInterestChangePct": 0.1141,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0045,
+      "markPriceUsd": 76034.66,
+      "spotPriceUsd": 76066.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794144600,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71121.88,
+      "openInterestChangePct": 0.113,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3785,
+      "markPriceUsd": 75905.86,
+      "spotPriceUsd": 75938.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794145500,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71006.307,
+      "openInterestChangePct": -0.1625,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1971,
+      "markPriceUsd": 75901.04,
+      "spotPriceUsd": 75934.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794146400,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70974.283,
+      "openInterestChangePct": -0.0451,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8948,
+      "markPriceUsd": 75944.28,
+      "spotPriceUsd": 75973.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794147300,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70923.144,
+      "openInterestChangePct": -0.0721,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3895,
+      "markPriceUsd": 75921.4,
+      "spotPriceUsd": 75955,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794148200,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70958.802,
+      "openInterestChangePct": 0.0503,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1167,
+      "markPriceUsd": 75975.9,
+      "spotPriceUsd": 76009.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794149100,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70970.038,
+      "openInterestChangePct": 0.0158,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8847,
+      "markPriceUsd": 76012.5,
+      "spotPriceUsd": 76045.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794150000,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71007.185,
+      "openInterestChangePct": 0.0523,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1259,
+      "markPriceUsd": 76001.44,
+      "spotPriceUsd": 76032.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794150900,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 70995.916,
+      "openInterestChangePct": -0.0159,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.5816,
+      "markPriceUsd": 76030.76,
+      "spotPriceUsd": 76067.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794151800,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71006.561,
+      "openInterestChangePct": 0.015,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4542,
+      "markPriceUsd": 76051.2,
+      "spotPriceUsd": 76084.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794152700,
+      "fundingRate8h": 0.0001,
+      "openInterestContracts": 71043.05899999,
+      "openInterestChangePct": 0.0514,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3826,
+      "markPriceUsd": 76040.2,
+      "spotPriceUsd": 76076.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794153600,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 71038.967,
+      "openInterestChangePct": -0.0058,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4689,
+      "markPriceUsd": 76001.83,
+      "spotPriceUsd": 76035.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794154500,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 71034.429,
+      "openInterestChangePct": -0.0064,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4428,
+      "markPriceUsd": 76021,
+      "spotPriceUsd": 76057.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794155400,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 71010.274,
+      "openInterestChangePct": -0.034,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.309,
+      "markPriceUsd": 75971.5,
+      "spotPriceUsd": 76003.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794156300,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 71032.43399999,
+      "openInterestChangePct": 0.0312,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1038,
+      "markPriceUsd": 75751.4,
+      "spotPriceUsd": 75781.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794157200,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70503.801,
+      "openInterestChangePct": -0.7442,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.3135,
+      "markPriceUsd": 75660.4,
+      "spotPriceUsd": 75694.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794158100,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70552.336,
+      "openInterestChangePct": 0.0688,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4005,
+      "markPriceUsd": 75668.9,
+      "spotPriceUsd": 75698.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794159000,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70685.762,
+      "openInterestChangePct": 0.1891,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.7637,
+      "markPriceUsd": 75747.8,
+      "spotPriceUsd": 75769.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794159900,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70726.785,
+      "openInterestChangePct": 0.058,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1594,
+      "markPriceUsd": 75725,
+      "spotPriceUsd": 75757.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794160800,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70931.458,
+      "openInterestChangePct": 0.2894,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9133,
+      "markPriceUsd": 75864.9,
+      "spotPriceUsd": 75896.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794161700,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70857.391,
+      "openInterestChangePct": -0.1044,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.9032,
+      "markPriceUsd": 75882.9,
+      "spotPriceUsd": 75913.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794162600,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70838.111,
+      "openInterestChangePct": -0.0272,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.7593,
+      "markPriceUsd": 75900,
+      "spotPriceUsd": 75936.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794163500,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70826.719,
+      "openInterestChangePct": -0.0161,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8567,
+      "markPriceUsd": 75917.06,
+      "spotPriceUsd": 75948.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794164400,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70846.589,
+      "openInterestChangePct": 0.0281,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.8894,
+      "markPriceUsd": 75818.2,
+      "spotPriceUsd": 75846.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794165300,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70826.00599999,
+      "openInterestChangePct": -0.0291,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.006,
+      "markPriceUsd": 75856.4,
+      "spotPriceUsd": 75884.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794166200,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70832.067,
+      "openInterestChangePct": 0.0086,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.851,
+      "markPriceUsd": 75873.3,
+      "spotPriceUsd": 75904.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794167100,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70848.742,
+      "openInterestChangePct": 0.0235,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.4256,
+      "markPriceUsd": 75901.7,
+      "spotPriceUsd": 75926.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794168000,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70842.371,
+      "openInterestChangePct": -0.009,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.1544,
+      "markPriceUsd": 75863.55,
+      "spotPriceUsd": 75893.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794168900,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70862.02,
+      "openInterestChangePct": 0.0277,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6047,
+      "markPriceUsd": 75873.09,
+      "spotPriceUsd": 75899.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794169800,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70867.129,
+      "openInterestChangePct": 0.0072,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.2363,
+      "markPriceUsd": 75812.4,
+      "spotPriceUsd": 75844.6,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794170700,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70840.213,
+      "openInterestChangePct": -0.038,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.2773,
+      "markPriceUsd": 75716.02,
+      "spotPriceUsd": 75750.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794171600,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70830.619,
+      "openInterestChangePct": -0.0135,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0703,
+      "markPriceUsd": 75712.4,
+      "spotPriceUsd": 75742.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794172500,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70775.67,
+      "openInterestChangePct": -0.0776,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.7192,
+      "markPriceUsd": 75676.91,
+      "spotPriceUsd": 75708.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794173400,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70754.98699999,
+      "openInterestChangePct": -0.0292,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.8342,
+      "markPriceUsd": 75571.33,
+      "spotPriceUsd": 75603.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794174300,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 70654.147,
+      "openInterestChangePct": -0.1425,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -6.6886,
+      "markPriceUsd": 74091.2,
+      "spotPriceUsd": 74143,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794175200,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 68963.811,
+      "openInterestChangePct": -2.3924,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.7468,
+      "markPriceUsd": 74477.21,
+      "spotPriceUsd": 74513.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794176100,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69242.046,
+      "openInterestChangePct": 0.4035,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.2396,
+      "markPriceUsd": 74432.72,
+      "spotPriceUsd": 74462.3,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794177000,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69315.746,
+      "openInterestChangePct": 0.1064,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -5.147,
+      "markPriceUsd": 74393.97,
+      "spotPriceUsd": 74429.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794177900,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69321.567,
+      "openInterestChangePct": 0.0084,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4475,
+      "markPriceUsd": 74436.1,
+      "spotPriceUsd": 74472.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794178800,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69478.783,
+      "openInterestChangePct": 0.2268,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.311,
+      "markPriceUsd": 75169.69,
+      "spotPriceUsd": 75201.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794179700,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69322.357,
+      "openInterestChangePct": -0.2251,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.5353,
+      "markPriceUsd": 75373.61,
+      "spotPriceUsd": 75409.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794180600,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69179.456,
+      "openInterestChangePct": -0.2061,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0243,
+      "markPriceUsd": 75014,
+      "spotPriceUsd": 75043.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794181500,
+      "fundingRate8h": 0.00008594,
+      "openInterestContracts": 69191.248,
+      "openInterestChangePct": 0.017,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.5665,
+      "markPriceUsd": 74816,
+      "spotPriceUsd": 74855.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794182400,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69108.238,
+      "openInterestChangePct": -0.12,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.023,
+      "markPriceUsd": 74865,
+      "spotPriceUsd": 74899.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794183300,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69150.341,
+      "openInterestChangePct": 0.0609,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6768,
+      "markPriceUsd": 75010.3,
+      "spotPriceUsd": 75036.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794184200,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69716.098,
+      "openInterestChangePct": 0.8182,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0426,
+      "markPriceUsd": 74921.38,
+      "spotPriceUsd": 74951.4,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794185100,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69408.07799999,
+      "openInterestChangePct": -0.4418,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7987,
+      "markPriceUsd": 75208,
+      "spotPriceUsd": 75239,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794186000,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69510.564,
+      "openInterestChangePct": 0.1477,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.7379,
+      "markPriceUsd": 75061.69,
+      "spotPriceUsd": 75098.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794186900,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69366.629,
+      "openInterestChangePct": -0.2071,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.4862,
+      "markPriceUsd": 74729.24,
+      "spotPriceUsd": 74761.7,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794187800,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69274.567,
+      "openInterestChangePct": -0.1327,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -2.8065,
+      "markPriceUsd": 75162.3,
+      "spotPriceUsd": 75182.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794188700,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69281.308,
+      "openInterestChangePct": 0.0097,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0327,
+      "markPriceUsd": 75130.9,
+      "spotPriceUsd": 75162.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794189600,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69328.23299999,
+      "openInterestChangePct": 0.0677,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.1721,
+      "markPriceUsd": 75224.8,
+      "spotPriceUsd": 75249,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794190500,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69373.655,
+      "openInterestChangePct": 0.0655,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.6192,
+      "markPriceUsd": 75486.6,
+      "spotPriceUsd": 75518.2,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794191400,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69182.379,
+      "openInterestChangePct": -0.2757,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7865,
+      "markPriceUsd": 75371.4,
+      "spotPriceUsd": 75402.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794192300,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69319.421,
+      "openInterestChangePct": 0.1981,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.0103,
+      "markPriceUsd": 75252.5,
+      "spotPriceUsd": 75275.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794193200,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69344.77099999,
+      "openInterestChangePct": 0.0366,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.6371,
+      "markPriceUsd": 74969.22,
+      "spotPriceUsd": 75002.9,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794194100,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69279.747,
+      "openInterestChangePct": -0.0938,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.7417,
+      "markPriceUsd": 75045.59,
+      "spotPriceUsd": 75074.5,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794195000,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69298.229,
+      "openInterestChangePct": 0.0267,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -4.0651,
+      "markPriceUsd": 75071.48,
+      "spotPriceUsd": 75102.1,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    },
+    {
+      "timestampSec": 1794195900,
+      "fundingRate8h": 0.00005204,
+      "openInterestContracts": 69267.651,
+      "openInterestChangePct": -0.0441,
+      "liquidationImbalanceNorm": null,
+      "markSpotBasisBps": -3.5739,
+      "markPriceUsd": 74905.42,
+      "spotPriceUsd": 74934.8,
+      "venue": "Bybit V5 Linear Perp & Spot (BTCUSDT)"
+    }
+  ]
+}

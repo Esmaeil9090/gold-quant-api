@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "C2-LIVE-RECORDER-1.0.0",
+  "dataLabel": "REAL-DATA",
+  "startedAtIso": "2026-11-10T17:48:18.397Z",
+  "updatedAtIso": "2026-11-10T18:33:51.936Z",
+  "wsConnected": true,
+  "wsEndpoint": "wss://data-stream.binance.vision/stream?streams=paxgusdt@depth20@100ms/paxgusdt@trade/btcusdt@depth20@100ms/btcusdt@trade",
+  "bybitLinearWsConnected": true,
+  "counts": {
+    "l2Depth20Records": 317,
+    "aggressorTradeRecords": 492,
+    "derivativesFundingOiRecords": 264,
+    "totalRecords": 1073
+  },
+  "files": {
+    "l2Depth20": {
+      "fileName": "l2_depth20_100ms.jsonl",
+      "relativePath": "data/live_recorder/l2_depth20_100ms.jsonl",
+      "recordCount": 317,
+      "byteSize": 341110,
+      "sha256": "eccba9ba032539e73ec600c6c707e4c2f9b89ab7a502a3a3c3bc9563d6ec0da4",
+      "firstCaptureIso": "2026-11-10T17:48:19.433Z",
+      "lastCaptureIso": "2026-11-10T18:33:51.934Z"
+    },
+    "aggressorTrades": {
+      "fileName": "trades_aggressor.jsonl",
+      "relativePath": "data/live_recorder/trades_aggressor.jsonl",
+      "recordCount": 492,
+      "byteSize": 189854,
+      "sha256": "1685695dc6e8e7b74ec49625da2dfc7803feed25008fbeeb4a221870912ba869",
+      "firstCaptureIso": "2026-11-10T17:48:19.522Z",
+      "lastCaptureIso": "2026-11-10T18:33:31.150Z"
+    },
+    "derivativesFundingOi": {
+      "fileName": "derivatives_funding_oi.jsonl",
+      "relativePath": "data/live_recorder/derivatives_funding_oi.jsonl",
+      "recordCount": 264,
+      "byteSize": 111402,
+      "sha256": "139f7fcd1b405b107dcdfbbd6982e1650edba251ab4160b65fde836a01a9850f",
+      "firstCaptureIso": "2026-11-10T17:48:19.143Z",
+      "lastCaptureIso": "2026-11-10T18:33:41.127Z"
+    }
+  }
+}

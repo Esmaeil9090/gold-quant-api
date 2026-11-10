@@ -45,6 +45,7 @@ import type {
   EpisodicShockRecord,
   Level5MetaCognitionTelemetry,
   OpenEndedCausalDiscoveryTelemetry,
+  PulseIntelligenceTelemetry,
   SymbolicExpressionNodeRecord,
 } from '../contracts/quantContracts.js';
 import {
@@ -94,6 +95,7 @@ import {
   isCloudSqlConfigured,
   syncArchitectureStoreToCloudSql,
 } from '../db/gdfRepository.js';
+import { evaluatePulseIntelligenceCore } from './pulseIntelligenceEngine.js';
 
 export enum FaultType {
   WRONG_DIRECTION = 'WRONG_DIRECTION',
@@ -497,6 +499,7 @@ interface RuntimeCoreStore {
   episodicRegimeBank: EpisodicShockRecord[];
   dirichletTransitionCounts5x5: number[][];
   lastLevel5MetaCognition?: Level5MetaCognitionTelemetry;
+  lastPulseIntelligence?: PulseIntelligenceTelemetry;
 }
 
 export interface LatentParameterDiffItem {
@@ -3691,6 +3694,9 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
           ),
         };
 
+  const isolatedLiveBaseTuning = Object.freeze(structuredClone(liveBaseTuning));
+  const isolatedCandTuningOverrides = Object.freeze(structuredClone(candTuningOverrides));
+
   let scientificCore = evaluateScientificCorePipeline({
     candles,
     interval,
@@ -3702,8 +3708,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     verifiedVenueCameras,
     macroNews,
     extensionInput,
-    liveTuning: liveBaseTuning,
-    candidateTuningOverrides: candTuningOverrides,
+    liveTuning: isolatedLiveBaseTuning,
+    candidateTuningOverrides: isolatedCandTuningOverrides,
     dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
   });
 
@@ -3714,7 +3720,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     equilibriumAnchorPrice: liveBaseTuning.equilibriumAnchorOverride ?? rawEquilibriumPrice,
     liveEnsemble: scientificCore.yellowLineConditionalExpectation,
     candidateEnsemble:
-      scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation,
+      scientificCore.candidateLatentExpectation ??
+      structuredClone(scientificCore.yellowLineConditionalExpectation),
     recentResiduals: scientificCore.residualOracle.recentResiduals,
     liveMacro,
     macroNews,
@@ -3853,6 +3860,15 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
       },
     };
 
+    const isolatedLivePolicyTuning = Object.freeze(
+      structuredClone(
+        hadPendingPromotionAck && coreStore.promotedCandTuningOverrides
+          ? liveBaseTuning
+          : livePolicyTuning
+      )
+    );
+    const isolatedCandPolicyTuning = Object.freeze(structuredClone(candPolicyTuning));
+
     scientificCore = evaluateScientificCorePipeline({
       candles,
       interval,
@@ -3864,11 +3880,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
       verifiedVenueCameras,
       macroNews,
       extensionInput,
-      liveTuning:
-        hadPendingPromotionAck && coreStore.promotedCandTuningOverrides
-          ? liveBaseTuning
-          : livePolicyTuning,
-      candidateTuningOverrides: candPolicyTuning,
+      liveTuning: isolatedLivePolicyTuning,
+      candidateTuningOverrides: isolatedCandPolicyTuning,
       dataDrivenMinWindowBars: verificationReport.dataDrivenMinWindowBars,
     });
   }
@@ -3936,7 +3949,8 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     : scientificCore.yellowLineConditionalExpectation;
   let candidateEnsemble: EnsemblePlume = btcDedicatedOut
     ? btcDedicatedOut.candidateEnsemblePlume
-    : scientificCore.candidateLatentExpectation || scientificCore.yellowLineConditionalExpectation;
+    : scientificCore.candidateLatentExpectation ??
+      structuredClone(scientificCore.yellowLineConditionalExpectation);
 
   // 7. Check if Automatic Promotion is enabled AND all 8 gates passed (VERIFIED_FOR_PROMOTION)
   //    AND no blocking forecast faults are active in MarketAwarenessState
@@ -4053,6 +4067,27 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     persistCoreStoreToDisk(coreStore);
   }
 
+  const pulseIntelligence = evaluatePulseIntelligenceCore({
+    assetClass: isBtcAsset ? 'BTC' : 'GOLD',
+    instrumentIdentity,
+    timeframe: interval,
+    intervalStepSeconds,
+    candles,
+    atr,
+    liveMacro,
+    macroNews,
+    scientificCore,
+    liveEnsemble,
+    candidateEnsemble,
+    marketAwarenessState,
+    htfPocAnchorPrice: liquidityEngine.compositeHtfPocAnchor,
+    nearestUpperHvn: liquidityEngine.nearestUpperHvn,
+    nearestLowerHvn: liquidityEngine.nearestLowerHvn,
+    vpinScore: vpinBase.vpinScore,
+    crossVenueBasisZScore: cointegrationBasis.zScore,
+  });
+  coreStore.lastPulseIntelligence = pulseIntelligence;
+
   return {
     enabled: flags.ENABLE_PARALLEL_UNIVERSE_CORE,
     autoPromotionEnabled: coreStore.autoPromotionRuntimeEnabled,
@@ -4071,6 +4106,7 @@ export function evaluateParallelUniverseAndAwarenessCore(params: {
     findings,
     marketAwarenessState,
     level5MetaCognition,
+    pulseIntelligence,
     verificationReport,
     auditTrail: coreStore.auditTrail.slice(0, 25),
     promotionOccurredThisCycle,
@@ -5481,6 +5517,7 @@ export function getIntelligenceCoreStateSnapshot() {
     canRollbackWriteBack: coreStore.writeBackVersionHistory.length > 0,
     writeBackVersionHistory: coreStore.writeBackVersionHistory,
     level5MetaCognition: coreStore.lastLevel5MetaCognition || null,
+    pulseIntelligence: coreStore.lastPulseIntelligence || null,
   };
 }
 

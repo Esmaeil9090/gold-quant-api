@@ -36,3 +36,5 @@ __pycache__/
 venv/
 .aistudio/
 public/assets/aistudio/
+data/c2_real_sample/binance_vision_*.json
+data/c2_real_sample/tmp_zips/

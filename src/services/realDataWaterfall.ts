@@ -100,6 +100,13 @@ export interface VerifiedMarketWaterfallResult {
   haltReasonFa?: string;
 }
 
+export type MacroObservationEpistemicState =
+  | 'VERIFIED_POINT_IN_TIME'
+  | 'PRE_SERIES_HISTORICAL_MISSING'
+  | 'RELEASE_DELAYED_OR_HOLIDAY'
+  | 'VINTAGE_UNAVAILABLE_REVISION_RISK'
+  | 'LIVE_FEED_UNAVAILABLE_OR_QUORUM_FAILED';
+
 export interface VerifiedMacroYieldResult {
   nominal10Y: number;
   tipsRealYield10Y: number;
@@ -111,6 +118,9 @@ export interface VerifiedMacroYieldResult {
   netMacroLift: number;
   source: string;
   status: 'ONLINE_MULTI_SOURCE_VERIFIED' | 'DEGRADED_SINGLE_SOURCE' | 'DEGRADED_CACHED_REAL' | 'MACRO_FEED_UNAVAILABLE';
+  epistemicState?: MacroObservationEpistemicState;
+  effectiveAvailableTimestampSec?: number;
+  observationAgeSec?: number;
   lastUpdated: string;
   respondingSources: string[];
   missingSeries?: string[];

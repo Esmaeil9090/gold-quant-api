@@ -125,7 +125,38 @@ export function computeCointegrationBasis(
     };
   }
 
-  const bCandles = secondaryBenchmark.candles;
+  const originTimeSec = candles.length > 0 ? candles[candles.length - 1].time : Infinity;
+  const bCandles = secondaryBenchmark.candles.filter(b => b.time <= originTimeSec);
+  if (bCandles.length < 10) {
+    const subset = candles.slice(-30);
+    let volSum = 0;
+    let pvSum = 0;
+    const vwapSpreads: number[] = [];
+    for (const c of subset) {
+      volSum += c.volume;
+      pvSum += c.close * c.volume;
+      const runningVwap = pvSum / Math.max(1e-6, volSum);
+      vwapSpreads.push(c.close - runningVwap);
+    }
+    const meanBasis = vwapSpreads.reduce((a, b) => a + b, 0) / Math.max(1, vwapSpreads.length);
+    const variance =
+      vwapSpreads.reduce((a, b) => a + Math.pow(b - meanBasis, 2), 0) / Math.max(1, vwapSpreads.length - 1);
+    const stdBasis = Math.sqrt(Math.max(0.04, variance));
+    const basisSpread = parseFloat((vwapSpreads[vwapSpreads.length - 1] || 0).toFixed(2));
+    const zScore = parseFloat(((basisSpread - meanBasis) / stdBasis).toFixed(2));
+
+    return {
+      paxgPrice: currentPrice,
+      comexBenchmarkSpot: parseFloat((currentPrice - basisSpread).toFixed(2)),
+      benchmarkSource: 'Rolling Intraday Real VWAP Anchor (Single-Venue Mode)',
+      basisSpread,
+      meanBasis: parseFloat(meanBasis.toFixed(2)),
+      stdBasis: parseFloat(stdBasis.toFixed(2)),
+      zScore,
+      purgedPrice: parseFloat((currentPrice - basisSpread).toFixed(2)),
+      basisStatus: 'SINGLE_VENUE_UNANCHORED',
+    };
+  }
   const windowSize = Math.min(30, candles.length, bCandles.length);
   const basisSeries: number[] = [];
   for (let i = 0; i < windowSize; i++) {
@@ -534,7 +565,6 @@ export class AdaptiveDPObserver {
     let v = 0.0;
     let prevClose = subset[0].close;
 
-    const meanVol = Math.max(1e-6, subset.reduce((acc, c) => acc + c.volume, 0) / Math.max(1, subset.length));
     const { alphaClock, tauMin, tauMax, huberJumpSigmaThreshold, Qv0Empirical, Qb0Empirical, REmpirical } =
       calibration.ekfObserver;
 
@@ -542,11 +572,14 @@ export class AdaptiveDPObserver {
     let Pb = 0.8;
     let R = REmpirical;
     let totalTau = 0.0;
+    let runningVolSum = 0.0;
     const nisWindow: number[] = [];
 
     for (let i = 0; i < subset.length; i++) {
       const c = subset[i];
-      const volRatio = c.volume / meanVol;
+      runningVolSum += Math.max(1e-6, c.volume);
+      const causalMeanVol = runningVolSum / (i + 1);
+      const volRatio = c.volume / Math.max(1e-6, causalMeanVol);
       const rawTau = alphaClock * volRatio + (1.0 - alphaClock) * 1.0;
       const deltaTau = Math.min(tauMax, Math.max(tauMin, rawTau));
       const isCeiling = rawTau <= tauMin || rawTau >= tauMax;
@@ -722,11 +755,12 @@ export function computeLogOddsSweepDiscriminator(
   let latestHawkesIntensity = 0.0;
   let latestMacroDivergence = 0.0;
 
-  const meanVolAll =
-    candles.slice(-evalWindow).reduce((a, c) => a + c.volume, 0) / Math.max(1, evalWindow);
+  let runningSweepVolSum = 0;
 
   for (let idx = startIdx; idx < candles.length; idx++) {
     const c = candles[idx];
+    runningSweepVolSum += Math.max(1e-6, c.volume);
+    const causalMeanVol = runningSweepVolSum / Math.max(1, idx - startIdx + 1);
     const span = Math.max(0.05, c.high - c.low);
     const body = Math.abs(c.close - c.open);
     const upperWick = c.high - Math.max(c.open, c.close);
@@ -751,7 +785,7 @@ export function computeLogOddsSweepDiscriminator(
       (opposesMacro ? 0.65 : -0.35) + (basisAnchored ? 0.45 : -0.55) + (absRatio - 0.45) * 1.4;
     const relVol = idx === candles.length - 1
       ? vpinTelemetry.relativeVolumeRatio
-      : c.volume / Math.max(1e-6, meanVolAll);
+      : c.volume / Math.max(1e-6, causalMeanVol);
 
     const rawLO =
       1.85 * (absRatio - 0.42) +
@@ -1245,8 +1279,13 @@ export function computeTopDownLiquidityEngine(params: {
   } = params;
 
   const safeAtr = Math.max(0.5, atr);
-  const dailySource = htfDailyCandles && htfDailyCandles.length >= 20
-    ? htfDailyCandles
+  const originTimeSec =
+    intradayCandles.length > 0 ? intradayCandles[intradayCandles.length - 1].time : Infinity;
+  const causalHtfDaily = htfDailyCandles
+    ? htfDailyCandles.filter(b => b.time <= originTimeSec)
+    : undefined;
+  const dailySource = causalHtfDaily && causalHtfDaily.length >= 20
+    ? causalHtfDaily
     : aggregateCandlesByFactor(intradayCandles, Math.max(1, Math.round(86400 / Math.max(60, intervalStepSeconds))));
 
   const monthlySlice = dailySource.slice(-Math.min(240, dailySource.length));
@@ -1398,11 +1437,24 @@ export function computeTopDownLiquidityEngine(params: {
     const localRange = Math.max(0.05, cCur.high - cCur.low);
     const localWick = (cCur.high - Math.max(cCur.open, cCur.close) - (Math.min(cCur.open, cCur.close) - cCur.low)) / localRange;
 
-    const predOu = 0.12 * (equilibriumPrice - cCur.close);
-    const predKalman = 0.35 * (0.55 * kalmanDriftVelocity + 0.45 * localMom);
+    // Strictly causal local equilibrium and VWAP anchor up to step k (never using terminal equilibriumPrice or compositeHtfPocAnchor)
+    const eqPrefix = intradayCandles.slice(Math.max(0, k - 39), k + 1);
+    const causalEqAtK =
+      eqPrefix.reduce((acc, bar) => acc + bar.close, 0) / Math.max(1, eqPrefix.length);
+    let pvAtK = 0;
+    let vvAtK = 0;
+    for (const bar of eqPrefix) {
+      const w = Math.max(1e-6, bar.volume || 1);
+      pvAtK += bar.close * w;
+      vvAtK += w;
+    }
+    const causalPocAtK = pvAtK / Math.max(1e-6, vvAtK);
+
+    const predOu = 0.12 * (causalEqAtK - cCur.close);
+    const predKalman = 0.35 * (0.55 * localMom + 0.45 * localMom);
     const predMacro = orthogonalMacroLift * 0.35;
     const predSweep = (-localWick * safeAtr * 0.12) * (1 - 0.25 * vpinScore);
-    const predLiq = 0.16 * (compositeHtfPocAnchor - cCur.close) + (localEq - cCur.close) * 0.08;
+    const predLiq = 0.16 * (causalPocAtK - cCur.close) + (localEq - cCur.close) * 0.08;
 
     errVarOu += (realizedStep - predOu) ** 2;
     errVarKalman += (realizedStep - predKalman) ** 2;
@@ -1629,18 +1681,19 @@ export function evaluatePureQuantPipeline(
       ? 0.88
       : 1.0;
 
+  // Phase C6 Product Honesty: Default drift to zero in live forecasts unless a component passes the pre-registered directional gate.
   const ensemble = computeEmpiricalQuantilePlumes(
     currentPrice,
-    equilibriumPrice,
-    0.12,
+    currentPrice,
+    0.0,
     garchVolForecast,
     returns,
     24,
     intervalStepSeconds,
     candles[candles.length - 1].time,
     {
-      fusedEquilibriumPrice: equilibriumPrice,
-      fusedNetDriftUsdPerStep: liquidityEngine.fusedNetDriftUsd * 0.35,
+      fusedEquilibriumPrice: currentPrice,
+      fusedNetDriftUsdPerStep: 0.0,
       liquidityVolatilityMultiplier: liquidityVolMult,
       nearestUpperHvn: liquidityEngine.nearestUpperHvn,
       nearestLowerHvn: liquidityEngine.nearestLowerHvn,

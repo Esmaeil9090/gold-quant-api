@@ -844,23 +844,44 @@ export const VERIFIED_2026_POLITICAL_INTELLIGENCE: PoliticalEventIntelligence = 
   electionCycle: '2026_US_MIDTERMS',
   electionDateUtc: '2026-11-03T00:00:00Z',
   electionDateSec: 1793664000,
-  titleEn: 'U.S. Midterm Elections (November 3, 2026)',
-  titleFa: 'انتخابات میان‌دوره‌ای کنگره آمریکا (۳ نوامبر ۲۰۲۶)',
-  status: 'RESULTS_CONFIRMED',
-  latestProbabilitySnapshot: VERIFIED_2026_MIDTERM_ELECTION_SNAPSHOTS[2],
-  historicalSnapshots: VERIFIED_2026_MIDTERM_ELECTION_SNAPSHOTS,
-  recentPolls: VERIFIED_2026_MIDTERM_POLLING_RECORD,
-  falsificationAudit: {
-    pollingTrendDirectionBeforeEvent: 'DEMOCRAT_MOMENTUM',
-    probabilityShiftDetectedTimestampSec: 1793107200, // Oct 28, 2026 (6 days before election)
-    postEventGoldSurgeAttributableUsd: 92.4,
-    predictiveLeadTimeHours: 144, // 6 full days of predictive lead time
-    wasPricedInPreEventPct: 38.5, // 38.5% was priced in during Oct 28 - Nov 2, remainder post-result
+  titleEn: '[UNVERIFIED PLACEHOLDER] U.S. Midterm Elections (November 3, 2026)',
+  titleFa: '[نمونه تاییدنشده] انتخابات میان‌دوره‌ای کنگره آمریکا (۳ نوامبر ۲۰۲۶)',
+  status: 'UNVERIFIED_PLACEHOLDER_QUARANTINED',
+  verificationStatus: 'UNVERIFIED_PLACEHOLDER',
+  latestProbabilitySnapshot: {
+    ...VERIFIED_2026_MIDTERM_ELECTION_SNAPSHOTS[2],
+    isUnverifiedPlaceholder: true,
   },
+  historicalSnapshots: VERIFIED_2026_MIDTERM_ELECTION_SNAPSHOTS.map((s) => ({
+    ...s,
+    isUnverifiedPlaceholder: true,
+  })),
+  recentPolls: VERIFIED_2026_MIDTERM_POLLING_RECORD.map((p) => ({
+    ...p,
+    isUnverifiedPlaceholder: true,
+  })),
+  quarantineNoticeEn:
+    'UNVERIFIED PLACEHOLDER: Static post-hoc midterm polling and election records are quarantined and zeroed out in forecast transmission until live timestamped polling/calendar feeds with revision history are connected.',
 };
+
+// Quarantine all static hardcoded macro events: strip false official verification claims
+for (const ev of OFFICIAL_STRUCTURED_MACRO_CALENDAR_EVENTS) {
+  if (!ev.eventName.startsWith('[UNVERIFIED PLACEHOLDER]')) {
+    ev.eventName = `[UNVERIFIED PLACEHOLDER] ${ev.eventName}`;
+  }
+  ev.provenance = {
+    retrievedAtIso: ev.provenance?.retrievedAtIso || '1970-01-01T00:00:00Z',
+    isVerifiedOfficial: false,
+    verificationStatus: 'UNVERIFIED_PLACEHOLDER',
+    verificationMethod: 'UNVERIFIED_STATIC_PLACEHOLDER_QUARANTINED',
+    releaseTimestampSec: null,
+  };
+}
 
 /**
  * Returns structured macro calendar and political intelligence.
+ * Hardcoded static records are quarantined as UNVERIFIED_PLACEHOLDER_QUARANTINED
+ * until sourced from live BLS / BEA / Fed calendars with separate release timestamps, consensus, and revisions.
  */
 export function getVerifiedMacroCalendarFeed(options?: {
   simulateFailure?: string;
@@ -878,15 +899,13 @@ export function getVerifiedMacroCalendarFeed(options?: {
   }
 
   return {
-    status: 'ONLINE_OFFICIAL_FEEDS',
-    activeSources: [
-      'U.S. Bureau of Labor Statistics (BLS)',
-      'U.S. Bureau of Economic Analysis (BEA)',
-      'Federal Reserve Board of Governors',
-      'U.S. Department of the Treasury (TreasuryDirect)',
-      'FiveThirtyEight / RealClearPolitics Polling Aggregator',
+    status: 'UNVERIFIED_PLACEHOLDER_QUARANTINED',
+    activeSources: [],
+    failedSources: [
+      'BLS Live Release Calendar API (Not Connected — Quarantined Placeholder)',
+      'BEA Live Release Calendar API (Not Connected — Quarantined Placeholder)',
+      'Federal Reserve FOMC Live Calendar Feed (Not Connected — Quarantined Placeholder)',
     ],
-    failedSources: [],
     events: OFFICIAL_STRUCTURED_MACRO_CALENDAR_EVENTS,
     politicalIntelligence: VERIFIED_2026_POLITICAL_INTELLIGENCE,
     lastFetchedIso: new Date().toISOString(),

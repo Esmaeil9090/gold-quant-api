@@ -42,8 +42,18 @@ import {
   applyResidualShockOperator,
   type ResidualShockOperatorResult,
 } from './residualShockOperator.js';
+import {
+  loadPointInTimeMacroSeriesFromFixture,
+  resolvePointInTimeMacroAt,
+  type PointInTimeMacroObservation,
+} from '../services/pointInTimeMacroService.js';
 
-export { FaultType, type FaultClassifierMetricsInput, type FaultClassificationReport };
+export {
+  FaultType,
+  type FaultClassifierMetricsInput,
+  type FaultClassificationReport,
+  type PointInTimeMacroObservation,
+};
 
 /**
  * GDF Scientific Core Engine (Pure Quantitative State-Space & Sonar Layer — Zero I/O)
@@ -720,11 +730,15 @@ export function computeCausalInformationClock(params: {
     const curRangeRatio = ranges[ranges.length - 1] / medRange;
 
     let crossAct = 0.5 * (curVolRatio + curRangeRatio);
-    const extTradeFlow = extensionInput?.aggressorTradeFlow?.find(
-      tf => Math.abs(tf.barTimeSec - candles[i].time) <= 900
-    );
+    const extTradeFlow = [...(extensionInput?.aggressorTradeFlow || [])]
+      .reverse()
+      .find(tf => tf.barTimeSec <= candles[i].time && candles[i].time - tf.barTimeSec <= 900);
     if (extTradeFlow && extTradeFlow.tradeCount > 0) {
-      crossAct = Math.max(0.25, Math.min(4.0, (extTradeFlow.buyerInitiatedVolume + extTradeFlow.sellerInitiatedVolume) / medVol));
+      const bVol = Number(extTradeFlow.buyerInitiatedVolume ?? (extTradeFlow as any).buyAggressorVolume ?? 0);
+      const sVol = Number(extTradeFlow.sellerInitiatedVolume ?? (extTradeFlow as any).sellAggressorVolume ?? 0);
+      if (Number.isFinite(bVol) && Number.isFinite(sVol) && bVol + sVol > 0) {
+        crossAct = Math.max(0.25, Math.min(4.0, (bVol + sVol) / medVol));
+      }
     } else if (extensionInput?.tradeCountPerBar && extensionInput.tradeCountPerBar[i] !== undefined) {
       const tcSlice = extensionInput.tradeCountPerBar.slice(winStart, i + 1).filter(v => v > 0);
       const medTc = Math.max(1, median(tcSlice));
@@ -733,7 +747,13 @@ export function computeCausalInformationClock(params: {
       const targetTime = candles[i].time;
       const venueVolRatios: number[] = [];
       for (const cam of verifiedVenueCameras) {
-        const barIdx = cam.candles.findIndex(b => Math.abs(b.time - targetTime) <= 900);
+        let barIdx = -1;
+        for (let k = cam.candles.length - 1; k >= 0; k--) {
+          if (cam.candles[k].time <= targetTime && targetTime - cam.candles[k].time <= 900) {
+            barIdx = k;
+            break;
+          }
+        }
         if (barIdx >= 0) {
           const camSub = cam.candles.slice(Math.max(0, barIdx - 16), barIdx + 1).map(b => Math.max(1e-6, b.volume));
           const camMed = Math.max(1e-6, median(camSub));
@@ -925,11 +945,15 @@ export function runPulseEchoSonarLayer(params: {
     const tauZ = (deltaTauSeries[i] - medTau) / madTau;
 
     let aggImbalanceZ = 0;
-    const extAgg = extensionInput?.aggressorTradeFlow?.find(tf => Math.abs(tf.barTimeSec - c.time) <= 900);
+    const extAgg = [...(extensionInput?.aggressorTradeFlow || [])]
+      .reverse()
+      .find(tf => tf.barTimeSec <= c.time && c.time - tf.barTimeSec <= 900);
     if (extAgg) {
-      const bVol = extAgg.buyerInitiatedVolume;
-      const sVol = extAgg.sellerInitiatedVolume;
-      aggImbalanceZ = ((bVol - sVol) / Math.max(1e-6, bVol + sVol)) * 2.5;
+      const bVol = Number(extAgg.buyerInitiatedVolume ?? (extAgg as any).buyAggressorVolume ?? 0);
+      const sVol = Number(extAgg.sellerInitiatedVolume ?? (extAgg as any).sellAggressorVolume ?? 0);
+      if (Number.isFinite(bVol) && Number.isFinite(sVol) && bVol + sVol > 0) {
+        aggImbalanceZ = ((bVol - sVol) / Math.max(1e-6, bVol + sVol)) * 2.5;
+      }
     } else if (
       extensionInput?.aggressorBuyVolume?.[i] !== undefined &&
       extensionInput?.aggressorSellVolume?.[i] !== undefined
@@ -939,12 +963,12 @@ export function runPulseEchoSonarLayer(params: {
       aggImbalanceZ = ((bVol - sVol) / Math.max(1e-6, bVol + sVol)) * 2.5;
     }
 
-    const scheduledPulse = extensionInput?.scheduledEconomicPulses?.find(
-      ev => Math.abs(ev.timestampSec - c.time) <= 1800
-    );
+    const scheduledPulse = [...(extensionInput?.scheduledEconomicPulses || [])]
+      .reverse()
+      .find(ev => ev.timestampSec <= c.time && c.time - ev.timestampSec <= 1800);
     const hasMacroRelease =
       Boolean(scheduledPulse) ||
-      Boolean(macroNews && macroNews.some(ev => Math.abs(ev.timestamp - c.time) <= 1800));
+      Boolean(macroNews && macroNews.some(ev => ev.timestamp <= c.time && c.time - ev.timestamp <= 1800));
 
     let pulseType: PulseType | null = null;
     let impulseMagnitudeSigma = 0;
@@ -1039,14 +1063,20 @@ export function runPulseEchoSonarLayer(params: {
       );
 
       let crossVenuePropagationBps = 0;
-      if (secondaryBenchmarkCandles && secondaryBenchmarkCandles.length > echoEnd) {
-        const bIdxPulse = Math.min(secondaryBenchmarkCandles.length - 1, i);
-        const bIdxEnd = Math.min(secondaryBenchmarkCandles.length - 1, echoEnd);
-        const spreadPulse = c.close - secondaryBenchmarkCandles[bIdxPulse].close;
-        const spreadEnd = candles[echoEnd].close - secondaryBenchmarkCandles[bIdxEnd].close;
-        crossVenuePropagationBps = parseFloat(
-          ((Math.abs(spreadPulse - spreadEnd) / Math.max(100, c.close)) * 10000).toFixed(2)
-        );
+      if (secondaryBenchmarkCandles && secondaryBenchmarkCandles.length > 0) {
+        const bPulse = [...secondaryBenchmarkCandles].reverse().find(b => b.time <= c.time);
+        const bEnd = [...secondaryBenchmarkCandles].reverse().find(b => b.time <= candles[echoEnd].time);
+        if (bPulse && bEnd) {
+          const spreadPulse = c.close - bPulse.close;
+          const spreadEnd = candles[echoEnd].close - bEnd.close;
+          crossVenuePropagationBps = parseFloat(
+            ((Math.abs(spreadPulse - spreadEnd) / Math.max(100, c.close)) * 10000).toFixed(2)
+          );
+        } else {
+          crossVenuePropagationBps = parseFloat(
+            ((Math.abs(endDisplacement) / Math.max(100, c.close)) * 10000 * 0.35).toFixed(2)
+          );
+        }
       } else {
         crossVenuePropagationBps = parseFloat(
           ((Math.abs(endDisplacement) / Math.max(100, c.close)) * 10000 * 0.35).toFixed(2)
@@ -1416,17 +1446,20 @@ export function evaluateTriEngineBayesianMetaLearner(params: {
     });
 
     // Hamilton filter step + Dirichlet online transition update
-    const prevDominantIdx = regimePost.indexOf(Math.max(...regimePost));
+    const prevDominantIdx = Math.max(0, regimePost.indexOf(Math.max(...regimePost)));
     const predictedRegime = [0, 0, 0, 0, 0];
     for (let j = 0; j < 5; j++) {
       for (let i = 0; i < 5; i++) {
         predictedRegime[j] += regimePost[i] * transMat[i][j];
       }
     }
-    const unnormPost = predictedRegime.map((p, j) => p * regimeLikelihoods[j]);
+    const unnormPost = predictedRegime.map((p, j) => {
+      const v = p * regimeLikelihoods[j];
+      return Number.isFinite(v) && v > 0 ? v : 1e-4;
+    });
     const sumPost = unnormPost.reduce((a, b) => a + b, 0) || 1;
     regimePost = unnormPost.map(u => u / sumPost);
-    const newDominantIdx = regimePost.indexOf(Math.max(...regimePost));
+    const newDominantIdx = Math.max(0, regimePost.indexOf(Math.max(...regimePost)));
     dirichletCounts[prevDominantIdx][newDominantIdx] += 0.35;
 
     // Particle filter sequential importance update
@@ -1691,6 +1724,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   instrumentIdentity: string;
   extensionInput?: OrderBookMicrostructureExtensionInput;
   tuningOverrides?: LatentFilterTuningOverrides;
+  pointInTimeMacroSeries?: PointInTimeMacroObservation[];
 }): {
   latentState: LatentStateVector6D;
   impliedLatentPriceUsd: number;
@@ -1728,7 +1762,11 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     instrumentIdentity,
     extensionInput,
     tuningOverrides,
+    pointInTimeMacroSeries,
   } = params;
+
+  const macroSeries: PointInTimeMacroObservation[] =
+    pointInTimeMacroSeries ?? loadPointInTimeMacroSeriesFromFixture().observations;
 
   const n = candles.length;
   const logReturns: number[] = [0];
@@ -1759,10 +1797,12 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   const obsPrecMult = Math.max(0.5, Math.min(2.5, tuningOverrides?.crossVenueObservationPrecisionMult ?? 1.0));
 
   const initRefPrice = Math.max(100, candles[0].close);
+  const macroAt0 =
+    macroSeries.length > 0 ? resolvePointInTimeMacroAt(candles[0].time, macroSeries) : liveMacro;
   const initMacroLogForce =
-    liveMacro.status === 'MACRO_FEED_UNAVAILABLE'
+    macroAt0.status === 'MACRO_FEED_UNAVAILABLE'
       ? 0
-      : (liveMacro.netMacroLift / initRefPrice) * etaMacro;
+      : (macroAt0.netMacroLift / initRefPrice) * etaMacro;
   const initMedVol = Math.max(0.0005, parkinsonVols[0] || 0.0015);
 
   const X = [
@@ -1835,10 +1875,52 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     kappaTox = Math.max(0.12, Math.min(0.6, -Math.log(Math.max(0.15, Math.min(0.85, imbAutocorr1 + 0.3)))));
 
     const causalRefPrice = Math.max(100, candles[Math.max(0, t - 1)].close);
-    const causalMacroLogForce =
-      liveMacro.status === 'MACRO_FEED_UNAVAILABLE'
-        ? 0
-        : (liveMacro.netMacroLift / causalRefPrice) * etaMacro;
+    const hasExplicitPointInTimeSeries = Array.isArray(pointInTimeMacroSeries);
+    const barMacro: VerifiedMacroYieldResult =
+      macroSeries.length > 0
+        ? resolvePointInTimeMacroAt(c.time, macroSeries)
+        : hasExplicitPointInTimeSeries
+        ? resolvePointInTimeMacroAt(c.time, [])
+        : t === n - 1 ||
+          (liveMacro.effectiveAvailableTimestampSec !== undefined &&
+            liveMacro.effectiveAvailableTimestampSec <= c.time)
+        ? liveMacro
+        : resolvePointInTimeMacroAt(c.time, []);
+
+    const barMacroState =
+      barMacro.epistemicState ??
+      (barMacro.status === 'MACRO_FEED_UNAVAILABLE'
+        ? 'LIVE_FEED_UNAVAILABLE_OR_QUORUM_FAILED'
+        : 'VERIFIED_POINT_IN_TIME');
+    const isMacroMissingOrUnavailable =
+      barMacro.status === 'MACRO_FEED_UNAVAILABLE' ||
+      barMacroState === 'PRE_SERIES_HISTORICAL_MISSING' ||
+      barMacroState === 'LIVE_FEED_UNAVAILABLE_OR_QUORUM_FAILED' ||
+      !Number.isFinite(barMacro.netMacroLift);
+
+    const macroAgeDays = (barMacro.observationAgeSec ?? 0) / 86400;
+    const staleMacroDecay =
+      barMacroState === 'RELEASE_DELAYED_OR_HOLIDAY'
+        ? Math.exp(-0.08 * Math.max(0, macroAgeDays - 4))
+        : 1.0;
+    const causalMacroLogForce = isMacroMissingOrUnavailable
+      ? 0
+      : (barMacro.netMacroLift / causalRefPrice) * etaMacro * staleMacroDecay;
+
+    // Compute strictly causal cointegration basis mean up to bar t
+    const causalPrefixStart = Math.max(0, t - 29);
+    const causalCandlesSlice = candles.slice(causalPrefixStart, t + 1);
+    const causalBenchAtT = secondaryBenchmark
+      ? {
+          ...secondaryBenchmark,
+          candles: secondaryBenchmark.candles.filter(b => b.time <= c.time),
+        }
+      : null;
+    const causalBasisAtT = computeCointegrationBasis(
+      c.close,
+      causalCandlesSlice,
+      causalBenchAtT
+    ).meanBasis;
 
     const eqStart = Math.max(0, t - 24);
     let eqSum = 0;
@@ -1865,7 +1947,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       const toxRatio = X[3] / safeRes;
       // Innovation-shrunk 1-step drift prevents high-frequency bar noise over-extrapolation
       const driftShrinkage = 0.28;
-      const cointBasisLogCausal = -cointegrationBasisMeanUsd / Math.max(100, causalRefPrice);
+      const cointBasisLogCausal = -causalBasisAtT / Math.max(100, causalRefPrice);
       const structuralStepLogDrift = tuningOverrides?.activeIntegratedStructuralTerm
         ? evaluateCausalStructuralHypothesisTermLogDrift({
             structuralTerm: tuningOverrides.activeIntegratedStructuralTerm,
@@ -1888,7 +1970,11 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       const nextX2 = Math.max(0.0002, Math.min(0.035, eVol * X[2] + (1 - eVol) * causalMedVol));
       const nextX3 = Math.max(-1.0, Math.min(1.0, eTox * X[3]));
       const nextX4 = Math.max(0.05, Math.min(0.99, eRes * X[4] + (1 - eRes) * 0.72));
-      const nextX5 = eMac * X[5] + (1 - eMac) * causalMacroLogForce;
+      // Never inject a synthetic 0.0 macro target when macro observation is missing/unavailable;
+      // decay existing latent macro state purely via eMac and inflate QDiag[5]
+      const nextX5 = isMacroMissingOrUnavailable
+        ? eMac * X[5]
+        : eMac * X[5] + (1 - eMac) * causalMacroLogForce;
 
       const F: number[][] = [
         [
@@ -1907,13 +1993,14 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       ];
 
       const stepVar = Math.max(1e-8, X[2] * X[2] * dt);
+      const macroProcessNoiseMult = isMacroMissingOrUnavailable ? 1.35 : 1.0;
       const QDiag = [
         stepVar * 0.65,
         stepVar * 0.12,
         stepVar * 0.04,
         0.015 * dt,
         0.008 * dt,
-        stepVar * 0.03,
+        stepVar * 0.03 * macroProcessNoiseMult,
       ];
 
       const predP: number[][] = Array.from({ length: 6 }, () => new Array<number>(6).fill(0));
@@ -2035,13 +2122,15 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
       for (let camIdx = 0; camIdx < verifiedVenueCameras.length; camIdx++) {
         const cam = verifiedVenueCameras[camIdx];
         if (cam.providerName === activeProvider && cam.symbol === activeSymbol) continue;
-        const alignedBar = cam.candles.find(b => Math.abs(b.time - c.time) <= intervalStepSeconds * 2);
+        const alignedBar = [...cam.candles]
+          .reverse()
+          .find(b => b.time <= c.time && c.time - b.time <= intervalStepSeconds * 2);
         if (!alignedBar || alignedBar.close <= 100) continue;
 
         const isFuturesCamera = cam.instrumentIdentity === 'COMEX_GOLD_FUTURES' || cam.symbol === 'GC=F';
         const camLogP = Math.log(alignedBar.close);
         const basisUsd = isFuturesCamera
-          ? -cointegrationBasisMeanUsd
+          ? -causalBasisAtT
           : (alignedBar.close - c.close) * 0.35;
         const basisLogOffset = basisUsd / Math.max(100, c.close);
         const camNoiseVar = (microNoiseVarPrimary * (isFuturesCamera ? 1.45 : 1.2)) / obsPrecMult;
@@ -2081,10 +2170,12 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
         }
       }
     } else if (secondaryBenchmark && secondaryBenchmark.candles.length > 0) {
-      const bBar = secondaryBenchmark.candles.find(b => Math.abs(b.time - c.time) <= intervalStepSeconds * 2);
+      const bBar = [...secondaryBenchmark.candles]
+        .reverse()
+        .find(b => b.time <= c.time && c.time - b.time <= intervalStepSeconds * 2);
       if (bBar && bBar.close > 100) {
         const bLogP = Math.log(bBar.close);
-        const basisUsd = -cointegrationBasisMeanUsd;
+        const basisUsd = -causalBasisAtT;
         const basisLogOffset = basisUsd / Math.max(100, c.close);
         const bNoiseVar = (microNoiseVarPrimary * 1.4) / obsPrecMult;
         const upBench = applySequentialMeasurementUpdate6D({
@@ -2131,8 +2222,11 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     X[2] = Math.max(0.0002, Math.min(0.035, X[2]));
 
     // Pulse–Echo (Sonar) & Optional L2 Order-Book Imbalance -> x4 (pressureToxicity) & x5 (liquidityResilience)
-    const l2Snap = extensionInput?.l2OrderBookSnapshots?.find(s => Math.abs(s.timestampSec - c.time) <= 900);
-    const l2Imbalance = l2Snap ? l2Snap.orderBookImbalance : 0;
+    const l2Snap = [...(extensionInput?.l2OrderBookSnapshots || [])]
+      .reverse()
+      .find(s => s.timestampSec <= c.time && c.time - s.timestampSec <= 900);
+    const l2Imbalance =
+      l2Snap && Number.isFinite(l2Snap.orderBookImbalance) ? l2Snap.orderBookImbalance : 0;
     const rawFlowToxObs = Math.max(
       -0.95,
       Math.min(
@@ -2151,7 +2245,10 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     X[3] = Math.max(-1.0, Math.min(1.0, X[3]));
 
     const l2DepthBoost =
-      l2Snap && l2Snap.bidDepthTop5Usd + l2Snap.askDepthTop5Usd > 0
+      l2Snap &&
+      Number.isFinite(l2Snap.bidDepthTop5Usd) &&
+      Number.isFinite(l2Snap.askDepthTop5Usd) &&
+      l2Snap.bidDepthTop5Usd + l2Snap.askDepthTop5Usd > 0
         ? Math.min(0.15, (l2Snap.bidDepthTop5Usd + l2Snap.askDepthTop5Usd) / 20000000)
         : 0;
     const rawResObs = Math.max(
@@ -2169,14 +2266,21 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     X[4] = Math.max(0.05, Math.min(0.99, X[4]));
 
     // Macro Real-Yield & Dollar Index Observation Channel -> x6 and x2
-    if (liveMacro.status !== 'MACRO_FEED_UNAVAILABLE') {
+    // Only apply measurement update when macro observation is causally verified (never on missing/unavailable)
+    if (!isMacroMissingOrUnavailable) {
+      const macroRInflation =
+        barMacroState === 'RELEASE_DELAYED_OR_HOLIDAY'
+          ? 1 + 0.35 * Math.max(0, macroAgeDays - 4)
+          : barMacroState === 'VINTAGE_UNAVAILABLE_REVISION_RISK'
+          ? 1.5
+          : 1.0;
       applySequentialMeasurementUpdate6D({
         X,
         P,
         H: [0, 0.22, 0, 0, 0, 1],
         observedY: causalMacroLogForce,
         basisOffset: 0,
-        R: Math.max(1e-8, causalMedVol * causalMedVol * 0.3),
+        R: Math.max(1e-8, causalMedVol * causalMedVol * 0.3 * macroRInflation),
       });
     }
 
@@ -2605,12 +2709,145 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   }
 
   const bandPolicyMult =
-    Math.max(
-      bandPolicy === 'WIDEN' ? 1.38 : 1.0,
-      Math.min(1.65, vbKalman.continuousBandUncertaintyMult)
-    ) * seasonalUncMult;
+    (bandPolicy === 'WIDEN' ? 1.25 : 1.0) * seasonalUncMult;
+
+  // Compute causal empirical 1-step close-to-close log-return variance and Direct Horizon-h FHS standardized residuals
+  const trailingLogRets: number[] = [];
+  const retStart = Math.max(1, n - 120);
+  for (let idx = retStart; idx < n; idx++) {
+    trailingLogRets.push(
+      Math.log(Math.max(1e-6, candles[idx].close) / Math.max(1e-6, candles[idx - 1].close))
+    );
+  }
+  const meanTrailingLogRet =
+    trailingLogRets.length > 0
+      ? trailingLogRets.reduce((a, b) => a + b, 0) / trailingLogRets.length
+      : 0;
+  const empCloseLogVar =
+    trailingLogRets.length > 1
+      ? trailingLogRets.reduce((a, r) => a + (r - meanTrailingLogRet) ** 2, 0) /
+        (trailingLogRets.length - 1)
+      : medVol * medVol;
+  const empCloseLogStd = Math.sqrt(Math.max(1e-10, empCloseLogVar));
+
+  const pickSortedQuantile = (sorted: number[], q: number, fallback: number): number => {
+    if (sorted.length < 10) return fallback;
+    const pos = Math.max(0, Math.min(sorted.length - 1, q * (sorted.length - 1)));
+    const lo = Math.floor(pos);
+    const hi = Math.ceil(pos);
+    const frac = pos - lo;
+    return sorted[lo] * (1 - frac) + sorted[hi] * frac;
+  };
+
+  // Fallback 1-step signed standardized residuals (demeaned so location is in simX[0] and shape/skewness in e)
+  const signedStdRets1 = trailingLogRets.map(r => (r - meanTrailingLogRet) / empCloseLogStd);
+  const sortedSignedStd1 = [...signedStdRets1].sort((a, b) => a - b);
+
+  // Compute causal Adaptive Conformal Inference (ACI) offset on 1-step standardized residuals
+  let aciAlphaOffset90 = 0;
+  if (residualPoints.length >= 16) {
+    const recentRes = residualPoints.slice(-48);
+    let misses90 = 0;
+    for (const pt of recentRes) {
+      if (Math.abs(pt.standardizedResidualSigma) > 1.6448536) {
+        misses90++;
+      }
+    }
+    const empMissRate90 = misses90 / recentRes.length;
+    aciAlphaOffset90 = Math.max(-0.12, Math.min(0.35, (empMissRate90 - 0.10) * 1.25));
+  }
+
+  // Helper: Direct Horizon-h Standardized Empirical Residuals e_{i,h} = (r_{i,h} - mean(r_h)) / (sqrt(h) * empCloseLogStd)
+  const computeDirectHorizonEmpiricalStats = (h: number, predLogStdH: number) => {
+    const hRets: number[] = [];
+    const startIdx = Math.max(h, n - 120);
+    for (let idx = startIdx; idx < n; idx++) {
+      hRets.push(
+        Math.log(Math.max(1e-6, candles[idx].close) / Math.max(1e-6, candles[idx - h].close))
+      );
+    }
+    const scaleH = Math.max(1e-10, Math.sqrt(h) * empCloseLogStd);
+    let stdResH: number[];
+    if (hRets.length >= 14) {
+      const meanH = hRets.reduce((a, b) => a + b, 0) / hRets.length;
+      stdResH = hRets.map(r => (r - meanH) / scaleH);
+    } else {
+      stdResH = signedStdRets1.length > 0 ? signedStdRets1 : [-1.645, -0.674, 0, 0.674, 1.645];
+    }
+    const sortedH = [...stdResH].sort((a, b) => a - b);
+    const q05Raw = pickSortedQuantile(sortedH, 0.05, -1.6448536269514722);
+    const q25Raw = pickSortedQuantile(sortedH, 0.25, -0.6744897501960817);
+    const q50Raw = pickSortedQuantile(sortedH, 0.50, 0.0);
+    const q75Raw = pickSortedQuantile(sortedH, 0.75, 0.6744897501960817);
+    const q95Raw = pickSortedQuantile(sortedH, 0.95, 1.6448536269514722);
+
+    // Ensure proper quantile ordering with ACI conformal calibration offset
+    const q50 = Math.max(-0.35, Math.min(0.35, q50Raw));
+    const q75 = Math.max(q50 + 0.25, q75Raw + 0.5 * aciAlphaOffset90);
+    const q25 = Math.min(q50 - 0.25, q25Raw - 0.5 * aciAlphaOffset90);
+    const q95 = Math.max(q75 + 0.35, q95Raw + aciAlphaOffset90);
+    const q05 = Math.min(q25 - 0.35, q05Raw - aciAlphaOffset90);
+
+    // Empirical Duan smearing factor M_h(sigma_h) = (1/N) * sum(exp(sigma_h * e_{i,h}))
+    // Captures both log-normal convexity (0.5 * sigma^2) and empirical third/fourth moment skewness/kurtosis
+    let smearingSum = 0;
+    const sampleArr = stdResH.length >= 8 ? stdResH : sortedSignedStd1;
+    if (sampleArr.length >= 8) {
+      for (let i = 0; i < sampleArr.length; i++) {
+        const clampedE = Math.max(-6, Math.min(6, sampleArr[i]));
+        smearingSum += Math.exp(predLogStdH * clampedE);
+      }
+      smearingSum /= sampleArr.length;
+    } else {
+      smearingSum = Math.exp(0.5 * predLogStdH * predLogStdH);
+    }
+    const duanSmearingFactor = Math.max(0.95, Math.min(1.15, smearingSum));
+
+    return { q05, q25, q50, q75, q95, duanSmearingFactor };
+  };
+
+  let cumHorizonLogVar = 0;
+
+  // Variance-ratio-gated OU pull strictly restricted to 1h (3600s) and 4h (14400s) per Critique #3:
+  // Compute causal Lo-MacKinlay VR(4) = Var(r^{(4)}) / (4 * Var(r^{(1)})) on trailingLogRets (<= t)
+  let vr4Ratio = 1.0;
+  if (trailingLogRets.length >= 16 && empCloseLogVar > 1e-12) {
+    const r4List: number[] = [];
+    for (let i = 3; i < trailingLogRets.length; i++) {
+      r4List.push(
+        trailingLogRets[i] +
+          trailingLogRets[i - 1] +
+          trailingLogRets[i - 2] +
+          trailingLogRets[i - 3]
+      );
+    }
+    const m4 = r4List.reduce((a, b) => a + b, 0) / r4List.length;
+    const var4 =
+      r4List.reduce((a, r) => a + (r - m4) ** 2, 0) / Math.max(1, r4List.length - 1);
+    vr4Ratio = var4 / (4 * empCloseLogVar);
+  }
+  const is1hOr4h = intervalStepSeconds === 3600 || intervalStepSeconds === 14400;
+  const hasExplicitAnchorOverride =
+    typeof tuningOverrides?.equilibriumAnchorOverride === 'number' &&
+    Number.isFinite(tuningOverrides.equilibriumAnchorOverride);
+  // Strictly restrict VR(4) OU pull to 1h and 4h; do NOT extend automatically to 1d or other intervals
+  const vrOuPullGate = is1hOr4h
+    ? vr4Ratio < 0.85
+      ? Math.max(0, Math.min(1, (0.85 - vr4Ratio) / 0.35))
+      : 0
+    : hasExplicitAnchorOverride
+    ? 0.45
+    : 0;
+
+  // directionalGatePassed controls ONLY direction badges and signals, never suppressing conditional trajectories
+  const directionalGatePassed = Boolean(
+    (tuningOverrides as { directionalGatePassed?: boolean } | undefined)?.directionalGatePassed
+  );
 
   const medianTrack: { time: number; value: number }[] = [];
+  const predictiveMedianTrack: { time: number; value: number }[] = [];
+  const conditionalExpectationTrack: { time: number; value: number }[] = [];
+  const experimentalDriftTrack: { time: number; value: number }[] = [];
   const upper75: { time: number; value: number }[] = [];
   const lower25: { time: number; value: number }[] = [];
   const upper95: { time: number; value: number }[] = [];
@@ -2631,6 +2868,10 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
   );
   let openStepsElapsed = 0;
   let prevStepWasClosed = startedInClosedSession;
+  let prevUpper75Offset = 0;
+  let prevLower25Offset = 0;
+  let prevUpper95Offset = 0;
+  let prevLower05Offset = 0;
 
   for (let h = 1; h <= horizonSteps; h++) {
     const stepTime = lastBarTime + h * intervalStepSeconds;
@@ -2640,20 +2881,16 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     const stepCal = evaluateGoldSessionAndCalendar({ timestampSec: stepTime });
     if (hasAwarenessPolicyActive) {
       if (intervalStepSeconds >= 86400) {
-        // Daily (1d) bars span 24 hours: only Saturday or early Sunday is a closed weekend step;
-        // Sunday evening and Monday–Friday are active open trading days
         const dUtc = new Date(stepTime * 1000);
         const dayUtc = dUtc.getUTCDay();
         const hourUtc = stepCal.utcHourDecimal ?? dUtc.getUTCHours();
         isStepClosed = dayUtc === 6 || (dayUtc === 0 && hourUtc < 16);
       } else if (intervalStepSeconds >= 14400) {
-        // 4-hour (4h) bars: closed only if both midpoint and endpoint are inside the weekend close
         const midCal = evaluateGoldSessionAndCalendar({
           timestampSec: stepTime - Math.floor(intervalStepSeconds * 0.5),
         });
         isStepClosed = stepCal.isFuturesClosed && midCal.isFuturesClosed;
       } else {
-        // Intraday (5m, 15m, 1h) bars: closed during weekend thin, or during daily maintenance if h=0 started in maintenance
         isStepClosed =
           stepCal.isFuturesClosed ||
           (startedInClosedSession && stepCal.sessionId === 'DAILY_ROLL_MAINTENANCE');
@@ -2679,14 +2916,11 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     if (useStepSessionRouting) {
       if (isStepClosed) {
         if (!prevStepWasClosed) {
-          // Horizon just crossed from an open Friday session into the Friday 22:00 UTC weekend close:
-          // freeze the closed-market target at the Friday closing level (simX[0]) instead of pulling back to h=0
           closedMarketLogEqTarget = simX[0];
         }
         simDeltaTau = 0.22;
       } else {
         if (prevStepWasClosed) {
-          // Market just reopened at stepTime: release conserved active-auction drift velocity
           simX[1] = conservedOpenDriftX1;
         }
         openStepsElapsed++;
@@ -2707,7 +2941,9 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     const toxRatio = simX[3] / safeRes;
     const activeLogEqTarget =
       useStepSessionRouting && isStepClosed ? closedMarketLogEqTarget : openMarketLogEqTarget;
-    const eqRestoringLog = kappaMeanRev * (activeLogEqTarget - simX[0]);
+    const stepOuGate =
+      useStepSessionRouting && isStepClosed ? 1.0 : vrOuPullGate;
+    const eqRestoringLog = kappaMeanRev * (activeLogEqTarget - simX[0]) * stepOuGate;
 
     const effectiveOpenDecayIdx = Math.max(0, openStepsElapsed - 1);
     const decayingSymbolicLog =
@@ -2726,7 +2962,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
         }) * (useStepSessionRouting && isStepClosed ? 0.18 : Math.exp(-0.06 * effectiveOpenDecayIdx))
       : 0;
 
-    const stepEqPullMult = useStepSessionRouting
+    const stepEqPullMult = (useStepSessionRouting
       ? isStepClosed
         ? 0.08
         : hasShockFault
@@ -2734,7 +2970,7 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
         : prevStepWasClosed || openStepsElapsed <= 3
         ? 0.56
         : 0.45
-      : eqRestoringPullMult;
+      : eqRestoringPullMult) * stepOuGate;
 
     const stepDriftScale = useStepSessionRouting
       ? isStepClosed
@@ -2755,10 +2991,9 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     const stepLogDrift = rawStepDrift * stepDriftScale;
 
     const nextX0 = simX[0] + stepLogDrift;
-    // During closed steps, conserve latent directional velocity X[1] in suspension so it is ready when market opens
     const nextX1 =
       useStepSessionRouting && isStepClosed
-        ? 0.96 * simX[1] + 0.04 * (kappaMeanRev * (openMarketLogEqTarget - simX[0]) + simX[5])
+        ? 0.96 * simX[1] + 0.04 * (kappaMeanRev * stepOuGate * (openMarketLogEqTarget - simX[0]) + simX[5])
         : eDrift * simX[1] + (1 - eDrift) * (eqRestoringLog + simX[5]);
     const nextX2 = Math.max(0.0002, Math.min(0.035, eVol * simX[2] + (1 - eVol) * medVol));
     const nextX3 = useStepSessionRouting && isStepClosed ? 0.96 * simX[3] : eTox * simX[3];
@@ -2775,16 +3010,19 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
         (-betaTox * simX[3] * simX[2] * simDeltaTau) / (safeRes * safeRes),
         simDeltaTau,
       ],
-      [-(1 - eDrift) * kappaMeanRev, eDrift, 0, 0, 0, 1 - eDrift],
+      [-(1 - eDrift) * kappaMeanRev * stepOuGate, eDrift, 0, 0, 0, 1 - eDrift],
       [0, 0, eVol, 0, 0, 0],
       [0, 0, 0, eTox, 0, 0],
       [0, 0, 0, 0, eRes, 0],
       [0, 0, 0, 0, 0, eMac],
     ];
 
-    const stepVar = Math.max(1e-8, simX[2] * simX[2] * simDeltaTau);
+    const blendedStepLogVar =
+      0.80 * empCloseLogVar + 0.20 * (simX[2] * simX[2]);
+    const stepVar = Math.max(1e-8, blendedStepLogVar);
+    cumHorizonLogVar += stepVar;
     const QDiag = [
-      stepVar * 0.85,
+      stepVar * 1.0,
       stepVar * 0.14,
       stepVar * 0.04,
       0.012 * simDeltaTau,
@@ -2808,17 +3046,35 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     simX = [nextX0, nextX1, nextX2, nextX3, nextX4, nextX5];
     simP = nextP;
 
-    const predLogVar = Math.max(1e-8, simP[0][0]);
+    const predLogVar = Math.max(1e-8, cumHorizonLogVar);
     const predLogStd = Math.sqrt(predLogVar) * bandPolicyMult;
-    const expectedPrice = Math.exp(simX[0] + 0.5 * predLogVar);
+    const empH = computeDirectHorizonEmpiricalStats(h, predLogStd);
 
-    const pMed = parseFloat(expectedPrice.toFixed(2));
-    const pUp75 = parseFloat((expectedPrice * Math.exp(1.0 * predLogStd)).toFixed(2));
-    const pLo25 = parseFloat((expectedPrice * Math.exp(-1.0 * predLogStd)).toFixed(2));
-    const pUp95 = parseFloat((expectedPrice * Math.exp(1.96 * predLogStd)).toFixed(2));
-    const pLo05 = parseFloat((expectedPrice * Math.exp(-1.96 * predLogStd)).toFixed(2));
+    // 1. Predictive Median Q_{0.50}(P_{t+h} | F_t) = exp(simX[0] + q_{0.50}(e_h) * sigma_h)
+    const pMedUsd = parseFloat(Math.exp(simX[0] + empH.q50 * predLogStd).toFixed(2));
+    // 2. Conditional Expectation E[P_{t+h} | F_t] = exp(simX[0]) * M_h(sigma_h) via Duan Smearing
+    const pCondExpUsd = parseFloat((Math.exp(simX[0]) * empH.duanSmearingFactor).toFixed(2));
 
-    medianTrack.push({ time: stepTime, value: pMed });
+    // Monotonic horizon quantile offsets around simX[0]
+    const up75Offset = Math.max(prevUpper75Offset + 1e-5, Math.max(0.15 * predLogStd, (empH.q75 - empH.q50) * predLogStd));
+    const lo25Offset = Math.max(prevLower25Offset + 1e-5, Math.max(0.15 * predLogStd, (empH.q50 - empH.q25) * predLogStd));
+    const up95Offset = Math.max(prevUpper95Offset + 1e-5, Math.max(up75Offset + 0.15 * predLogStd, (empH.q95 - empH.q50) * predLogStd));
+    const lo05Offset = Math.max(prevLower05Offset + 1e-5, Math.max(lo25Offset + 0.15 * predLogStd, (empH.q50 - empH.q05) * predLogStd));
+    prevUpper75Offset = up75Offset;
+    prevLower25Offset = lo25Offset;
+    prevUpper95Offset = up95Offset;
+    prevLower05Offset = lo05Offset;
+
+    const medLogCenter = simX[0] + empH.q50 * predLogStd;
+    const pUp75 = parseFloat(Math.exp(medLogCenter + up75Offset).toFixed(2));
+    const pLo25 = parseFloat(Math.exp(medLogCenter - lo25Offset).toFixed(2));
+    const pUp95 = parseFloat(Math.exp(medLogCenter + up95Offset).toFixed(2));
+    const pLo05 = parseFloat(Math.exp(medLogCenter - lo05Offset).toFixed(2));
+
+    medianTrack.push({ time: stepTime, value: pMedUsd });
+    predictiveMedianTrack.push({ time: stepTime, value: pMedUsd });
+    conditionalExpectationTrack.push({ time: stepTime, value: pCondExpUsd });
+    experimentalDriftTrack.push({ time: stepTime, value: pCondExpUsd });
     upper75.push({ time: stepTime, value: pUp75 });
     lower25.push({ time: stepTime, value: pLo25 });
     upper95.push({ time: stepTime, value: pUp95 });
@@ -2826,10 +3082,20 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
 
     for (let rIdx = 0; rIdx < quantileMultipliers.length; rIdx++) {
       const m = quantileMultipliers[rIdx];
-      const rayVal = parseFloat((expectedPrice * Math.exp(m * predLogStd)).toFixed(2));
+      const rayVal = parseFloat(Math.exp(medLogCenter + m * predLogStd).toFixed(2));
       sampleTracks[rIdx].path.push({ time: stepTime, value: rayVal });
     }
   }
+
+  const terminalMeanMedianWedgeUsd =
+    conditionalExpectationTrack.length > 0 && predictiveMedianTrack.length > 0
+      ? parseFloat(
+          (
+            conditionalExpectationTrack[conditionalExpectationTrack.length - 1].value -
+            predictiveMedianTrack[predictiveMedianTrack.length - 1].value
+          ).toFixed(4)
+        )
+      : 0;
 
   const impliedLatentPriceUsd = parseFloat(Math.exp(X[0]).toFixed(2));
   const impliedDriftUsdPerTau = parseFloat((X[1] * impliedLatentPriceUsd).toFixed(4));
@@ -2863,6 +3129,12 @@ export function evaluateLatentStateFilterOnInformationClock(params: {
     venueObservations,
     yellowLinePlume: {
       medianTrack,
+      predictiveMedianTrack,
+      conditionalExpectationTrack,
+      experimentalDriftTrack,
+      meanMedianSkewWedgeUsd: terminalMeanMedianWedgeUsd,
+      horizonDistributionMethod: 'DIRECT_HORIZON_EMPIRICAL_FHS_ACI',
+      directionalGatePassed,
       upper95,
       upper75,
       lower25,
@@ -3379,11 +3651,11 @@ export function evaluateScientificCorePipeline(params: {
   liveTuning: LatentModelMathWriteBackState & LatentFilterTuningOverrides;
   candidateTuningOverrides?: LatentFilterTuningOverrides;
   dataDrivenMinWindowBars: number;
+  pointInTimeMacroSeries?: PointInTimeMacroObservation[];
 }): ScientificCoreTelemetry {
   const {
     candles,
     intervalStepSeconds,
-    htfPocAnchorPrice,
     liveMacro,
     secondaryBenchmark,
     verifiedVenueCameras,
@@ -3392,11 +3664,86 @@ export function evaluateScientificCorePipeline(params: {
     liveTuning,
     candidateTuningOverrides,
     dataDrivenMinWindowBars,
+    pointInTimeMacroSeries,
   } = params;
 
+  const originTimestampSec = candles.length > 0 ? candles[candles.length - 1].time : 0;
+  const hasExplicitPointInTimeSeries = Array.isArray(pointInTimeMacroSeries);
+  const macroSeries: PointInTimeMacroObservation[] =
+    pointInTimeMacroSeries ?? loadPointInTimeMacroSeriesFromFixture().observations;
+  const causalLiveMacroAtOrigin =
+    macroSeries.length > 0 && originTimestampSec > 0
+      ? resolvePointInTimeMacroAt(originTimestampSec, macroSeries)
+      : hasExplicitPointInTimeSeries
+      ? resolvePointInTimeMacroAt(originTimestampSec, [])
+      : liveMacro;
+
+  // Strictly sanitize all auxiliary inputs so no record with timestamp > originTimestampSec can enter the pipeline
+  const causalSecondaryBenchmark = secondaryBenchmark
+    ? {
+        ...secondaryBenchmark,
+        candles: secondaryBenchmark.candles.filter(b => b.time <= originTimestampSec),
+      }
+    : null;
+  const causalVenueCameras = verifiedVenueCameras
+    ? verifiedVenueCameras.map(cam => ({
+        ...cam,
+        candles: cam.candles.filter(b => b.time <= originTimestampSec),
+      }))
+    : undefined;
+  const causalMacroNews = macroNews
+    ? macroNews.filter(ev => ev.timestamp <= originTimestampSec)
+    : undefined;
+  const causalExtensionInput: OrderBookMicrostructureExtensionInput | undefined = extensionInput
+    ? {
+        ...extensionInput,
+        aggressorTradeFlow: extensionInput.aggressorTradeFlow?.filter(
+          tf => tf.barTimeSec <= originTimestampSec
+        ),
+        scheduledEconomicPulses: extensionInput.scheduledEconomicPulses?.filter(
+          ev => ev.timestampSec <= originTimestampSec
+        ),
+        l2OrderBookSnapshots: extensionInput.l2OrderBookSnapshots?.filter(
+          s => s.timestampSec <= originTimestampSec
+        ),
+      }
+    : undefined;
+
+  // Compute strictly causal ATR and causal volume-weighted anchor from candles[0..n-1] so external scalars cannot leak future bars
+  let causalAtr = params.atr;
+  let causalHtfPocAnchorPrice = params.htfPocAnchorPrice;
+  if (candles.length >= 2) {
+    const atrW = Math.min(14, candles.length - 1);
+    let trSum = 0;
+    for (let i = candles.length - atrW; i < candles.length; i++) {
+      const cur = candles[i];
+      const prev = candles[i - 1];
+      trSum += Math.max(
+        cur.high - cur.low,
+        Math.abs(cur.high - prev.close),
+        Math.abs(cur.low - prev.close)
+      );
+    }
+    causalAtr = parseFloat((trSum / Math.max(1, atrW)).toFixed(4));
+
+    const vwapW = Math.min(60, candles.length);
+    let pv = 0;
+    let vv = 0;
+    for (let i = candles.length - vwapW; i < candles.length; i++) {
+      const w = Math.max(1e-6, candles[i].volume || 1);
+      pv += candles[i].close * w;
+      vv += w;
+    }
+    causalHtfPocAnchorPrice = parseFloat((pv / Math.max(1e-6, vv)).toFixed(2));
+  }
+
   const currentPrice = candles.length > 0 ? candles[candles.length - 1].close : 2650;
-  const cointegrationBasis = computeCointegrationBasis(currentPrice, candles, secondaryBenchmark || null);
-  const primaryCam = verifiedVenueCameras?.[0];
+  const cointegrationBasis = computeCointegrationBasis(
+    currentPrice,
+    candles,
+    causalSecondaryBenchmark
+  );
+  const primaryCam = causalVenueCameras?.[0];
   const activeProvider = primaryCam?.providerName || 'Binance Vision PAXG';
   const activeSymbol = primaryCam?.symbol || 'PAXGUSDT';
   const instrumentIdentity = primaryCam?.instrumentIdentity || 'PAXG_SPOT_TOKEN';
@@ -3404,8 +3751,8 @@ export function evaluateScientificCorePipeline(params: {
   // 1. Causal Information Clock τ
   const clockOut = computeCausalInformationClock({
     candles,
-    verifiedVenueCameras,
-    extensionInput,
+    verifiedVenueCameras: causalVenueCameras,
+    extensionInput: causalExtensionInput,
     isHalted: candles.length === 0,
   });
 
@@ -3415,9 +3762,9 @@ export function evaluateScientificCorePipeline(params: {
     deltaTauSeries: clockOut.deltaTauSeries,
     cumulativeTauSeries: clockOut.cumulativeTauSeries,
     crossVenueZScore: cointegrationBasis.zScore,
-    secondaryBenchmarkCandles: secondaryBenchmark?.candles,
-    macroNews,
-    extensionInput,
+    secondaryBenchmarkCandles: causalSecondaryBenchmark?.candles,
+    macroNews: causalMacroNews,
+    extensionInput: causalExtensionInput,
   });
 
   // 3. Live 6D Latent State Filter on Information Clock τ
@@ -3425,21 +3772,22 @@ export function evaluateScientificCorePipeline(params: {
     candles,
     deltaTauSeries: clockOut.deltaTauSeries,
     cumulativeTauSeries: clockOut.cumulativeTauSeries,
-    liveMacro,
+    liveMacro: causalLiveMacroAtOrigin,
     cointegrationBasisMeanUsd: cointegrationBasis.meanBasis,
-    verifiedVenueCameras,
-    secondaryBenchmark,
+    verifiedVenueCameras: causalVenueCameras,
+    secondaryBenchmark: causalSecondaryBenchmark,
     barEchoToxicityUpdates: sonarOut.barEchoToxicityUpdates,
     barEchoResilienceUpdates: sonarOut.barEchoResilienceUpdates,
     barEchoResidualsUsd: sonarOut.barEchoResidualsUsd,
-    equilibriumAnchorPrice: htfPocAnchorPrice,
+    equilibriumAnchorPrice: causalHtfPocAnchorPrice,
     intervalStepSeconds,
-    atr: params.atr,
+    atr: causalAtr,
     activeProvider,
     activeSymbol,
     instrumentIdentity,
-    extensionInput,
+    extensionInput: causalExtensionInput,
     tuningOverrides: liveTuning,
+    pointInTimeMacroSeries: macroSeries,
   });
 
   // Optional Candidate Latent State Expectation in Parallel Universe
@@ -3449,21 +3797,22 @@ export function evaluateScientificCorePipeline(params: {
       candles,
       deltaTauSeries: clockOut.deltaTauSeries,
       cumulativeTauSeries: clockOut.cumulativeTauSeries,
-      liveMacro,
+      liveMacro: causalLiveMacroAtOrigin,
       cointegrationBasisMeanUsd: cointegrationBasis.meanBasis,
-      verifiedVenueCameras,
-      secondaryBenchmark,
+      verifiedVenueCameras: causalVenueCameras,
+      secondaryBenchmark: causalSecondaryBenchmark,
       barEchoToxicityUpdates: sonarOut.barEchoToxicityUpdates,
       barEchoResilienceUpdates: sonarOut.barEchoResilienceUpdates,
       barEchoResidualsUsd: sonarOut.barEchoResidualsUsd,
-      equilibriumAnchorPrice: htfPocAnchorPrice,
+      equilibriumAnchorPrice: causalHtfPocAnchorPrice,
       intervalStepSeconds,
-      atr: params.atr,
+      atr: causalAtr,
       activeProvider,
       activeSymbol,
       instrumentIdentity,
-      extensionInput,
+      extensionInput: causalExtensionInput,
       tuningOverrides: candidateTuningOverrides,
+      pointInTimeMacroSeries: macroSeries,
     });
     candidateLatentExpectation = candFilterOut.yellowLinePlume;
   }
@@ -3474,7 +3823,7 @@ export function evaluateScientificCorePipeline(params: {
     candles,
     crossVenueZScore: cointegrationBasis.zScore,
     barEchoToxicityUpdates: sonarOut.barEchoToxicityUpdates,
-    liveMacro,
+    liveMacro: causalLiveMacroAtOrigin,
   });
 
   const lastResPt = liveFilterOut.residualPoints[liveFilterOut.residualPoints.length - 1];

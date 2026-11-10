@@ -3853,6 +3853,7 @@ input:checked + .toggle-slider:before {
           <button class="deck-layer-btn active" id="btnParticles" data-i18n="layerStream">Streamlines</button>
           <button class="deck-layer-btn active" id="btnIsobars" data-i18n="layerIsobars" title="Toggle Waiting-Money Resting Liquidity Heat Bands">Waiting Money</button>
           <button class="deck-layer-btn active" id="btnEnsemble" data-i18n="layerPlumes">Confidence (68%·95%)</button>
+          <button class="deck-layer-btn active" id="btnExperimentalDrift" style="border-color: rgba(245, 215, 110, 0.55); color: #f5d76e;" title="Toggle Experimental Drift Trajectory Line (unvalidated rawStepDrift)">Exp. Drift</button>
           <button class="deck-layer-btn active" id="btnParallelCandidate" style="border-color: rgba(224, 64, 251, 0.55); color: #f381ff;" title="Toggle Parallel Universe Candidate Trajectory Line (#e040fb)">Candidate</button>
           <button class="deck-layer-btn active" id="btnCandles" data-i18n="layerBattle">Spectrum Candles</button>
           <label for="flowQualitySelect" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#9cb0cc;margin-left:2px;white-space:nowrap;" title="Flow &amp; Heat Quality Mode (Persisted)">
@@ -7382,6 +7383,7 @@ const layers = {
   particles: flowQualityMode !== 'off',
   isobars: flowQualityMode !== 'off',
   ensemble: true,
+  experimentalDrift: true,
   candles: true,
 };
 
@@ -8864,6 +8866,9 @@ function updateAssetToggleUI(asset) {
 function switchActiveAsset(newAsset) {
   if (newAsset !== 'GOLD' && newAsset !== 'BTC') return;
   currentAsset = newAsset;
+  if (window.GDFTelemetryAnimator && typeof window.GDFTelemetryAnimator.reset === 'function') {
+    window.GDFTelemetryAnimator.reset();
+  }
   updateAssetToggleUI(newAsset);
 
   const url = new URL(window.location.href);
@@ -9845,7 +9850,7 @@ async function fetchQuantData(interval = currentTimeframe, force = false) {
           pulse.style.boxShadow = '0 0 12px #ff1744';
         }
         if (data.dataReliability) updateDataReliabilityUI(data.dataReliability);
-        if (data.validationScorecard) renderValidationScorecard(data.validationScorecard);
+        if (data.validationScorecard) renderValidationScorecard(data.validationScorecard, data.prospectiveLedgerAccuracy);
         if (data.parallelUniverse) renderParallelUniverseTelemetry(data.parallelUniverse);
         if (typeof updateThreeWorldData === 'function' && threeWorldState && threeWorldState.isInitialized) {
           updateThreeWorldData(data);
@@ -10393,12 +10398,12 @@ function renderCalendarEventDetail(ev) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-bottom:1px solid rgba(40,60,95,0.45);padding-bottom:8px;margin-bottom:8px;">
       <div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
-          <span class="epistemic-badge epistemic-raw">[RAW OBSERVATION: OFFICIAL RELEASE]</span>
+          <span class="epistemic-badge" style="background:rgba(255,171,0,0.15);color:#ffab00;border:1px solid rgba(255,171,0,0.4);">[UNVERIFIED PLACEHOLDER — QUARANTINED]</span>
           <span style="font-family:monospace;font-size:9.5px;color:#00e5ff;font-weight:700;">${ev.category}</span>
           <span style="font-family:monospace;font-size:9.5px;color:#6e84a3;">${ev.eventId}</span>
         </div>
         <div style="font-size:13px;font-weight:800;color:#fff;">${ev.flag || '🇺🇸'} ${escapeHtml(evTitle)}</div>
-        <div style="font-size:10px;color:#7e95b5;">Official Issuer: <a href="${ev.officialSourceUrl}" target="_blank" rel="noopener noreferrer" style="color:#00e5ff;text-decoration:underline;">${escapeHtml(ev.officialSource)}</a></div>
+        <div style="font-size:10px;color:#ffab00;">Quarantined Static Record (Awaiting Live BLS/BEA/Fed Release Timestamp API · Zero Forecast Weight)</div>
       </div>
       <button type="button" class="btn btn-sm" id="closeCalDrawerBtn" style="padding:2px 6px;font-size:10px;">✕ Close</button>
     </div>
@@ -10501,30 +10506,25 @@ function renderPoliticalIntelligence(polData) {
   }).join('');
 
   container.innerHTML = `
-    <!-- Top Banner: 2026 Midterm Outcome & Fiscal Expansion -->
-    <div style="padding:10px 12px;border-radius:8px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.4);display:flex;flex-direction:column;gap:6px;">
+    <!-- Top Banner: Quarantined Unverified Placeholder -->
+    <div style="padding:10px 12px;border-radius:8px;background:rgba(255,171,0,0.06);border:1px solid rgba(255,171,0,0.4);display:flex;flex-direction:column;gap:6px;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
         <div style="display:flex;align-items:center;gap:6px;">
-          <span class="epistemic-badge epistemic-raw">[RAW OBSERVATION: HISTORICAL RESULT]</span>
-          <span style="font-size:12px;font-weight:800;color:#fff;">🏛️ U.S. November 2026 Midterm Elections</span>
+          <span class="epistemic-badge" style="background:rgba(255,171,0,0.15);color:#ffab00;border:1px solid rgba(255,171,0,0.4);">[UNVERIFIED PLACEHOLDER — QUARANTINED]</span>
+          <span style="font-size:12px;font-weight:800;color:#fff;">🏛️ U.S. Midterm Election Placeholder (Quarantined)</span>
         </div>
-        <span style="font-family:monospace;font-size:10px;font-weight:800;color:#00e676;padding:2px 6px;border-radius:4px;background:rgba(0,230,118,0.12);border:1px solid #00e676;">CONFIRMED OUTCOME: UNIFIED DEMOCRATIC MAJORITY</span>
+        <span style="font-family:monospace;font-size:10px;font-weight:800;color:#ffab00;padding:2px 6px;border-radius:4px;background:rgba(255,171,0,0.12);border:1px solid #ffab00;">UNVERIFIED PLACEHOLDER · ZERO FORECAST WEIGHT</span>
       </div>
       <div style="font-size:11px;color:#dbe7f6;line-height:1.45;">
-        ${escapeHtml(goldSumm)}
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;font-family:monospace;font-size:10px;margin-top:4px;">
-        <span>Fiscal Trajectory: <b style="color:#f5d76e;">${policy.fiscalDeficitTrajectory || 'EXPANSION ($1.9T+)'}</b></span>
-        <span>Treasury Supply: <b style="color:#ff5252;">${policy.treasurySupplyPressure || 'ELEVATED ISSUANCE'}</b></span>
-        <span>Real-Yield Impact: <b style="color:#00e676;">2.82% → 2.65% (COMPRESSION)</b></span>
+        ${escapeHtml(polData.quarantineNoticeEn || goldSumm)}
       </div>
     </div>
 
     <!-- Polling Averages & Individual Observations -->
     <div style="display:flex;flex-direction:column;gap:6px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;font-weight:800;color:#00e5ff;text-transform:uppercase;">📊 Institutional Polling Record (RealClearPolitics / 538 Verified)</span>
-        <span style="font-family:monospace;font-size:9px;color:#8fa2bf;">Zero Look-Ahead Ingestion</span>
+        <span style="font-size:11px;font-weight:800;color:#ffab00;text-transform:uppercase;">📊 Quarantined Static Polling Placeholders (Unverified)</span>
+        <span style="font-family:monospace;font-size:9px;color:#ffab00;">Excluded from Live Forecast</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:6px;">
         ${pollsHtml}
@@ -10610,8 +10610,15 @@ function renderHUD(d) {
     window.GDFClientCore.syncModelSpecRegistry(d.modelSpecRegistry);
   }
   const isBtcAsset = d.asset === 'BTC' || d.instrumentIdentity === 'BTC_SPOT_USD' || d.instrumentIdentity === 'BTC_USD_SPOT' || (d.activeSymbol && d.activeSymbol.includes('BTC'));
+  const activeAssetKey = isBtcAsset ? 'BTC' : 'GOLD';
+  if (window.__lastRenderedHudAsset && window.__lastRenderedHudAsset !== activeAssetKey) {
+    if (window.GDFTelemetryAnimator && typeof window.GDFTelemetryAnimator.reset === 'function') {
+      window.GDFTelemetryAnimator.reset();
+    }
+  }
+  window.__lastRenderedHudAsset = activeAssetKey;
   if (typeof updateAssetToggleUI === 'function') {
-    updateAssetToggleUI(isBtcAsset ? 'BTC' : 'GOLD');
+    updateAssetToggleUI(activeAssetKey);
   }
   document.getElementById('headPrice').textContent = '$' + d.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const spotLabelEl = document.querySelector('[data-i18n="spotGold"]');
@@ -10762,8 +10769,10 @@ function renderHUD(d) {
     }
   }
 
-  const netLift = d.macroWindVector.totalNetVelocity;
-  document.getElementById('headDrift').textContent = (netLift >= 0 ? '+' : '') + netLift.toFixed(2) + ' $/hr';
+  const netLift = d.macroWindVector && Number.isFinite(Number(d.macroWindVector.totalNetVelocity))
+    ? Number(d.macroWindVector.totalNetVelocity)
+    : 0;
+  document.getElementById('headDrift').textContent = (netLift >= 0 ? '+' : '') + netLift.toFixed(2) + ' $/hr (unvalidated)';
   document.getElementById('headVol').textContent = d.garchVolatility.currentVolPct.toFixed(2) + '%';
 
   // Live Macro Stream Ingestion Update
@@ -10787,8 +10796,11 @@ function renderHUD(d) {
     }
   }
 
-  let stateText = d.atmosphericState;
-  if (currentLang === 'fa') {
+  const dirGatePassed = Boolean(d.ensemble && d.ensemble.directionalGatePassed);
+  let stateText = dirGatePassed
+    ? d.atmosphericState
+    : (currentLang === 'fa' ? 'دامنه کالیبره‌شده (بدون مهارت جهتی اثبات‌شده)' : 'NEUTRAL RANGE (NO VALIDATED DIRECTIONAL SIGNAL)');
+  if (dirGatePassed && currentLang === 'fa') {
     if (d.atmosphericState.includes('LAMINAR')) stateText = i18n.fa.stateLaminar;
     else if (d.atmosphericState.includes('SQUALL')) stateText = i18n.fa.stateSquall;
     else if (d.atmosphericState.includes('CALM')) stateText = i18n.fa.stateCalm;
@@ -10797,11 +10809,11 @@ function renderHUD(d) {
   document.getElementById('atmStateLabel').textContent = stateText;
   document.getElementById('atmSubLabel').textContent =
     (currentLang === 'fa' ? 'فشارسنج: ' : 'Barometer: ') +
-    d.barometerStatus +
+    (dirGatePassed ? d.barometerStatus : 'DIRECTIONAL GATE LOCKED (UNVALIDATED)') +
     (currentLang === 'fa' ? ' · گیت پرش ماهالانوبیس و GARCH(1,1)' : ' · Mahalanobis 3σ Jump Gate & GARCH(1,1)');
 
   document.getElementById('cardEquilibrium').textContent = '$' + d.equilibriumPrice.toFixed(2);
-  document.getElementById('cardWind').innerHTML = (netLift >= 0 ? '+' : '') + netLift.toFixed(2) + ' <span class="card-metric-unit">$/hr</span>';
+  document.getElementById('cardWind').innerHTML = (netLift >= 0 ? '+' : '') + netLift.toFixed(2) + ' <span class="card-metric-unit">$/hr (unvalidated)</span>';
   document.getElementById('cardGarch').textContent = d.garchVolatility.currentVolPct.toFixed(3) + '%';
 
   // Phase 6: Compute ±1σ and ±2σ uncertainty envelopes from GARCH conditional volatility & EKF innovation variance
@@ -11110,7 +11122,7 @@ function renderHUD(d) {
   }
 
   if (d.validationScorecard) {
-    renderValidationScorecard(d.validationScorecard);
+    renderValidationScorecard(d.validationScorecard, d.prospectiveLedgerAccuracy);
   }
 
   if (d.liquidityEngine) {
@@ -11278,7 +11290,7 @@ window.GDFTelemetryAnimator = (function () {
         id: 'headDrift',
         value: netLift,
         decimals: 2,
-        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr'; },
+        renderValue: function (el, val) { el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + ' $/hr (unvalidated)'; },
       },
       {
         id: 'headVol',
@@ -11337,7 +11349,7 @@ window.GDFTelemetryAnimator = (function () {
         decimals: 2,
         skipZeroBaseline: true,
         renderValue: function (el, val) {
-          el.innerHTML = (val >= 0 ? '+' : '') + val.toFixed(2) + ' <span class="card-metric-unit">$/hr</span>';
+          el.innerHTML = (val >= 0 ? '+' : '') + val.toFixed(2) + ' <span class="card-metric-unit">$/hr (unvalidated)</span>';
         },
       },
       {
@@ -11558,9 +11570,27 @@ window.GDFTelemetryAnimator = (function () {
     snapshotCount++;
   }
 
+  function reset() {
+    activeRafs.forEach(function (rafId) { cancelAnimationFrame(rafId); });
+    activeRafs.clear();
+    activeTimers.forEach(function (timerId) { clearTimeout(timerId); });
+    activeTimers.clear();
+    prevValues.clear();
+    snapshotCount = 0;
+    document.querySelectorAll('[data-delta-badge]').forEach(function (el) {
+      el.removeAttribute('data-delta-badge');
+      el.removeAttribute('data-delta-dir');
+      el.classList.remove('metric-flash-up', 'metric-flash-down');
+    });
+    document.querySelectorAll('.card-flash-up, .card-flash-down').forEach(function (el) {
+      el.classList.remove('card-flash-up', 'card-flash-down');
+    });
+  }
+
   return {
     processSnapshot: processSnapshot,
     triggerMetricDelta: triggerMetricDelta,
+    reset: reset,
     getTrackedSnapshotValues: function () {
       return Object.fromEntries(prevValues.entries());
     },
@@ -12642,29 +12672,33 @@ function renderLiquidityEngine(liq) {
 }
 
 // Phase 5: Causal Walk-Forward Validation & Attribution Scorecard Renderer
-function renderValidationScorecard(sc) {
+function renderValidationScorecard(sc, prospectiveLedger) {
   if (!sc) return;
   const isFa = currentLang === 'fa';
+  const ledger = prospectiveLedger || null;
+  const liveResolvedN = ledger && typeof ledger.resolvedOutcomePairsCount === 'number' ? ledger.resolvedOutcomePairsCount : 0;
+  const minReqN = ledger && typeof ledger.minRequiredLiveSamplePerCell === 'number' ? ledger.minRequiredLiveSamplePerCell : 197;
+  const isPublishable = Boolean(ledger && ledger.isPublishable && liveResolvedN >= minReqN);
 
   const headerPill = document.getElementById('valScorecardHeaderPill');
   if (headerPill) {
-    headerPill.textContent = isFa
-      ? (sc.summaryBadgeFa || `نمونه N=${sc.effectiveSampleSizeN}`)
-      : (sc.summaryBadgeEn || `OOS N=${sc.effectiveSampleSizeN}`);
+    headerPill.textContent = isPublishable
+      ? `LIVE LEDGER N=${liveResolvedN}/${minReqN}`
+      : `PROSPECTIVE LEDGER N=${liveResolvedN}/${minReqN} (WITHHELD < ${minReqN})`;
   }
 
   const sampleBadge = document.getElementById('valSampleBadge');
   if (sampleBadge) {
-    sampleBadge.textContent = isFa
-      ? `نمونه خارج از نمونه N = ${sc.effectiveSampleSizeN} (ذخیره‌شده: ${sc.persistedSnapshotsCount || sc.effectiveSampleSizeN})`
-      : `OOS Sample N = ${sc.effectiveSampleSizeN} (Persisted: ${sc.persistedSnapshotsCount || sc.effectiveSampleSizeN})`;
+    sampleBadge.textContent = isPublishable
+      ? `Prospective Live N = ${liveResolvedN} (Min Gate: ${minReqN})`
+      : `Prospective Live N = ${liveResolvedN}/${minReqN} (Live Accuracy Withheld Until N ≥ ${minReqN}; Backtest N_eff=${sc.effectiveSampleSizeN})`;
   }
 
   const causalityBadge = document.getElementById('valCausalityBadge');
   if (causalityBadge) {
     causalityBadge.textContent = isFa
-      ? '✓ علّی و بدون آینده‌نگری (صرفاً کندل‌های ≤ t)'
-      : '✓ Zero-Lookahead Causal Prefix (≤ t)';
+      ? '✓ علّی و بدون آینده‌نگری (پیش‌فرض Drift = 0)'
+      : '✓ Zero-Lookahead Causal Prefix (≤ t) · Default Drift = 0';
   }
 
   const volRegEl = document.getElementById('valCurrentVolRegime');
@@ -12699,22 +12733,22 @@ function renderValidationScorecard(sc) {
     t1MacroBadge.style.color = sc.currentMacroRegime === 'EXPANDING_MACRO_PRESSURE' ? '#00e5ff' : '#ff5252';
   }
 
-  const h5Row = Array.isArray(sc.horizons) ? (sc.horizons.find(r => r.horizonBars === 5) || sc.horizons[0]) : null;
   const t2ValMetric = document.getElementById('t2ValSummaryMetric');
   const t2ValSub = document.getElementById('t2ValSummarySub');
-  if (t2ValMetric && h5Row) {
-    if (h5Row.spearmanRankIc !== null && h5Row.directionalHitRate !== null) {
-      const icS = h5Row.spearmanRankIc >= 0 ? '+' : '';
-      t2ValMetric.textContent = `IC(h=5): ${icS}${h5Row.spearmanRankIc.toFixed(3)} · Hit: ${(h5Row.directionalHitRate * 100).toFixed(1)}%`;
+  if (t2ValMetric) {
+    if (isPublishable && ledger.empiricalCoverage50 !== null && ledger.empiricalCoverage90 !== null) {
+      const ci50 = Array.isArray(ledger.empiricalCoverage50Ci95) ? `[${(ledger.empiricalCoverage50Ci95[0]*100).toFixed(1)}%, ${(ledger.empiricalCoverage50Ci95[1]*100).toFixed(1)}%]` : '';
+      t2ValMetric.textContent = `Cov50: ${(ledger.empiricalCoverage50 * 100).toFixed(1)}% ${ci50} · Cov90: ${(ledger.empiricalCoverage90 * 100).toFixed(1)}%`;
     } else {
-      t2ValMetric.textContent = isFa ? `در حال کالیبراسیون (N=${sc.effectiveSampleSizeN})` : `CALIBRATING (N=${sc.effectiveSampleSizeN})`;
+      t2ValMetric.textContent = `LIVE ACCURACY WITHHELD (Prospective N=${liveResolvedN}/${minReqN})`;
     }
   }
   if (t2ValSub) {
-    const brierStr = h5Row && h5Row.sweepBrierScore !== null ? h5Row.sweepBrierScore.toFixed(3) : '--';
-    t2ValSub.textContent = isFa
-      ? `نمونه N=${sc.effectiveSampleSizeN} · امتیاز برایر=${brierStr} · بدون آینده‌نگری ▾`
-      : `OOS N=${sc.effectiveSampleSizeN} · Brier=${brierStr} · Zero-Lookahead ▾`;
+    if (isPublishable && ledger.meanCrpsLogReturn !== null && ledger.meanPinballLoss !== null) {
+      t2ValSub.textContent = `Prospective N=${liveResolvedN} · CRPS=${ledger.meanCrpsLogReturn.toFixed(5)} · Pinball=${ledger.meanPinballLoss.toFixed(3)} ▾`;
+    } else {
+      t2ValSub.textContent = `Requires N_min=${minReqN} resolved live forecasts per cell (C3 Power Gate · Drift=0 Default) ▾`;
+    }
   }
 
   const tbody = document.getElementById('valHorizonsTableBody');
@@ -13203,6 +13237,7 @@ function computeStaticChartStateKey(w, h) {
     flowQualityMode,
     layers.isobars ? 1 : 0,
     layers.ensemble ? 1 : 0,
+    layers.experimentalDrift !== false ? 1 : 0,
     layers.parallelCandidate !== false ? 1 : 0,
     layers.candles ? 1 : 0,
     chartSettings.chartStyle,
@@ -13241,8 +13276,14 @@ function renderStaticChartLayer(ctx, w, h, allowGlow) {
       allPrices = allPrices.concat(ensemble.upper95.map(p => p.value));
       allPrices = allPrices.concat(ensemble.lower05.map(p => p.value));
     }
+    if (layers.experimentalDrift !== false && ensemble && Array.isArray(ensemble.experimentalDriftTrack)) {
+      allPrices = allPrices.concat(ensemble.experimentalDriftTrack.map(p => p.value));
+    }
     if (layers.parallelCandidate !== false && candEnsemble && Array.isArray(candEnsemble.medianTrack) && candEnsemble.medianTrack.length > 0) {
       allPrices = allPrices.concat(candEnsemble.medianTrack.map(p => p.value));
+      if (layers.experimentalDrift !== false && Array.isArray(candEnsemble.experimentalDriftTrack)) {
+        allPrices = allPrices.concat(candEnsemble.experimentalDriftTrack.map(p => p.value));
+      }
       if (Array.isArray(candEnsemble.upper75)) allPrices = allPrices.concat(candEnsemble.upper75.map(p => p.value));
       if (Array.isArray(candEnsemble.lower25)) allPrices = allPrices.concat(candEnsemble.lower25.map(p => p.value));
     }
@@ -14131,53 +14172,131 @@ function renderStaticChartLayer(ctx, w, h, allowGlow) {
       ctx.fillStyle = 'rgba(245, 215, 110, 0.085)';
       ctx.fill();
 
-      // Median Expected Trajectory (LIVE APPROVED ARCHITECTURE — Yellow Line #f5d76e)
+      // (a) Solid Calibrated Zero-Drift Median Trajectory ("Evidence-backed range")
       ctx.beginPath();
       for (let s = 0; s < nSteps; s++) {
         const x = startX + s * stepW;
         const y = priceToY(ensemble.medianTrack[s].value, minP, maxP, mainHeight);
         if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
-      ctx.lineWidth = 2.6;
-      ctx.strokeStyle = '#f5d76e';
-      ctx.shadowColor = 'rgba(245, 215, 110, 0.65)';
-      ctx.shadowBlur = 9;
+      ctx.lineWidth = 2.4;
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.92)';
+      ctx.shadowColor = 'rgba(148, 163, 184, 0.45)';
+      ctx.shadowBlur = 6;
       ctx.stroke();
       ctx.shadowBlur = 0;
 
-      // Glowing terminal tip dot on the Live Yellow Forecast Trajectory
+      // Terminal tip dot on the Solid Zero-Drift Median ("Evidence-backed range")
       const lastLiveStep = nSteps - 1;
       const tipLiveX = startX + lastLiveStep * stepW;
       const tipLiveVal = ensemble.medianTrack[lastLiveStep].value;
       const tipLiveY = priceToY(tipLiveVal, minP, maxP, mainHeight);
       ctx.save();
-      const tipHalo = ctx.createRadialGradient(tipLiveX, tipLiveY, 1, tipLiveX, tipLiveY, 12);
-      tipHalo.addColorStop(0, 'rgba(255, 236, 160, 0.95)');
-      tipHalo.addColorStop(0.45, 'rgba(245, 215, 110, 0.42)');
-      tipHalo.addColorStop(1, 'rgba(245, 215, 110, 0)');
-      ctx.fillStyle = tipHalo;
       ctx.beginPath();
-      ctx.arc(tipLiveX, tipLiveY, 12, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(tipLiveX, tipLiveY, 3.8, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff3b8';
-      ctx.shadowColor = '#f5d76e';
-      ctx.shadowBlur = 10;
+      ctx.arc(tipLiveX, tipLiveY, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#e2e8f0';
       ctx.fill();
       ctx.restore();
 
+      const calloutRightX = mainWidth - 8;
+      const liveTopY = Math.max(20, Math.min(mainHeight - 64, tipLiveY - 6));
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '700 12.5px monospace';
+      ctx.fillText(tipLiveVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), calloutRightX, liveTopY);
+      ctx.fillStyle = 'rgba(203, 213, 225, 0.88)';
+      ctx.font = '600 8.5px sans-serif';
+      ctx.fillText('Evidence-backed range', calloutRightX, liveTopY + 11);
+      ctx.restore();
+
+      // (b) Dashed Yellow Line using rawStepDrift ("Experimental drift (unvalidated)")
+      const expDriftTrack = Array.isArray(ensemble.experimentalDriftTrack) && ensemble.experimentalDriftTrack.length > 0
+        ? ensemble.experimentalDriftTrack
+        : null;
+      let expDriftTopY = liveTopY;
+      if (layers.experimentalDrift !== false && expDriftTrack) {
+        const expSteps = Math.min(nSteps, expDriftTrack.length);
+        ctx.save();
+        ctx.beginPath();
+        for (let s = 0; s < expSteps; s++) {
+          const x = startX + s * stepW;
+          const y = priceToY(expDriftTrack[s].value, minP, maxP, mainHeight);
+          if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.lineWidth = 2.4;
+        ctx.strokeStyle = '#f5d76e';
+        ctx.setLineDash([6, 4]);
+        ctx.shadowColor = 'rgba(245, 215, 110, 0.65)';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.restore();
+
+        const lastExpVal = expDriftTrack[expSteps - 1].value;
+        const yExpEnd = priceToY(lastExpVal, minP, maxP, mainHeight);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(startX + (expSteps - 1) * stepW, yExpEnd, 3.6, 0, Math.PI * 2);
+        ctx.fillStyle = '#f5d76e';
+        ctx.fill();
+        ctx.restore();
+
+        expDriftTopY = Math.abs(yExpEnd - liveTopY) < 34
+          ? Math.min(mainHeight - 38, liveTopY + 36)
+          : Math.max(24, Math.min(mainHeight - 38, yExpEnd - 4));
+
+        // Prospective-ledger stats beside the dashed line (sample size, coverage, hit rate with CI) or "no demonstrated skill"
+        const ledgerAcc = forecastData.prospectiveLedgerAccuracy;
+        let ledgerStatLine = 'no demonstrated skill';
+        if (ledgerAcc) {
+          const nRes = Number(ledgerAcc.resolvedPredictions || 0);
+          const cov50 = typeof ledgerAcc.empiricalCoverage50 === 'number'
+            ? `${(ledgerAcc.empiricalCoverage50 * 100).toFixed(0)}%`
+            : 'n/a';
+          const hitRate = typeof ledgerAcc.hitRate === 'number'
+            ? `${(ledgerAcc.hitRate * 100).toFixed(1)}%`
+            : null;
+          const ci95 = Array.isArray(ledgerAcc.hitRateWilson95Ci) && ledgerAcc.hitRateWilson95Ci.length === 2
+            ? `[${(ledgerAcc.hitRateWilson95Ci[0] * 100).toFixed(0)}%,${(ledgerAcc.hitRateWilson95Ci[1] * 100).toFixed(0)}%]`
+            : '';
+          if (ledgerAcc.publishable && hitRate) {
+            ledgerStatLine = `N=${nRes} · Cov50=${cov50} · Hit=${hitRate} ${ci95}`;
+          } else if (nRes > 0 && hitRate) {
+            ledgerStatLine = `N=${nRes}/${ledgerAcc.minSampleSizeForPublication || 197} · Cov50=${cov50} · Hit=${hitRate} ${ci95} · no demonstrated skill`;
+          } else {
+            ledgerStatLine = `N=${nRes}/${ledgerAcc.minSampleSizeForPublication || 197} · no demonstrated skill`;
+          }
+        }
+
+        ctx.save();
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#f5d76e';
+        ctx.font = '700 12.5px monospace';
+        ctx.fillText(lastExpVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), calloutRightX, expDriftTopY);
+        ctx.fillStyle = 'rgba(245, 215, 110, 0.88)';
+        ctx.font = '600 8.5px sans-serif';
+        ctx.fillText('Experimental drift (unvalidated)', calloutRightX, expDriftTopY + 11);
+        ctx.fillStyle = 'rgba(248, 250, 252, 0.78)';
+        ctx.font = '600 8px monospace';
+        ctx.fillText(ledgerStatLine, calloutRightX, expDriftTopY + 21);
+        ctx.restore();
+      }
+
       // =========================================================================
       // MANDATORY SAME-CHART DUAL-LINE COMPARISON:
-      // Draw Parallel Universe Candidate Trajectory (#e040fb Dashed Magenta Line)
-      // on the EXACT SAME 2D Canvas (#windyCanvas), Price Scale, and Time Axis
+      // Magenta Candidate follows the exact same rule:
+      // (a) Solid calibrated fan with zero-drift median (candEnsemble.medianTrack)
+      // (b) Dashed magenta line using candidate rawStepDrift (candEnsemble.experimentalDriftTrack)
       // =========================================================================
-      const candTrack = candEnsemble?.medianTrack;
-      if (layers.parallelCandidate !== false && Array.isArray(candTrack) && candTrack.length > 0) {
-        const cSteps = Math.min(nSteps, candTrack.length);
+      const candZeroTrack = candEnsemble?.medianTrack;
+      const candExpTrack = (layers.experimentalDrift !== false && Array.isArray(candEnsemble?.experimentalDriftTrack) && candEnsemble.experimentalDriftTrack.length > 0)
+        ? candEnsemble.experimentalDriftTrack
+        : null;
+      const candTrack = candExpTrack || candZeroTrack;
+      if (layers.parallelCandidate !== false && Array.isArray(candZeroTrack) && candZeroTrack.length > 0) {
+        const cSteps = Math.min(nSteps, candZeroTrack.length);
 
-        // Candidate Inner P25–P75 Translucent Band on Same Chart
+        // Candidate Inner P25–P75 Translucent Band on Same Chart (centered on zero-drift median)
         if (Array.isArray(candEnsemble.upper75) && Array.isArray(candEnsemble.lower25) && candEnsemble.upper75.length >= cSteps) {
           ctx.beginPath();
           for (let s = 0; s < cSteps; s++) {
@@ -14195,55 +14314,56 @@ function renderStaticChartLayer(ctx, w, h, allowGlow) {
           ctx.fill();
         }
 
-        // Candidate Trajectory Line (#e040fb High-Contrast Dashed Magenta)
+        // Candidate Solid Zero-Drift Median Line
         ctx.save();
         ctx.beginPath();
         for (let s = 0; s < cSteps; s++) {
           const x = startX + s * stepW;
-          const y = priceToY(candTrack[s].value, minP, maxP, mainHeight);
+          const y = priceToY(candZeroTrack[s].value, minP, maxP, mainHeight);
           if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
-        ctx.lineWidth = 2.2;
-        ctx.strokeStyle = '#e040fb';
-        ctx.setLineDash([7, 4]);
-        ctx.shadowColor = 'rgba(224, 64, 251, 0.55)';
-        ctx.shadowBlur = 7;
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = 'rgba(224, 64, 251, 0.55)';
         ctx.stroke();
         ctx.restore();
 
-        // Calm, Unboxed Reference-Style Callouts for Live Forecast & Candidate Trajectory
-        const lastCandVal = candTrack[cSteps - 1].value;
-        const lastLiveVal = ensemble.medianTrack[cSteps - 1].value;
-        const yCandEnd = priceToY(lastCandVal, minP, maxP, mainHeight);
-        const yLiveEnd = priceToY(lastLiveVal, minP, maxP, mainHeight);
-        const calloutRightX = mainWidth - 8;
+        // Candidate Experimental Drift Line (#e040fb High-Contrast Dashed Magenta, toggled with Experimental Drift)
+        if (candExpTrack) {
+          const ceSteps = Math.min(nSteps, candExpTrack.length);
+          ctx.save();
+          ctx.beginPath();
+          for (let s = 0; s < ceSteps; s++) {
+            const x = startX + s * stepW;
+            const y = priceToY(candExpTrack[s].value, minP, maxP, mainHeight);
+            if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.lineWidth = 2.2;
+          ctx.strokeStyle = '#e040fb';
+          ctx.setLineDash([7, 4]);
+          ctx.shadowColor = 'rgba(224, 64, 251, 0.55)';
+          ctx.shadowBlur = 7;
+          ctx.stroke();
+          ctx.restore();
 
-        ctx.save();
-        ctx.textAlign = 'right';
-        const liveTopY = Math.max(20, Math.min(mainHeight - 54, yLiveEnd - 4));
-        const candTopY = Math.abs(yCandEnd - liveTopY) < 34
-          ? Math.min(mainHeight - 24, liveTopY + 36)
-          : Math.max(24, Math.min(mainHeight - 24, yCandEnd + 4));
+          const lastCandVal = candExpTrack[ceSteps - 1].value;
+          const yCandEnd = priceToY(lastCandVal, minP, maxP, mainHeight);
+          const candTopY = Math.abs(yCandEnd - expDriftTopY) < 34
+            ? Math.min(mainHeight - 24, expDriftTopY + 34)
+            : Math.max(24, Math.min(mainHeight - 24, yCandEnd + 4));
 
-        // 1) Live Forecast Callout (Yellow #f5d76e)
-        ctx.fillStyle = '#f5d76e';
-        ctx.font = '700 13px monospace';
-        ctx.fillText(lastLiveVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), calloutRightX, liveTopY);
-        ctx.fillStyle = 'rgba(245, 215, 110, 0.78)';
-        ctx.font = '600 8.5px sans-serif';
-        ctx.fillText('FORECAST', calloutRightX, liveTopY + 11);
-
-        // 2) Candidate Trajectory Callout (Magenta #e040fb)
-        ctx.fillStyle = '#e040fb';
-        ctx.font = '700 12.5px monospace';
-        ctx.fillText(lastCandVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), calloutRightX, candTopY);
-        ctx.fillStyle = 'rgba(224, 64, 251, 0.80)';
-        ctx.font = '600 8.5px sans-serif';
-        ctx.fillText('CANDIDATE', calloutRightX, candTopY + 11);
-        ctx.restore();
+          ctx.save();
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#e040fb';
+          ctx.font = '700 12px monospace';
+          ctx.fillText(lastCandVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), calloutRightX, candTopY);
+          ctx.fillStyle = 'rgba(224, 64, 251, 0.85)';
+          ctx.font = '600 8.5px sans-serif';
+          ctx.fillText('Candidate experimental drift (unvalidated)', calloutRightX, candTopY + 11);
+          ctx.restore();
+        }
       }
 
-      // Calm Confidence Band Callout (68% · 95%) near outer horizon envelope
+      // Calm Confidence Band Callout (50% · 90%) near outer horizon envelope
       const lastStepIdx = nSteps - 1;
       if (lastStepIdx >= 0) {
         const yL05 = priceToY(ensemble.lower05[lastStepIdx].value, minP, maxP, mainHeight);
@@ -14252,11 +14372,11 @@ function renderStaticChartLayer(ctx, w, h, allowGlow) {
         ctx.textAlign = 'right';
         ctx.fillStyle = 'rgba(168, 184, 208, 0.75)';
         ctx.font = '600 8.5px sans-serif';
-        ctx.fillText('CONFIDENCE', mainWidth - 8, confY);
-        ctx.fillText('BAND', mainWidth - 8, confY + 10);
+        ctx.fillText('EVIDENCE-BACKED', mainWidth - 8, confY);
+        ctx.fillText('RANGE BAND', mainWidth - 8, confY + 10);
         ctx.fillStyle = 'rgba(198, 212, 232, 0.86)';
         ctx.font = '600 9px monospace';
-        ctx.fillText('68% · 95%', mainWidth - 8, confY + 22);
+        ctx.fillText('50% · 90%', mainWidth - 8, confY + 22);
         ctx.restore();
       }
 
@@ -14264,7 +14384,9 @@ function renderStaticChartLayer(ctx, w, h, allowGlow) {
       const sliderStep = parseInt(document.getElementById('timeSlider').value, 10);
       if (sliderStep > 0 && sliderStep < nSteps) {
         const markerX = startX + sliderStep * stepW;
-        const markerVal = ensemble.medianTrack[sliderStep].value;
+        const markerVal = (layers.experimentalDrift !== false && expDriftTrack && expDriftTrack[sliderStep])
+          ? expDriftTrack[sliderStep].value
+          : ensemble.medianTrack[sliderStep].value;
         const markerY = priceToY(markerVal, minP, maxP, mainHeight);
         const candValAtStep =
           layers.parallelCandidate !== false && candTrack && candTrack[sliderStep]
@@ -14287,7 +14409,7 @@ function renderStaticChartLayer(ctx, w, h, allowGlow) {
         ctx.stroke();
         ctx.restore();
 
-        // Pulsing Marker Point on the Live Yellow Curve
+        // Pulsing Marker Point on the Active Curve
         ctx.beginPath();
         ctx.arc(markerX, markerY, 5.0, 0, Math.PI * 2);
         ctx.fillStyle = '#f5d76e';
@@ -19039,13 +19161,24 @@ setup3dLayerBtn('btn3dCandles', 'candles', () => threeWorldState.candlesGroup);
 setup3dLayerBtn('btn3dPlume', 'plume', () => threeWorldState.plumeGroup);
 setup3dLayerBtn('btn3dFlow', 'flow', () => threeWorldState.flowInstancedMesh);
 
-// Parallel Universe Layer Toggle & MMI Promotion Controls
+// Experimental Drift Layer Toggle & Parallel Universe Layer Toggle
+const btnExperimentalDrift = document.getElementById('btnExperimentalDrift');
+if (btnExperimentalDrift) {
+  layers.experimentalDrift = true;
+  btnExperimentalDrift.addEventListener('click', () => {
+    layers.experimentalDrift = !layers.experimentalDrift;
+    btnExperimentalDrift.classList.toggle('active', layers.experimentalDrift);
+    lastStaticChartCacheKey = '';
+  });
+}
+
 const btnParallelCandidate = document.getElementById('btnParallelCandidate');
 if (btnParallelCandidate) {
   layers.parallelCandidate = true;
   btnParallelCandidate.addEventListener('click', () => {
     layers.parallelCandidate = !layers.parallelCandidate;
     btnParallelCandidate.classList.toggle('active', layers.parallelCandidate);
+    lastStaticChartCacheKey = '';
     if (forecastData && threeWorldState && threeWorldState.isActive) {
       updateThreeWorldData(forecastData);
     }
@@ -22413,6 +22546,477 @@ document.addEventListener('DOMContentLoaded', () => {
       isOpen: !widget.classList.contains('hidden'),
     }),
   };
+})();
+</script>
+
+<!-- =========================================================================
+     GDF PULSE — PROBABILISTIC INTELLIGENCE CORE + ANDROID MOBILE REDESIGN
+     ========================================================================= -->
+<style>
+  .pulse-core-section {
+    max-width: 1480px;
+    margin: 18px auto 92px auto;
+    padding: 18px 20px;
+    background: linear-gradient(180deg, rgba(11, 17, 30, 0.96) 0%, rgba(7, 11, 20, 0.98) 100%);
+    border: 1px solid rgba(0, 229, 255, 0.28);
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+  }
+  .pulse-header-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(40, 62, 98, 0.55);
+    margin-bottom: 14px;
+  }
+  .pulse-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .pulse-card {
+    background: rgba(13, 21, 38, 0.88);
+    border: 1px solid rgba(45, 70, 110, 0.48);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .pulse-card-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: #00e5ff;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .pulse-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .pulse-table th {
+    text-align: left;
+    padding: 6px 8px;
+    color: #94a3b8;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.65);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+  .pulse-table td {
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.55);
+    color: #e2e8f0;
+  }
+  .pulse-epistemic-pill {
+    font-family: monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(245, 215, 110, 0.45);
+    background: rgba(245, 215, 110, 0.12);
+    color: #f5d76e;
+    white-space: nowrap;
+  }
+  .pulse-Unc-bar-track {
+    height: 6px;
+    background: rgba(30, 41, 59, 0.85);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .pulse-Unc-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  /* 5-Tab Android Mobile Bottom Navigation Bar */
+  .gdf-android-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(7, 11, 20, 0.97);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(0, 229, 255, 0.28);
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    z-index: 9990;
+    padding: 0 4px env(safe-area-inset-bottom, 0px) 4px;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.65);
+  }
+  .gdf-android-nav-btn {
+    flex: 1;
+    min-width: 48px;
+    min-height: 48px;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    transition: color 0.18s, background 0.18s;
+    border-top: 2px solid transparent;
+  }
+  .gdf-android-nav-btn.active {
+    color: #00e5ff;
+    border-top-color: #00e5ff;
+    background: rgba(0, 229, 255, 0.07);
+  }
+  .gdf-android-nav-icon {
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  @media (max-width: 768px) {
+    .pulse-core-section {
+      margin: 10px 8px 82px 8px;
+      padding: 12px;
+    }
+    .pulse-grid-2col {
+      grid-template-columns: 1fr;
+    }
+    .atmosphere-bar {
+      padding: 8px 10px !important;
+      gap: 6px !important;
+    }
+  }
+</style>
+
+<section id="panelPulseIntelligence" class="pulse-core-section" aria-label="GDF PULSE Probabilistic Intelligence Core">
+  <div class="pulse-header-bar">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:15px;font-weight:900;color:#fff;letter-spacing:0.6px;" data-i18n="pulseTitle">GDF PULSE — PROBABILISTIC UNDERSTANDING, LEARNING &amp; SCENARIO ENGINE</span>
+        <span id="pulseSchemaBadge" class="pulse-epistemic-pill">PULSE-1.0.0 · CAUSAL CUTOFF VERIFIED</span>
+        <span id="pulseSkillStatusBadge" class="pulse-epistemic-pill" style="border-color:rgba(244,63,94,0.55);background:rgba(244,63,94,0.14);color:#fda4af;">NO DEMONSTRATED DIRECTIONAL SKILL</span>
+      </div>
+      <div id="pulseExecutiveBrief" style="font-size:11.5px;color:#cbd5e1;margin-top:5px;line-height:1.45;">
+        Initializing 7-Component Separated Probability Field (Conditional Expectation E[P_t+h] via Duan Smearing vs. Predictive Median Q50 + Direct-h FHS+ACI Quantiles)...
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <button type="button" id="btnToggleExperimentalDriftLine" style="min-height:36px;padding:6px 12px;border-radius:6px;border:1px solid rgba(245,215,110,0.55);background:rgba(245,215,110,0.14);color:#f5d76e;font-size:11px;font-weight:800;cursor:pointer;">
+        ⚡ Experimental Drift Line: ON
+      </button>
+      <span id="pulseInfoClockStamp" style="font-family:monospace;font-size:10.5px;color:#7dd3fc;background:rgba(14,116,144,0.2);border:1px solid rgba(56,189,248,0.35);padding:5px 9px;border-radius:6px;">
+        τ=— · Macro=VERIFIED_POINT_IN_TIME
+      </span>
+    </div>
+  </div>
+
+  <!-- 1. 7-Component Separated Probability Field Table -->
+  <div class="pulse-card">
+    <div class="pulse-card-title">
+      <span>1. 7-Component Separated Probability Field (Independent E[P_t+h] vs. Median Q50 + Direct-h Empirical FHS+ACI)</span>
+      <span id="pulseDistMethodBadge" class="pulse-epistemic-pill">DIRECT_HORIZON_EMPIRICAL_FHS_ACI</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="pulse-table" id="pulseProbabilityFieldTable">
+        <thead>
+          <tr>
+            <th>Horizon</th>
+            <th>Cond. Expected E[P]</th>
+            <th>Pred. Median Q50</th>
+            <th>Skew Wedge (E-Q50)</th>
+            <th>90% Fan [Q05, Q95]</th>
+            <th>50% Fan [Q25, Q75]</th>
+            <th>P(Up / Down / Flat) &amp; 95% CI</th>
+            <th>ES90 (+Up / -Down)</th>
+            <th>Barrier Touch (±1 ATR)</th>
+            <th>Calibration</th>
+          </tr>
+        </thead>
+        <tbody id="pulseProbabilityFieldTbody">
+          <tr><td colspan="10" style="color:#94a3b8;">Awaiting live telemetry snapshot...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pulse-grid-2col">
+    <!-- 2. 5-Branch Scenario Tree (Sub-Engine A + C) -->
+    <div class="pulse-card">
+      <div class="pulse-card-title">
+        <span>2. 5-Branch Probabilistic Scenario Tree (Empirical-Bayes Shrunk)</span>
+        <span id="pulseHybridModeBadge" class="pulse-epistemic-pill">SCENARIO_DOMINANT</span>
+      </div>
+      <div id="pulseScenarioBranchesList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <!-- 3. 6-Axis Vulnerability Radar with Mandatory Provenance -->
+    <div class="pulse-card">
+      <div class="pulse-card-title">
+        <span>3. 6-Axis Structural Vulnerability Radar &amp; Provenance</span>
+        <span id="pulseFragilityBadge" class="pulse-epistemic-pill">FRAGILITY: —/100</span>
+      </div>
+      <div id="pulseVulnerabilityRadarList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+
+  <div class="pulse-grid-2col">
+    <!-- 4. Dynamic Transmission Dominance Engine (Ledoit-Wolf Joint Covariance) -->
+    <div class="pulse-card">
+      <div class="pulse-card-title">
+        <span>4. Transmission Dominance Engine (Ledoit–Wolf Joint Covariance)</span>
+        <span id="pulseDominantChannelBadge" class="pulse-epistemic-pill">DOMINANT: —</span>
+      </div>
+      <div id="pulseTransmissionChannelsList" style="display:flex;flex-direction:column;gap:7px;"></div>
+    </div>
+
+    <!-- 5. 5-Type Uncertainty Separation & Probability Migration Audit Trail -->
+    <div class="pulse-card">
+      <div class="pulse-card-title">
+        <span>5. 5-Type Uncertainty Separation &amp; JSD Probability Migration</span>
+        <span id="pulseBlindspotBadge" class="pulse-epistemic-pill">BLINDSPOT: NOMINAL</span>
+      </div>
+      <div id="pulseUncertaintySeparationList" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;"></div>
+      <div id="pulseMigrationLedgerList" style="font-size:10.5px;color:#94a3b8;border-top:1px solid rgba(51,65,85,0.5);padding-top:8px;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5-Tab Fixed Bottom Navigation Bar for Android Ergonomics -->
+<nav id="gdfAndroidBottomNav" class="gdf-android-bottom-nav" aria-label="GDF Mobile Primary Navigation">
+  <button type="button" class="gdf-android-nav-btn active" data-mobile-tab="CHART">
+    <span class="gdf-android-nav-icon">📈</span>
+    <span>Chart</span>
+  </button>
+  <button type="button" class="gdf-android-nav-btn" data-mobile-tab="PULSE">
+    <span class="gdf-android-nav-icon">🧠</span>
+    <span>PULSE</span>
+  </button>
+  <button type="button" class="gdf-android-nav-btn" data-mobile-tab="EVENTS">
+    <span class="gdf-android-nav-icon">📅</span>
+    <span>Events</span>
+  </button>
+  <button type="button" class="gdf-android-nav-btn" data-mobile-tab="THEATRE3D">
+    <span class="gdf-android-nav-icon">🌐</span>
+    <span>3D Theatre</span>
+  </button>
+  <button type="button" class="gdf-android-nav-btn" data-mobile-tab="SYSTEM">
+    <span class="gdf-android-nav-icon">⚙️</span>
+    <span>System</span>
+  </button>
+</nav>
+
+<script>
+(function initGdfPulseAndAndroidNav() {
+  // Experimental Drift Line Toggle Button
+  const btnToggleExp = document.getElementById('btnToggleExperimentalDriftLine');
+  if (btnToggleExp) {
+    btnToggleExp.addEventListener('click', () => {
+      if (typeof layers !== 'undefined') {
+        layers.experimentalDrift = !layers.experimentalDrift;
+        btnToggleExp.textContent = layers.experimentalDrift
+          ? '⚡ Experimental Drift Line: ON'
+          : '⚡ Experimental Drift Line: OFF';
+        btnToggleExp.style.opacity = layers.experimentalDrift ? '1' : '0.55';
+        if (typeof drawRadar === 'function') drawRadar();
+      }
+    });
+  }
+
+  // 5-Tab Android Bottom Navigation Controller
+  const navBtns = document.querySelectorAll('#gdfAndroidBottomNav .gdf-android-nav-btn');
+  navBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      navBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.getAttribute('data-mobile-tab');
+      if (tab === 'CHART') {
+        const el = document.getElementById('radarStage') || document.getElementById('tier2PrimaryWorkspace');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (tab === 'PULSE') {
+        const el = document.getElementById('panelPulseIntelligence');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (tab === 'EVENTS') {
+        const el = document.getElementById('macroEventCalendarSection') || document.getElementById('newsFeedContainer');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (tab === 'THEATRE3D') {
+        const btn3d = document.getElementById('btnToggle3DTheatre');
+        if (btn3d) btn3d.click();
+      } else if (tab === 'SYSTEM') {
+        const el = document.getElementById('panelParallelUniverse') || document.getElementById('tier3DiagnosticsDetails');
+        if (el) {
+          if (el.tagName === 'DETAILS') el.open = true;
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+
+  function renderPulseIntelligenceToDom(pulse) {
+    if (!pulse) return;
+    const isFa = typeof currentLang !== 'undefined' && currentLang === 'fa';
+    const briefEl = document.getElementById('pulseExecutiveBrief');
+    if (briefEl) briefEl.textContent = isFa ? (pulse.executiveBriefFa || pulse.executiveBriefEn) : pulse.executiveBriefEn;
+
+    const clockEl = document.getElementById('pulseInfoClockStamp');
+    if (clockEl && pulse.informationClock) {
+      const ic = pulse.informationClock;
+      clockEl.textContent = `τ=${ic.intrinsicTau} (Δτ=${ic.deltaTauStep}) · Macro=${ic.macroEpistemicState} · Cutoff=${ic.informationCutoffVerified ? 'VERIFIED' : 'UNVERIFIED'}`;
+    }
+
+    const firstH = Array.isArray(pulse.probabilityFieldByHorizon) && pulse.probabilityFieldByHorizon[0];
+    const skillBadge = document.getElementById('pulseSkillStatusBadge');
+    if (skillBadge && firstH) {
+      const passed = firstH.directionalProbability?.directionalGatePassed;
+      skillBadge.textContent = passed ? 'VALIDATED DIRECTIONAL SKILL' : 'NO DEMONSTRATED DIRECTIONAL SKILL';
+      skillBadge.style.borderColor = passed ? 'rgba(16,185,129,0.55)' : 'rgba(244,63,94,0.55)';
+      skillBadge.style.color = passed ? '#6ee7b7' : '#fda4af';
+    }
+
+    const tbody = document.getElementById('pulseProbabilityFieldTbody');
+    if (tbody && Array.isArray(pulse.probabilityFieldByHorizon)) {
+      tbody.innerHTML = pulse.probabilityFieldByHorizon.map((pt) => {
+        const dp = pt.directionalProbability || {};
+        const md = pt.magnitudeDistribution || {};
+        const ex = pt.excursionDistribution || {};
+        const cq = pt.calibrationQuality || {};
+        const q = pt.quantilesUsd || {};
+        const wedgeSign = pt.meanMedianSkewWedgeUsd >= 0 ? '+' : '';
+        return `<tr>
+          <td style="font-weight:800;color:#7dd3fc;">${isFa ? pt.horizonLabelFa : pt.horizonLabelEn}</td>
+          <td style="font-weight:800;color:#f5d76e;">$${Number(pt.conditionalExpectedPriceUsd).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+          <td style="font-weight:700;color:#e2e8f0;">$${Number(pt.predictiveMedianPriceUsd).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+          <td style="font-family:monospace;color:${pt.meanMedianSkewWedgeUsd >= 0 ? '#34d399' : '#f87171'};">${wedgeSign}$${Number(pt.meanMedianSkewWedgeUsd).toFixed(2)}</td>
+          <td style="font-family:monospace;">[$${Number(q.q05).toFixed(1)}, $${Number(q.q95).toFixed(1)}]</td>
+          <td style="font-family:monospace;">[$${Number(q.q25).toFixed(1)}, $${Number(q.q75).toFixed(1)}]</td>
+          <td>
+            <span style="color:#34d399;">↑${(dp.probUp * 100).toFixed(1)}%</span> /
+            <span style="color:#f87171;">↓${(dp.probDown * 100).toFixed(1)}%</span> /
+            <span style="color:#94a3b8;">=${(dp.probFlatWithinNoise * 100).toFixed(1)}%</span>
+            <div style="font-size:9.5px;color:#94a3b8;">CI:[${(dp.wilsonCi95Lower * 100).toFixed(0)}%,${(dp.wilsonCi95Upper * 100).toFixed(0)}%] · ${dp.epistemicLabel}</div>
+          </td>
+          <td style="font-family:monospace;">+$${Number(md.upsideExpectedShortfall90Usd).toFixed(1)} / -$${Number(md.downsideExpectedShortfall90Usd).toFixed(1)}</td>
+          <td style="font-family:monospace;">+1ATR:${(ex.probTouchPlus1Atr * 100).toFixed(0)}% · -1ATR:${(ex.probTouchMinus1Atr * 100).toFixed(0)}%</td>
+          <td><span class="pulse-epistemic-pill">${cq.epistemicBadge} (N=${cq.sampleSizeN})</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    const modeBadge = document.getElementById('pulseHybridModeBadge');
+    if (modeBadge) {
+      modeBadge.textContent = `${pulse.hybridMode} (w_pre=${pulse.anticipatoryShrinkageWeightWPre})`;
+    }
+
+    const scList = document.getElementById('pulseScenarioBranchesList');
+    if (scList && Array.isArray(pulse.scenarioBranches)) {
+      scList.innerHTML = pulse.scenarioBranches.map((b) => {
+        const pct = (b.posteriorProbability * 100).toFixed(1);
+        const priorPct = (b.priorBaseRateProbability * 100).toFixed(0);
+        return `<div style="padding:8px 10px;border-radius:8px;background:rgba(15,23,42,0.75);border:1px solid rgba(51,65,85,0.6);">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+            <span style="font-weight:800;font-size:11.5px;color:#f8fafc;">${isFa ? b.titleFa : b.titleEn}</span>
+            <span style="font-family:monospace;font-weight:900;color:#00e5ff;">${pct}% <span style="font-size:9.5px;color:#94a3b8;">(Prior ${priorPct}%)</span></span>
+          </div>
+          <div class="pulse-Unc-bar-track"><div class="pulse-Unc-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#00e5ff,#f5d76e);"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:5px;">
+            <span>Trigger: $${Number(b.triggerPriceThresholdUsd).toFixed(2)} · Target 4h: $${Number(b.targetHorizon4hUsd).toFixed(2)}</span>
+            <span>Invalidation: $${Number(b.invalidationPriceThresholdUsd).toFixed(2)}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    const fragBadge = document.getElementById('pulseFragilityBadge');
+    if (fragBadge && pulse.vulnerabilityRadar) {
+      fragBadge.textContent = `${pulse.vulnerabilityRadar.compositeFragilityScore0To100}/100 · ${pulse.vulnerabilityRadar.fragilityRegime}`;
+    }
+
+    const vulList = document.getElementById('pulseVulnerabilityRadarList');
+    if (vulList && pulse.vulnerabilityRadar && Array.isArray(pulse.vulnerabilityRadar.axes)) {
+      vulList.innerHTML = pulse.vulnerabilityRadar.axes.map((ax) => {
+        const c = ax.score0To100 >= 70 ? '#f43f5e' : ax.score0To100 >= 50 ? '#f59e0b' : '#10b981';
+        return `<div style="padding:7px 10px;border-radius:7px;background:rgba(15,23,42,0.75);border:1px solid rgba(51,65,85,0.55);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-weight:700;font-size:11px;color:#e2e8f0;">${isFa ? ax.labelFa : ax.labelEn}</span>
+            <span style="font-family:monospace;font-weight:800;color:${c};">${ax.score0To100}/100 (${ax.directionVulnerability})</span>
+          </div>
+          <div class="pulse-Unc-bar-track"><div class="pulse-Unc-bar-fill" style="width:${ax.score0To100}%;background:${c};"></div></div>
+          <div style="font-size:9.5px;color:#94a3b8;margin-top:4px;">
+            [${ax.derivationStatus}] ${ax.dataSourceProvenance} · ${isFa ? ax.knownLimitationsFa : ax.knownLimitationsEn}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    const domBadge = document.getElementById('pulseDominantChannelBadge');
+    if (domBadge && pulse.transmissionDominance) {
+      domBadge.textContent = `${pulse.transmissionDominance.dominantChannelNameEn} (LW δ=${pulse.transmissionDominance.ledoitWolfShrinkageDelta})`;
+    }
+
+    const chList = document.getElementById('pulseTransmissionChannelsList');
+    if (chList && pulse.transmissionDominance && Array.isArray(pulse.transmissionDominance.channels)) {
+      chList.innerHTML = pulse.transmissionDominance.channels.map((ch) => {
+        const dSign = ch.shiftDeltaPct >= 0 ? '+' : '';
+        return `<div style="padding:6px 9px;border-radius:6px;background:rgba(15,23,42,0.7);border:1px solid rgba(51,65,85,0.5);">
+          <div style="display:flex;justify-content:space-between;font-size:11px;">
+            <span style="color:#f1f5f9;font-weight:700;">${isFa ? ch.channelNameFa : ch.channelNameEn}</span>
+            <span style="font-family:monospace;color:#f5d76e;font-weight:800;">${ch.explanatorySharePct.toFixed(1)}% (${dSign}${ch.shiftDeltaPct.toFixed(1)}%)</span>
+          </div>
+          <div class="pulse-Unc-bar-track"><div class="pulse-Unc-bar-fill" style="width:${ch.explanatorySharePct}%;background:#f5d76e;"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    const uncList = document.getElementById('pulseUncertaintySeparationList');
+    if (uncList && pulse.uncertaintySeparation) {
+      const u = pulse.uncertaintySeparation;
+      const items = [
+        { name: '1. Data & Provenance Uncertainty', score: u.dataUncertaintyScore0To100, desc: u.dataUncertaintyLabelEn },
+        { name: '2. Model Epistemic Disagreement', score: u.modelUncertaintyScore0To100, desc: u.modelUncertaintyLabelEn },
+        { name: '3. Regime Structural Break (BOCPD)', score: u.regimeUncertaintyScore0To100, desc: u.regimeUncertaintyLabelEn },
+        { name: '4. Scheduled Event & Catalyst Risk', score: u.eventUncertaintyScore0To100, desc: u.eventUncertaintyLabelEn },
+        { name: '5. Execution & LVN Depth Uncertainty', score: u.executionLiquidityUncertaintyScore0To100, desc: u.executionLiquidityUncertaintyLabelEn },
+      ];
+      uncList.innerHTML = items.map((it) => `
+        <div style="font-size:10.5px;">
+          <div style="display:flex;justify-content:space-between;color:#e2e8f0;">
+            <span style="font-weight:700;">${it.name}</span>
+            <span style="font-family:monospace;color:#7dd3fc;">${it.score}/100 · ${it.desc}</span>
+          </div>
+          <div class="pulse-Unc-bar-track"><div class="pulse-Unc-bar-fill" style="width:${it.score}%;background:#38bdf8;"></div></div>
+        </div>
+      `).join('');
+    }
+
+    const migList = document.getElementById('pulseMigrationLedgerList');
+    if (migList && Array.isArray(pulse.probabilityMigrationLedger)) {
+      migList.innerHTML = '<div style="font-weight:800;color:#cbd5e1;margin-bottom:4px;">Recent Probability Migrations (Jensen–Shannon Divergence):</div>' +
+        pulse.probabilityMigrationLedger.slice(-3).reverse().map((m) =>
+          `<div style="margin-bottom:3px;font-family:monospace;">• JSD=${m.jensenShannonDivergenceBits} bits | P(Up): ${(m.probUpBefore * 100).toFixed(1)}%→${(m.probUpAfter * 100).toFixed(1)}% | ${isFa ? m.driverAttributionFa : m.driverAttributionEn}</div>`
+        ).join('');
+    }
+  }
+
+  window.renderPulseIntelligenceToDom = renderPulseIntelligenceToDom;
+
+  // Poll forecastData.parallelUniverse.pulseIntelligence automatically
+  setInterval(() => {
+    if (typeof forecastData !== 'undefined' && forecastData && forecastData.parallelUniverse && forecastData.parallelUniverse.pulseIntelligence) {
+      renderPulseIntelligenceToDom(forecastData.parallelUniverse.pulseIntelligence);
+    }
+  }, 1500);
 })();
 </script>
 

@@ -71,10 +71,13 @@ export function evaluateMacroTransmissionMechanisms(params: {
   const dxyDeviation = currentDxyIndex - dxyNeutralAnchor;
   const dxyDrift = (-dxyDeviation) * 0.45;
 
-  // Channel 3: Macro Event Surprise Aggregate
+  // Channel 3: Macro Event Surprise Aggregate (Strictly gated on isVerifiedOfficial === true)
   let cumulativeSurpriseDrift = 0;
   for (const ev of events) {
-    if (ev.releaseStatus === 'RELEASED' && ev.surpriseStdDev !== null) {
+    const isVerified =
+      ev.provenance?.isVerifiedOfficial === true &&
+      ev.provenance?.verificationStatus !== 'UNVERIFIED_PLACEHOLDER';
+    if (isVerified && ev.releaseStatus === 'RELEASED' && ev.surpriseStdDev !== null) {
       if (ev.surpriseDirection === 'DOVISH_FOR_USD') {
         cumulativeSurpriseDrift += Math.min(2.5, Math.abs(ev.surpriseStdDev) * 0.85);
       } else if (ev.surpriseDirection === 'HAWKISH_FOR_USD') {
@@ -83,15 +86,18 @@ export function evaluateMacroTransmissionMechanisms(params: {
     }
   }
 
-  // Channel 4: Political & Fiscal Expansion Transmission
+  // Channel 4: Political & Fiscal Expansion Transmission (Strictly gated against unverified placeholders)
   let politicalDrift = 0;
-  if (politicalIntelligence) {
+  const isPoliticalVerified =
+    politicalIntelligence &&
+    politicalIntelligence.status !== 'UNVERIFIED_PLACEHOLDER_QUARANTINED' &&
+    politicalIntelligence.verificationStatus === 'VERIFIED_OFFICIAL_RELEASE' &&
+    !politicalIntelligence.latestProbabilitySnapshot?.isUnverifiedPlaceholder;
+  if (isPoliticalVerified && politicalIntelligence) {
     const latestSnap = politicalIntelligence.latestProbabilitySnapshot;
     const demWinProb = latestSnap.democratSenateWinProb * 0.5 + latestSnap.democratHouseWinProb * 0.5;
-    // Unified Democratic or high spending mandate increases expected deficit by $1.8T - $2.2T
-    // Fiscal expansion reduces long-run real rates and elevates monetary debasement hedge demand
     const fiscalShockFactor = Math.max(0, demWinProb - 0.45) * 2.2;
-    politicalDrift = fiscalShockFactor * 1.45; // Up to ~$1.75/hr attributable drift
+    politicalDrift = fiscalShockFactor * 1.45;
   }
 
   const netAttributableDriftUsdPerStep = Number(

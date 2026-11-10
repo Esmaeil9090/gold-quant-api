@@ -1,7 +1,7 @@
 {
   "schemaVersion": "2026.11.03-v2.1-GDF-OS",
-  "revision": 227,
-  "contentSha256": "194444684eb67c6b7ebe5ddcbe8a6fde35736b35ffb545758bb96a48ade7b6f3",
+  "revision": 322,
+  "contentSha256": "0c644abf512706cab88c583b88d8078559e538989e1f455c6a4ef5dd20077001",
   "organizationHierarchy": [
     "1. Chief Scientist",
     "2. Head of Quantitative Engineering",
@@ -28,8 +28,8 @@
     "requireVerifiedProofForAutoPromotion": true,
     "requireVerifiedProofForManualMmiPromotion": true,
     "maxProofAgeMs": 900000,
-    "lastPromotionGateCheckIso": "2026-11-07T18:50:11.914Z",
-    "lastPromotionGateStatus": "FAIL"
+    "lastPromotionGateCheckIso": "2026-11-10T18:33:33.809Z",
+    "lastPromotionGateStatus": "PASS"
   },
   "interviews": [
     {
@@ -323,7 +323,7 @@
         "GdfAuditReport covering all 6 mandatory audit dimensions and automatic Loopback version upgrades."
       ],
       "trigger": "Triggered before any task completion claim (Decision Rule 9), via POST /api/gdf-os/run-proof, or via POST /api/gdf-os/audit.",
-      "version": "v1.7",
+      "version": "v1.8",
       "playbookId": "PB-006",
       "owningRoles": [
         "Verification & QA Lead (6)",
@@ -332,11 +332,11 @@
       ],
       "markdownPath": "/playbooks/PB-006.md",
       "playbookName": "Verification & QA Suite — Shock Regression, Level-5 Bayesian Meta-Learning & Feed Integrity Proof Runner",
-      "sha256Digest": "c492cff74ee5f34e",
+      "sha256Digest": "1c8207eb1afb4a60",
       "proofRequired": [
         "Live execution of POST /api/gdf-os/run-proof returning overallStatus: PASS with persisted evidence in data/gdf_os_registry.json."
       ],
-      "lastUpdatedIso": "2026-11-06T09:39:35.083Z",
+      "lastUpdatedIso": "2026-11-10T18:33:28.238Z",
       "nextImprovement": "Track SHA-256 digests for all /playbooks/*.md files so external auditor exports carry cryptographic file verification.",
       "commonFailureModes": [
         "Paper Compliance / Narrative Proof (Rule 9 & Rule 10 Violation): Claiming PASS in text without running programmatic assertions. Recovery: Execute live runtime assertions in runGdfProofSuite().",
@@ -346,7 +346,8 @@
         "Auto-Loopback Guard (2026-11-03T19:05:53.336Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=4dd94fce2d09b3f6 vs registry=96585e26881d7d01)) before allowing candidate promotion.",
         "Auto-Loopback Guard (2026-11-03T19:09:08.590Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=bb9ba4076e458230 vs registry=96585e26881d7d01)) before allowing candidate promotion.",
         "Auto-Loopback Guard (2026-11-06T09:21:52.025Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=02d5003eda3debe2 vs registry=96585e26881d7d01)) before allowing candidate promotion.",
-        "Auto-Loopback Guard (2026-11-06T09:39:34.895Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=34ce08d96eefc5df vs registry=96585e26881d7d01)) before allowing candidate promotion."
+        "Auto-Loopback Guard (2026-11-06T09:39:34.895Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=34ce08d96eefc5df vs registry=96585e26881d7d01)) before allowing candidate promotion.",
+        "Auto-Loopback Guard (2026-11-10T18:33:28.015Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=89c4f22c3d4b48c4 vs registry=96585e26881d7d01)) before allowing candidate promotion."
       ]
     }
   ],
@@ -473,6 +474,836 @@
     }
   ],
   "proofReports": [
+    {
+      "proofId": "PRF-1794335612969-843",
+      "timestampIso": "2026-11-10T18:33:32.782Z",
+      "runnerVersion": "v2.0.0-executable-proof-runner",
+      "requestedBy": "MMI_BUTTONS_SUITE_SETUP",
+      "totalDurationMs": 186.62,
+      "whatWasRequested": "Execute GDF Step 4 Functional Proof Verification across PB-001..PB-006, Toolbox Store TB-001..TB-012, and Live Engine Modules.",
+      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 186.62ms). Static file metadata kept separate and never counted as functional proof.",
+      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
+      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
+      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
+      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk.",
+      "overallStatus": "PASS",
+      "checks": [
+        {
+          "checkId": "CHK-STEP1-INTERVIEW",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
+          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage).",
+          "status": "PASS",
+          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.21,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP2-PLAYBOOKS",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
+          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections.",
+          "status": "PASS",
+          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.0[sha:96585e26], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.8[sha:1c8207eb]).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.95,
+          "assertionsPassed": 6,
+          "assertionsTotal": 6,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP3-TOOLBOX",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization.",
+          "status": "PASS",
+          "evidence": "Verified 12/12 Toolbox assets on disk (total 980.5 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 1.01,
+          "assertionsPassed": 12,
+          "assertionsTotal": 12,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
+          "relatedPlaybook": "PB-001",
+          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
+          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window).",
+          "status": "PASS",
+          "evidence": "6D FairPrice=$4045.04, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-2.78σ), small-sample status=CALIBRATING.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 146.41,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB002-AWARENESS-RISK",
+          "relatedPlaybook": "PB-002",
+          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
+          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner.",
+          "status": "PASS",
+          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.4%, RegimeSum=1.0000.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 35.13,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
+          "relatedPlaybook": "PB-003",
+          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
+          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation).",
+          "status": "PASS",
+          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.55,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
+          "relatedPlaybook": "PB-005",
+          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
+          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states.",
+          "status": "PASS",
+          "evidence": "Isolated Live (v56.0-LivePromoted (MMI)) vs Candidate (v57.0-ParallelCandidate-G56); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 1.3,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        }
+      ],
+      "staticSourceInspection": [
+        {
+          "fileInspected": "/src/engine/scientificCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 156604,
+          "sha256Prefix": "4925efb6e3513b12",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/engine/quantEngine.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 70564,
+          "sha256Prefix": "5d2e810ecf5011f5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 278022,
+          "sha256Prefix": "95e93cad546c8677",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/realDataWaterfall.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 96346,
+          "sha256Prefix": "ba7390ef460922d2",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/sessionCalendar.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 9212,
+          "sha256Prefix": "60a1f1da87cbd114",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 131503,
+          "sha256Prefix": "d1e78580585ba16a",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/gdfOperatingSystem.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 145340,
+          "sha256Prefix": "7b9bdc535eb8d192",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        }
+      ],
+      "integritySignature": "f5834740e3589d80a54fb0a5fc27e4066d57e96218fbaa3f58789d49150367fd"
+    },
+    {
+      "proofId": "PRF-1794335608318-7446",
+      "timestampIso": "2026-11-10T18:33:28.015Z",
+      "runnerVersion": "v2.0.0-executable-proof-runner",
+      "requestedBy": "POST_SUITE_CLEAN_STATE",
+      "totalDurationMs": 217.9,
+      "whatWasRequested": "Ensure current executable PASS proof report after verification suite.",
+      "whatWasExecuted": "Executed 7/7 registered functional verification suites (31/32 assertions in 217.9ms). Static file metadata kept separate and never counted as functional proof.",
+      "whatOutputWasProduced": "6/7 executable checks PASSED (Overall Status: FAIL). Persisted atomically to data/gdf_os_registry.json.",
+      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
+      "whatFailedOrRemainsUnverified": "CHK-STEP2-PLAYBOOKS: FAIL (Playbook PB-001 SHA-256 mismatch (disk=89c4f22c3d4b48c4 vs registry=96585e26881d7d01))",
+      "whatWasUpdatedInPlaybookOrToolbox": "PB-006 upgraded v1.7 -> v1.8",
+      "overallStatus": "FAIL",
+      "checks": [
+        {
+          "checkId": "CHK-STEP1-INTERVIEW",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
+          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage).",
+          "status": "PASS",
+          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.02,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP2-PLAYBOOKS",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
+          "procedureExecuted": "Executed CHK-STEP2-PLAYBOOKS (v2.0.0-exec) — threw exception.",
+          "status": "FAIL",
+          "evidence": "FAIL CLOSED (EXCEPTION): Playbook PB-001 SHA-256 mismatch (disk=89c4f22c3d4b48c4 vs registry=96585e26881d7d01)",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.17,
+          "assertionsPassed": 0,
+          "assertionsTotal": 1,
+          "error": "Playbook PB-001 SHA-256 mismatch (disk=89c4f22c3d4b48c4 vs registry=96585e26881d7d01)"
+        },
+        {
+          "checkId": "CHK-STEP3-TOOLBOX",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization.",
+          "status": "PASS",
+          "evidence": "Verified 12/12 Toolbox assets on disk (total 980.5 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.34,
+          "assertionsPassed": 12,
+          "assertionsTotal": 12,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
+          "relatedPlaybook": "PB-001",
+          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
+          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window).",
+          "status": "PASS",
+          "evidence": "6D FairPrice=$4045.04, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-2.78σ), small-sample status=CALIBRATING.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 157.38,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB002-AWARENESS-RISK",
+          "relatedPlaybook": "PB-002",
+          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
+          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner.",
+          "status": "PASS",
+          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.4%, RegimeSum=1.0000.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 59.36,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
+          "relatedPlaybook": "PB-003",
+          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
+          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation).",
+          "status": "PASS",
+          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.2,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
+          "relatedPlaybook": "PB-005",
+          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
+          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states.",
+          "status": "PASS",
+          "evidence": "Isolated Live (v57.0-LivePromoted (MMI)) vs Candidate (v58.0-ParallelCandidate-G57); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.35,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        }
+      ],
+      "staticSourceInspection": [
+        {
+          "fileInspected": "/src/engine/scientificCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 156604,
+          "sha256Prefix": "4925efb6e3513b12",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/engine/quantEngine.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 70564,
+          "sha256Prefix": "5d2e810ecf5011f5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 278022,
+          "sha256Prefix": "95e93cad546c8677",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/realDataWaterfall.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 96346,
+          "sha256Prefix": "ba7390ef460922d2",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/sessionCalendar.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 9212,
+          "sha256Prefix": "60a1f1da87cbd114",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 131503,
+          "sha256Prefix": "d1e78580585ba16a",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/gdfOperatingSystem.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 145340,
+          "sha256Prefix": "7b9bdc535eb8d192",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        }
+      ],
+      "integritySignature": "a089fab9d5c72b71ec264a750934e11625795db3637115e5d556036d501443c1"
+    },
+    {
+      "proofId": "PRF-1794335404001-3212",
+      "timestampIso": "2026-11-10T18:30:03.752Z",
+      "runnerVersion": "v2.0.0-executable-proof-runner",
+      "requestedBy": "EIGHT_STEP_SCIENTIFIC_CYCLE_SUITE_SETUP",
+      "totalDurationMs": 248.48,
+      "whatWasRequested": "Execute GDF Step 4 Functional Proof Verification across PB-001..PB-006, Toolbox Store TB-001..TB-012, and Live Engine Modules.",
+      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 248.48ms). Static file metadata kept separate and never counted as functional proof.",
+      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
+      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
+      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
+      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk.",
+      "overallStatus": "PASS",
+      "checks": [
+        {
+          "checkId": "CHK-STEP1-INTERVIEW",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
+          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage).",
+          "status": "PASS",
+          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.25,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP2-PLAYBOOKS",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
+          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections.",
+          "status": "PASS",
+          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.0[sha:96585e26], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.7[sha:c492cff7]).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 1.54,
+          "assertionsPassed": 6,
+          "assertionsTotal": 6,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP3-TOOLBOX",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization.",
+          "status": "PASS",
+          "evidence": "Verified 12/12 Toolbox assets on disk (total 980.3 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.8,
+          "assertionsPassed": 12,
+          "assertionsTotal": 12,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
+          "relatedPlaybook": "PB-001",
+          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
+          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window).",
+          "status": "PASS",
+          "evidence": "6D FairPrice=$4045.04, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-2.78σ), small-sample status=CALIBRATING.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 209.59,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB002-AWARENESS-RISK",
+          "relatedPlaybook": "PB-002",
+          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
+          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner.",
+          "status": "PASS",
+          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.4%, RegimeSum=1.0000.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 32.74,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
+          "relatedPlaybook": "PB-003",
+          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
+          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation).",
+          "status": "PASS",
+          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 1.01,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
+          "relatedPlaybook": "PB-005",
+          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
+          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states.",
+          "status": "PASS",
+          "evidence": "Isolated Live (v1.0-LiveApproved) vs Candidate (v2.0-ParallelCandidate-G1); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 1.19,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        }
+      ],
+      "staticSourceInspection": [
+        {
+          "fileInspected": "/src/engine/scientificCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 156604,
+          "sha256Prefix": "4925efb6e3513b12",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/engine/quantEngine.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 70564,
+          "sha256Prefix": "5d2e810ecf5011f5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 277819,
+          "sha256Prefix": "a86e0c4a2aefa8c5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/realDataWaterfall.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 96346,
+          "sha256Prefix": "ba7390ef460922d2",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/sessionCalendar.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 9212,
+          "sha256Prefix": "60a1f1da87cbd114",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 131503,
+          "sha256Prefix": "d1e78580585ba16a",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/gdfOperatingSystem.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 145340,
+          "sha256Prefix": "7b9bdc535eb8d192",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        }
+      ],
+      "integritySignature": "54a6b4de45fe9737f0b90e3c954eccccad9672bdd2aeb0135fa1b1d85d068e51"
+    },
+    {
+      "proofId": "PRF-1794335069247-9475",
+      "timestampIso": "2026-11-10T18:24:29.004Z",
+      "runnerVersion": "v2.0.0-executable-proof-runner",
+      "requestedBy": "SCIENTIFIC_CORE_TEST_SUITE",
+      "totalDurationMs": 242.99,
+      "whatWasRequested": "Execute GDF Step 4 Functional Proof Verification across PB-001..PB-006, Toolbox Store TB-001..TB-012, and Live Engine Modules.",
+      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 242.99ms). Static file metadata kept separate and never counted as functional proof.",
+      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
+      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
+      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
+      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk.",
+      "overallStatus": "PASS",
+      "checks": [
+        {
+          "checkId": "CHK-STEP1-INTERVIEW",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
+          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage).",
+          "status": "PASS",
+          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.28,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP2-PLAYBOOKS",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
+          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections.",
+          "status": "PASS",
+          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.0[sha:96585e26], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.7[sha:c492cff7]).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 1.29,
+          "assertionsPassed": 6,
+          "assertionsTotal": 6,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP3-TOOLBOX",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization.",
+          "status": "PASS",
+          "evidence": "Verified 12/12 Toolbox assets on disk (total 980.3 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.77,
+          "assertionsPassed": 12,
+          "assertionsTotal": 12,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
+          "relatedPlaybook": "PB-001",
+          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
+          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window).",
+          "status": "PASS",
+          "evidence": "6D FairPrice=$4045.04, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-2.78σ), small-sample status=CALIBRATING.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 193.99,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB002-AWARENESS-RISK",
+          "relatedPlaybook": "PB-002",
+          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
+          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner.",
+          "status": "PASS",
+          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.4%, RegimeSum=1.0000.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 44.32,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
+          "relatedPlaybook": "PB-003",
+          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
+          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation).",
+          "status": "PASS",
+          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.56,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
+          "relatedPlaybook": "PB-005",
+          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
+          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states.",
+          "status": "PASS",
+          "evidence": "Isolated Live (v56.0-LivePromoted (MMI)) vs Candidate (v57.0-ParallelCandidate-G56); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.56,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        }
+      ],
+      "staticSourceInspection": [
+        {
+          "fileInspected": "/src/engine/scientificCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 156604,
+          "sha256Prefix": "4925efb6e3513b12",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/engine/quantEngine.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 70564,
+          "sha256Prefix": "5d2e810ecf5011f5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 277819,
+          "sha256Prefix": "a86e0c4a2aefa8c5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/realDataWaterfall.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 96346,
+          "sha256Prefix": "ba7390ef460922d2",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/sessionCalendar.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 9212,
+          "sha256Prefix": "60a1f1da87cbd114",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 131503,
+          "sha256Prefix": "d1e78580585ba16a",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/gdfOperatingSystem.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 145340,
+          "sha256Prefix": "7b9bdc535eb8d192",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        }
+      ],
+      "integritySignature": "899f7edacdcb971e2864a87df55ae98397428c2e8ebaa9304bd8ddccbd5dc6f4"
+    },
+    {
+      "proofId": "PRF-1794335034077-3418",
+      "timestampIso": "2026-11-10T18:23:53.863Z",
+      "runnerVersion": "v2.0.0-executable-proof-runner",
+      "requestedBy": "PARALLEL_UNIVERSE_TEST_SUITE",
+      "totalDurationMs": 214.36,
+      "whatWasRequested": "Execute GDF Step 4 Functional Proof Verification across PB-001..PB-006, Toolbox Store TB-001..TB-012, and Live Engine Modules.",
+      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 214.36ms). Static file metadata kept separate and never counted as functional proof.",
+      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
+      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
+      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
+      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk.",
+      "overallStatus": "PASS",
+      "checks": [
+        {
+          "checkId": "CHK-STEP1-INTERVIEW",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
+          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage).",
+          "status": "PASS",
+          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.19,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP2-PLAYBOOKS",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
+          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections.",
+          "status": "PASS",
+          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.0[sha:96585e26], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.7[sha:c492cff7]).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.96,
+          "assertionsPassed": 6,
+          "assertionsTotal": 6,
+          "error": null
+        },
+        {
+          "checkId": "CHK-STEP3-TOOLBOX",
+          "relatedPlaybook": "PB-006",
+          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization.",
+          "status": "PASS",
+          "evidence": "Verified 12/12 Toolbox assets on disk (total 980.3 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.6,
+          "assertionsPassed": 12,
+          "assertionsTotal": 12,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
+          "relatedPlaybook": "PB-001",
+          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
+          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window).",
+          "status": "PASS",
+          "evidence": "6D FairPrice=$4045.04, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-2.78σ), small-sample status=CALIBRATING.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 180.4,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB002-AWARENESS-RISK",
+          "relatedPlaybook": "PB-002",
+          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
+          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner.",
+          "status": "PASS",
+          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.4%, RegimeSum=1.0000.",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 30,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
+          "relatedPlaybook": "PB-003",
+          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
+          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation).",
+          "status": "PASS",
+          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.56,
+          "assertionsPassed": 3,
+          "assertionsTotal": 3,
+          "error": null
+        },
+        {
+          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
+          "relatedPlaybook": "PB-005",
+          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
+          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states.",
+          "status": "PASS",
+          "evidence": "Isolated Live (v55.0-LivePromoted (MMI)) vs Candidate (v56.0-ParallelCandidate-G55); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
+          "testVersion": "v2.0.0-exec",
+          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
+          "durationMs": 0.66,
+          "assertionsPassed": 4,
+          "assertionsTotal": 4,
+          "error": null
+        }
+      ],
+      "staticSourceInspection": [
+        {
+          "fileInspected": "/src/engine/scientificCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 156604,
+          "sha256Prefix": "4925efb6e3513b12",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/engine/quantEngine.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 70564,
+          "sha256Prefix": "5d2e810ecf5011f5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 277819,
+          "sha256Prefix": "a86e0c4a2aefa8c5",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/realDataWaterfall.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 96346,
+          "sha256Prefix": "ba7390ef460922d2",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/sessionCalendar.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 9212,
+          "sha256Prefix": "60a1f1da87cbd114",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 131503,
+          "sha256Prefix": "d1e78580585ba16a",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        },
+        {
+          "fileInspected": "/src/services/gdfOperatingSystem.ts",
+          "existsOnDisk": true,
+          "sizeBytes": 145340,
+          "sha256Prefix": "7b9bdc535eb8d192",
+          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
+        }
+      ],
+      "integritySignature": "efe9d51aa323fdc847920dc823ec8f508563d913441ca49844975300bbaf64b2"
+    },
     {
       "checks": [
         {
@@ -3792,836 +4623,6 @@
       ],
       "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
       "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk."
-    },
-    {
-      "checks": [
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP1-INTERVIEW",
-          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
-          "durationMs": 0.03,
-          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 5,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 5,
-          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage)."
-        },
-        {
-          "error": "Playbook PB-001 SHA-256 mismatch (disk=02d5003eda3debe2 vs registry=96585e26881d7d01)",
-          "status": "FAIL",
-          "checkId": "CHK-STEP2-PLAYBOOKS",
-          "evidence": "FAIL CLOSED (EXCEPTION): Playbook PB-001 SHA-256 mismatch (disk=02d5003eda3debe2 vs registry=96585e26881d7d01)",
-          "durationMs": 0.23,
-          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 1,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 0,
-          "procedureExecuted": "Executed CHK-STEP2-PLAYBOOKS (v2.0.0-exec) — threw exception."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP3-TOOLBOX",
-          "evidence": "Verified 12/12 Toolbox assets on disk (total 931.8 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "durationMs": 0.39,
-          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 12,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 12,
-          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
-          "evidence": "6D FairPrice=$4045.11, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-3.24σ), small-sample status=CALIBRATING.",
-          "durationMs": 130.73,
-          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-001",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB002-AWARENESS-RISK",
-          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.8%, RegimeSum=1.0000.",
-          "durationMs": 51.05,
-          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-002",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
-          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
-          "durationMs": 0.25,
-          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-003",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
-          "evidence": "Isolated Live (v53.0-LivePromoted (MMI)) vs Candidate (v54.0-ParallelCandidate-G53); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
-          "durationMs": 0.45,
-          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-005",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states."
-        }
-      ],
-      "proofId": "PRF-1793956912264-8108",
-      "requestedBy": "POST_SUITE_CLEAN_STATE",
-      "timestampIso": "2026-11-06T09:21:52.025Z",
-      "overallStatus": "FAIL",
-      "runnerVersion": "v2.0.0-executable-proof-runner",
-      "totalDurationMs": 183.24,
-      "whatWasExecuted": "Executed 7/7 registered functional verification suites (31/32 assertions in 183.24ms). Static file metadata kept separate and never counted as functional proof.",
-      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
-      "whatWasRequested": "Ensure current executable PASS proof report after verification suite.",
-      "integritySignature": "10b71940e002917d933c843522d12c63375f33778567bbb1db1b39d5184e267d",
-      "whatOutputWasProduced": "6/7 executable checks PASSED (Overall Status: FAIL). Persisted atomically to data/gdf_os_registry.json.",
-      "staticSourceInspection": [
-        {
-          "sizeBytes": 140073,
-          "existsOnDisk": true,
-          "sha256Prefix": "f0acb9cd5def8704",
-          "fileInspected": "/src/engine/scientificCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 68225,
-          "existsOnDisk": true,
-          "sha256Prefix": "ae751f2c9dbc9109",
-          "fileInspected": "/src/engine/quantEngine.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 270357,
-          "existsOnDisk": true,
-          "sha256Prefix": "7aa83b0d829ff99c",
-          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 85758,
-          "existsOnDisk": true,
-          "sha256Prefix": "3464be7779bc20fb",
-          "fileInspected": "/src/services/realDataWaterfall.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 9212,
-          "existsOnDisk": true,
-          "sha256Prefix": "60a1f1da87cbd114",
-          "fileInspected": "/src/services/sessionCalendar.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 131503,
-          "existsOnDisk": true,
-          "sha256Prefix": "d1e78580585ba16a",
-          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 145340,
-          "existsOnDisk": true,
-          "sha256Prefix": "7b9bdc535eb8d192",
-          "fileInspected": "/src/services/gdfOperatingSystem.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        }
-      ],
-      "whatFailedOrRemainsUnverified": "CHK-STEP2-PLAYBOOKS: FAIL (Playbook PB-001 SHA-256 mismatch (disk=02d5003eda3debe2 vs registry=96585e26881d7d01))",
-      "whatWasUpdatedInPlaybookOrToolbox": "PB-006 upgraded v1.5 -> v1.6"
-    },
-    {
-      "checks": [
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP1-INTERVIEW",
-          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
-          "durationMs": 0.03,
-          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 5,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 5,
-          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP2-PLAYBOOKS",
-          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.2[sha:02d5003e], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.6[sha:9e733186]).",
-          "durationMs": 0.68,
-          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 6,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 6,
-          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP3-TOOLBOX",
-          "evidence": "Verified 12/12 Toolbox assets on disk (total 931.8 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "durationMs": 0.37,
-          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 12,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 12,
-          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
-          "evidence": "6D FairPrice=$4045.11, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-3.24σ), small-sample status=CALIBRATING.",
-          "durationMs": 111.85,
-          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-001",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB002-AWARENESS-RISK",
-          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.8%, RegimeSum=1.0000.",
-          "durationMs": 26.3,
-          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-002",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
-          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
-          "durationMs": 0.18,
-          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-003",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
-          "evidence": "Isolated Live (v53.0-LivePromoted (MMI)) vs Candidate (v54.0-ParallelCandidate-G53); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
-          "durationMs": 0.21,
-          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-005",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states."
-        }
-      ],
-      "proofId": "PRF-1793956751485-2806",
-      "requestedBy": "CONCURRENT_WORKER_PROOF_2",
-      "timestampIso": "2026-11-06T09:19:11.345Z",
-      "overallStatus": "PASS",
-      "runnerVersion": "v2.0.0-executable-proof-runner",
-      "totalDurationMs": 139.68,
-      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 139.68ms). Static file metadata kept separate and never counted as functional proof.",
-      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
-      "whatWasRequested": "Execute GDF Step 4 Functional Proof Verification across PB-001..PB-006, Toolbox Store TB-001..TB-012, and Live Engine Modules.",
-      "integritySignature": "63b42cd024a0839d20375e613e5f77eae005ee09879fd6fba1e9068f9b333510",
-      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
-      "staticSourceInspection": [
-        {
-          "sizeBytes": 140073,
-          "existsOnDisk": true,
-          "sha256Prefix": "f0acb9cd5def8704",
-          "fileInspected": "/src/engine/scientificCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 68225,
-          "existsOnDisk": true,
-          "sha256Prefix": "ae751f2c9dbc9109",
-          "fileInspected": "/src/engine/quantEngine.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 270357,
-          "existsOnDisk": true,
-          "sha256Prefix": "7aa83b0d829ff99c",
-          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 85758,
-          "existsOnDisk": true,
-          "sha256Prefix": "3464be7779bc20fb",
-          "fileInspected": "/src/services/realDataWaterfall.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 9212,
-          "existsOnDisk": true,
-          "sha256Prefix": "60a1f1da87cbd114",
-          "fileInspected": "/src/services/sessionCalendar.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 131503,
-          "existsOnDisk": true,
-          "sha256Prefix": "d1e78580585ba16a",
-          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 145340,
-          "existsOnDisk": true,
-          "sha256Prefix": "7b9bdc535eb8d192",
-          "fileInspected": "/src/services/gdfOperatingSystem.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        }
-      ],
-      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
-      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk."
-    },
-    {
-      "checks": [
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP1-INTERVIEW",
-          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
-          "durationMs": 0.02,
-          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 5,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 5,
-          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP2-PLAYBOOKS",
-          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.2[sha:02d5003e], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.6[sha:9e733186]).",
-          "durationMs": 0.58,
-          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 6,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 6,
-          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP3-TOOLBOX",
-          "evidence": "Verified 12/12 Toolbox assets on disk (total 931.8 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "durationMs": 0.35,
-          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 12,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 12,
-          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
-          "evidence": "6D FairPrice=$4045.11, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-3.24σ), small-sample status=CALIBRATING.",
-          "durationMs": 144.19,
-          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-001",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB002-AWARENESS-RISK",
-          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.8%, RegimeSum=1.0000.",
-          "durationMs": 25.58,
-          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-002",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
-          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
-          "durationMs": 0.34,
-          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-003",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
-          "evidence": "Isolated Live (v53.0-LivePromoted (MMI)) vs Candidate (v54.0-ParallelCandidate-G53); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
-          "durationMs": 0.28,
-          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-005",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states."
-        }
-      ],
-      "proofId": "PRF-1793956751290-8173",
-      "requestedBy": "CONCURRENT_WORKER_PROOF_1",
-      "timestampIso": "2026-11-06T09:19:11.119Z",
-      "overallStatus": "PASS",
-      "runnerVersion": "v2.0.0-executable-proof-runner",
-      "totalDurationMs": 171.42,
-      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 171.42ms). Static file metadata kept separate and never counted as functional proof.",
-      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
-      "whatWasRequested": "Execute GDF Step 4 Functional Proof Verification across PB-001..PB-006, Toolbox Store TB-001..TB-012, and Live Engine Modules.",
-      "integritySignature": "aef4c3e808411d15669548406a6c6c3d57ed7fb6345e0b0454e75a002e908477",
-      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
-      "staticSourceInspection": [
-        {
-          "sizeBytes": 140073,
-          "existsOnDisk": true,
-          "sha256Prefix": "f0acb9cd5def8704",
-          "fileInspected": "/src/engine/scientificCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 68225,
-          "existsOnDisk": true,
-          "sha256Prefix": "ae751f2c9dbc9109",
-          "fileInspected": "/src/engine/quantEngine.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 270357,
-          "existsOnDisk": true,
-          "sha256Prefix": "7aa83b0d829ff99c",
-          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 85758,
-          "existsOnDisk": true,
-          "sha256Prefix": "3464be7779bc20fb",
-          "fileInspected": "/src/services/realDataWaterfall.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 9212,
-          "existsOnDisk": true,
-          "sha256Prefix": "60a1f1da87cbd114",
-          "fileInspected": "/src/services/sessionCalendar.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 131503,
-          "existsOnDisk": true,
-          "sha256Prefix": "d1e78580585ba16a",
-          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 145340,
-          "existsOnDisk": true,
-          "sha256Prefix": "7b9bdc535eb8d192",
-          "fileInspected": "/src/services/gdfOperatingSystem.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        }
-      ],
-      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
-      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk."
-    },
-    {
-      "checks": [
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP1-INTERVIEW",
-          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
-          "durationMs": 0.3,
-          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 5,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 5,
-          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP2-PLAYBOOKS",
-          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.1[sha:67ff7689], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.6[sha:9e733186]).",
-          "durationMs": 1.39,
-          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 6,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 6,
-          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP3-TOOLBOX",
-          "evidence": "Verified 12/12 Toolbox assets on disk (total 931.8 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "durationMs": 0.86,
-          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 12,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 12,
-          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
-          "evidence": "6D FairPrice=$4045.11, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-3.24σ), small-sample status=CALIBRATING.",
-          "durationMs": 122.13,
-          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-001",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB002-AWARENESS-RISK",
-          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.8%, RegimeSum=1.0000.",
-          "durationMs": 45.97,
-          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-002",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
-          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
-          "durationMs": 0.46,
-          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-003",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
-          "evidence": "Isolated Live (v53.0-LivePromoted (MMI)) vs Candidate (v54.0-ParallelCandidate-G53); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
-          "durationMs": 0.71,
-          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-005",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states."
-        }
-      ],
-      "proofId": "PRF-1793956750946-9820",
-      "requestedBy": "E2E_PROMOTE_ROUTE_VERIFICATION",
-      "timestampIso": "2026-11-06T09:19:10.773Z",
-      "overallStatus": "PASS",
-      "runnerVersion": "v2.0.0-executable-proof-runner",
-      "totalDurationMs": 172.96,
-      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 172.96ms). Static file metadata kept separate and never counted as functional proof.",
-      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
-      "whatWasRequested": "Run live backend proof report prior to HTTP promotion route verification.",
-      "integritySignature": "95af2d8238ccecaf58cf88ed43812101ac1ef052970445dd7c66d5dc6694352b",
-      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
-      "staticSourceInspection": [
-        {
-          "sizeBytes": 140073,
-          "existsOnDisk": true,
-          "sha256Prefix": "f0acb9cd5def8704",
-          "fileInspected": "/src/engine/scientificCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 68225,
-          "existsOnDisk": true,
-          "sha256Prefix": "ae751f2c9dbc9109",
-          "fileInspected": "/src/engine/quantEngine.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 270357,
-          "existsOnDisk": true,
-          "sha256Prefix": "7aa83b0d829ff99c",
-          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 85758,
-          "existsOnDisk": true,
-          "sha256Prefix": "3464be7779bc20fb",
-          "fileInspected": "/src/services/realDataWaterfall.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 9212,
-          "existsOnDisk": true,
-          "sha256Prefix": "60a1f1da87cbd114",
-          "fileInspected": "/src/services/sessionCalendar.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 131503,
-          "existsOnDisk": true,
-          "sha256Prefix": "d1e78580585ba16a",
-          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 145340,
-          "existsOnDisk": true,
-          "sha256Prefix": "7b9bdc535eb8d192",
-          "fileInspected": "/src/services/gdfOperatingSystem.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        }
-      ],
-      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
-      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk."
-    },
-    {
-      "checks": [
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP1-INTERVIEW",
-          "evidence": "Interview INT-001 confirmed at 2026-11-02T19:09:51.374Z with 5 verified turns and 6 linked playbooks.",
-          "durationMs": 0.02,
-          "requirement": "STEP 1 — INTERVIEW: Confirmed interview record with explicit scope, constraints, and acceptance criteria exists before execution.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 5,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 5,
-          "procedureExecuted": "Executed 5 structural assertions on registry.interviews[0] (confirmation flag, ISO timestamp, >=5 Q&A turns, non-empty resolved constraints, and PB-001..PB-006 linkage)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP2-PLAYBOOKS",
-          "evidence": "All 6 playbooks verified and hash-matched on disk (PB-001@v1.1[sha:67ff7689], PB-002@v1.0[sha:5a148ebb], PB-003@v1.0[sha:a7a590c7], PB-004@v1.0[sha:505c812e], PB-005@v1.0[sha:4b363ef8], PB-006@v1.6[sha:9e733186]).",
-          "durationMs": 0.79,
-          "requirement": "STEP 2 — PLAYBOOK: All 6 core GDF Playbooks (PB-001..PB-006) exist on disk, match SHA-256 digests, and satisfy the 9-field SOP template.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 6,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 6,
-          "procedureExecuted": "Parsed /playbooks/PB-001.md..PB-006.md on disk, verified cryptographic SHA-256 parity with registry, and validated all 9 SOP sections."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-STEP3-TOOLBOX",
-          "evidence": "Verified 12/12 Toolbox assets on disk (total 931.8 KB) and indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "durationMs": 0.45,
-          "requirement": "STEP 3 — TOOLBOX STORE: All 12 registered GDF engines, services, and verification suites exist on disk with non-zero byte size and are indexed in /toolbox/TOOLBOX_INDEX.md.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 12,
-          "relatedPlaybook": "PB-006",
-          "assertionsPassed": 12,
-          "procedureExecuted": "Executed fs.statSync size/file checks across all 12 Toolbox assets (TB-001..TB-012) and verified /toolbox/TOOLBOX_INDEX.md synchronization."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB001-SCIENTIFIC-CORE",
-          "evidence": "6D FairPrice=$4045.11, 24-step plume finite, Shock policy=SHOCK_RESET (innovation=-3.24σ), small-sample status=CALIBRATING.",
-          "durationMs": 115.43,
-          "requirement": "PB-001 — Scientific Core: Execute 6D latent filter on verified PAXG candles, verify finite state bounds, post-shock drift response (Rule 5), 24-step plume monotonicity, and honest CALIBRATING scoreboard gate (Rule 1).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-001",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Executed evaluateScientificCorePipeline across 3 scenarios (nominal 120-bar PAXG fixture, -30 USD shock-perturbed bar with SHOCK_RESET, and under-sampled calibration window)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB002-AWARENESS-RISK",
-          "evidence": "Triggered faults=[WRONG_DIRECTION, OVERCONFIDENT_TREND] -> policy=SHOCK_RESET/WIDEN; Weekend session=WEEKEND_CLOSED_THIN (WEEKEND_THIN); Level-5 BOCPD P(CP)=5.8%, RegimeSum=1.0000.",
-          "durationMs": 26.12,
-          "requirement": "PB-002 — Awareness & Risk: Execute FaultClassifier on directional/shock/news divergence, verify weekend session damping (Rule 6), and execute Level-5 Bayesian Meta-Learning.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-002",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed pure FaultClassifier.classifyFromMetrics (-27 USD shock vs upward slope), evaluateGoldSessionAndCalendar (Saturday UTC), and Level-5 BOCPD/Regime Bayesian Meta-Learner."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB003-PB004-WATERFALL-NEWS",
-          "evidence": "Provenance guard rejected <20-bar payload; 2 Binance hosts deduplicated to independentVenuesActive=1; COMEX GC=F separated from sameInstrumentPaxgVenuesActive=1 (independentVenuesActive=2).",
-          "durationMs": 0.19,
-          "requirement": "PB-003 & PB-004 — Data & News Integrity: Execute provenance validation, synthetic bar rejection, correlated Binance host deduplication, and PAXG vs COMEX GC=F identity separation (Rule 11).",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 3,
-          "relatedPlaybook": "PB-003",
-          "assertionsPassed": 3,
-          "procedureExecuted": "Executed assertVerifiedProvenance (valid + truncated rejection) and evaluateProviderQuorum (correlated host deduplication + PAXG vs COMEX GC=F identity separation)."
-        },
-        {
-          "error": null,
-          "status": "PASS",
-          "checkId": "CHK-PB005-PARALLEL-PROMOTION",
-          "evidence": "Isolated Live (v53.0-LivePromoted (MMI)) vs Candidate (v54.0-ParallelCandidate-G53); Gate blocked MISSING (MISSING), FAIL (Manual=false, Auto=false), and STALE (STALE).",
-          "durationMs": 0.19,
-          "requirement": "PB-005 — Parallel Universe & Dual-Control Promotion Gate: Verify Live (Yellow) vs Candidate (Magenta) isolation and verify that missing, failed, or stale proof blocks BOTH MANUAL_MMI and AUTOMATIC_VERIFIED promotions.",
-          "testVersion": "v2.0.0-exec",
-          "executionType": "EXECUTABLE_FUNCTIONAL_ASSERTION",
-          "assertionsTotal": 4,
-          "relatedPlaybook": "PB-005",
-          "assertionsPassed": 4,
-          "procedureExecuted": "Verified Live vs Candidate architecture isolation and executed dry-run Dual-Control Promotion Gate assertions across MISSING, FAIL (MANUAL_MMI + AUTOMATIC_VERIFIED), and STALE proof states."
-        }
-      ],
-      "proofId": "PRF-1793956749459-8180",
-      "requestedBy": "ACCEPTANCE_TEST_RESTORE_PASS",
-      "timestampIso": "2026-11-06T09:19:09.316Z",
-      "overallStatus": "PASS",
-      "runnerVersion": "v2.0.0-executable-proof-runner",
-      "totalDurationMs": 143.32,
-      "whatWasExecuted": "Executed 7/7 registered functional verification suites (37/37 assertions in 143.32ms). Static file metadata kept separate and never counted as functional proof.",
-      "howItWasVerified": "In-process execution of evaluateScientificCorePipeline, evaluateMarketAwarenessState, evaluateGoldSessionAndCalendar, evaluateLevel5MetaCognitionOnRealSnapshot, assertVerifiedProvenance, evaluateProviderQuorum, and evaluateDualControlPromotionGate.",
-      "whatWasRequested": "Restore verified PASS proof report for console recovery and end-to-end route tests.",
-      "integritySignature": "e4512c0dab7d05bbcba2efb4d6322af3bb87e7abd2bfce41098a7f95f8652147",
-      "whatOutputWasProduced": "7/7 executable checks PASSED (Overall Status: PASS). Persisted atomically to data/gdf_os_registry.json.",
-      "staticSourceInspection": [
-        {
-          "sizeBytes": 140073,
-          "existsOnDisk": true,
-          "sha256Prefix": "f0acb9cd5def8704",
-          "fileInspected": "/src/engine/scientificCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 68225,
-          "existsOnDisk": true,
-          "sha256Prefix": "ae751f2c9dbc9109",
-          "fileInspected": "/src/engine/quantEngine.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 270357,
-          "existsOnDisk": true,
-          "sha256Prefix": "7aa83b0d829ff99c",
-          "fileInspected": "/src/services/intelligenceAwarenessCore.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 85758,
-          "existsOnDisk": true,
-          "sha256Prefix": "3464be7779bc20fb",
-          "fileInspected": "/src/services/realDataWaterfall.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 9212,
-          "existsOnDisk": true,
-          "sha256Prefix": "60a1f1da87cbd114",
-          "fileInspected": "/src/services/sessionCalendar.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 131503,
-          "existsOnDisk": true,
-          "sha256Prefix": "d1e78580585ba16a",
-          "fileInspected": "/src/services/scientificDiscoveryCycleService.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        },
-        {
-          "sizeBytes": 145340,
-          "existsOnDisk": true,
-          "sha256Prefix": "7b9bdc535eb8d192",
-          "fileInspected": "/src/services/gdfOperatingSystem.ts",
-          "classification": "STATIC_SOURCE_METADATA_ONLY_NEVER_PROOF"
-        }
-      ],
-      "whatFailedOrRemainsUnverified": "None — all 7 executable verification suites PASSED with concrete empirical assertions.",
-      "whatWasUpdatedInPlaybookOrToolbox": "All 6 Playbooks (PB-001..PB-006) and 12 Toolbox entries (TB-001..TB-012) verified and synchronized on disk."
     }
   ],
   "auditReports": [
@@ -6360,38 +6361,155 @@
       ],
       "previousVersion": "v1.0",
       "addedFailureModeOrStep": "Verified cryptographic SHA-256 digest tracking across /playbooks/PB-001.md..PB-006.md."
+    },
+    {
+      "loopbackId": "LPB-1794335608239-3463",
+      "timestampIso": "2026-11-10T18:33:28.238Z",
+      "playbookId": "PB-006",
+      "previousVersion": "v1.7",
+      "newVersion": "v1.8",
+      "triggerReason": "Executable proof check CHK-STEP2-PLAYBOOKS failed: Playbook PB-001 SHA-256 mismatch (disk=89c4f22c3d4b48c4 vs registry=96585e26881d7d01)",
+      "addedFailureModeOrStep": "Auto-Loopback Guard (2026-11-10T18:33:28.015Z): Remediate CHK-STEP2-PLAYBOOKS failure (Playbook PB-001 SHA-256 mismatch (disk=89c4f22c3d4b48c4 vs registry=96585e26881d7d01)) before allowing candidate promotion.",
+      "toolboxUpdated": [
+        "TB-008"
+      ]
     }
   ],
   "promotionDecisionLog": [
     {
-      "decisionId": "PROMO-DEC-1794077411914-827",
-      "timestampIso": "2026-11-07T18:50:11.914Z",
+      "decisionId": "PROMO-DEC-1794335613809-972",
+      "timestampIso": "2026-11-10T18:33:33.809Z",
       "mode": "MANUAL_MMI",
-      "decision": "REJECTED",
-      "proofReportId": "PRF-1794071354481-7230",
-      "proofStatus": "STALE",
-      "proofAgeMs": 6057606,
-      "candidateArchitectureId": "arch-cand-gen56",
-      "candidateVersionTag": "v56.0-ParallelCandidate-G55",
-      "liveArchitectureId": "arch-live-gen55",
-      "operatorAuthorization": "Controlled audit write-back verification",
-      "quantitativeGateStatus": "OBSERVING_CONFIRMATION_WINDOW",
-      "reason": "GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6058s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting."
+      "decision": "ALLOWED",
+      "proofReportId": "PRF-1794335612969-843",
+      "proofStatus": "PASS",
+      "proofAgeMs": 1027,
+      "candidateArchitectureId": "arch-cand-gen57",
+      "candidateVersionTag": "v57.0-ParallelCandidate-G56",
+      "liveArchitectureId": "arch-live-gen56",
+      "operatorAuthorization": "Operator confirmed Direct Mathematical Write-Back after pre-write parameter inspection",
+      "quantitativeGateStatus": "VERIFIED_FOR_PROMOTION",
+      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794335612969-843 (age=1s)."
     },
     {
-      "decisionId": "PROMO-DEC-1794077411613-689",
-      "timestampIso": "2026-11-07T18:50:11.612Z",
+      "decisionId": "PROMO-DEC-1794335405352-896",
+      "timestampIso": "2026-11-10T18:30:05.352Z",
       "mode": "MANUAL_MMI",
+      "decision": "ALLOWED",
+      "proofReportId": "PRF-1794335404001-3212",
+      "proofStatus": "PASS",
+      "proofAgeMs": 1600,
+      "candidateArchitectureId": "arch-cand-gen1",
+      "candidateVersionTag": "v2.0-ParallelCandidate-G1",
+      "liveArchitectureId": "arch-live-gen1",
+      "operatorAuthorization": "Eight-Step Scientific Cycle Step 7 (INTEGRATE) case=sci-case-1-32c8a8dc hypothesis=hyp-sci-case-1-32c8a8dc-ar1_residual",
+      "quantitativeGateStatus": "UNVERIFIED_COLD_START",
+      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794335404001-3212 (age=2s)."
+    },
+    {
+      "decisionId": "PROMO-DEC-1794335405209-289",
+      "timestampIso": "2026-11-10T18:30:05.209Z",
+      "mode": "MANUAL_MMI",
+      "decision": "ALLOWED",
+      "proofReportId": "PRF-1794335404001-3212",
+      "proofStatus": "PASS",
+      "proofAgeMs": 1457,
+      "candidateArchitectureId": "arch-cand-gen1",
+      "candidateVersionTag": "v2.0-ParallelCandidate-G1",
+      "liveArchitectureId": "arch-live-gen1",
+      "operatorAuthorization": "Eight-Step Scientific Cycle Step 7 (INTEGRATE) case=sci-case-8-32c8a8dc hypothesis=hyp-sci-case-8-32c8a8dc-ar1_residual",
+      "quantitativeGateStatus": "UNVERIFIED_COLD_START",
+      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794335404001-3212 (age=1s)."
+    },
+    {
+      "decisionId": "PROMO-DEC-1794335069291-431",
+      "timestampIso": "2026-11-10T18:24:29.291Z",
+      "mode": "MANUAL_MMI",
+      "decision": "ALLOWED",
+      "proofReportId": "PRF-1794335069247-9475",
+      "proofStatus": "PASS",
+      "proofAgeMs": 281,
+      "candidateArchitectureId": "arch-cand-gen57",
+      "candidateVersionTag": "v57.0-ParallelCandidate-G56",
+      "liveArchitectureId": "arch-live-gen57",
+      "operatorAuthorization": "OPERATOR_MMI (Scientific core promotion parity test)",
+      "quantitativeGateStatus": "OBSERVING_CONFIRMATION_WINDOW (7/8)",
+      "reason": "Operator manually approved & promoted Parallel Universe Candidate (v57.0-ParallelCandidate-G56) to Live Yellow-Line Architecture (v57.0-LivePromoted (MMI)) via MMI [Gates: 7/8 · Proof: PRF-1794335069247-9475] · Note: Scientific core promotion parity test."
+    },
+    {
+      "decisionId": "PROMO-DEC-1794335068041-595",
+      "timestampIso": "2026-11-10T18:24:28.040Z",
+      "mode": "MANUAL_MMI",
+      "decision": "ALLOWED",
+      "proofReportId": "PRF-1794335034077-3418",
+      "proofStatus": "PASS",
+      "proofAgeMs": 34178,
+      "candidateArchitectureId": "arch-cand-gen57",
+      "candidateVersionTag": "v57.0-ParallelCandidate-G56",
+      "liveArchitectureId": "arch-live-gen56",
+      "operatorAuthorization": "Verification test of direct mathematical write-back to 6D Latent State model",
+      "quantitativeGateStatus": "OBSERVING_CONFIRMATION_WINDOW",
+      "reason": "GDF OS Dual-Control Promotion Gate (MANUAL_MMI) verified via current PASS Proof Report PRF-1794335034077-3418 (age=34s)."
+    },
+    {
+      "decisionId": "PROMO-DEC-1794335034123-232",
+      "timestampIso": "2026-11-10T18:23:54.123Z",
+      "mode": "MANUAL_MMI",
+      "decision": "ALLOWED",
+      "proofReportId": "PRF-1794335034077-3418",
+      "proofStatus": "PASS",
+      "proofAgeMs": 252,
+      "candidateArchitectureId": "arch-cand-gen56",
+      "candidateVersionTag": "v56.0-ParallelCandidate-G55",
+      "liveArchitectureId": "arch-live-gen56",
+      "operatorAuthorization": "OPERATOR_MMI (Automated test verification of MMI promotion path)",
+      "quantitativeGateStatus": "OBSERVING_CONFIRMATION_WINDOW (7/8)",
+      "reason": "Operator manually approved & promoted Parallel Universe Candidate (v56.0-ParallelCandidate-G55) to Live Yellow-Line Architecture (v56.0-LivePromoted (MMI)) via MMI [Gates: 7/8 · Proof: PRF-1794335034077-3418] · Note: Automated test verification of MMI promotion path."
+    },
+    {
+      "decisionId": "PROMO-DEC-1794335033260-459",
+      "timestampIso": "2026-11-10T18:23:53.260Z",
+      "mode": "AUTOMATIC_VERIFIED",
       "decision": "REJECTED",
       "proofReportId": "PRF-1794071354481-7230",
       "proofStatus": "STALE",
-      "proofAgeMs": 6057304,
+      "proofAgeMs": 263678947,
       "candidateArchitectureId": "arch-cand-gen56",
       "candidateVersionTag": "v56.0-ParallelCandidate-G55",
       "liveArchitectureId": "arch-live-gen55",
+      "operatorAuthorization": "CLOSED_LOOP_VERIFIER",
+      "quantitativeGateStatus": "HALTED_FROZEN (0/8)",
+      "reason": "GDF OS Dual-Control Promotion Gate (Rule 8) blocked AUTOMATIC_VERIFIED promotion: Proof Report PRF-1794071354481-7230 is STALE (age=263679s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting."
+    },
+    {
+      "mode": "MANUAL_MMI",
+      "reason": "GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6058s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting.",
+      "decision": "REJECTED",
+      "decisionId": "PROMO-DEC-1794077411914-827",
+      "proofAgeMs": 6057606,
+      "proofStatus": "STALE",
+      "timestampIso": "2026-11-07T18:50:11.914Z",
+      "proofReportId": "PRF-1794071354481-7230",
+      "liveArchitectureId": "arch-live-gen55",
+      "candidateVersionTag": "v56.0-ParallelCandidate-G55",
+      "operatorAuthorization": "Controlled audit write-back verification",
+      "quantitativeGateStatus": "OBSERVING_CONFIRMATION_WINDOW",
+      "candidateArchitectureId": "arch-cand-gen56"
+    },
+    {
+      "mode": "MANUAL_MMI",
+      "reason": "GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6057s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting.",
+      "decision": "REJECTED",
+      "decisionId": "PROMO-DEC-1794077411613-689",
+      "proofAgeMs": 6057304,
+      "proofStatus": "STALE",
+      "timestampIso": "2026-11-07T18:50:11.612Z",
+      "proofReportId": "PRF-1794071354481-7230",
+      "liveArchitectureId": "arch-live-gen55",
+      "candidateVersionTag": "v56.0-ParallelCandidate-G55",
       "operatorAuthorization": "OPERATOR_MMI_WRITEBACK_SESSION",
       "quantitativeGateStatus": "HALTED_FROZEN",
-      "reason": "GDF OS Dual-Control Promotion Gate (Rule 8) blocked MANUAL_MMI promotion: Proof Report PRF-1794071354481-7230 is STALE (age=6057s exceeds maxAllowed=900s). Re-run POST /api/gdf-os/run-proof before promoting."
+      "candidateArchitectureId": "arch-cand-gen56"
     },
     {
       "mode": "MANUAL_MMI",
@@ -8029,5 +8147,5 @@
     "lastRecoveredFromBackupIso": null,
     "lastRecoveryReason": null
   },
-  "lastSyncedIso": "2026-11-07T18:50:11.920Z"
+  "lastSyncedIso": "2026-11-10T18:33:33.817Z"
 }
